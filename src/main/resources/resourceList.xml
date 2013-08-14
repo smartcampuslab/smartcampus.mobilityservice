@@ -29,9 +29,9 @@
   
   <!-- planning -->
   <resourceMapping uri="mobilityservice.plan" 
-      pathPattern="/plansinglejourney" method="GET"/>
+      pathPattern="/plansinglejourney" method="POST"/>
   <resourceMapping uri="mobilityservice.plan" 
-      pathPattern="/planrecurrent" method="GET"/>
+      pathPattern="/planrecurrent" method="POST"/>
   
   <!-- user data read -->
   <resourceMapping uri="mobilityservice.user.itinerary.read" 

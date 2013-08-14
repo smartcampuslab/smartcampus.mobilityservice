@@ -42,8 +42,10 @@ public class EventProcessorImpl implements DomainUpdateListener {
 	private static final String ALERT_DELAY = "alertDelay";
 	private static final String ALERT_STRIKE = "alertStrike";
 	private static final String ALERT_PARKING = "alertAllParking";
+	private static final String FACTORY_ALERT_PARKING = "alertParking";
 	private static final String ALERT_ACCIDENT = "alertAccident";
-	private static final String ALERT_ROAD = "sendRoadAlerts";
+	private static final String ALERT_ROAD_BATCH = "sendRoadAlerts";
+	private static final String ALERT_ROAD = "alertRoad";
 
 	private static final String CUSTOM = "CUSTOM";
 
@@ -108,7 +110,8 @@ public class EventProcessorImpl implements DomainUpdateListener {
 			String req = mapper.writeValueAsString(alert);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAD", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);			
-		} if (e.getEventSubtype().equals(ALERT_PARKING)) {
+		} if (e.getEventSubtype().equals(ALERT_PARKING) ||
+			  e.getDoType().equals(ALERT_FACTORY) && e.getEventSubtype().equals(FACTORY_ALERT_PARKING)) {
 			AlertParking alert = mapper.convertValue(map.get("alert"), AlertParking.class);
 			String req = mapper.writeValueAsString(alert);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAP", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
@@ -118,7 +121,7 @@ public class EventProcessorImpl implements DomainUpdateListener {
 			String req = mapper.writeValueAsString(alert);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAE", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);	
-		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
+		} if (e.getEventSubtype().equals(ALERT_ROAD_BATCH)) {
 			AlertRoad[] alerts = mapper.convertValue(map.get("data"), AlertRoad[].class);
 			if (alerts != null) {
 				for (AlertRoad alertRoad : alerts) {
@@ -126,6 +129,13 @@ public class EventProcessorImpl implements DomainUpdateListener {
 					String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAR", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 					logger.info(result);	
 				}
+			}
+		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
+			AlertRoad alertRoad = mapper.convertValue(map.get("alert"), AlertRoad.class);
+			if (alertRoad != null) {
+				String req = mapper.writeValueAsString(alertRoad);
+				String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAR", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
+				logger.info(result);	
 			}
 		}
 	}

@@ -655,14 +655,13 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void submitAlert(Map<String, Object> map, String userId, String clientId)
 			throws InvocationException {
 		AlertType type = AlertType.getAlertType((String) map.get("type"));
 
 		Alert alert = null;
 		String method = "";
-		Map<String, Object> contentMap = (Map<String, Object>) map.get("content");
+		Map<String, Object> contentMap = map;
 		switch (type) {
 		case ACCIDENT:
 			alert = mapper.convertValue(contentMap, AlertAccident.class);

@@ -56,7 +56,7 @@
 		<property name="domainUpdateListener" ref="eventProcessor" />
 	</bean>
 	
-<!-- 	<bean id="domainUpdateSubscriber" class="eu.trentorise.smartcampus.mobility.listener.Subscriber"> -->
-<!-- 		<constructor-arg ref="domainEngineClient" /> -->
-<!-- 	</bean>	 -->
+	<bean id="domainUpdateSubscriber" class="eu.trentorise.smartcampus.mobility.listener.Subscriber">
+		<constructor-arg ref="domainEngineClient" />
+	</bean>	
 </beans>
