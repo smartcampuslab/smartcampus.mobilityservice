@@ -15,14 +15,10 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.sync;
 
-import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
-public class BasicRecurrentJourney extends BasicObject {
+public class BasicRecurrentJourney {
 
-	private static final long serialVersionUID = -4030283559378955235L;
-	
-	
 	private String clientId;
 	private RecurrentJourney data;
 	private String name;

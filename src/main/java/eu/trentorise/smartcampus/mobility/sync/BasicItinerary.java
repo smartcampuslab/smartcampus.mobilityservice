@@ -17,10 +17,8 @@ package eu.trentorise.smartcampus.mobility.sync;
 
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Position;
-import eu.trentorise.smartcampus.presentation.data.BasicObject;
 
-public class BasicItinerary extends BasicObject {
-	private static final long serialVersionUID = 1L;
+public class BasicItinerary {
 	
 	private String clientId;
 	private Itinerary data;

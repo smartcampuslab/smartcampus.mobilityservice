@@ -512,7 +512,6 @@ public class JourneyPlannerController extends SCController {
 				recurrentJourney.setClientId(clientId);
 				recurrentJourney.setName((String) obj.getContent().get("name"));
 				recurrentJourney.setMonitor((Boolean) obj.getContent().get("monitor"));
-				recurrentJourney.setUser((String) obj.getContent().get("userId"));
 
 				journeys.add(recurrentJourney);
 			}
@@ -556,7 +555,6 @@ public class JourneyPlannerController extends SCController {
 			recurrentJourney.setClientId(itineraryId);
 			recurrentJourney.setName((String) obj.getContent().get("name"));
 			recurrentJourney.setMonitor((Boolean) obj.getContent().get("monitor"));
-			recurrentJourney.setUser((String) obj.getContent().get("userId"));
 
 			return recurrentJourney;
 		} catch (Exception e) {
