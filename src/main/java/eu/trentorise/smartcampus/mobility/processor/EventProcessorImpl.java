@@ -55,6 +55,7 @@ public class EventProcessorImpl implements DomainUpdateListener {
 	public static final String TRAINS_ALERT_SENDER = "smartcampus.services.journeyplanner.TrainsAlertsSender";
 	public static final String PARKING_ALERT_SENDER = "smartcampus.services.journeyplanner.ParkingAlertsSender";
 	public static final String ROAD_ALERT_SENDER = "smartcampus.services.journeyplanner.RoadAlertSender";
+	public static final String USER_ALERT_SENDER = "smartcampus.services.journeyplanner.UserAlertSender";
 
 	private static ObjectMapper mapper = new ObjectMapper();
 	@Autowired
@@ -89,7 +90,34 @@ public class EventProcessorImpl implements DomainUpdateListener {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			} else if (event.getAllTypesList().contains(USER_ALERT_SENDER) && event.getEventType().equals(CUSTOM)) {
+				try {
+					notifyUser(event);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
+		}
+	}
+
+	/**
+	 * @param event
+	 * @throws Exception 
+	 */
+	private void notifyUser(DomainEvent e) throws Exception {
+		// TODO complete the user notification using the communicator service.
+		Map<String, Object> map = mapper.readValue(e.getPayload(), Map.class);
+		String userId = (String)map.get("userId");
+		if (e.getEventSubtype().equals(ALERT_STRIKE)) {
+			AlertStrike alert = mapper.convertValue(map.get("alert"), AlertStrike.class);
+		} else if (e.getEventSubtype().equals(ALERT_DELAY)) {
+			AlertDelay alert = mapper.convertValue(map.get("alert"), AlertDelay.class);
+		} if (e.getEventSubtype().equals(ALERT_PARKING)) {
+			AlertParking alert = mapper.convertValue(map.get("alert"), AlertParking.class);
+		} if (e.getEventSubtype().equals(ALERT_ACCIDENT)) {
+			AlertAccident alert = mapper.convertValue(map.get("alert"), AlertAccident.class);
+		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
+			AlertRoad alertRoad = mapper.convertValue(map.get("alert"), AlertRoad.class);
 		}
 	}
 
