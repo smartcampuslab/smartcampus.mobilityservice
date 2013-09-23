@@ -26,6 +26,10 @@
       pathPattern="/getroadinfobyagency/{agencyId}/{from}/{to}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getparkingsbyagency/{agencyId}" method="GET"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/getcachestatus" method="POST"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/getcacheupdate/{agencyId}/{fileName}" method="GET"/>
   
   <!-- planning -->
   <resourceMapping uri="mobilityservice.plan" 
