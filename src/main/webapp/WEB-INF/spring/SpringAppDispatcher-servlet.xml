@@ -42,10 +42,22 @@
 	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 
 	<!-- JMS Configuration -->
-		<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-		<property name="brokerURL" value="${smartcampus.vas.web.activeMQ.brokerURL}" />
-	</bean>
-
+  <bean id="connectionFactory" class="org.hornetq.jms.client.HornetQJMSConnectionFactory">
+    <constructor-arg value="false" />
+    <constructor-arg>
+      <bean class="org.hornetq.api.core.TransportConfiguration">
+        <constructor-arg
+          value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory" />
+        <constructor-arg>
+          <map key-type="java.lang.String" value-type="java.lang.Object">
+            <entry key="host" value="localhost" />
+            <entry key="port" value="5445" />
+          </map>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+      
 	<bean id="eventProcessor" class="eu.trentorise.smartcampus.mobility.processor.EventProcessorImpl"/>
 
 	<bean id="domainEngineClient" class="it.sayservice.platform.client.jms.JMSDomainEngineClient" scope="singleton" destroy-method="destroy">
