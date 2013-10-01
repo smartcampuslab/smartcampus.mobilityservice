@@ -46,7 +46,7 @@ public class OTPController extends SCController {
 	
 	public static final String OTP  = "/smart-planner/rest/";
 
-//	@Autowired
+	@Autowired
 	private AuthServices services;
 	@Override
 	protected AuthServices getAuthServices() {

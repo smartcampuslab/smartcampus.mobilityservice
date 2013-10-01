@@ -15,46 +15,25 @@
 
     <context:property-placeholder location="classpath:mobility.properties" />
 
-<!-- 	<http create-session="never" entry-point-ref="oauthAuthenticationEntryPoint" -->
-<!-- 		 xmlns="http://www.springframework.org/schema/security" authentication-manager-ref="resourceAuthenticationManager"> -->
-<!-- 		<anonymous enabled="false" /> -->
-<!--         <sec:intercept-url  pattern="/**" access="IS_AUTHENTICATED_FULLY" /> -->
-<!-- 		<custom-filter ref="resourceFilter" before="PRE_AUTH_FILTER" /> -->
-<!-- 		<access-denied-handler ref="oauthAccessDeniedHandler" /> -->
-<!-- 	</http> -->
+	<http create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		 xmlns="http://www.springframework.org/schema/security" authentication-manager-ref="authenticationManager">
+		<anonymous enabled="false" />
+        <sec:intercept-url  pattern="/**" access="IS_AUTHENTICATED_FULLY" />
+		<custom-filter ref="resourceFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
 
-<!--     <bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/> -->
-<!--     <bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" /> -->
+  <bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/>
+  <bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
 	
-<!-- 	<bean id="resourceFilter" class="eu.trentorise.smartcampus.resourceprovider.filter.ResourceFilter"> -->
-<!--         <property name="authenticationManager" ref="resourceAuthenticationManager"/> -->
-<!--     </bean>	 -->
+	<bean id="resourceFilter" class="org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+    </bean>	
 
-<!-- 	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.JdbcTokenStore"> -->
-<!--         <constructor-arg ref="dataSource" /> -->
-<!--     </bean> -->
-	
-<!-- 	<bean id="dataSource" destroy-method="close" -->
-<!-- 		class="org.apache.commons.dbcp.BasicDataSource"> -->
-<!-- 		<property name="driverClassName" value="${jdbc.driver}" /> -->
-<!-- 		<property name="url" value="${jdbc.url}" /> -->
-<!-- 		<property name="username" value="${jdbc.user}" /> -->
-<!-- 		<property name="password" value="${jdbc.password}" /> -->
-<!-- 	</bean> -->
-	
-	
-<!-- 	<bean id="resourceAuthenticationManager" class="eu.trentorise.smartcampus.resourceprovider.filter.ResourceAuthenticationManager"> -->
-<!--         <property name="tokenStore" ref="tokenStore"/> -->
-<!--         <property name="authServices" ref="authServices"/> -->
-<!--     </bean> -->
+	<bean id="authenticationManager" class="eu.trentorise.smartcampus.mobility.filter.DummyAuthenticationManager">
+        <property name="token" value="token"/>
+    </bean>
 
-<!--     <bean id="authServices" class="eu.trentorise.smartcampus.resourceprovider.jdbc.JdbcServices"> -->
-<!--         <constructor-arg ref="dataSource"/> -->
-<!--     </bean> -->
-	
-	
-<!-- 	<context:component-scan base-package="eu.trentorise.smartcampus.resourceprovider"/> -->
-
-<!-- 	<mvc:annotation-driven /> -->
-	
+    <bean id="authServices" class="eu.trentorise.smartcampus.mobility.filter.EmptyAuthServices"/>
+		
 </beans>
