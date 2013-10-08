@@ -114,10 +114,8 @@ public class JourneyPlannerController {
 	private List<String> buildItineraryPlannerRequest(SingleJourney request) {
 		List<String> reqs = new ArrayList<String>();
 		for (TType type : request.getTransportTypes()) {
-			int its = 1;
-			if (type.equals(TType.TRANSIT)) {
-				its = 3;
-			}
+			int its = request.getResultsNumber();
+			if (its == 0) its = 1;
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, its);
 			reqs.add(req);
 		}
