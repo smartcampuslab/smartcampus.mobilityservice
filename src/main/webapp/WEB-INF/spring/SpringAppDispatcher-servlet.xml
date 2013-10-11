@@ -35,7 +35,7 @@
 	<mvc:annotation-driven />
 
 	<!-- MVC Controllers -->
-	<context:component-scan base-package="eu.trentorise.smartcampus.mobility.controller" />
+	<context:component-scan base-package="eu.trentorise.smartcampus.mobility" />
 
 	<context:property-placeholder  location="classpath:mobility.properties" />
 

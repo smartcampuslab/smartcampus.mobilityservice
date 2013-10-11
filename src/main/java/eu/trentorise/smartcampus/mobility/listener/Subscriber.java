@@ -30,8 +30,8 @@ public class Subscriber {
 	public Subscriber(DomainEngineClient client) {
 		try {
 			client.subscribeDomain(EventProcessorImpl.ALERT_FACTORY, null);
-			client.subscribeDomain(EventProcessorImpl.ITINERARY_OBJECT, null);
-			client.subscribeDomain(EventProcessorImpl.RECURRENT_JOURNEY_OBJECT, null);
+//			client.subscribeDomain(EventProcessorImpl.ITINERARY_OBJECT, null);
+//			client.subscribeDomain(EventProcessorImpl.RECURRENT_JOURNEY_OBJECT, null);
 			client.subscribeDomain(EventProcessorImpl.TRAINS_ALERT_SENDER, null);
 			client.subscribeDomain(EventProcessorImpl.PARKING_ALERT_SENDER, null);
 			client.subscribeDomain(EventProcessorImpl.ROAD_ALERT_SENDER, null);

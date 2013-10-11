@@ -62,6 +62,9 @@ public class EventProcessorImpl implements DomainUpdateListener {
 	@Value("${otp.url}")
 	private String otpURL;
 
+	@Autowired
+	private AlertNotifier notifier;
+	
 	private static Log logger = LogFactory.getLog(EventProcessorImpl.class);
 
 	public void onDomainEvents(String subscriptionId, List<DomainEvent> events) {
@@ -104,20 +107,28 @@ public class EventProcessorImpl implements DomainUpdateListener {
 	 * @param event
 	 * @throws Exception 
 	 */
+	@SuppressWarnings("unchecked")
 	private void notifyUser(DomainEvent e) throws Exception {
-		// TODO complete the user notification using the communicator service.
 		Map<String, Object> map = mapper.readValue(e.getPayload(), Map.class);
 		String userId = (String)map.get("userId");
+		String clientId = (String)map.get("clientId");
+		String name = (String)map.get("title");
 		if (e.getEventSubtype().equals(ALERT_STRIKE)) {
 			AlertStrike alert = mapper.convertValue(map.get("alert"), AlertStrike.class);
+			notifier.notifyStrike(userId, clientId, alert, name);
 		} else if (e.getEventSubtype().equals(ALERT_DELAY)) {
 			AlertDelay alert = mapper.convertValue(map.get("alert"), AlertDelay.class);
+			notifier.notifyDelay(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_PARKING)) {
 			AlertParking alert = mapper.convertValue(map.get("alert"), AlertParking.class);
+			notifier.notifyParking(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_ACCIDENT)) {
 			AlertAccident alert = mapper.convertValue(map.get("alert"), AlertAccident.class);
+			notifier.notifyAccident(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
-			AlertRoad alertRoad = mapper.convertValue(map.get("alert"), AlertRoad.class);
+			AlertRoad alert = mapper.convertValue(map.get("alert"), AlertRoad.class);
+			notifier.notifyRoad(userId, clientId, alert, name);
+
 		}
 	}
 
