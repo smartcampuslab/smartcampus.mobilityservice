@@ -29,6 +29,8 @@
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getcachestatus" method="POST"/>
   <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/cachestatus" method="POST"/>
+  <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getcacheupdate/{agencyId}/{fileName}" method="GET"/>
   
   <!-- planning -->
