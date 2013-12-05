@@ -18,6 +18,8 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.CompressedTransitTimeTable;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,9 +62,9 @@ public class CacheController {
         fullMapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
     }
 
-  	@RequestMapping(method = RequestMethod.POST, value = "/getcachestatus")
+  	@RequestMapping(method = RequestMethod.POST, value = "/cachestatus")
   	public @ResponseBody
-  	Map<String, CacheUpdateResponse> getCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, String> versions) {
+  	Map<String, CacheUpdateResponse> cacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, String> versions) {
 		try {
 			String address =  otpURL + OTP + "getCacheStatus";
 			
@@ -79,7 +81,34 @@ public class CacheController {
 			return null;
 		}
 	}
-  	
+
+  	/**
+  	 * @param request
+  	 * @param response
+  	 * @param session
+  	 * @param versions
+  	 */
+  	@Deprecated
+  	@RequestMapping(method = RequestMethod.POST, value = "/getcachestatus")
+  	public @ResponseBody
+  	Map<String, Map<String,Object>> getCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, String> versions) {
+		try {
+			Map<String,Map<String,Object>> result = new HashMap<String, Map<String,Object>>();
+			for (String agency : versions.keySet()) {
+				Map<String,Object> map = new HashMap<String, Object>();
+				map.put("version", Long.parseLong(versions.get(agency)));
+				map.put("added", Collections.emptyList());
+				map.put("removed", Collections.emptyList());
+				map.put("calendar", null);
+				result.put(agency, map);
+			}
+			return result;
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return null;
+		}
+	}
+
   	@RequestMapping(method = RequestMethod.GET, value = "/getcacheupdate/{agencyId}/{fileName}")
   	public @ResponseBody
   	CompressedTransitTimeTable getCacheUpdate(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId,  @PathVariable String fileName) {
