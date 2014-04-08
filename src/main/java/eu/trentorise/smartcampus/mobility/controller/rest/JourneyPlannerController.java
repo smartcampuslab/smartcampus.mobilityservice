@@ -159,6 +159,13 @@ public class JourneyPlannerController extends SCController {
 			String clientId = itinerary.getClientId();
 			if (clientId == null) {
 				clientId = new ObjectId().toString();
+			} else {
+				DomainObject res = getObjectByClientId(clientId, "smartcampus.services.journeyplanner.ItineraryObject");
+				if (res != null && checkUser(res, userId) == null) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					return null;
+				}
+
 			}
 			pars.put("clientId", clientId);
 			pars.put("userId", userId);
@@ -343,6 +350,12 @@ public class JourneyPlannerController extends SCController {
 			String clientId = recurrent.getClientId();
 			if (clientId == null) {
 				clientId = new ObjectId().toString();
+			} else {
+				DomainObject res = getObjectByClientId(clientId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
+				if (res != null && checkUser(res, userId) == null) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					return null;
+				}
 			}
 			pars.put("clientId", clientId);
 			pars.put("userId", userId);

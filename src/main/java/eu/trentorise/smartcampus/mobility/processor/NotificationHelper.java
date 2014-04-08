@@ -120,7 +120,7 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		content.put("routeShortName", ((AlertStrike) alert).getTransport().getRouteShortName());
 		content.put("tripId", ((AlertStrike) alert).getTransport().getTripId());
 		content.put("stopId", ((AlertStrike) alert).getStop().getId());
-		Notification n = prepareMessage(name, alert, content);
+		Notification n = prepareMessage(name, alert, content, clientId);
 		notify(n, userId);
 	}
 
@@ -136,14 +136,14 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		if (((AlertDelay) alert).getPosition() != null) {
 			content.put("station", ((AlertDelay) alert).getPosition().getName());
 		}
-		Notification n = prepareMessage(name, alert, content);
+		Notification n = prepareMessage(name, alert, content, clientId);
 		notify(n, userId);
 	}
 
 	@Override
 	public void notifyParking(String userId, String clientId, AlertParking alert, String name) {
 		Map<String, Object> content = new TreeMap<String, Object>();
-		Notification n = prepareMessage(name, alert, content);
+		Notification n = prepareMessage(name, alert, content, clientId);
 		notify(n, userId);
 		content.put("type", "alertParking");
 		content.put("agencyId", ((AlertParking) alert).getPlace().getAgencyId());
@@ -180,7 +180,7 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 			}
 	}
 
-	private Notification prepareMessage(String name, Alert alert, Map<String, Object> content) {
+	private Notification prepareMessage(String name, Alert alert, Map<String, Object> content, String clientId) {
 		Notification not = new Notification();
 //		not.setTitle(title + " Alert for journey '" + name + "'");
 		not.setTitle(name);
