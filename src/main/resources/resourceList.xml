@@ -16,6 +16,8 @@
       pathPattern="/getstops/{agencyId}/{routeId}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getstops/{agencyId}/{routeId}/{latitude}/{longitude}/{radius:.+}" method="GET"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/getgeolocalizedstops" method="POST"/>  
   <resourceMapping uri="mobilityservice.data"       
       pathPattern="/gettimetable/{agencyId}/{routeId}/{stopId:.*}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
@@ -32,6 +34,8 @@
       pathPattern="/getcachestatus" method="POST"/>
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/cachestatus" method="POST"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/partialcachestatus" method="POST"/>  
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getcacheupdate/{agencyId}/{fileName}" method="GET"/>
   

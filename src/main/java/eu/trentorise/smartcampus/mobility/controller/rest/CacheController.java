@@ -81,6 +81,27 @@ public class CacheController {
 			return null;
 		}
 	}
+  	
+	@RequestMapping(method = RequestMethod.POST, value = "/partialcachestatus")
+	public @ResponseBody
+	Map<String, CacheUpdateResponse> getPartialCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, Map> versions) {
+		try {
+			String address =  otpURL + OTP + "getPartialCacheStatus";
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String content = mapper.writeValueAsString(versions);
+			String res = HTTPConnector.doPost(address, content, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+			
+			Map<String, CacheUpdateResponse> result = mapper.readValue(res, Map.class);
+			
+			return result;
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return null;
+		}
+	}  	
+  	
 
   	/**
   	 * @param request
@@ -108,7 +129,7 @@ public class CacheController {
 			return null;
 		}
 	}
-
+  	
   	@RequestMapping(method = RequestMethod.GET, value = "/getcacheupdate/{agencyId}/{fileName}")
   	public @ResponseBody
   	CompressedTransitTimeTable getCacheUpdate(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId,  @PathVariable String fileName) {
