@@ -15,12 +15,10 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import java.util.List;
-import java.util.Map;
-
 import it.sayservice.platform.client.InvocationException;
-import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
+
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,9 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -127,21 +125,39 @@ public class OTPController extends SCController {
 		}
 	}			
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/getgeolocalizedstops")
+	@RequestMapping(method = RequestMethod.GET, value = "/geostops/{agencyId}")
 	public @ResponseBody
-	List<Object> getGeolocalizedStops(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody GeolocalizedStopRequest gsr) {
+	List<Object> getGeolocalizedStops(
+			HttpServletRequest request, 
+			HttpServletResponse response, 
+			@PathVariable String agencyId, 
+			@RequestParam double lat, 
+			@RequestParam double lng, 
+			@RequestParam double radius,
+			@RequestParam(required=false) Integer page,
+			@RequestParam(required=false) Integer count) {
 		try {
 			String address =  otpURL + OTP + "getGeolocalizedStops";
 			
+			GeolocalizedStopRequest gsr = new GeolocalizedStopRequest();
+			gsr.setAgencyId(agencyId);
+			gsr.setCoordinates(new double[]{lat,lng});
+			gsr.setRadius(radius);
+			gsr.setPageSize(count == null ? 100 : count);
+			gsr.setPageNumber(page == null ? 0 : page);
 			ObjectMapper mapper = new ObjectMapper();
 			String content = mapper.writeValueAsString(gsr);
+
+
 			String res = HTTPConnector.doPost(address, content, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+			
 			
 			List result = mapper.readValue(res, List.class);
 			
 			return result;
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}	

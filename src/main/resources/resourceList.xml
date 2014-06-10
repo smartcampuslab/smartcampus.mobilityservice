@@ -17,7 +17,7 @@
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getstops/{agencyId}/{routeId}/{latitude}/{longitude}/{radius:.+}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
-      pathPattern="/getgeolocalizedstops" method="POST"/>  
+      pathPattern="/geostops/{agencyId}" method="GET"/>
   <resourceMapping uri="mobilityservice.data"       
       pathPattern="/gettimetable/{agencyId}/{routeId}/{stopId:.*}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
