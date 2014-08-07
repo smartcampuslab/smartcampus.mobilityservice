@@ -31,6 +31,8 @@
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getparkingsbyagency/{agencyId}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/getbikesharingbyagency/{agencyId}" method="GET"/>  
+  <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getcachestatus" method="POST"/>
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/cachestatus" method="POST"/>

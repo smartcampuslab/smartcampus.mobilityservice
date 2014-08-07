@@ -42,7 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.MediaType;
 
 import org.bson.types.ObjectId;
@@ -735,6 +737,25 @@ public class JourneyPlannerController extends SCController {
 			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}			
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
+	public @ResponseBody
+	void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws InvocationException {
+		try {
+			String address =  otpURL + SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId;
+			
+			String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
+			
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(routes);
+
+		} catch (ConnectorException e0) {
+			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}	
+	
 
 	private DomainObject getObjectByClientId(String id, String type) throws Exception {
 		Map<String, Object> pars = new TreeMap<String, Object>();
