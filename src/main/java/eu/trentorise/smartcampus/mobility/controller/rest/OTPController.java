@@ -18,6 +18,7 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -150,9 +151,9 @@ public class OTPController extends SCController {
 
 
 			String res = HTTPConnector.doPost(address, content, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+			String res2 = new String(res.getBytes(), Charset.forName("UTF-8"));
 			
-			
-			List result = mapper.readValue(res, List.class);
+			List result = mapper.readValue(res2, List.class);
 			
 			return result;
 
