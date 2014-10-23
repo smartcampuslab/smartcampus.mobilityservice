@@ -56,6 +56,7 @@ public class ItinerarySorter {
 			@Override
 			public int compare(Itinerary o1, Itinerary o2) {
 				return (int) (o1.getEndtime() - o2.getEndtime());
+//				return (int) (o1.getEndtime() - o1.getStartime() - (o2.getEndtime() - o2.getStartime()));
 			}
 		});
 	}
@@ -65,7 +66,7 @@ public class ItinerarySorter {
 
 			@Override
 			public int compare(Itinerary o1, Itinerary o2) {
-				return computeGreenness(o2) - computeGreenness(o1);
+				return computeGreenness(o1) - computeGreenness(o2);
 			}
 
 			private int computeGreenness(Itinerary itinerary) {
