@@ -59,4 +59,8 @@
 	<bean id="domainUpdateSubscriber" class="eu.trentorise.smartcampus.mobility.listener.Subscriber">
 		<constructor-arg ref="domainEngineClient" />
 	</bean>	
+	
+	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
+	</bean>		
+	
 </beans>

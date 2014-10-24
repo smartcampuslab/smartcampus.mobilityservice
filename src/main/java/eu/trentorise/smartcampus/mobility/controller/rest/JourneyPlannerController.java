@@ -79,7 +79,7 @@ public class JourneyPlannerController extends SCController {
 	private AuthServices services;
 	
 	@Autowired
-	private ItineraryRequestEnricher itineraryRequestExpander;
+	private ItineraryRequestEnricher itineraryRequestEnricher;
 	
 	@Override
 	protected AuthServices getAuthServices() {
@@ -144,7 +144,7 @@ public class JourneyPlannerController extends SCController {
 				}
 			}
 
-			List<Itinerary> evaluated = itineraryRequestExpander.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
+			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
 			
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
@@ -165,7 +165,7 @@ public class JourneyPlannerController extends SCController {
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
 			reqsMap.put(0, req);
 			if (expand) {
-				reqsMap.putAll(itineraryRequestExpander.addPromotedItineraries(request, type));
+				reqsMap.putAll(itineraryRequestEnricher.addPromotedItineraries(request, type));
 			}
 		}
 		return reqsMap;
