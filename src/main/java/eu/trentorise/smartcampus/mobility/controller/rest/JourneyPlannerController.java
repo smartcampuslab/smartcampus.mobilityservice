@@ -61,6 +61,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -73,6 +77,10 @@ public class JourneyPlannerController extends SCController {
 
 	@Autowired
 	private AuthServices services;
+	
+	@Autowired
+	private ItineraryRequestEnricher itineraryRequestExpander;
+	
 	@Override
 	protected AuthServices getAuthServices() {
 		return services;
@@ -106,19 +114,39 @@ public class JourneyPlannerController extends SCController {
 	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
 		try {
 
-			List<String> reqs = buildItineraryPlannerRequest(journeyRequest);
+			Map<String, String> cache = new TreeMap<String, String>();
+			
+			Multimap<Integer, String> reqs = buildItineraryPlannerRequest(journeyRequest, true);
+			Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
 
 			List<Itinerary> itineraries = new ArrayList<Itinerary>();
-
-			for (String req : reqs) {
-				String plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, req, MediaType.APPLICATION_JSON, null, "UTF-8");
-				List<?> its = mapper.readValue(plan, List.class);
-				for (Object it : its) {
-					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
-					itineraries.add(itinerary);
+			
+			for (Integer key : reqs.keySet()) {
+				for (String req : reqs.get(key)) {
+					String plan = null;
+					if (cache.containsKey(req)) {
+//						plan = cache.get(req);
+						continue;
+					} else {
+						plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, req, MediaType.APPLICATION_JSON, null, "UTF-8");
+						cache.put(req, plan);
+					}
+					List<?> its = mapper.readValue(plan, List.class);
+					for (Object it : its) {
+						Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
+						if (key != 0) {
+							itinerary.setPromoted(true);
+							evalIts.put(key, itinerary);
+						} else {
+							itineraries.add(itinerary);
+						}
+					}
 				}
 			}
 
+			List<Itinerary> evaluated = itineraryRequestExpander.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
+			itineraries.addAll(evaluated);
+			
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
 
 			return itineraries;
@@ -130,22 +158,19 @@ public class JourneyPlannerController extends SCController {
 		return null;
 	}
 
-	private List<String> buildItineraryPlannerRequest(SingleJourney request) {
-		List<String> reqs = new ArrayList<String>();
+	private Multimap<Integer, String> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
+		Multimap<Integer, String> reqsMap = ArrayListMultimap.create();
+		int itn = Math.max(request.getResultsNumber(), 1);
 		for (TType type : request.getTransportTypes()) {
-			int its = 1;
-			if (type.equals(TType.TRANSIT)) {
-				its = 3;
+			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
+			reqsMap.put(0, req);
+			if (expand) {
+				reqsMap.putAll(itineraryRequestExpander.addPromotedItineraries(request, type));
 			}
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, its);
-			reqs.add(req);
 		}
-
-		return reqs;
-		// String[] resp = new String[request.getTransportTypes().length];
-		// return reqs.toArray(resp);
+		return reqsMap;
 	}
-
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
 	public @ResponseBody
 	BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary) throws InvocationException {
