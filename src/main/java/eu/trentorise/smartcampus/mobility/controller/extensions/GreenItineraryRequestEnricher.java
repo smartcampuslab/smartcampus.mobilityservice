@@ -14,7 +14,7 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 
-public class RoveretoItineraryRequestEnricher implements ItineraryRequestEnricher {
+public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
 	public Multimap<Integer, String> addPromotedItineraries(SingleJourney request, TType type) {

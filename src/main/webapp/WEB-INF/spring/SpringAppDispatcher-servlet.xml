@@ -60,7 +60,7 @@
 		<constructor-arg ref="domainEngineClient" />
 	</bean>	
 	
-	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
+	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.GreenItineraryRequestEnricher">
 	</bean>		
 	
 </beans>

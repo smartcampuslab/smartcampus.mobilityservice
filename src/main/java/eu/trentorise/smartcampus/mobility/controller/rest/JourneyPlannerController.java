@@ -151,9 +151,11 @@ public class JourneyPlannerController extends SCController {
 
 			return itineraries;
 		} catch (ConnectorException e0) {
+			e0.printStackTrace();
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
