@@ -24,4 +24,9 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 		return new ArrayList<Itinerary>();
 	}
 
+	@Override
+	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria) {
+		return itineraries;
+	}
+
 }

@@ -13,4 +13,5 @@ public interface ItineraryRequestEnricher {
 
 	public Multimap<Integer, String> addPromotedItineraries(SingleJourney request, TType type);
 	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria);
+	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria);
 }
