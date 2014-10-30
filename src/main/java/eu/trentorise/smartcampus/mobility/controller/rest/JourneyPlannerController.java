@@ -146,6 +146,8 @@ public class JourneyPlannerController extends SCController {
 
 			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
+
+			itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
 			
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
 
