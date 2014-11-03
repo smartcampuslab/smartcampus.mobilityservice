@@ -60,7 +60,14 @@
 		<constructor-arg ref="domainEngineClient" />
 	</bean>	
 	
-	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.GreenItineraryRequestEnricher">
+	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
 	</bean>		
+	
+	 <mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
+
+  <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+    <constructor-arg ref="mongo" />
+    <constructor-arg name="databaseName" value="${statlogging.dbname}" />
+  </bean>
 	
 </beans>

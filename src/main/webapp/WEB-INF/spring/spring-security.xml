@@ -19,8 +19,8 @@
   <http xmlns="http://www.springframework.org/schema/security" pattern="/partialcachestatus/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcachestatus/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcacheupdate/**" security="none"/>
-  <http xmlns="http://www.springframework.org/schema/security" pattern="/plansinglejourney/**" security="none"/>
-  <http xmlns="http://www.springframework.org/schema/security" pattern="/planrecurrent/**" security="none"/>
+<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/plansinglejourney/**" security="none"/> -->
+<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/planrecurrent/**" security="none"/> -->
 
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getbikesharingbyagency/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getparkingsbyagency/**" security="none"/>

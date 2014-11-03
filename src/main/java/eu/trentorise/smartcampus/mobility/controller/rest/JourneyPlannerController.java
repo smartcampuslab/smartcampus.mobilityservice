@@ -65,6 +65,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
+import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -75,6 +76,9 @@ import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 @Controller
 public class JourneyPlannerController extends SCController {
 
+	@Autowired
+	private StatLogger statLogger;
+	
 	@Autowired
 	private AuthServices services;
 	
@@ -113,7 +117,8 @@ public class JourneyPlannerController extends SCController {
 	public @ResponseBody
 	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
 		try {
-
+			statLogger.log(journeyRequest, getUserId());
+			
 			Map<String, String> cache = new TreeMap<String, String>();
 			
 			Multimap<Integer, String> reqs = buildItineraryPlannerRequest(journeyRequest, true);
@@ -184,6 +189,8 @@ public class JourneyPlannerController extends SCController {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
+
+			statLogger.log(itinerary, getUserId());
 
 			Map<String, Object> pars = new HashMap<String, Object>();
 			pars.put("itinerary", itinerary.getData());
@@ -680,6 +687,7 @@ public class JourneyPlannerController extends SCController {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
+			statLogger.log(map, getUserId());
 
 			submitAlert(map, userId, null);
 		} catch (Exception e) {

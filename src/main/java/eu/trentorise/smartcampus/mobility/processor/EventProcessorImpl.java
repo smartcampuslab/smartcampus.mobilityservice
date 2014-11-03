@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.JourneyPlannerController;
+import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 
 public class EventProcessorImpl implements DomainUpdateListener {
@@ -64,6 +65,9 @@ public class EventProcessorImpl implements DomainUpdateListener {
 
 	@Autowired
 	private AlertNotifier notifier;
+	
+	@Autowired
+	private StatLogger statLogger;
 	
 	private static Log logger = LogFactory.getLog(EventProcessorImpl.class);
 
@@ -115,18 +119,23 @@ public class EventProcessorImpl implements DomainUpdateListener {
 		String name = (String)map.get("title");
 		if (e.getEventSubtype().equals(ALERT_STRIKE)) {
 			AlertStrike alert = mapper.convertValue(map.get("alert"), AlertStrike.class);
+			statLogger.log(alert, userId);
 			notifier.notifyStrike(userId, clientId, alert, name);
 		} else if (e.getEventSubtype().equals(ALERT_DELAY)) {
 			AlertDelay alert = mapper.convertValue(map.get("alert"), AlertDelay.class);
+			statLogger.log(alert, userId);
 			notifier.notifyDelay(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_PARKING)) {
 			AlertParking alert = mapper.convertValue(map.get("alert"), AlertParking.class);
+			statLogger.log(alert, userId);
 			notifier.notifyParking(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_ACCIDENT)) {
 			AlertAccident alert = mapper.convertValue(map.get("alert"), AlertAccident.class);
+			statLogger.log(alert, userId);
 			notifier.notifyAccident(userId, clientId, alert, name);
 		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
 			AlertRoad alert = mapper.convertValue(map.get("alert"), AlertRoad.class);
+			statLogger.log(alert, userId);
 			notifier.notifyRoad(userId, clientId, alert, name);
 
 		}
