@@ -143,12 +143,17 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 	@Override
 	public void notifyParking(String userId, String clientId, AlertParking alert, String name) {
 		Map<String, Object> content = new TreeMap<String, Object>();
+		content.put("type", "alertParking");
+		AlertParking parking = ((AlertParking) alert);
+		content.put("agencyId", parking.getPlace().getAgencyId());
+		content.put("stopId", parking.getPlace().getId());
+		content.put("placesAvailable", parking.getPlacesAvailable());
+		content.put("noOfvehicles", parking.getNoOfvehicles());
+		if (parking.getPlace().getExtra() != null && parking.getPlace().getExtra().containsKey("transport")) {
+			content.put("transport", parking.getPlace().getExtra().get("transport"));
+		}
 		Notification n = prepareMessage(name, alert, content, clientId);
 		notify(n, userId);
-		content.put("type", "alertParking");
-		content.put("agencyId", ((AlertParking) alert).getPlace().getAgencyId());
-		content.put("stopId", ((AlertParking) alert).getPlace().getId());
-		content.put("placesAvailable", ((AlertParking) alert).getPlacesAvailable());
 	}
 
 	@Override
