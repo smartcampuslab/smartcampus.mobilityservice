@@ -151,22 +151,26 @@ public class EventProcessorImpl implements DomainUpdateListener {
 			// TODO, need stopId?
 //			alert.setId();
 			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAS", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);
 		} else if (e.getEventSubtype().equals(ALERT_DELAY)) {
 			AlertDelay alert = mapper.convertValue(map.get("alert"), AlertDelay.class);
 			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAD", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);			
 		} if (e.getDoType().equals(PARKING_ALERT_SENDER) && e.getEventSubtype().equals(ALL_ALERT_PARKING) ||
 			  e.getDoType().equals(ALERT_FACTORY) && e.getEventSubtype().equals(ALERT_PARKING)) {
 			AlertParking alert = mapper.convertValue(map.get("alert"), AlertParking.class);
 			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAP", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);	
 		} if (e.getEventSubtype().equals(ALERT_ACCIDENT)) {
 			AlertAccident alert = mapper.convertValue(map.get("alert"), AlertAccident.class);
 			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
 			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAE", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 			logger.info(result);	
 		} if (e.getEventSubtype().equals(ALERT_ROAD_BATCH)) {
@@ -174,12 +178,14 @@ public class EventProcessorImpl implements DomainUpdateListener {
 			if (alerts != null) {
 				for (AlertRoad alertRoad : alerts) {
 					String req = mapper.writeValueAsString(alertRoad);
+					statLogger.log(alertRoad, null);
 					String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAR", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 					logger.info(result);	
 				}
 			}
 		} if (e.getEventSubtype().equals(ALERT_ROAD)) {
 			AlertRoad alertRoad = mapper.convertValue(map.get("alert"), AlertRoad.class);
+			statLogger.log(alertRoad, null);
 			if (alertRoad != null) {
 				String req = mapper.writeValueAsString(alertRoad);
 				String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAR", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
