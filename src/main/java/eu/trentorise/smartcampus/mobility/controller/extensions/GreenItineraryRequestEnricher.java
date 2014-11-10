@@ -12,6 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -19,6 +22,8 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 
 public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
+
+	private static Log logger = LogFactory.getLog(GreenItineraryRequestEnricher.class);
 
 	@Override
 	public Multimap<Integer, String> addPromotedItineraries(SingleJourney request, TType type) {
@@ -85,30 +90,56 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria) {
-		Set<Itinerary> dups = new HashSet<Itinerary>(itineraries);
-		List<Itinerary> newItineraries = new ArrayList<Itinerary>(dups);
+		List<Itinerary> newItineraries = new ArrayList<Itinerary>();
+		List<Itinerary> toRemove = Lists.newArrayList();
+		
+		Set<Itinerary> original = new HashSet<Itinerary>();
+		Set<Itinerary> promoted = new HashSet<Itinerary>();
+		for (Itinerary it: itineraries) {
+			if (it.isPromoted()) {
+				promoted.add(it);
+			} else {
+				original.add(it);
+			}
+		}
+		
+		for (Itinerary it1: original) {
+			for (Itinerary it2: promoted) {
+				if (it1.equals(it2)) {
+					toRemove.add(it2);
+				}
+			}
+		}
+		promoted.removeAll(toRemove);
+		
+		newItineraries.addAll(original);
+		newItineraries.addAll(promoted);
 		
 		ItinerarySorter.sort(newItineraries, criteria);
-		
-		long maxTime = Long.MAX_VALUE;
-		double maxDistance = Double.MAX_VALUE;
+
+		long maxTime = 0;
+		double maxDistance = 0;
 
 		for (Itinerary it : newItineraries) {
-			maxTime = Math.min(maxTime, it.getDuration());
+			if (it.isPromoted()) {
+				continue;
+			}
+			maxTime = Math.max(maxTime, it.getDuration());
 			double distance = 0;
 			for (Leg leg : it.getLeg()) {
 				distance += leg.getLength();
 			}
-			maxDistance = Math.min(maxDistance, distance);
+			maxDistance = Math.max(maxDistance, distance);
 		}
 
-		List<Itinerary> toRemove = Lists.newArrayList();
+		toRemove = Lists.newArrayList();
 		for (Itinerary it : newItineraries) {
 			if (!it.isPromoted()) {
 				continue;
 			}
 			if (it.getDuration() > maxTime + (1000 * 60 * 30)) {
 				toRemove.add(it);
+				logger.info("Removing by time: " + it.getDuration() + "/" + maxTime);
 				continue;
 			}
 
@@ -119,25 +150,27 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 			if (distance > 2 * maxDistance) {
 				toRemove.add(it);
+				logger.info("Removing by distance: " + distance + "/" + maxDistance);
 				continue;
 			}
 		}
 
 		newItineraries.removeAll(toRemove);
-		
+
 		toRemove = Lists.newArrayList();
-		int promoted = 0;
+		int promotedN = 0;
 		for (Itinerary it : newItineraries) {
 			if (it.isPromoted()) {
-				promoted++;
+				promotedN++;
 			} else {
 				continue;
 			}
-			if (promoted > 2) {
+			if (promotedN > 2 && it.isPromoted()) {
+				logger.info("Removing too many");
 				toRemove.add(it);
 			}
 		}
-			
+
 		newItineraries.removeAll(toRemove);
 
 		return newItineraries;
