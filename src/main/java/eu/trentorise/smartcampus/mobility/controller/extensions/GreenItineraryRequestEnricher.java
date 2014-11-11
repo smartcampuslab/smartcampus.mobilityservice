@@ -15,7 +15,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -26,8 +25,8 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 	private static Log logger = LogFactory.getLog(GreenItineraryRequestEnricher.class);
 
 	@Override
-	public Multimap<Integer, String> addPromotedItineraries(SingleJourney request, TType type) {
-		Multimap<Integer, String> reqsMap = ArrayListMultimap.create();
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
+		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
 		List<TType> types = new ArrayList<TType>();
 		List<TType> requestedTypes = Arrays.asList(request.getTransportTypes());
@@ -61,18 +60,31 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		}
 		for (TType newType : types) {
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, itn);
-			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
-				if (newType.equals(TType.PARK_AND_RIDE)) {
-					reqsMap.put(1, req);
-				} else {
-					reqsMap.put(-1, req);
+			PlanRequest pr = new PlanRequest();
+			pr.setRequest(req);
+			pr.setType(newType);
+			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) ||  newType.equals(TType.SHAREDBIKE) ||  newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
+				if (requestedTypes.contains(newType)) {
+				System.out.println("NORM TO PROM: " + newType);
+				pr.setValue(0);
+				reqList.add(pr);
+				continue;
 				}
 			}
-			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
-				reqsMap.put(2, req);
+			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
+				if (newType.equals(TType.PARK_AND_RIDE)) {
+					pr.setValue(1);
+				} else {
+					pr.setValue(-1);
+				}
+			} else if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
+				pr.setValue(2);
+			} else {
+				System.out.println();
 			}
+			reqList.add(pr);
 		}
-		return reqsMap;
+		return reqList;
 	}
 
 	@Override
@@ -80,6 +92,8 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		List<Itinerary> kept = new ArrayList<Itinerary>();
 		for (Integer key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
+			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
+			toSort = new ArrayList<Itinerary>(toSortSet);
 			ItinerarySorter.sort(toSort, criteria);
 			for (int i = 0; i < Math.min(Math.abs(key), toSort.size()); i++) {
 				kept.add(toSort.get(i));
@@ -172,9 +186,24 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		}
 
 		newItineraries.removeAll(toRemove);
-
+		
 		return newItineraries;
 
+	}
+
+	@Override
+	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests) {
+		for (PlanRequest pr : planRequests) {
+			List<TType> req = Arrays.asList(journeyRequest.getTransportTypes());
+			if (pr.getType().equals(TType.WALK) || pr.getType().equals(TType.BICYCLE) || pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
+				if (req.contains(pr.getType())) {
+					for (Itinerary it: pr.getItinerary()) {
+						it.setPromoted(true);
+					}
+				}
+			}
+		}
+		
 	}
 
 }

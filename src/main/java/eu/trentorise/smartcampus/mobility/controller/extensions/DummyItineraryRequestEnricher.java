@@ -8,15 +8,14 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 
 public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
-	public Multimap<Integer, String> addPromotedItineraries(SingleJourney request, TType type) {
-		return ArrayListMultimap.create();
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
+		return new ArrayList<PlanRequest>();
 	}
 
 	@Override
@@ -27,6 +26,10 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 	@Override
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria) {
 		return itineraries;
+	}
+
+	@Override
+	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests) {
 	}
 
 }

@@ -62,9 +62,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
@@ -120,34 +122,37 @@ public class JourneyPlannerController extends SCController {
 			statLogger.log(journeyRequest, getUserId());
 			
 			Map<String, String> cache = new TreeMap<String, String>();
+			Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
 			
-			Multimap<Integer, String> reqs = buildItineraryPlannerRequest(journeyRequest, true);
+			List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true);
 			Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
 
 			List<Itinerary> itineraries = new ArrayList<Itinerary>();
 			
-			for (Integer key : reqs.keySet()) {
-				for (String req : reqs.get(key)) {
+//			for (Integer key : reqs.keySet()) {
+//				for (String req : reqs.get(key)) {
+			for (PlanRequest pr: reqs) {
 					String plan = null;
-					if (cache.containsKey(req)) {
+					if (cache.containsKey(pr.getRequest())) {
 //						plan = cache.get(req);
 						continue;
 					} else {
-						plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, req, MediaType.APPLICATION_JSON, null, "UTF-8");
-						cache.put(req, plan);
+						plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
+						cache.put(pr.getRequest(), plan);
 					}
 					List<?> its = mapper.readValue(plan, List.class);
 					for (Object it : its) {
 						Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
-						if (key != 0) {
+						pr.getItinerary().add(itinerary);
+						if (pr.getValue() != 0) {
 							itinerary.setPromoted(true);
-							evalIts.put(key, itinerary);
+							evalIts.put(pr.getValue(), itinerary);
 						} else {
 							itineraries.add(itinerary);
 						}
+						itineraryCache.put(pr.getRequest(), itinerary);
 					}
 				}
-			}
 
 			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
@@ -155,6 +160,8 @@ public class JourneyPlannerController extends SCController {
 			itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
 			
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
+			
+			itineraryRequestEnricher.completeResponse(journeyRequest, reqs);
 
 			return itineraries;
 		} catch (ConnectorException e0) {
@@ -167,17 +174,22 @@ public class JourneyPlannerController extends SCController {
 		return null;
 	}
 
-	private Multimap<Integer, String> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
-		Multimap<Integer, String> reqsMap = ArrayListMultimap.create();
+	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
+//		Multimap<Integer, String> reqsMap = ArrayListMultimap.create();
+		List<PlanRequest> reqsList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
 		for (TType type : request.getTransportTypes()) {
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
-			reqsMap.put(0, req);
+			PlanRequest pr = new PlanRequest();
+			pr.setRequest(req);
+			pr.setType(type);
+			pr.setValue(0);
+			reqsList.add(pr);
 			if (expand) {
-				reqsMap.putAll(itineraryRequestEnricher.addPromotedItineraries(request, type));
+				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type));
 			}
 		}
-		return reqsMap;
+		return reqsList;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
