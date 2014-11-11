@@ -14,5 +14,5 @@ public interface ItineraryRequestEnricher {
 	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type);
 	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria);
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria);
-	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests);
+	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests, List<Itinerary> itineraries);
 }
