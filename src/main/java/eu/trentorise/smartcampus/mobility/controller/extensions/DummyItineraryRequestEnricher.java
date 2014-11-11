@@ -29,7 +29,7 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 	}
 
 	@Override
-	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests) {
+	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests, List<Itinerary> itineraries) {
 	}
 
 }

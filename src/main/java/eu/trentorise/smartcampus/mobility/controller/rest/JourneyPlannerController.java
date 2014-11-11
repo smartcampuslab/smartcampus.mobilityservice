@@ -161,7 +161,7 @@ public class JourneyPlannerController extends SCController {
 			
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
 			
-			itineraryRequestEnricher.completeResponse(journeyRequest, reqs);
+			itineraryRequestEnricher.completeResponse(journeyRequest, reqs, itineraries);
 
 			return itineraries;
 		} catch (ConnectorException e0) {
