@@ -8,6 +8,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,12 +64,11 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
 			pr.setType(newType);
-			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) ||  newType.equals(TType.SHAREDBIKE) ||  newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
+			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
-				System.out.println("NORM TO PROM: " + newType);
-				pr.setValue(0);
-				reqList.add(pr);
-				continue;
+					pr.setValue(0);
+					reqList.add(pr);
+					continue;
 				}
 			}
 			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
@@ -106,29 +106,29 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria) {
 		List<Itinerary> newItineraries = new ArrayList<Itinerary>();
 		List<Itinerary> toRemove = Lists.newArrayList();
-		
+
 		Set<Itinerary> original = new HashSet<Itinerary>();
 		Set<Itinerary> promoted = new HashSet<Itinerary>();
-		for (Itinerary it: itineraries) {
+		for (Itinerary it : itineraries) {
 			if (it.isPromoted()) {
 				promoted.add(it);
 			} else {
 				original.add(it);
 			}
 		}
-		
-		for (Itinerary it1: original) {
-			for (Itinerary it2: promoted) {
+
+		for (Itinerary it1 : original) {
+			for (Itinerary it2 : promoted) {
 				if (it1.equals(it2)) {
 					toRemove.add(it2);
 				}
 			}
 		}
 		promoted.removeAll(toRemove);
-		
+
 		newItineraries.addAll(original);
 		newItineraries.addAll(promoted);
-		
+
 		ItinerarySorter.sort(newItineraries, criteria);
 
 		long maxTime = 0;
@@ -138,7 +138,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 			if (it.isPromoted()) {
 				continue;
 			}
-			maxTime = Math.max(maxTime, it.getDuration());
+			maxTime = Math.max(maxTime, it.getEndtime());
 			double distance = 0;
 			for (Leg leg : it.getLeg()) {
 				distance += leg.getLength();
@@ -171,39 +171,65 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 		newItineraries.removeAll(toRemove);
 
-		toRemove = Lists.newArrayList();
-		int promotedN = 0;
-		for (Itinerary it : newItineraries) {
-			if (it.isPromoted()) {
-				promotedN++;
-			} else {
-				continue;
-			}
-			if (promotedN > 2 && it.isPromoted()) {
-				logger.info("Removing too many");
-				toRemove.add(it);
-			}
-		}
+		// toRemove = Lists.newArrayList();
+		// int promotedN = 0;
+		// for (Itinerary it : newItineraries) {
+		// if (it.isPromoted()) {
+		// promotedN++;
+		// } else {
+		// continue;
+		// }
+		// if (promotedN > 2 && it.isPromoted()) {
+		// logger.info("Removing too many");
+		// toRemove.add(it);
+		// }
+		// }
+		//
+		// newItineraries.removeAll(toRemove);
 
-		newItineraries.removeAll(toRemove);
-		
 		return newItineraries;
 
 	}
 
 	@Override
-	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests) {
+	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests, List<Itinerary> itineraries) {
+		List<Itinerary> toKeep = Lists.newArrayList();
+
 		for (PlanRequest pr : planRequests) {
 			List<TType> req = Arrays.asList(journeyRequest.getTransportTypes());
 			if (pr.getType().equals(TType.WALK) || pr.getType().equals(TType.BICYCLE) || pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (req.contains(pr.getType())) {
-					for (Itinerary it: pr.getItinerary()) {
+					for (Itinerary it : pr.getItinerary()) {
 						it.setPromoted(true);
+						toKeep.add(it);
 					}
 				}
 			}
 		}
-		
+
+		List<Itinerary> toRemove = Lists.newArrayList();
+		int promotedN = 0;
+		for (Itinerary it : itineraries) {
+			if (it.isPromoted()) {
+				promotedN++;
+			}
+		}
+
+		Collections.reverse(itineraries);
+		if (promotedN > 2) {
+			for (Itinerary it : itineraries) {
+				if (promotedN > 2 && it.isPromoted() && !toKeep.contains(it)) {
+					logger.info("Removing too many");
+					toRemove.add(it);
+					promotedN--;
+				}
+			}
+		}
+
+		itineraries.removeAll(toRemove);
+
+		Collections.reverse(itineraries);
+
 	}
 
 }
