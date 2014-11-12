@@ -151,7 +151,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 			if (!it.isPromoted()) {
 				continue;
 			}
-			if (it.getDuration() > maxTime + (1000 * 60 * 30)) {
+			if (maxTime != 0 && it.getEndtime() > maxTime + (1000 * 60 * 30)) {
 				toRemove.add(it);
 				logger.info("Removing by time: " + it.getDuration() + "/" + maxTime);
 				continue;
@@ -162,7 +162,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 				distance += leg.getLength();
 			}
 
-			if (distance > 2 * maxDistance) {
+			if (maxDistance != 0 && distance > 2 * maxDistance) {
 				toRemove.add(it);
 				logger.info("Removing by distance: " + distance + "/" + maxDistance);
 				continue;
