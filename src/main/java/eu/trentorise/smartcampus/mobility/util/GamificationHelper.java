@@ -16,6 +16,10 @@
 
 package eu.trentorise.smartcampus.mobility.util;
 
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -67,6 +71,35 @@ public class GamificationHelper {
 			double trainDist = 0; // km
 			double busDist = 0; // km
 			double carDist = 0; // km
+			
+			Itinerary it = itinerary.getData();
+			if (it != null) {
+				for (Leg leg : it.getLeg()) {
+					if (leg.getTransport().getType().equals(TType.CAR)) {
+						carDist += leg.getLength();
+						if (leg.getTo().getStopId() != null) {
+							pnr = true;
+							parkName = leg.getTo().getStopId().getId();
+						}						
+					}					
+					if (leg.getTransport().getType().equals(TType.BICYCLE)) {
+						bikeDist += leg.getLength();
+						if (leg.getTo().getStopId() != null) {
+							bikeSharing = true;
+						}						
+					}
+					if (leg.getTransport().getType().equals(TType.WALK)) {
+						walkDist += leg.getLength();
+					}
+					if (leg.getTransport().getType().equals(TType.TRAIN)) {
+						trainDist += leg.getLength();
+					}
+					if (leg.getTransport().getType().equals(TType.BUS)) {
+						busDist += leg.getLength();
+					}
+				}
+			}
+			
 			
 			if (bikeDist > 0) data.put("bikeDistance", bikeDist);
 			if (walkDist > 0) data.put("walkDistance", walkDist);
