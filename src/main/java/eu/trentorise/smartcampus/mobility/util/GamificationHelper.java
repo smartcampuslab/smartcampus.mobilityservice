@@ -76,26 +76,26 @@ public class GamificationHelper {
 			if (it != null) {
 				for (Leg leg : it.getLeg()) {
 					if (leg.getTransport().getType().equals(TType.CAR)) {
-						carDist += leg.getLength();
+						carDist += leg.getLength() / 1000;
 						if (leg.getTo().getStopId() != null) {
 							pnr = true;
 							parkName = leg.getTo().getStopId().getId();
 						}						
 					}					
 					if (leg.getTransport().getType().equals(TType.BICYCLE)) {
-						bikeDist += leg.getLength();
+						bikeDist += leg.getLength() / 1000;
 						if (leg.getTo().getStopId() != null) {
 							bikeSharing = true;
 						}						
 					}
 					if (leg.getTransport().getType().equals(TType.WALK)) {
-						walkDist += leg.getLength();
+						walkDist += leg.getLength() / 1000;
 					}
 					if (leg.getTransport().getType().equals(TType.TRAIN)) {
-						trainDist += leg.getLength();
+						trainDist += leg.getLength() / 1000;
 					}
 					if (leg.getTransport().getType().equals(TType.BUS)) {
-						busDist += leg.getLength();
+						busDist += leg.getLength() / 1000;
 					}
 				}
 			}
