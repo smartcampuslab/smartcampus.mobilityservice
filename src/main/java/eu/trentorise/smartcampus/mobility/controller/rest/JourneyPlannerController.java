@@ -71,6 +71,7 @@ import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
@@ -86,6 +87,9 @@ public class JourneyPlannerController extends SCController {
 	
 	@Autowired
 	private ItineraryRequestEnricher itineraryRequestEnricher;
+	
+	@Autowired
+	private GamificationHelper gamificationHelper;
 	
 	@Override
 	protected AuthServices getAuthServices() {
@@ -202,7 +206,8 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			statLogger.log(itinerary, getUserId());
+			statLogger.log(itinerary, userId);
+			gamificationHelper.saveItinerary(itinerary, userId);
 
 			Map<String, Object> pars = new HashMap<String, Object>();
 			pars.put("itinerary", itinerary.getData());

@@ -70,4 +70,5 @@
     <constructor-arg name="databaseName" value="${statlogging.dbname}" />
   </bean>
 	
+  <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
 </beans>
