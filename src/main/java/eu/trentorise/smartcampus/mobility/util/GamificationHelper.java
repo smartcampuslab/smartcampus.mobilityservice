@@ -73,6 +73,7 @@ public class GamificationHelper {
 			double carDist = 0; // km
 			
 			Itinerary it = itinerary.getData();
+			logger.info("Analyzing itinerary for gamification.");
 			if (it != null) {
 				for (Leg leg : it.getLeg()) {
 					if (leg.getTransport().getType().equals(TType.CAR)) {
@@ -99,6 +100,10 @@ public class GamificationHelper {
 					}
 				}
 			}
+			logger.info("Analysis results:");
+			logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
+			logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
+			logger.info("Park = " + parkName);
 			
 			
 			if (bikeDist > 0) data.put("bikeDistance", bikeDist);
