@@ -67,6 +67,7 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
@@ -81,16 +82,19 @@ public class JourneyPlannerController extends SCController {
 
 	@Autowired
 	private StatLogger statLogger;
-	
+
 	@Autowired
 	private AuthServices services;
-	
+
 	@Autowired
 	private ItineraryRequestEnricher itineraryRequestEnricher;
-	
+
 	@Autowired
 	private GamificationHelper gamificationHelper;
-	
+
+	@Autowired
+	private PromotedJourneyRequestConverter promotedJourneyRequestConverter;
+
 	@Override
 	protected AuthServices getAuthServices() {
 		return services;
@@ -103,12 +107,11 @@ public class JourneyPlannerController extends SCController {
 	@Value("${otp.url}")
 	private String otpURL;
 
-	private static ObjectMapper mapper = new ObjectMapper(); 
+	private static ObjectMapper mapper = new ObjectMapper();
 	static {
 		mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
-	
 	// private static final String OTP_LOCATION = "http://213.21.154.84:7070";
 	// private static final String OTP_LOCATION = "http://localhost:7070";
 
@@ -124,49 +127,53 @@ public class JourneyPlannerController extends SCController {
 	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
 		try {
 			statLogger.log(journeyRequest, getUserId());
-			
+
 			Map<String, String> cache = new TreeMap<String, String>();
 			Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
+
+			promotedJourneyRequestConverter.modifyRequest(journeyRequest);
 			
 			List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true);
 			Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
 
 			List<Itinerary> itineraries = new ArrayList<Itinerary>();
-			
-//			for (Integer key : reqs.keySet()) {
-//				for (String req : reqs.get(key)) {
-			for (PlanRequest pr: reqs) {
-					String plan = null;
-					if (cache.containsKey(pr.getRequest())) {
-//						plan = cache.get(req);
-						continue;
-					} else {
-						plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
-						cache.put(pr.getRequest(), plan);
-					}
-					List<?> its = mapper.readValue(plan, List.class);
-					for (Object it : its) {
-						Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
-						pr.getItinerary().add(itinerary);
-						if (pr.getValue() != 0) {
-							itinerary.setPromoted(true);
-							evalIts.put(pr.getValue(), itinerary);
-						} else {
-							itineraries.add(itinerary);
-						}
-						itineraryCache.put(pr.getRequest(), itinerary);
-					}
+
+			for (PlanRequest pr : reqs) {
+				String plan = null;
+				if (cache.containsKey(pr.getRequest())) {
+					// plan = cache.get(req);
+					continue;
+				} else {
+					plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
+					cache.put(pr.getRequest(), plan);
 				}
+				List<?> its = mapper.readValue(plan, List.class);
+				for (Object it : its) {
+					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
+					pr.getItinerary().add(itinerary);
+					if (pr.getValue() != 0) {
+						itinerary.setPromoted(true);
+						evalIts.put(pr.getValue(), itinerary);
+					} else {
+						itineraries.add(itinerary);
+					}
+					itineraryCache.put(pr.getRequest(), itinerary);
+				}
+			}
 
 			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
 
 			itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
-			
+
 			ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
-			
+
 			itineraryRequestEnricher.completeResponse(journeyRequest, reqs, itineraries);
 
+			promotedJourneyRequestConverter.promoteJourney(reqs);
+			
+//			promotedJourneyRequestConverter.append(reqs);
+			
 			return itineraries;
 		} catch (ConnectorException e0) {
 			e0.printStackTrace();
@@ -179,7 +186,6 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
-//		Multimap<Integer, String> reqsMap = ArrayListMultimap.create();
 		List<PlanRequest> reqsList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
 		for (TType type : request.getTransportTypes()) {
@@ -193,9 +199,14 @@ public class JourneyPlannerController extends SCController {
 				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type));
 			}
 		}
+		
+		for (PlanRequest req: reqsList) {
+			req.setOriginalRequest(request);
+		}
+		
 		return reqsList;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
 	public @ResponseBody
 	BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary) throws InvocationException {
@@ -231,7 +242,8 @@ public class JourneyPlannerController extends SCController {
 			itinerary.setClientId(clientId);
 			return itinerary;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -260,7 +272,8 @@ public class JourneyPlannerController extends SCController {
 
 			return itineraries;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -290,7 +303,8 @@ public class JourneyPlannerController extends SCController {
 
 			return itinerary;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -320,7 +334,8 @@ public class JourneyPlannerController extends SCController {
 			domainClient.invokeDomainOperation("deleteItinerary", "smartcampus.services.journeyplanner.ItineraryObject", res.getId(), pars, userId, "vas_journeyplanner_subscriber");
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
 	}
@@ -353,11 +368,11 @@ public class JourneyPlannerController extends SCController {
 			String s = (String) ServiceUtil.deserializeObject(b);
 			return Boolean.parseBoolean(s);
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
 	}
-
 
 	// RECURRENT
 
@@ -383,7 +398,8 @@ public class JourneyPlannerController extends SCController {
 		} catch (ConnectorException e0) {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
 		return null;
@@ -419,7 +435,8 @@ public class JourneyPlannerController extends SCController {
 			recurrent.setClientId(clientId);
 			return recurrent;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -464,7 +481,8 @@ public class JourneyPlannerController extends SCController {
 		} catch (ConnectorException e0) {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
 		return null;
@@ -503,7 +521,8 @@ public class JourneyPlannerController extends SCController {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -587,7 +606,8 @@ public class JourneyPlannerController extends SCController {
 			return journeys;
 
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -626,7 +646,8 @@ public class JourneyPlannerController extends SCController {
 
 			return recurrentJourney;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -655,7 +676,8 @@ public class JourneyPlannerController extends SCController {
 			domainClient.invokeDomainOperation("deleteRecurrentJourney", "smartcampus.services.journeyplanner.RecurrentJourneyObject", obj.getId(), pars, userId, "vas_journeyplanner_subscriber");
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}
@@ -687,7 +709,8 @@ public class JourneyPlannerController extends SCController {
 			return Boolean.parseBoolean(s);
 
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
 	}
@@ -708,7 +731,8 @@ public class JourneyPlannerController extends SCController {
 
 			submitAlert(map, userId, null);
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -718,12 +742,12 @@ public class JourneyPlannerController extends SCController {
 		try {
 			submitAlert(map, null, getClientId());
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private void submitAlert(Map<String, Object> map, String userId, String clientId)
-			throws InvocationException {
+	private void submitAlert(Map<String, Object> map, String userId, String clientId) throws InvocationException {
 		AlertType type = AlertType.getAlertType((String) map.get("type"));
 
 		Alert alert = null;
@@ -771,16 +795,16 @@ public class JourneyPlannerController extends SCController {
 		domainClient.invokeDomainOperation(method, "smartcampus.services.journeyplanner.AlertFactory", "smartcampus.services.journeyplanner.AlertFactory.0", pars, userId, "vas_journeyplanner_subscriber");
 	}
 
-	// /////////////////////////////////////////////////////////////////////////////	
+	// /////////////////////////////////////////////////////////////////////////////
 
 	@RequestMapping(method = RequestMethod.GET, value = "/getparkingsbyagency/{agencyId}")
 	public @ResponseBody
 	void getParkingsByAgency(HttpServletResponse response, @PathVariable String agencyId) throws InvocationException {
 		try {
-			String address =  otpURL + SMARTPLANNER + "getParkingsByAgency?agencyId=" + agencyId;
-			
+			String address = otpURL + SMARTPLANNER + "getParkingsByAgency?agencyId=" + agencyId;
+
 			String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			
+
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(routes);
 
@@ -788,18 +812,19 @@ public class JourneyPlannerController extends SCController {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-	}			
-	
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
 	public @ResponseBody
 	void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws InvocationException {
 		try {
-			String address =  otpURL + SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId;
-			
+			String address = otpURL + SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId;
+
 			String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			
+
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(routes);
 
@@ -808,8 +833,7 @@ public class JourneyPlannerController extends SCController {
 		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-	}	
-	
+	}
 
 	private DomainObject getObjectByClientId(String id, String type) throws Exception {
 		Map<String, Object> pars = new TreeMap<String, Object>();
@@ -833,22 +857,22 @@ public class JourneyPlannerController extends SCController {
 		return objectId;
 	}
 
-
 	@RequestMapping(method = RequestMethod.GET, value = "/getroadinfobyagency/{agencyId}/{from}/{to}")
 	public @ResponseBody
 	void getRoadInfoByAgency(HttpServletResponse response, @PathVariable String agencyId, @PathVariable Long from, @PathVariable Long to) throws InvocationException {
 		try {
-			String address =  otpURL + SMARTPLANNER + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to;
-			
+			String address = otpURL + SMARTPLANNER + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to;
+
 			String roadInfo = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			
+
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(roadInfo);
 
 		} catch (ConnectorException e0) {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
-			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 

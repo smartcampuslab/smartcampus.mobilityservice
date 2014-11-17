@@ -63,6 +63,9 @@
 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
 	</bean>		
 	
+	<bean id="promotedJourneyRequestConverter" class=" eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPromotedJourneyRequestConverter">
+	</bean>		
+	
 	 <mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
   <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
