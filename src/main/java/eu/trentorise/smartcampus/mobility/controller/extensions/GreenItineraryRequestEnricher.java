@@ -31,7 +31,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		int itn = Math.max(request.getResultsNumber(), 1);
 		List<TType> types = new ArrayList<TType>();
 		List<TType> requestedTypes = Arrays.asList(request.getTransportTypes());
-		if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
+		if (type.equals(TType.CAR)) {
 			if (!requestedTypes.contains(TType.PARK_AND_RIDE)) {
 				types.add(TType.PARK_AND_RIDE);
 			}
@@ -71,7 +71,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 					continue;
 				}
 			}
-			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
+			if (type.equals(TType.CAR)) {
 				if (newType.equals(TType.PARK_AND_RIDE)) {
 					pr.setValue(1);
 				} else {

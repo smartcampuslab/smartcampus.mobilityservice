@@ -2,6 +2,7 @@ package eu.trentorise.smartcampus.mobility.controller.extensions;
 
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.TType;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class PlanRequest {
 	private String request;
 	private Integer value;
 	private List<Itinerary> itinerary;
+	private SingleJourney originalRequest;
 	
 	public PlanRequest() {
 		itinerary = Lists.newArrayList();
@@ -43,6 +45,12 @@ public class PlanRequest {
 
 	public void setItinerary(List<Itinerary> itinerary) {
 		this.itinerary = itinerary;
+	}
+	public SingleJourney getOriginalRequest() {
+		return originalRequest;
+	}
+	public void setOriginalRequest(SingleJourney originalRequest) {
+		this.originalRequest = originalRequest;
 	}
 
 	@Override
