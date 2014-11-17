@@ -111,7 +111,7 @@ public class GamificationHelper {
 			if (busDist > 0) data.put("busDistance", busDist);
 			if (trainDist > 0) data.put("trainDistance", trainDist);
 			if (carDist > 0) data.put("carDistance", carDist);
-			if (bikeSharing) data.put("bikeSharing", bikeSharing);
+			if (bikeSharing) data.put("bikesharing", bikeSharing);
 			if (parkName != null) data.put("park", parkName);
 			if (pnr) data.put("p+r", pnr);
 			data.put("sustainable", itinerary.getData().isPromoted());
