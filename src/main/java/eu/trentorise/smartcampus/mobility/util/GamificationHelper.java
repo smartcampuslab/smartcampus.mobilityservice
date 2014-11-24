@@ -20,6 +20,8 @@ import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.TType;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +45,15 @@ public class GamificationHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 	
+	private static long START_GAME_DATE = Long.MAX_VALUE;
+//	static {
+//		try {
+//			START_GAME_DATE = new SimpleDateFormat("dd/MM/yyyy").parse("24/11/2014").getTime();
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
 	@Autowired
 	@Value("${gamification.url}")
 	private String gamificationUrl;
@@ -51,6 +62,8 @@ public class GamificationHelper {
 	private ExecutorService executorService;
 	
 	public void saveItinerary(final BasicItinerary itinerary, final String userId) {
+		if (System.currentTimeMillis() < START_GAME_DATE) return;
+		
 		executorService.execute(new Runnable() {
 			@Override
 			public void run() {

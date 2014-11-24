@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -46,6 +47,8 @@ import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
 public class OTPController extends SCController {
+
+	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Autowired
 	@Value("${otp.url}")
@@ -79,7 +82,9 @@ public class OTPController extends SCController {
 			String address =  otpURL + OTP + "getroutes/" + agencyId;
 			
 			String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			
+
+			logger.info("-"+getUserId()  + "~AppConsume~routes=" + agencyId);
+	
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(routes);
 
@@ -97,6 +102,7 @@ public class OTPController extends SCController {
 			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId;
 			
 			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
+			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
 
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(stops);
@@ -115,6 +121,7 @@ public class OTPController extends SCController {
 			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId + "/" + latitude + "/" + longitude + "/" + radius;
 			
 			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
+			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
 
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(stops);
@@ -173,6 +180,7 @@ public class OTPController extends SCController {
 			String address =  otpURL + OTP + "gettimetable/" + agencyId + "/" + routeId + "/" + stopId;
 			
 			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, null);
+			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
 
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
@@ -189,7 +197,8 @@ public class OTPController extends SCController {
 	void getLimitedTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String stopId, @PathVariable Integer maxResults) throws InvocationException{
 		try {
 			String address =  otpURL + OTP + "getlimitedtimetable/" + agencyId + "/" + stopId + "/" + maxResults;
-			
+			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
+
 			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
@@ -225,6 +234,7 @@ public class OTPController extends SCController {
 			String address =  otpURL + OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to;
 			
 			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
+			logger.info("-"+getUserId()  + "~AppConsume~delays=" + routeId);
 
 			response.setContentType("application/json; charset=utf-8");
 			

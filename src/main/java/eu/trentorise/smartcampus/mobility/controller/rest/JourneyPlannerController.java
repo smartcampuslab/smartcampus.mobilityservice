@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -82,7 +83,9 @@ public class JourneyPlannerController extends SCController {
 
 	@Autowired
 	private StatLogger statLogger;
+	private Logger logger = Logger.getLogger(this.getClass());
 
+	
 	@Autowired
 	private AuthServices services;
 
@@ -126,7 +129,9 @@ public class JourneyPlannerController extends SCController {
 	public @ResponseBody
 	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
 		try {
-			statLogger.log(journeyRequest, getUserId());
+			String userId = getUserId();
+			statLogger.log(journeyRequest, userId);
+			logger.info("-"+userId  + "~AppConsume~plan");
 
 			Map<String, String> cache = new TreeMap<String, String>();
 			Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
@@ -414,6 +419,7 @@ public class JourneyPlannerController extends SCController {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
+			logger.info("-"+userId  + "~AppConsume~monitor");
 
 			Map<String, Object> pars = new HashMap<String, Object>();
 			pars.put("recurrentJourney", recurrent.getData());
@@ -761,6 +767,7 @@ public class JourneyPlannerController extends SCController {
 		case DELAY:
 			alert = mapper.convertValue(contentMap, AlertDelay.class);
 			method = "submitAlertDelay";
+			if (userId != null) logger.info("-"+userId  + "~AppProsume~delay=" + ((AlertDelay)alert).getTransport().getAgencyId());
 			break;
 		case PARKING:
 			alert = mapper.convertValue(contentMap, AlertParking.class);
