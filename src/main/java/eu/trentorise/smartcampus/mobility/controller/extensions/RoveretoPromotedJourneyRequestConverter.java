@@ -15,8 +15,8 @@ import com.google.common.collect.Lists;
 
 public class RoveretoPromotedJourneyRequestConverter implements PromotedJourneyRequestConverter {
 
-//	private String places[] = new String[] { "45.900559,11.03641" };
-	private String places[] = new String[] { "45.890068,11.043747" };
+	private String places[] = new String[] { "45.889568,11.043297" };
+//	private String places[] = new String[] { "45.890068,11.043747" };
 	
 	private List<Position> positions;
 	
