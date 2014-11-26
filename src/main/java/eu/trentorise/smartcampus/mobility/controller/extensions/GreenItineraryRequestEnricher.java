@@ -90,14 +90,33 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 	@Override
 	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria) {
 		List<Itinerary> kept = new ArrayList<Itinerary>();
+		List<Itinerary> toRemove;
 		for (Integer key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
 			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
 			toSort = new ArrayList<Itinerary>(toSortSet);
 			ItinerarySorter.sort(toSort, criteria);
-			for (int i = 0; i < Math.min(Math.abs(key), toSort.size()); i++) {
-				kept.add(toSort.get(i));
+			Collections.reverse(toSort);
+			int removeN = toSort.size() - Math.min(Math.abs(key), toSort.size());
+			toRemove =  new ArrayList<Itinerary>();
+			for (Itinerary it: toSort) {
+				if (toRemove.size() == removeN) {
+					break;
+				}
+				boolean rem = true;
+				for (Leg leg: it.getLeg()) {
+					if ("116".equals(leg.getTransport().getAgencyId())) {
+						rem = false;
+						continue;
+					}
+				}
+				
+				if (rem) {
+					toRemove.add(it);
+				}
 			}
+			toSort.removeAll(toRemove);
+			kept.addAll(toSort);
 		}
 		return kept;
 	}
