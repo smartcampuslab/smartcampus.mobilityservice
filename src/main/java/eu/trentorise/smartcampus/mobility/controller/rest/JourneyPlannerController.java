@@ -146,7 +146,6 @@ public class JourneyPlannerController extends SCController {
 			for (PlanRequest pr : reqs) {
 				String plan = null;
 				if (cache.containsKey(pr.getRequest())) {
-					// plan = cache.get(req);
 					continue;
 				} else {
 					plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
@@ -177,8 +176,6 @@ public class JourneyPlannerController extends SCController {
 
 			promotedJourneyRequestConverter.promoteJourney(reqs);
 			
-//			promotedJourneyRequestConverter.append(reqs);
-			
 			return itineraries;
 		} catch (ConnectorException e0) {
 			e0.printStackTrace();
@@ -192,8 +189,12 @@ public class JourneyPlannerController extends SCController {
 
 	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
 		List<PlanRequest> reqsList = Lists.newArrayList();
-		int itn = Math.max(request.getResultsNumber(), 1);
 		for (TType type : request.getTransportTypes()) {
+			int minitn = 1;
+			if (type.equals(TType.TRANSIT)) {
+				minitn = 3;
+			}
+			int itn = Math.max(request.getResultsNumber(), minitn);			
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
