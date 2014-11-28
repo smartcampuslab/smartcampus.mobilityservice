@@ -20,21 +20,30 @@ import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.TType;
 
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
+import eu.trentorise.smartcampus.network.RemoteException;
 
 /**
  * @author raman
@@ -46,22 +55,31 @@ public class GamificationHelper {
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 	
 	private static long START_GAME_DATE = Long.MAX_VALUE;
-//	static {
-//		try {
-//			START_GAME_DATE = new SimpleDateFormat("dd/MM/yyyy").parse("24/11/2014").getTime();
-//		} catch (ParseException e) {
-//			e.printStackTrace();
-//		}
-//	}
 	
-	@Autowired
+	@Autowired(required=false)
 	@Value("${gamification.url}")
 	private String gamificationUrl;
+
+	@Autowired(required=false)
+	@Value("${gamification.startgame}")
+	private String gameStart;
 
 	@Autowired
 	private ExecutorService executorService;
 	
+	@PostConstruct
+	public void initConnector() {
+		if (gameStart != null) {
+			try {
+				START_GAME_DATE = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void saveItinerary(final BasicItinerary itinerary, final String userId) {
+		if (gamificationUrl == null) return;
 		if (System.currentTimeMillis() < START_GAME_DATE) return;
 		
 		executorService.execute(new Runnable() {
@@ -136,6 +154,15 @@ public class GamificationHelper {
 			RemoteConnector.postJSON(gamificationUrl, "/execute", JsonUtils.toJSON(body), null);
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: "+e.getMessage());
+		}
+	}
+	
+	public static void main(String[] args) throws UnknownHostException, MongoException, SecurityException, RemoteException {
+		MongoTemplate mg = new MongoTemplate(new Mongo("127.0.0.1", 37017), "mobility-logging");
+		List<Map> findAll = mg.findAll(Map.class, "forgamification");
+		for (Map m : findAll) {
+			m.remove("_id");
+			RemoteConnector.postJSON("http://localhost:8900", "/execute", JsonUtils.toJSON(m), null);
 		}
 	}
 }
