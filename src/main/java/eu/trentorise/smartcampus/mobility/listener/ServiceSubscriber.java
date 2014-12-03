@@ -26,11 +26,17 @@ import org.apache.commons.logging.LogFactory;
 
 public class ServiceSubscriber {
 
+
+
+	public static final String GET_ORDINANZE = "GetOrdinanze";
+	public static final String TRAINS_TRENTO_MALE = "TrainsTrentoMale";
 	public static final String GET_STAZIONI = "GetStazioni";
 	public static final String GET_ORARI_TRENI = "GetOrariTreni";
 	public static final String GET_PARCHEGGI_TRENTO = "GetParcheggiTrento";
 	public static final String GET_PARCHEGGI_ROVERETO = "GetParcheggiRovereto";
 
+	public static final String ORDINANZE_ROVERETO_SERVICE = "eu.trentorise.smartcampus.services.ordinanzerovereto.OrdinanzeRoveretoService";	
+	public static final String SMARTCAMPUS_SERVICE_TRENTO_MALE = "smartcampus.service.TrentoMale";	
 	public static final String SMARTCAMPUS_SERVICE_TOBIKE = "smartcampus.service.tobike";
 	public static final String SMARTCAMPUS_SERVICE_ORARITRENI = "smartcampus.service.oraritreni";
 	public static final String SMARTCAMPUS_SERVICE_PARCHEGGI = "smartcampus.service.parcheggi";
@@ -56,10 +62,10 @@ public class ServiceSubscriber {
 			client.subscribeService(SMARTCAMPUS_SERVICE_TOBIKE, GET_STAZIONI, params);
 			
 			params = new TreeMap<String, Object>();
-			client.subscribeService("smartcampus.service.TrentoMale", "TrainsTrentoMale", params);
+			client.subscribeService(SMARTCAMPUS_SERVICE_TRENTO_MALE, TRAINS_TRENTO_MALE, params);
 			client.subscribeService(SMARTCAMPUS_SERVICE_PARCHEGGI, GET_PARCHEGGI_TRENTO, params);
 			client.subscribeService(SMARTCAMPUS_SERVICE_PARCHEGGI, GET_PARCHEGGI_ROVERETO, params);
-			client.subscribeService("eu.trentorise.smartcampus.services.ordinanzerovereto.OrdinanzeRoveretoService", "GetOrdinanze", params);
+			client.subscribeService(ORDINANZE_ROVERETO_SERVICE, GET_ORDINANZE, params);
 		
 		} catch (InvocationException e) {
 			logger.error("Failed to subscribe for service events: "+e.getMessage());

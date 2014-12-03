@@ -38,6 +38,12 @@ public class ServiceEventProcessorImpl implements ServiceBusListener {
 		if (ServiceSubscriber.SMARTCAMPUS_SERVICE_ORARITRENI.equals(serviceId)) {
 			System.out.println(dataConverter.convertTreni(data));
 		}
+		if (ServiceSubscriber.SMARTCAMPUS_SERVICE_TRENTO_MALE.equals(serviceId)) {
+			System.out.println(dataConverter.convertTrentoMale(data));
+		} 
+		if (ServiceSubscriber.ORDINANZE_ROVERETO_SERVICE.equals(serviceId)) {
+			System.out.println(dataConverter.convertOrdinanze(data));
+		} 		
 	}
 
 	

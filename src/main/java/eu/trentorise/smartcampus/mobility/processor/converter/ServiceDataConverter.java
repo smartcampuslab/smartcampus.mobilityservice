@@ -1,9 +1,17 @@
 package eu.trentorise.smartcampus.mobility.processor.converter;
 
+import it.sayservice.platform.smartplanner.data.message.RoadElement;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoadType;
+import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import smartcampus.service.trentomale.data.message.Trentomale.Train;
 
 import com.google.protobuf.ByteString;
 
@@ -12,6 +20,8 @@ import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni.Part
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni.PartenzeArrivi;
 import eu.trentorise.smartcampus.service.parcheggi.data.message.Parcheggi.Parcheggio;
 import eu.trentorise.smartcampus.service.tobike.data.message.Tobike.Stazione;
+import eu.trentorise.smartcampus.services.ordinanzerovereto.data.message.Ordinanzerovereto.Ordinanza;
+import eu.trentorise.smartcampus.services.ordinanzerovereto.data.message.Ordinanzerovereto.Via;
 
 public class ServiceDataConverter {
 
@@ -25,6 +35,12 @@ public class ServiceDataConverter {
 	private static final String BDG_TN = "TB_R2_R";
 	private static final String BZ_VR = "BV_R1_G";
 	private static final String VR_BZ = "BV_R1_R";			
+	
+	private static final String DIVIETO_DI_TRANSITO_E_DI_SOSTA = "divieto di transito e di sosta";
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	private static final String DIVIETO_DI_TRANSITO = "divieto di transito";
+	private static final String DIVIETO_DI_SOSTA = "divieto di sosta";
+	private static final String DIVIETO_DI_SOSTA_CON = "divieto di sosta con rimozione coatta";	
 	
 	public ServiceDataConverter() {
 	}
@@ -80,6 +96,64 @@ public class ServiceDataConverter {
 		}
 		return list;
 	}	
+	
+	public List<GenericTrain> convertTrentoMale(List<ByteString> data) {
+		List<GenericTrain> list = new ArrayList<GenericTrain>();
+		for (ByteString bs : data) {
+			try {
+				Train t = Train.parseFrom(bs);
+				GenericTrain tmt = new GenericTrain();
+					tmt.setDelay(t.getDelay());
+					tmt.setId("" + t.getId());
+					tmt.setTripId("" + t.getNumber());
+					tmt.setDirection(t.getDirection());
+					tmt.setTime(t.getTime());
+					tmt.setStation(t.getStation());
+					tmt.setAgencyId("10");
+					if ("Trento".equalsIgnoreCase(t.getDirection())) {
+						tmt.setRouteId("556");
+					} else {
+						tmt.setRouteId("555");
+					}
+					list.add(tmt);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return list;
+	}		
+	
+	public List<AlertRoad> convertOrdinanze(List<ByteString> data) {
+		List<AlertRoad> list = new ArrayList<AlertRoad>();
+		for (ByteString bs : data) {
+			try {
+				Ordinanza t = Ordinanza.parseFrom(bs);
+				if (t.getVieCount() == 0) continue;
+				for (int i = 0; i < t.getVieCount(); i++) {
+					Via via = t.getVie(i);
+					AlertRoad ar = new AlertRoad();
+					ar.setAgencyId("COMUNE_DI_ROVERETO");
+					ar.setCreatorType(CreatorType.SERVICE);
+					ar.setDescription(t.getOgetto());
+					ar.setEffect(via.hasTipologia() && !via.getTipologia().isEmpty() ? via.getTipologia() : t.getTipologia());
+					ar.setFrom(sdf.parse(t.getDal()).getTime());
+					ar.setTo(sdf.parse(t.getAl()).getTime());
+					ar.setId(t.getId()+"_"+via.getCodiceVia());
+					ar.setRoad(toRoadElement(via,t));
+					ar.setChangeTypes(getTypes(via,t));
+//					if (!t.getTipologia().equals("Permanente") || ar.getFrom() > c.getTimeInMillis()) 
+//					{
+						list.add(ar);
+//					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}		
+	
 	
 	private List<GenericTrain> buildTrain(PartenzeArrivi pa) {
 		List<GenericTrain> result = new ArrayList<GenericTrain>();
@@ -279,6 +353,43 @@ public class ServiceDataConverter {
 		}
 		res = res.replaceAll("ES\\*", "ESAV");
 		return res;
+	}	
+	
+	private AlertRoadType[] getTypes(Via via, Ordinanza t) {
+		String type = via.hasTipologia() && ! via.getTipologia().isEmpty() ? via.getTipologia() : t.getTipologia();
+		if (DIVIETO_DI_TRANSITO_E_DI_SOSTA.equals(type) || t.getOgetto().toLowerCase().contains(DIVIETO_DI_TRANSITO_E_DI_SOSTA)) {
+			return new AlertRoadType[]{AlertRoadType.PARKING_BLOCK, AlertRoadType.ROAD_BLOCK};
+		}
+		if (DIVIETO_DI_TRANSITO.equals(type) || t.getOgetto().toLowerCase().contains(DIVIETO_DI_TRANSITO)) {
+			return new AlertRoadType[]{AlertRoadType.ROAD_BLOCK};
+		}
+		if (DIVIETO_DI_SOSTA.equals(type) || DIVIETO_DI_SOSTA_CON.equals(type) || t.getOgetto().toLowerCase().contains(DIVIETO_DI_SOSTA)) {
+			return new AlertRoadType[]{AlertRoadType.PARKING_BLOCK};
+		}
+		if ("senso unico alternato".equals(type) || t.getOgetto().toLowerCase().contains("senso unico alternato")) {
+			return new AlertRoadType[]{AlertRoadType.DRIVE_CHANGE};
+		}
+		if ("doppio senso di marcia".equals(type) || t.getOgetto().toLowerCase().contains("doppio senso di marcia")) {
+			return new AlertRoadType[]{AlertRoadType.DRIVE_CHANGE};
+		}
+		if (type.contains("limitazione della velocit")) {
+			return new AlertRoadType[]{AlertRoadType.DRIVE_CHANGE};
+		}
+		return new AlertRoadType[]{AlertRoadType.OTHER};
+	}
+
+	private RoadElement toRoadElement(Via via, Ordinanza t) {
+		RoadElement re = new RoadElement();
+		re.setLat(via.getLat()+"");
+		re.setLon(via.getLng()+"");
+		if (via.hasAlCivico()) re.setToNumber(via.getAlCivico());
+		if (via.hasAlIntersezione()) re.setToIntersection(via.getAlIntersezione());
+		if (via.hasCodiceVia()) re.setStreetCode(via.getCodiceVia());
+		if (via.hasDalCivico()) re.setFromNumber(via.getDalCivico());
+		if (via.hasDalIntersezione()) re.setFromIntersection(via.getDalIntersezione());
+		if (via.hasDescrizioneVia()) re.setStreet(via.getDescrizioneVia());
+		if (via.hasNote()) re.setNote(via.getNote());
+		return re;
 	}	
 		
 	
