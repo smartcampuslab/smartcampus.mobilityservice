@@ -41,6 +41,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +67,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
@@ -105,6 +109,10 @@ public class JourneyPlannerController extends SCController {
 
 	@Autowired
 	private DomainEngineClient domainClient;
+	
+	@Autowired
+	private ExecutorService executorService;	
+	
 
 	@Autowired
 	@Value("${otp.url}")
@@ -143,15 +151,21 @@ public class JourneyPlannerController extends SCController {
 
 			List<Itinerary> itineraries = new ArrayList<Itinerary>();
 
+			List<Future<PlanRequest>> results = Lists.newArrayList();
+			Map<String, PlanRequest> reqMap = Maps.newTreeMap();
 			for (PlanRequest pr : reqs) {
-				String plan = null;
-				if (cache.containsKey(pr.getRequest())) {
-					continue;
-				} else {
-					plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
-					cache.put(pr.getRequest(), plan);
-				}
-				List<?> its = mapper.readValue(plan, List.class);
+				reqMap.put(pr.getRequest(), pr);
+			}
+			
+			for (PlanRequest pr : reqMap.values()) {
+				CallableItineraryRequest callableReq = new CallableItineraryRequest();
+				callableReq.setRequest(pr);
+				Future<PlanRequest> future = executorService.submit(callableReq);
+				results.add(future);
+			}
+			for (Future<PlanRequest> plan: results) {
+				PlanRequest pr = plan.get();
+				List<?> its = mapper.readValue(pr.getPlan(), List.class);
 				for (Object it : its) {
 					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
 					pr.getItinerary().add(itinerary);
@@ -164,6 +178,31 @@ public class JourneyPlannerController extends SCController {
 					itineraryCache.put(pr.getRequest(), itinerary);
 				}
 			}
+			
+			
+			////
+			
+//			for (PlanRequest pr : reqs) {
+//				String plan = null;
+//				if (cache.containsKey(pr.getRequest())) {
+//					continue;
+//				} else {
+//					plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
+//					cache.put(pr.getRequest(), plan);
+//				}
+//				List<?> its = mapper.readValue(plan, List.class);
+//				for (Object it : its) {
+//					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
+//					pr.getItinerary().add(itinerary);
+//					if (pr.getValue() != 0) {
+//						itinerary.setPromoted(true);
+//						evalIts.put(pr.getValue(), itinerary);
+//					} else {
+//						itineraries.add(itinerary);
+//					}
+//					itineraryCache.put(pr.getRequest(), itinerary);
+//				}
+//			}
 
 			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
@@ -177,9 +216,9 @@ public class JourneyPlannerController extends SCController {
 			promotedJourneyRequestConverter.promoteJourney(reqs);
 			
 			return itineraries;
-		} catch (ConnectorException e0) {
-			e0.printStackTrace();
-			response.setStatus(e0.getCode());
+//		} catch (ConnectorException e0) {
+//			e0.printStackTrace();
+//			response.setStatus(e0.getCode());
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -892,4 +931,20 @@ public class JourneyPlannerController extends SCController {
 		return auth.getAuthorizationRequest().getClientId();
 	}
 
+	private class CallableItineraryRequest implements Callable<PlanRequest> {
+		
+		private PlanRequest request;
+		
+		public void setRequest(PlanRequest req) {
+			this.request = req;
+		}
+		
+		@Override
+		public PlanRequest call() throws Exception {
+			String plan =  HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, request.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
+			request.setPlan(plan);
+			return request;
+		}};		
+		
+	
 }
