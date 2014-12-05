@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -69,7 +70,7 @@ public class GamificationHelper {
 	
 	@PostConstruct
 	public void initConnector() {
-		if (gameStart != null) {
+		if (StringUtils.hasText(gameStart)) {
 			try {
 				START_GAME_DATE = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
 			} catch (ParseException e) {
@@ -79,7 +80,7 @@ public class GamificationHelper {
 	}
 	
 	public void saveItinerary(final BasicItinerary itinerary, final String userId) {
-		if (gamificationUrl == null) return;
+		if (!StringUtils.hasText(gamificationUrl)) return;
 		if (System.currentTimeMillis() < START_GAME_DATE) return;
 		
 		executorService.execute(new Runnable() {
