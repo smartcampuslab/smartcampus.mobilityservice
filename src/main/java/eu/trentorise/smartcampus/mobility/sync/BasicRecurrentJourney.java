@@ -19,10 +19,10 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 
 public class BasicRecurrentJourney {
 
-	private String clientId;
-	private RecurrentJourney data;
-	private String name;
-	private boolean monitor;
+	protected String clientId;
+	protected RecurrentJourney data;
+	protected String name;
+	protected boolean monitor;
 	
 	public boolean isMonitor() {
 		return monitor;

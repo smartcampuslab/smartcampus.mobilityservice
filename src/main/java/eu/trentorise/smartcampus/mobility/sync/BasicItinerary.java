@@ -20,12 +20,12 @@ import it.sayservice.platform.smartplanner.data.message.Position;
 
 public class BasicItinerary {
 	
-	private String clientId;
-	private Itinerary data;
-	private boolean monitor;
-	private Position originalFrom;
-	private Position originalTo;
-	private String name;
+	protected String clientId;
+	protected Itinerary data;
+	protected boolean monitor;
+	protected Position originalFrom;
+	protected Position originalTo;
+	protected String name;
 
 	public String getClientId() {
 		return clientId;
