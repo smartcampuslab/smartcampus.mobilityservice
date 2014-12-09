@@ -17,6 +17,7 @@
 package eu.trentorise.smartcampus.mobility.logging;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 public class StatLogger {
 
 	@Autowired
+	@Qualifier("logMongoTemplate")
 	private MongoTemplate mongoTemplate;
 	
 	@Value("${statlogging.enabled}")

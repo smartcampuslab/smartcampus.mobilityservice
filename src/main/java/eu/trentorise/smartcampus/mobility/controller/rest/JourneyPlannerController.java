@@ -72,10 +72,10 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
-import eu.trentorise.smartcampus.mobility.domain.DomainStorage;
-import eu.trentorise.smartcampus.mobility.domain.ItineraryObject;
-import eu.trentorise.smartcampus.mobility.domain.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
+import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -265,7 +265,7 @@ public class JourneyPlannerController extends SCController {
 			io.setClientId(clientId);
 			io.setUserId(userId);
 			io.setOriginalFrom(itinerary.getOriginalFrom());
-			io.setOriginalto(itinerary.getOriginalTo());
+			io.setOriginalTo(itinerary.getOriginalTo());
 			io.setName(itinerary.getName());
 			io.setData(itinerary.getData());
 

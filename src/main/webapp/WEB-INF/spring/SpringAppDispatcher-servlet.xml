@@ -86,10 +86,20 @@
 	
 	 <mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
-  <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+  <bean id="logMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
     <constructor-arg ref="mongo" />
     <constructor-arg name="databaseName" value="${statlogging.dbname}" />
   </bean>
+  
+	<bean id="domainMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg ref="mongo" />
+		<constructor-arg name="databaseName" value="mobility-domain" />
+	</bean>
+
+	<bean id="domainStorage" class="eu.trentorise.smartcampus.mobility.storage.DomainStorage"></bean>  
+  
+  
+  
 	
   <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
 </beans>
