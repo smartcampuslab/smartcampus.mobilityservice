@@ -18,7 +18,6 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import it.sayservice.platform.client.DomainEngineClient;
 import it.sayservice.platform.client.DomainObject;
 import it.sayservice.platform.client.InvocationException;
-import it.sayservice.platform.core.common.util.ServiceUtil;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
 import it.sayservice.platform.smartplanner.data.message.TType;
@@ -41,6 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,11 +66,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
+import eu.trentorise.smartcampus.mobility.domain.DomainStorage;
+import eu.trentorise.smartcampus.mobility.domain.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.domain.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
@@ -105,6 +111,12 @@ public class JourneyPlannerController extends SCController {
 
 	@Autowired
 	private DomainEngineClient domainClient;
+	
+	@Autowired
+	private ExecutorService executorService;
+	
+	@Autowired
+	private DomainStorage domainStorage;	
 
 	@Autowired
 	@Value("${otp.url}")
@@ -143,16 +155,21 @@ public class JourneyPlannerController extends SCController {
 
 			List<Itinerary> itineraries = new ArrayList<Itinerary>();
 
+			List<Future<PlanRequest>> results = Lists.newArrayList();
+			Map<String, PlanRequest> reqMap = Maps.newTreeMap();
 			for (PlanRequest pr : reqs) {
-				String plan = null;
-				if (cache.containsKey(pr.getRequest())) {
-					// plan = cache.get(req);
-					continue;
-				} else {
-					plan = HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, pr.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
-					cache.put(pr.getRequest(), plan);
-				}
-				List<?> its = mapper.readValue(plan, List.class);
+				reqMap.put(pr.getRequest(), pr);
+			}
+			
+			for (PlanRequest pr : reqMap.values()) {
+				CallableItineraryRequest callableReq = new CallableItineraryRequest();
+				callableReq.setRequest(pr);
+				Future<PlanRequest> future = executorService.submit(callableReq);
+				results.add(future);
+			}
+			for (Future<PlanRequest> plan: results) {
+				PlanRequest pr = plan.get();
+				List<?> its = mapper.readValue(pr.getPlan(), List.class);
 				for (Object it : its) {
 					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
 					pr.getItinerary().add(itinerary);
@@ -165,7 +182,8 @@ public class JourneyPlannerController extends SCController {
 					itineraryCache.put(pr.getRequest(), itinerary);
 				}
 			}
-
+			
+			
 			List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 			itineraries.addAll(evaluated);
 
@@ -177,12 +195,10 @@ public class JourneyPlannerController extends SCController {
 
 			promotedJourneyRequestConverter.promoteJourney(reqs);
 			
-//			promotedJourneyRequestConverter.append(reqs);
-			
 			return itineraries;
-		} catch (ConnectorException e0) {
-			e0.printStackTrace();
-			response.setStatus(e0.getCode());
+//		} catch (ConnectorException e0) {
+//			e0.printStackTrace();
+//			response.setStatus(e0.getCode());
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -192,8 +208,12 @@ public class JourneyPlannerController extends SCController {
 
 	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
 		List<PlanRequest> reqsList = Lists.newArrayList();
-		int itn = Math.max(request.getResultsNumber(), 1);
 		for (TType type : request.getTransportTypes()) {
+			int minitn = 1;
+			if (type.equals(TType.TRANSIT)) {
+				minitn = 3;
+			}
+			int itn = Math.max(request.getResultsNumber(), minitn);			
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
@@ -224,26 +244,32 @@ public class JourneyPlannerController extends SCController {
 
 			statLogger.log(itinerary, userId);
 			gamificationHelper.saveItinerary(itinerary, userId);
-
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("itinerary", itinerary.getData());
+			
 			String clientId = itinerary.getClientId();
+			
 			if (clientId == null) {
 				clientId = new ObjectId().toString();
 			} else {
-				DomainObject res = getObjectByClientId(clientId, "smartcampus.services.journeyplanner.ItineraryObject");
-				if (res != null && checkUser(res, userId) == null) {
+				Map<String, Object> pars = new TreeMap<String, Object>();
+				pars.put("clientId", clientId);
+				ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
+
+				if (!userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
-				}
+				}	
+			}			
+			
+			ItineraryObject io = new ItineraryObject();
+			
+			io.setClientId(clientId);
+			io.setUserId(userId);
+			io.setOriginalFrom(itinerary.getOriginalFrom());
+			io.setOriginalto(itinerary.getOriginalTo());
+			io.setName(itinerary.getName());
+			io.setData(itinerary.getData());
 
-			}
-			pars.put("clientId", clientId);
-			pars.put("userId", userId);
-			pars.put("originalFrom", itinerary.getOriginalFrom());
-			pars.put("originalTo", itinerary.getOriginalTo());
-			pars.put("name", itinerary.getName());
-			domainClient.invokeDomainOperation("saveItinerary", "smartcampus.services.journeyplanner.ItineraryFactory", "smartcampus.services.journeyplanner.ItineraryFactory.0", pars, userId, "vas_journeyplanner_subscriber");
+			domainStorage.saveItinerary(io);
 			itinerary.setClientId(clientId);
 			return itinerary;
 		} catch (Exception e) {
@@ -252,7 +278,8 @@ public class JourneyPlannerController extends SCController {
 		}
 		return null;
 	}
-
+	
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary")
 	public @ResponseBody
 	List<BasicItinerary> getItineraries(HttpServletResponse response) throws InvocationException {
@@ -265,24 +292,16 @@ public class JourneyPlannerController extends SCController {
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("userId", userId);
-			List<String> res = domainClient.searchDomainObjects("smartcampus.services.journeyplanner.ItineraryObject", pars, "vas_journeyplanner_subscriber");
+			List res = domainStorage.searchDomainObjects(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
-			List<BasicItinerary> itineraries = new ArrayList<BasicItinerary>();
-
-			for (String r : res) {
-				DomainObject obj = new DomainObject(r);
-				BasicItinerary itinerary = mapper.convertValue(obj.getContent(), BasicItinerary.class);
-				itineraries.add(itinerary);
-			}
-
-			return itineraries;
+			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
-
+	}	
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}")
 	public @ResponseBody
 	BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
@@ -293,27 +312,26 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			DomainObject res = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.ItineraryObject");
-			if (res == null) {
-				return null;
-			}
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
-			if (checkUser(res, userId) == null) {
+			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
 
-			Map<String, Object> content = res.getContent();
-			BasicItinerary itinerary = mapper.convertValue(content, BasicItinerary.class);
-
+			BasicItinerary itinerary = mapper.convertValue(res, BasicItinerary.class);
+			
 			return itinerary;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
-
+	}	
+	
+	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/itinerary/{itineraryId}")
 	public @ResponseBody
 	Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
@@ -324,28 +342,25 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			DomainObject res = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.ItineraryObject");
-			if (res == null) {
-				return false;
-			}
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
-			if (checkUser(res, userId) == null) {
+			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
 
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("userId", userId);
-			domainClient.invokeDomainOperation("deleteItinerary", "smartcampus.services.journeyplanner.ItineraryObject", res.getId(), pars, userId, "vas_journeyplanner_subscriber");
+			domainStorage.deleteItinerary(res);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
-	}
-
-	// no crud
+	}	
+	
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}/monitor/{monitor}")
 	public @ResponseBody
 	Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
@@ -356,29 +371,27 @@ public class JourneyPlannerController extends SCController {
 				return false;
 			}
 
-			DomainObject res = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.ItineraryObject");
-			if (res == null) {
-				return false;
-			}
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
-			if (checkUser(res, userId) == null) {
+			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
 
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("flag", monitor);
-			pars.put("userId", userId);
-			byte[] b = (byte[]) domainClient.invokeDomainOperationSync("setMonitorFlag", "smartcampus.services.journeyplanner.ItineraryObject", res.getId(), pars, "vas_journeyplanner_subscriber");
-			String s = (String) ServiceUtil.deserializeObject(b);
-			return Boolean.parseBoolean(s);
+			res.setMonitor(monitor);
+			
+			domainStorage.saveItinerary(res);
+			
+			return monitor;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
-	}
-
+	}	
+	
 	// RECURRENT
 
 	@RequestMapping(method = RequestMethod.POST, value = "/planrecurrent")
@@ -409,7 +422,7 @@ public class JourneyPlannerController extends SCController {
 
 		return null;
 	}
-
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent")
 	public @ResponseBody
 	BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent) throws InvocationException {
@@ -421,23 +434,30 @@ public class JourneyPlannerController extends SCController {
 			}
 			logger.info("-"+userId  + "~AppConsume~monitor");
 
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("recurrentJourney", recurrent.getData());
-			pars.put("name", recurrent.getName());
 			String clientId = recurrent.getClientId();
+			
 			if (clientId == null) {
 				clientId = new ObjectId().toString();
 			} else {
-				DomainObject res = getObjectByClientId(clientId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
-				if (res != null && checkUser(res, userId) == null) {
+				Map<String, Object> pars = new TreeMap<String, Object>();
+				pars.put("clientId", clientId);
+				RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+
+				if (!userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
-				}
+				}	
 			}
-			pars.put("clientId", clientId);
-			pars.put("userId", userId);
-			pars.put("monitor", recurrent.isMonitor());
-			domainClient.invokeDomainOperation("saveRecurrentJourney", "smartcampus.services.journeyplanner.RecurrentJourneyFactory", "smartcampus.services.journeyplanner.RecurrentJourneyFactory.0", pars, userId, "vas_journeyplanner_subscriber");
+			
+			RecurrentJourneyObject rec = new RecurrentJourneyObject();
+			rec.setData(recurrent.getData());
+			rec.setName(recurrent.getName());
+			rec.setUserId(userId);
+			rec.setMonitor(recurrent.isMonitor());
+			rec.setClientId(clientId);
+			
+			domainStorage.saveRecurrent(rec);
+			
 			recurrent.setClientId(clientId);
 			return recurrent;
 		} catch (Exception e) {
@@ -445,8 +465,8 @@ public class JourneyPlannerController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
-
+	}	
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent/replan/{itineraryId}")
 	public @ResponseBody
 	RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters, @PathVariable String itineraryId) throws InvocationException {
@@ -467,13 +487,16 @@ public class JourneyPlannerController extends SCController {
 				}
 			}
 
-			DomainObject res = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);	
+			
 			if (res != null) {
-				String objectId = checkUser(res, userId);
-				if (objectId == null) {
+				if (!userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				} else {
-					RecurrentJourney oldJourney = mapper.convertValue(res.getContent().get("data"), RecurrentJourney.class);
+					return null;
+				}	 else {
+					RecurrentJourney oldJourney = res.getData();
 					RecurrentJourney journey = new RecurrentJourney();
 					journey.setParameters(parameters);
 					journey.setLegs(legs);
@@ -492,8 +515,9 @@ public class JourneyPlannerController extends SCController {
 		}
 
 		return null;
-	}
-
+	}	
+	
+	
 	@RequestMapping(method = RequestMethod.PUT, value = "/recurrent/{itineraryId}")
 	public @ResponseBody
 	Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws InvocationException {
@@ -509,19 +533,23 @@ public class JourneyPlannerController extends SCController {
 				response.setStatus(HttpServletResponse.SC_CONFLICT);
 				return null;
 			}
-			DomainObject res = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
+
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);				
+			
 			if (res != null) {
-				String objectId = checkUser(res, userId);
-				if (objectId == null) {
+				if (!userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
 				}
+				
+				res.setData(recurrent.getData());
+				res.setName(recurrent.getName());
+				res.setMonitor(recurrent.isMonitor());
+				
+				domainStorage.saveRecurrent(res);
 
-				Map<String, Object> pars = new HashMap<String, Object>();
-				pars.put("newJourney", recurrent.getData());
-				pars.put("newName", recurrent.getName());
-				pars.put("newMonitor", recurrent.isMonitor());
-				domainClient.invokeDomainOperation("updateRecurrentJourney", "smartcampus.services.journeyplanner.RecurrentJourneyObject", objectId, pars, userId, "vas_journeyplanner_subscriber");
 				return true;
 			} else {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -531,8 +559,8 @@ public class JourneyPlannerController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
-
+	}	
+	
 	private Map<String, Boolean> buildMonitorMap(List<SimpleLeg> legs) {
 		Map<String, Boolean> result = new TreeMap<String, Boolean>();
 
@@ -593,31 +621,18 @@ public class JourneyPlannerController extends SCController {
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("userId", userId);
-			List<String> res = domainClient.searchDomainObjects("smartcampus.services.journeyplanner.RecurrentJourneyObject", pars, "vas_journeyplanner_subscriber");
-
-			List<BasicRecurrentJourney> journeys = new ArrayList<BasicRecurrentJourney>();
-			for (String r : res) {
-				DomainObject obj = new DomainObject(r);
-				RecurrentJourney recurrent = mapper.convertValue(obj.getContent().get("data"), RecurrentJourney.class);
-				BasicRecurrentJourney recurrentJourney = new BasicRecurrentJourney();
-				String clientId = (String) obj.getContent().get("clientId");
-				recurrentJourney.setData(recurrent);
-				recurrentJourney.setClientId(clientId);
-				recurrentJourney.setName((String) obj.getContent().get("name"));
-				recurrentJourney.setMonitor((Boolean) obj.getContent().get("monitor"));
-
-				journeys.add(recurrentJourney);
-			}
-
-			return journeys;
+			List res = domainStorage.searchDomainObjects(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+			
+			return res;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
-
+	}	
+	
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}")
 	public @ResponseBody
 	BasicRecurrentJourney getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
@@ -628,35 +643,24 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			DomainObject obj = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
-			if (obj == null) {
-				return null;
-			}
-			if (checkUser(obj, userId) == null) {
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+
+			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
 
-			Map<String, Object> content = obj.getContent();
-			RecurrentJourney recurrent = mapper.convertValue(content.get("data"), RecurrentJourney.class);
-			BasicRecurrentJourney recurrentJourney = new BasicRecurrentJourney();
-			String objectClientId = (String) content.get("clientId");
-			if (!itineraryId.equals(objectClientId)) {
-				response.setStatus(HttpServletResponse.SC_CONFLICT);
-				return null;
-			}
-			recurrentJourney.setData(recurrent);
-			recurrentJourney.setClientId(itineraryId);
-			recurrentJourney.setName((String) obj.getContent().get("name"));
-			recurrentJourney.setMonitor((Boolean) obj.getContent().get("monitor"));
-
-			return recurrentJourney;
+			BasicRecurrentJourney recurrent = mapper.convertValue(res, BasicRecurrentJourney.class);
+			
+			return recurrent;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;
-	}
+	}	
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/recurrent/{itineraryId}")
 	public @ResponseBody
@@ -668,59 +672,55 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			DomainObject obj = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
-			if (obj == null) {
-				return null;
-			}
-			if (checkUser(obj, userId) == null) {
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+
+			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
 
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("userId", userId);
-			domainClient.invokeDomainOperation("deleteRecurrentJourney", "smartcampus.services.journeyplanner.RecurrentJourneyObject", obj.getId(), pars, userId, "vas_journeyplanner_subscriber");
+			domainStorage.deleteRecurrent(res);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-		return null;
-	}
+		return false;
+	}	
 
-	// no crud
+
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}/monitor/{monitor}")
 	public @ResponseBody
 	Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
 		try {
-			String userId = getUserId();
-			if (userId == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				return false;
-			}
+		String userId = getUserId();
+		if (userId == null) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return null;
+		}
 
-			DomainObject obj = getObjectByClientId(itineraryId, "smartcampus.services.journeyplanner.RecurrentJourneyObject");
-			if (obj == null) {
-				return null;
-			}
-			if (checkUser(obj, userId) == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				return null;
-			}
-			Map<String, Object> pars = new HashMap<String, Object>();
-			pars.put("flag", monitor);
-			pars.put("userId", userId);
-			byte[] b = (byte[]) domainClient.invokeDomainOperationSync("setMonitorFlag", "smartcampus.services.journeyplanner.RecurrentJourneyObject", obj.getId(), pars, "vas_journeyplanner_subscriber");
-			String s = (String) ServiceUtil.deserializeObject(b);
-			return Boolean.parseBoolean(s);
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("clientId", itineraryId);
+		RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
 
+		if (!userId.equals(res.getUserId())) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return null;
+		}
+		
+			res.setMonitor(monitor);
+			domainStorage.saveRecurrent(res);
+			return monitor;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return false;
-	}
-
+	}	
+	
+	
 	// ALERTS
 
 	// no crud
@@ -891,4 +891,20 @@ public class JourneyPlannerController extends SCController {
 		return auth.getAuthorizationRequest().getClientId();
 	}
 
+	private class CallableItineraryRequest implements Callable<PlanRequest> {
+		
+		private PlanRequest request;
+		
+		public void setRequest(PlanRequest req) {
+			this.request = req;
+		}
+		
+		@Override
+		public PlanRequest call() throws Exception {
+			String plan =  HTTPConnector.doGet(otpURL + SMARTPLANNER + PLAN, request.getRequest(), MediaType.APPLICATION_JSON, null, "UTF-8");
+			request.setPlan(plan);
+			return request;
+		}};		
+		
+	
 }
