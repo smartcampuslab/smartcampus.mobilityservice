@@ -74,17 +74,23 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequest
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
+import eu.trentorise.smartcampus.mobility.processor.BikeSharingCache;
+import eu.trentorise.smartcampus.mobility.processor.Station;
 import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
+import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
 public class JourneyPlannerController extends SCController {
 
+	@Autowired
+	private BikeSharingCache bikeSharingCache;
+	
 	@Autowired
 	private StatLogger statLogger;
 	private Logger logger = Logger.getLogger(this.getClass());
@@ -864,6 +870,17 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/bikesharing/{comune}")
+	public @ResponseBody
+	void bikeSharingByComune(HttpServletResponse response, @PathVariable String comune) throws InvocationException {
+		response.setContentType("application/json; charset=utf-8");
+		try {
+			response.getWriter().write(JsonUtils.toJSON(bikeSharingCache.getStations(comune)));
+		} catch (IOException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
 	public @ResponseBody
 	void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws InvocationException {
@@ -882,6 +899,7 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 
+	
 	private DomainObject getObjectByClientId(String id, String type) throws Exception {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("clientId", id);

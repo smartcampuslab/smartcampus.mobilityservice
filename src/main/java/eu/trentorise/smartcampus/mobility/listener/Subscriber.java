@@ -36,6 +36,7 @@ public class Subscriber {
 			client.subscribeDomain(EventProcessorImpl.PARKING_ALERT_SENDER, null);
 			client.subscribeDomain(EventProcessorImpl.ROAD_ALERT_SENDER, null);
 			client.subscribeDomain(EventProcessorImpl.USER_ALERT_SENDER, null);
+			
 		} catch (InvocationException e) {
 			logger.error("Failed to subscribe for domain events: "+e.getMessage());
 		}

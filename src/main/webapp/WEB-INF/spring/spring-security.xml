@@ -22,6 +22,7 @@
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/plansinglejourney/**" security="none"/> -->
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/planrecurrent/**" security="none"/> -->
 
+<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/bikesharing/**" security="none"/> -->
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getbikesharingbyagency/**" security="none"/> -->
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getparkingsbyagency/**" security="none"/> -->
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getroadinfobyagency/**" security="none"/> -->

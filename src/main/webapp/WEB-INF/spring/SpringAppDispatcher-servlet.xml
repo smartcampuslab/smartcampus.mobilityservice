@@ -47,7 +47,8 @@
 	</bean>
 
 	<bean id="eventProcessor" class="eu.trentorise.smartcampus.mobility.processor.EventProcessorImpl"/>
-
+  <bean id="serviceEventProcessor" class="eu.trentorise.smartcampus.mobility.processor.ServiceEventProcessorImpl"/>
+	
 	<bean id="domainEngineClient" class="it.sayservice.platform.client.jms.JMSDomainEngineClient" scope="singleton" destroy-method="destroy">
 		<constructor-arg>
 			<ref bean="connectionFactory" />
@@ -55,11 +56,21 @@
 		<property name="clientId" value="vas_mobility_subscriber" />
 		<property name="domainUpdateListener" ref="eventProcessor" />
 	</bean>
-	
-	<bean id="domainUpdateSubscriber" class="eu.trentorise.smartcampus.mobility.listener.Subscriber">
+  <bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient" scope="singleton" destroy-method="destroy">
+    <constructor-arg>
+      <ref bean="connectionFactory" />
+    </constructor-arg>
+    <property name="clientId" value="vas_mobility_service_subscriber" />
+    <property name="listener" ref="serviceEventProcessor" />
+  </bean>
+		
+	<bean id="updateSubscriber" class="eu.trentorise.smartcampus.mobility.listener.Subscriber">
 		<constructor-arg ref="domainEngineClient" />
 	</bean>	
-	
+
+	 <bean id="bikesharingCache" class=" eu.trentorise.smartcampus.mobility.processor.BikeSharingCache">
+  </bean>   
+		
 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.GreenItineraryRequestEnricher">
 	</bean>		
 	
