@@ -143,6 +143,7 @@ public class JourneyPlannerController extends SCController {
 	public @ResponseBody
 	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
 		try {
+			
 			String userId = getUserId();
 			statLogger.log(journeyRequest, userId);
 			logger.info("-"+userId  + "~AppConsume~plan");
@@ -949,6 +950,15 @@ public class JourneyPlannerController extends SCController {
 		return auth.getAuthorizationRequest().getClientId();
 	}
 
+	@Override
+	protected String getUserId() {
+		try {
+			return super.getUserId();
+		} catch (Exception e) {
+			return null;
+		}
+	}	
+	
 	private class CallableItineraryRequest implements Callable<PlanRequest> {
 		
 		private PlanRequest request;
