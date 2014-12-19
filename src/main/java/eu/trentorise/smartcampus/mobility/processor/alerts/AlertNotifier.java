@@ -14,7 +14,7 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package eu.trentorise.smartcampus.mobility.processor;
+package eu.trentorise.smartcampus.mobility.processor.alerts;
 
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;

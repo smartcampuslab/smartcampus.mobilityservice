@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.JourneyPlannerController;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
+import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 
 public class EventProcessorImpl implements DomainUpdateListener {

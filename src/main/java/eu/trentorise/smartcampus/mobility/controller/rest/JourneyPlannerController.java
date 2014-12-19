@@ -15,7 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.client.DomainEngineClient;
 import it.sayservice.platform.client.DomainObject;
 import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -109,8 +108,8 @@ public class JourneyPlannerController extends SCController {
 		return services;
 	}
 
-	@Autowired
-	private DomainEngineClient domainClient;
+//	@Autowired
+//	private DomainEngineClient domainClient;
 	
 	@Autowired
 	private ExecutorService executorService;
@@ -254,10 +253,10 @@ public class JourneyPlannerController extends SCController {
 				pars.put("clientId", clientId);
 				ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
-				if (!userId.equals(res.getUserId())) {
+				if (res != null && !userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
-				}	
+				}
 			}			
 			
 			ItineraryObject io = new ItineraryObject();
@@ -314,7 +313,7 @@ public class JourneyPlannerController extends SCController {
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("clientId", itineraryId);
-			ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObject(pars, ItineraryObject.class, DomainStorage.ITINERARY);
+			ItineraryObject res = (ItineraryObject)domainStorage.searchDomainObjectFixForSpring(pars, ItineraryObject.class, DomainStorage.ITINERARY);
 
 			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -351,7 +350,7 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			domainStorage.deleteItinerary(res);
+			domainStorage.deleteItinerary(itineraryId);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -443,7 +442,7 @@ public class JourneyPlannerController extends SCController {
 				pars.put("clientId", clientId);
 				RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
 
-				if (!userId.equals(res.getUserId())) {
+				if (res != null && !userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
 				}	
@@ -536,7 +535,7 @@ public class JourneyPlannerController extends SCController {
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("clientId", itineraryId);
-			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);				
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObjectFixForSpring(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);				
 			
 			if (res != null) {
 				if (!userId.equals(res.getUserId())) {
@@ -645,7 +644,7 @@ public class JourneyPlannerController extends SCController {
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("clientId", itineraryId);
-			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+			RecurrentJourneyObject res = (RecurrentJourneyObject)domainStorage.searchDomainObjectFixForSpring(pars, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
 
 			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -681,7 +680,7 @@ public class JourneyPlannerController extends SCController {
 				return null;
 			}
 
-			domainStorage.deleteRecurrent(res);
+			domainStorage.deleteRecurrent(itineraryId);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -799,7 +798,9 @@ public class JourneyPlannerController extends SCController {
 		Map<String, Object> pars = new HashMap<String, Object>();
 		pars.put("newAlert", alert);
 		// pars.put("userId", userId);
-		domainClient.invokeDomainOperation(method, "smartcampus.services.journeyplanner.AlertFactory", "smartcampus.services.journeyplanner.AlertFactory.0", pars, userId, "vas_journeyplanner_subscriber");
+		
+		// TODO !!!
+//		domainClient.invokeDomainOperation(method, "smartcampus.services.journeyplanner.AlertFactory", "smartcampus.services.journeyplanner.AlertFactory.0", pars, userId, "vas_journeyplanner_subscriber");
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
@@ -842,15 +843,15 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 
-	private DomainObject getObjectByClientId(String id, String type) throws Exception {
-		Map<String, Object> pars = new TreeMap<String, Object>();
-		pars.put("clientId", id);
-		List<String> res = domainClient.searchDomainObjects(type, pars, "vas_journeyplanner_subscriber");
-		if (res == null || res.size() == 0) {
-			return null;
-		}
-		return new DomainObject(res.get(0));
-	}
+//	private DomainObject getObjectByClientId(String id, String type) throws Exception {
+//		Map<String, Object> pars = new TreeMap<String, Object>();
+//		pars.put("clientId", id);
+//		List<String> res = domainClient.searchDomainObjects(type, pars, "vas_journeyplanner_subscriber");
+//		if (res == null || res.size() == 0) {
+//			return null;
+//		}
+//		return new DomainObject(res.get(0));
+//	}
 
 	private String checkUser(DomainObject res, String userId) throws IOException, InvocationException {
 		if (res == null || userId == null) {

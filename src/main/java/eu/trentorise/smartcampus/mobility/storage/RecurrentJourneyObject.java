@@ -4,6 +4,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 
 import org.springframework.data.annotation.Id;
 
+import eu.trentorise.smartcampus.mobility.processor.alerts.RecurrentAlertsSent;
 import eu.trentorise.smartcampus.mobility.sync.BasicRecurrentJourney;
 
 public class RecurrentJourneyObject extends BasicRecurrentJourney {
@@ -12,6 +13,8 @@ public class RecurrentJourneyObject extends BasicRecurrentJourney {
 	private String id;
 	
 	private String userId;
+	
+	RecurrentAlertsSent alertsSent;
 
 	public RecurrentJourneyObject() {
 	}
@@ -22,6 +25,22 @@ public class RecurrentJourneyObject extends BasicRecurrentJourney {
 		this.clientId = clientId;
 		this.data = data;
 		this.name = name;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public RecurrentAlertsSent getAlertsSent() {
+		return alertsSent;
+	}
+
+	public void setAlertsSent(RecurrentAlertsSent alertsSent) {
+		this.alertsSent = alertsSent;
 	}
 
 	public String getUserId() {

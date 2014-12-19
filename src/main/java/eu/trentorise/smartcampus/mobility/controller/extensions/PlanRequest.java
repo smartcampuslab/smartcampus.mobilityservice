@@ -12,6 +12,7 @@ public class PlanRequest {
 
 	private TType type;
 	private String request;
+	private String plan;
 	private Integer value;
 	private List<Itinerary> itinerary;
 	private SingleJourney originalRequest;
@@ -32,6 +33,14 @@ public class PlanRequest {
 	public void setRequest(String request) {
 		this.request = request;
 	}
+	public String getPlan() {
+		return plan;
+	}
+
+	public void setPlan(String plan) {
+		this.plan = plan;
+	}
+
 	public Integer getValue() {
 		return value;
 	}

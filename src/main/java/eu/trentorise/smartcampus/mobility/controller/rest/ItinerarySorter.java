@@ -55,8 +55,8 @@ public class ItinerarySorter {
 
 			@Override
 			public int compare(Itinerary o1, Itinerary o2) {
-//				return (int) (o1.getEndtime() - o2.getEndtime());
-				return (int) (o1.getDuration() - o2.getDuration());
+				return (int) (o1.getEndtime() - o2.getEndtime());
+//				return (int) (o1.getDuration() - o2.getDuration());
 //				return (int) (o1.getEndtime() - o1.getStartime() - (o2.getEndtime() - o2.getStartime()));
 			}
 		});
