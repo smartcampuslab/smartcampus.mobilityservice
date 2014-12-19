@@ -60,7 +60,7 @@ public class AlertSender {
 	public void publishDelayAlerts(List<GenericTrain> trains) {
 		List<AlertDelay> allDelays = sendDelayAlert(trains);
 		List<AlertWrapper> userDelays = checkAlertDelay(allDelays);
-//		publishDelayAlert(allDelays, userDelays);
+		publishDelayAlerts(allDelays, userDelays);
 	}
 	
 	public List<AlertDelay> sendDelayAlert(List<GenericTrain> trains) {
@@ -137,6 +137,29 @@ public class AlertSender {
 		return result;
 	}
 	
+	public void publishDelayAlerts(List<AlertDelay> allAlerts, List<AlertWrapper> userAlerts) {
+		System.out.println("PUBLISHING DELAY: " + allAlerts.size() + " / " + userAlerts.size());
+		
+		ObjectMapper mapper = new ObjectMapper();
+		for (AlertDelay alert : allAlerts) {
+			try {
+			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
+			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAD", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
+			logger.info(result);				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for (AlertWrapper wrapper : userAlerts) {		
+			statLogger.log(wrapper.getAlert(), wrapper.getUserId());
+			notifier.notifyDelay(wrapper.getUserId(), wrapper.getClientId(), (AlertDelay)wrapper.getAlert(), wrapper.getName());		
+		}
+	}	
+	
+	
+	
 	public void publishParkingAlerts(List<Parking> trains) {
 		List<AlertParking> allAlerts = sendParkingAlert(trains);
 		List<AlertWrapper> userAlerts = checkAlertParking(allAlerts);
@@ -197,7 +220,7 @@ public class AlertSender {
 	}
 	
 	public void publishParkingAlert(List<AlertParking> allAlerts, List<AlertWrapper> userAlerts) {
-		System.out.println("PUBLISHING: " + allAlerts.size() + " / " + userAlerts.size());
+		System.out.println("PUBLISHING PARKING: " + allAlerts.size() + " / " + userAlerts.size());
 		
 		ObjectMapper mapper = new ObjectMapper();
 		for (AlertParking alert : allAlerts) {
@@ -219,10 +242,3 @@ public class AlertSender {
 	
 }
 
-
-//action checkDelay(alert:AlertDelay) {
-//	if (AlertFilter.filterDelay(data, alert)) {
-//		set data = AlertUpdater.updateAlerts(data,alert);
-//		publish alertDelay(alert, userId, clientId, name);
-//	}
-//}

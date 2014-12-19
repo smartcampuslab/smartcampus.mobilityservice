@@ -59,8 +59,8 @@ public class ServiceEventProcessorImpl implements ServiceBusListener {
 	}
 
 	private void sendTrainAlert(List<GenericTrain> trains) {
-//		System.out.println("sendTrainAlert");
-//		alertSender.publishDelayAlerts(trains);
+		System.out.println("sendTrainAlert");
+		alertSender.publishDelayAlerts(trains);
 	}
 	
 	private synchronized void sendParkingAlert(List<Parking> parkings) {
