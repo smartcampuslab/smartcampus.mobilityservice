@@ -1,0 +1,3 @@
+mongoexport -d mobility-logging -c statDataObject -q "{'data._class':'it.sayservice.platform.smartplanner.data.message.alerts.AlertParking','data.place.agencyId':'COMUNE_DI_ROVERETO'}" -o parking-updates.json
+mongoexport -d mobility-logging -c statDataObject -q "{'data._class':'eu.trentorise.smartcampus.mobility.sync.BasicItinerary'}" -o saved-plans.json
+mongoexport -d mobility-logging -c statDataObject -q "{'data._class':'it.sayservice.platform.smartplanner.data.message.journey.SingleJourney'}" -o plan-requests.json

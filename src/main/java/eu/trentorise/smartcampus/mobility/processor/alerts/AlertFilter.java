@@ -17,7 +17,6 @@ package eu.trentorise.smartcampus.mobility.processor.alerts;
 
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
-import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
 import it.sayservice.platform.smartplanner.data.message.StopId;
 import it.sayservice.platform.smartplanner.data.message.Transport;
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
@@ -135,17 +134,12 @@ public class AlertFilter {
 			if (!journey.getMonitorLegs().containsKey(transportId) || journey.getMonitorLegs().get(transportId) == false) {
 				return false;
 			}
-
-			for (SimpleLeg leg : journey.getLegs()) {
-//				if (areEqual(leg.getTransport(), alert.getTransport(), true, false, true, true)) {
-					Calendar cal = new GregorianCalendar();
-					cal.setTimeInMillis(System.currentTimeMillis());
-					if (journey.getParameters().getRecurrence().contains(cal.get(Calendar.DAY_OF_WEEK))) {
-						// found, check the existing alerts
-						if (alerts == null) return true;
-						return alerts.check(buildId(alert), alert.getDelay(), THRESHOLD);
-					}
-//				}
+			// TODO check also the period
+			Calendar cal = new GregorianCalendar();
+			if (journey.getParameters().getRecurrence().contains(cal.get(Calendar.DAY_OF_WEEK))) {
+				// found, check the existing alerts
+				if (alerts == null) return true;
+				return alerts.check(buildId(alert), alert.getDelay(), THRESHOLD);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -170,7 +164,6 @@ public class AlertFilter {
 	}
 
 	private static boolean filterRecurrentStrike(RecurrentJourney journey, AlertStrike alert, AlertsSent alerts) {
-		// TODO currently not supported
 		return false;
 	}
 
@@ -224,24 +217,19 @@ public class AlertFilter {
 	}
 
 	private static boolean filterRecurrentParking(RecurrentJourney journey, AlertParking alert, AlertsSent alerts) {
-		// TODO currently not supported
 		return false;
 	}
 
 	private static boolean filterAccident(List<Leg> legs, AlertAccident alert) {
-		// TODO currently not supported
 		return false;
 	}
 	private static boolean filterRecurrentAccident(RecurrentJourney journey, AlertAccident alert, AlertsSent alerts) {
-		// TODO currently not supported
 		return false;
 	}
 	private static boolean filterRoad(List<Leg> legs, AlertRoad alert) {
-		// TODO currently not supported
 		return false;
 	}
 	private static boolean filterRecurrentRoad(RecurrentJourney journey, AlertRoad alert, AlertsSent alerts) {
-		// TODO currently not supported
 		return false;
 	}
 

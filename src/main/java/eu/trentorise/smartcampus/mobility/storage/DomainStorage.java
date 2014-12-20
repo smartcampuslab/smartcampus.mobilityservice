@@ -18,15 +18,22 @@ import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 
 public class DomainStorage {
 
-	public static final String ITINERARY = "itinerary";
-	public static final String RECURRENT = "recurrent";
-	public static final String DATA = "data";
+	private static final String ITINERARY = "itinerary";
+	private static final String RECURRENT = "recurrent";
+	private static final String DATA = "data";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
 	MongoTemplate template;
 
 	public DomainStorage() {
+	}
+
+	private String getClassCollection(Class<?> cls) {
+		if (cls == ItineraryObject.class) return ITINERARY;
+		if (cls == RecurrentJourneyObject.class) return RECURRENT;
+		if (cls == AlertsSent.class) return DATA;
+		throw new IllegalArgumentException("Unknown class: "+cls.getName());
 	}
 	
 	public void saveItinerary(ItineraryObject io) {
@@ -56,7 +63,7 @@ public class DomainStorage {
 	}		
 	
 	public AlertsSent getAlertsSent() {
-		AlertsSent alerts = (AlertsSent)searchDomainObject(new TreeMap<String, Object>(), AlertsSent.class, DATA);
+		AlertsSent alerts = searchDomainObject(new TreeMap<String, Object>(), AlertsSent.class);
 		if (alerts == null) {
 			alerts = new AlertsSent();
 		}
@@ -75,13 +82,13 @@ public class DomainStorage {
 		}
 	}
 	
-	public List<?> searchDomainObjects(Criteria criteria, Class<?> clz, String collection) {
+	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
 		
-		return template.find(query, clz, collection);
+		return template.find(query, clz, getClassCollection(clz));
 	}
 	
-	public List<?> searchDomainObjects(Map<String, Object> pars, Class<?> clz, String collection) {
+	public <T> List<T> searchDomainObjects(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
 		for (String key: pars.keySet()) {
 			criteria.and(key).is(pars.get(key));
@@ -89,10 +96,10 @@ public class DomainStorage {
 		
 		Query query = new Query(criteria);
 		
-		return template.find(query, clz, collection);
+		return template.find(query, clz, getClassCollection(clz));
 	}
 	
-	public Object searchDomainObject(Map<String, Object> pars, Class<?> clz, String collection) {
+	public <T> T searchDomainObject(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
 		for (String key : pars.keySet()) {
 			criteria.and(key).is(pars.get(key));
@@ -100,10 +107,10 @@ public class DomainStorage {
 
 		Query query = new Query(criteria);
 
-		return template.findOne(query, clz, collection);
+		return template.findOne(query, clz);
 	}	
 	
-	public Object searchDomainObjectFixForSpring(Map<String, Object> pars, Class<?> clz, String collection) {
+	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
 		for (String key : pars.keySet()) {
 			criteria.and(key).is(pars.get(key));
@@ -111,7 +118,7 @@ public class DomainStorage {
 
 		Query query = new Query(criteria);
 
-			BasicDBObject obj = (BasicDBObject) template.getCollection(collection).findOne(query.getQueryObject());
+			BasicDBObject obj = (BasicDBObject) template.getCollection(getClassCollection(clz)).findOne(query.getQueryObject());
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.convertValue(obj, clz);

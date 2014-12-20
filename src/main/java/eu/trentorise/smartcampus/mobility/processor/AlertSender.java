@@ -2,14 +2,16 @@ package eu.trentorise.smartcampus.mobility.processor;
 
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -47,15 +49,7 @@ public class AlertSender {
 	@Autowired
 	private AlertNotifier notifier;	
 	
-	private static Log logger = LogFactory.getLog(AlertSender.class);
-	
-	private DelayChecker delayChecker;
-	private ParkingChecker parkingChecker;
-	
-	public AlertSender() {
-		delayChecker = new DelayChecker();
-		parkingChecker = new ParkingChecker();
-	}
+	private static Logger logger = LoggerFactory.getLogger(AlertSender.class);
 	
 	public void publishDelayAlerts(List<GenericTrain> trains) {
 		List<AlertDelay> allDelays = sendDelayAlert(trains);
@@ -63,17 +57,16 @@ public class AlertSender {
 		publishDelayAlerts(allDelays, userDelays);
 	}
 	
-	public List<AlertDelay> sendDelayAlert(List<GenericTrain> trains) {
+	private List<AlertDelay> sendDelayAlert(List<GenericTrain> trains) {
 		List<AlertDelay> result = Lists.newArrayList();
 		AlertsSent alertsSent = domainStorage.getAlertsSent();
 		for (GenericTrain train: trains) {
-			AlertDelay alert = delayChecker.checkDelay(train);
+			AlertDelay alert = DelayChecker.checkDelay(train);
 			if (alert != null) {
 				AlertsSent newAlertsSent = DelayChecker.checkNewAlerts(alertsSent, train);
 				if (newAlertsSent != null) {
 					alertsSent = newAlertsSent;
 					result.add(alert);
-//					System.out.println("******* SENDING DELAY *******");
 				}
 			}
 		}
@@ -84,18 +77,25 @@ public class AlertSender {
 	}
 	
 
-	public List<AlertWrapper> checkAlertDelay(List<AlertDelay> alerts) {
+	private List<AlertWrapper> checkAlertDelay(List<AlertDelay> alerts) {
 		List<AlertWrapper> result = Lists.newArrayList();
 
 		for (AlertDelay alert : alerts) {
-			System.out.println("\t" + alert.getTransport());
-			Criteria c1 = new Criteria("transport.agencyId").is(alert.getTransport().getAgencyId())
-					.and("transport.tripId").regex("[^digit]*" + alert.getTransport().getTripId() + "[^digit]*")
-					.and("transport.type").is(alert.getTransport().getType());
-			Criteria criteria = new Criteria("data.leg").elemMatch(c1).and("monitor").is(true);
-			List<ItineraryObject> its = (List<ItineraryObject>) domainStorage.searchDomainObjects(criteria, ItineraryObject.class, DomainStorage.ITINERARY);
+			logger.debug("\t{}", alert.getTransport());
+			Criteria c1 = 
+					new Criteria
+					("transport.agencyId").is(alert.getTransport().getAgencyId())
+					.and
+					("transport.tripId").regex("[^digit]*" + alert.getTransport().getTripId() + "[^digit]*")
+					.and
+					("transport.type").is(alert.getTransport().getType());
+			Criteria criteria = new Criteria
+					("data.leg").elemMatch(c1)
+					.and
+					("monitor").is(true);
+			List<ItineraryObject> its = domainStorage.searchDomainObjects(criteria, ItineraryObject.class);
 			if (!its.isEmpty()) {
-				System.out.println(its.size() + " -> " + alert.getTransport().getAgencyId());
+				logger.debug("{} -> {}",its.size(), alert.getTransport().getAgencyId());
 			}
 
 			for (ItineraryObject it : its) {
@@ -111,11 +111,14 @@ public class AlertSender {
 				}
 			}
 			
-			criteria = new Criteria("data.legs").elemMatch(c1).and("monitor").is(true);	
+			criteria = new Criteria
+					("data.legs").elemMatch(c1)
+					.and
+					("monitor").is(true);	
 			
-			List<RecurrentJourneyObject> recs = (List<RecurrentJourneyObject>) domainStorage.searchDomainObjects(criteria, RecurrentJourneyObject.class, DomainStorage.RECURRENT);
+			List<RecurrentJourneyObject> recs = domainStorage.searchDomainObjects(criteria, RecurrentJourneyObject.class);
 			if (!recs.isEmpty()) {
-				System.out.println(its.size() + " => " + alert.getTransport().getAgencyId());
+				logger.debug("{} => {}",its.size(), alert.getTransport().getAgencyId());
 			}
 
 			for (RecurrentJourneyObject rec : recs) {
@@ -137,8 +140,8 @@ public class AlertSender {
 		return result;
 	}
 	
-	public void publishDelayAlerts(List<AlertDelay> allAlerts, List<AlertWrapper> userAlerts) {
-		System.out.println("PUBLISHING DELAY: " + allAlerts.size() + " / " + userAlerts.size());
+	private void publishDelayAlerts(List<AlertDelay> allAlerts, List<AlertWrapper> userAlerts) {
+		logger.debug("PUBLISHING DELAY: {} / {}", allAlerts.size(), userAlerts.size());
 		
 		ObjectMapper mapper = new ObjectMapper();
 		for (AlertDelay alert : allAlerts) {
@@ -160,24 +163,24 @@ public class AlertSender {
 	
 	
 	
-	public void publishParkingAlerts(List<Parking> trains) {
-		List<AlertParking> allAlerts = sendParkingAlert(trains);
+	public void publishParkingAlerts(List<Parking> parkings) {
+		List<AlertParking> allAlerts = sendParkingAlert(parkings);
 		List<AlertWrapper> userAlerts = checkAlertParking(allAlerts);
 		publishParkingAlert(allAlerts, userAlerts);
 	}	
 	
 	
-	public List<AlertParking> sendParkingAlert(List<Parking> parkings) {
+	private List<AlertParking> sendParkingAlert(List<Parking> parkings) {
 		List<AlertParking> result = Lists.newArrayList();
 		AlertsSent alertsSent = domainStorage.getAlertsSent();
 		for (Parking parking: parkings) {
-			AlertParking alert = parkingChecker.checkParking(parking);
+			AlertParking alert = ParkingChecker.checkParking(parking);
 			if (alert != null) {
 				AlertsSent newAlertsSent = ParkingChecker.checkNewAlerts(alertsSent, parking);
 				if (newAlertsSent != null) {
 					alertsSent = newAlertsSent;
 					result.add(alert);
-//					System.out.println("******* SENDING PARKING *******");
+//					logger.debug("******* SENDING PARKING *******");
 				}
 			}
 		}
@@ -187,19 +190,24 @@ public class AlertSender {
 		return result;
 	}	
 
-	public List<AlertWrapper> checkAlertParking(List<AlertParking> alerts) {
+	private List<AlertWrapper> checkAlertParking(List<AlertParking> alerts) {
 		List<AlertWrapper> result = Lists.newArrayList();
 		
 		for (AlertParking alert : alerts) {
-			System.out.println("\t" + alert.getPlace());
-			Criteria c1 = new Criteria("from.stopId.agencyId").is(alert.getPlace().getAgencyId())
-					.and("from.stopId._id").is(alert.getPlace().getId());
-			Criteria criteria = new Criteria("data.leg").elemMatch(c1); //.and("monitor").is(true);
+			logger.debug("\t{}", alert.getPlace());
+			Criteria c1 = new Criteria
+					("from.stopId.agencyId").is(alert.getPlace().getAgencyId())
+					.and
+					("from.stopId._id").is(alert.getPlace().getId());
+			Criteria criteria = new Criteria
+					("data.leg").elemMatch(c1)
+					.and
+					("monitor").is(true);
 			
-			List<ItineraryObject> its = (List<ItineraryObject>) domainStorage.searchDomainObjects(criteria, ItineraryObject.class, DomainStorage.ITINERARY);
+			List<ItineraryObject> its = domainStorage.searchDomainObjects(criteria, ItineraryObject.class);
 			
 //			if (!its.isEmpty()) {
-//				System.out.println(its.size() + " ---> " + alert.getPlace().getAgencyId());
+//				logger.debug(its.size() + " ---> " + alert.getPlace().getAgencyId());
 //			}
 
 			for (ItineraryObject it : its) {
@@ -219,8 +227,8 @@ public class AlertSender {
 		return result;
 	}
 	
-	public void publishParkingAlert(List<AlertParking> allAlerts, List<AlertWrapper> userAlerts) {
-		System.out.println("PUBLISHING PARKING: " + allAlerts.size() + " / " + userAlerts.size());
+	private void publishParkingAlert(List<AlertParking> allAlerts, List<AlertWrapper> userAlerts) {
+		logger.debug("PUBLISHING PARKING: {} / {}", allAlerts.size(), userAlerts.size());
 		
 		ObjectMapper mapper = new ObjectMapper();
 		for (AlertParking alert : allAlerts) {
@@ -238,6 +246,71 @@ public class AlertSender {
 			statLogger.log(wrapper.getAlert(), wrapper.getUserId());
 			notifier.notifyParking(wrapper.getUserId(), wrapper.getClientId(), (AlertParking)wrapper.getAlert(), wrapper.getName());		
 		}
+	}
+
+	/**
+	 * @param convertOrdinanze
+	 */
+	public void publishRoadWorkAlerts(List<AlertRoad> roadWorkAlerts) {
+		List<AlertRoad> allAlerts = sendRoadWorkAlerts(roadWorkAlerts);
+		List<AlertWrapper> userAlerts = checkAlertRoadWork(allAlerts);
+		publishRoadWorkAlerts(allAlerts, userAlerts);
+	}
+
+	/**
+	 * @param allAlerts
+	 * @param userAlerts
+	 */
+	private void publishRoadWorkAlerts(List<AlertRoad> allAlerts, List<AlertWrapper> userAlerts) {
+		logger.debug("PUBLISHING ROAD WORKS: {} / {}", allAlerts.size(), userAlerts.size());
+		
+		ObjectMapper mapper = new ObjectMapper();
+		for (AlertRoad alert : allAlerts) {
+			try {
+			String req = mapper.writeValueAsString(alert);
+			statLogger.log(alert, null);
+			String result = HTTPConnector.doPost(otpURL + JourneyPlannerController.SMARTPLANNER + "updateAR", req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
+			logger.info(result);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for (AlertWrapper wrapper : userAlerts) {		
+			statLogger.log(wrapper.getAlert(), wrapper.getUserId());
+			notifier.notifyRoad(wrapper.getUserId(), wrapper.getClientId(), (AlertRoad)wrapper.getAlert(), wrapper.getName());		
+		}
+	}
+
+	/**
+	 * @param allDelays
+	 * @return
+	 */
+	private List<AlertWrapper> checkAlertRoadWork(List<AlertRoad> allDelays) {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * @param roadWorkAlerts
+	 * @return
+	 */
+	private List<AlertRoad> sendRoadWorkAlerts(List<AlertRoad> roadWorkAlerts) {
+//		List<AlertRoad> result = Lists.newArrayList();
+//		AlertsSent alertsSent = domainStorage.getAlertsSent();
+//		for (AlertRoad alert: roadWorkAlerts) {
+//			AlertRoad alert = DelayChecker.checkDelay(train);
+//			if (alert != null) {
+//				AlertsSent newAlertsSent = DelayChecker.checkNewAlerts(alertsSent, train);
+//				if (newAlertsSent != null) {
+//					alertsSent = newAlertsSent;
+//					result.add(alert);
+//				}
+//			}
+//		}
+//		alertsSent = DelayChecker.cleanOldAlerts(alertsSent);
+//		domainStorage.updateAlertsSent(alertsSent);
+//		return result;
+		return roadWorkAlerts;
 	}
 	
 }

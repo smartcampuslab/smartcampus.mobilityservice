@@ -14,6 +14,7 @@ public class AlertsSent {
 
 	private Map<String, String> delays;
 	private Map<String, String> parkings;
+	private Map<String, String> roadWorks;
 	
 	public AlertsSent() {
 		delays = Maps.newTreeMap();
@@ -23,6 +24,7 @@ public class AlertsSent {
 	public AlertsSent(AlertsSent other) {
 		delays = new TreeMap<String, String>(other.getDelays());
 		parkings = new TreeMap<String, String>(other.getParkings());
+		roadWorks = new TreeMap<String, String>(other.getRoadWorks());
 	}	
 
 	public String getId() {
@@ -49,6 +51,12 @@ public class AlertsSent {
 		this.parkings = parkings;
 	}
 
-	
+	public Map<String, String> getRoadWorks() {
+		return roadWorks;
+	}
+
+	public void setRoadWorks(Map<String, String> roadWorks) {
+		this.roadWorks = roadWorks;
+	}
 	
 }
