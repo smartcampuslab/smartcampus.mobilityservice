@@ -24,12 +24,11 @@ import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.processor.converter.GenericTrain;
+import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
 
 public class DelayChecker {
 
@@ -56,8 +55,11 @@ public class DelayChecker {
 		delay.setTransport(t);
 		delay.setType(AlertType.DELAY);
 
-		Calendar cal = new GregorianCalendar();
-		Calendar parsed = new GregorianCalendar();
+		Calendar cal = Calendar.getInstance();
+		if (train.getRefTime() != null) {
+			cal.setTimeInMillis(train.getRefTime());
+		}
+		Calendar parsed = Calendar.getInstance();
 		try {
 			parsed.setTime(TIME_FORMAT.parse(train.getTime()));
 			cal.set(Calendar.HOUR_OF_DAY, parsed.get(Calendar.HOUR_OF_DAY));
@@ -161,7 +163,7 @@ public class DelayChecker {
 	}
 
 	private static String buildDate() {
-		Calendar cal = new GregorianCalendar();
+		Calendar cal = Calendar.getInstance();
 		return cal.get(Calendar.DAY_OF_MONTH) + "-" + cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR);
 	}
 

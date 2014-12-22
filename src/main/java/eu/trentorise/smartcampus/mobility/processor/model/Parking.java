@@ -1,4 +1,4 @@
-package eu.trentorise.smartcampus.mobility.processor.converter;
+package eu.trentorise.smartcampus.mobility.processor.model;
 
 public class Parking {
 

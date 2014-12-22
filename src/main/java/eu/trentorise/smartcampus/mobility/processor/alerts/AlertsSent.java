@@ -19,6 +19,7 @@ public class AlertsSent {
 	public AlertsSent() {
 		delays = Maps.newTreeMap();
 		parkings = Maps.newTreeMap();
+		roadWorks = Maps.newTreeMap();
 	}
 	
 	public AlertsSent(AlertsSent other) {

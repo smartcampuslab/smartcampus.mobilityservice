@@ -5,7 +5,7 @@ import it.sayservice.platform.smartplanner.data.message.Position;
 
 import org.springframework.data.annotation.Id;
 
-import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.processor.model.BasicItinerary;
 
 public class ItineraryObject extends BasicItinerary {
 

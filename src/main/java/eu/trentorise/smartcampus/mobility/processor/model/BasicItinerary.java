@@ -13,42 +13,66 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.mobility.sync;
+package eu.trentorise.smartcampus.mobility.processor.model;
 
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Position;
 
-public class BasicRecurrentJourney {
-
-	protected String clientId;
-	protected RecurrentJourney data;
-	protected String name;
-	protected boolean monitor;
+public class BasicItinerary {
 	
-	public boolean isMonitor() {
-		return monitor;
-	}
-	public void setMonitor(boolean monitor) {
-		this.monitor = monitor;
-	}
+	protected String clientId;
+	protected Itinerary data;
+	protected boolean monitor;
+	protected Position originalFrom;
+	protected Position originalTo;
+	protected String name;
+
 	public String getClientId() {
 		return clientId;
 	}
+
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
-	public RecurrentJourney getData() {
+
+	public Itinerary getData() {
 		return data;
 	}
-	public void setData(RecurrentJourney data) {
-		this.data = data;
+
+	public void setData(Itinerary content) {
+		this.data = content;
 	}
+
+	public boolean isMonitor() {
+		return monitor;
+	}
+
+	public void setMonitor(boolean monitored) {
+		this.monitor = monitored;
+	}
+
+	public Position getOriginalFrom() {
+		return originalFrom;
+	}
+
+	public void setOriginalFrom(Position originalFrom) {
+		this.originalFrom = originalFrom;
+	}
+
+	public Position getOriginalTo() {
+		return originalTo;
+	}
+
+	public void setOriginalTo(Position originalTo) {
+		this.originalTo = originalTo;
+	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	
 
 }

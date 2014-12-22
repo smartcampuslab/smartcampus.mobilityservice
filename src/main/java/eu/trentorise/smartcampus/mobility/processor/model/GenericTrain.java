@@ -16,7 +16,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.mobility.processor.converter;
+package eu.trentorise.smartcampus.mobility.processor.model;
 
 import it.sayservice.platform.smartplanner.data.message.Position;
 
@@ -35,6 +35,8 @@ public class GenericTrain {
 	private String routeId;
 	private String tripId;
 
+	private Long refTime;
+	
 	public String getId() {
 		return id;
 	}
@@ -124,7 +126,15 @@ public class GenericTrain {
 	public void setTripId(String tripId) {
 		this.tripId = tripId;
 	}
-	
+
+	public Long getRefTime() {
+		return refTime;
+	}
+
+	public void setRefTime(Long refTime) {
+		this.refTime = refTime;
+	}
+
 	@Override
 	public String toString() {
 		return agencyId + "," + routeId + "," + tripId;

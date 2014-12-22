@@ -79,9 +79,5 @@
 		<constructor-arg name="databaseName" value="mobility-domain" />
 	</bean>
 
-	<bean id="domainStorage" class="eu.trentorise.smartcampus.mobility.storage.DomainStorage"></bean>
-	
-	<bean id="alertSender" class="eu.trentorise.smartcampus.mobility.processor.AlertSender"></bean>
-  
   <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
 </beans>

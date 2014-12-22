@@ -16,11 +16,267 @@
 
 package eu.trentorise.smartcampus.mobility.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+
+import java.util.Collections;
+
+import org.bson.types.ObjectId;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
+import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
+
 /**
  * @author raman
  *
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {TestConfig.class})
 public class TestAlertSender {
 
-	// TODO
+	@Autowired
+	private DomainStorage storage;
+
+	@Autowired
+	private AlertSender alertSender;
+	
+	@Before
+	public void init() {
+		storage.reset();
+	}
+
+	@Test
+	public void testTrainSingleMatchingAlert() throws Exception{
+		Itinerary withCar = ObjectCreator.createTransit();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForSingle(10);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		long found = hasDelayAlert(io);
+		assertEquals(10*60*1000,found);
+	}
+
+	@Test
+	public void testTrainSingleNonMatchingAlert() throws Exception {
+		Itinerary withCar = ObjectCreator.createTransit();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForSingle(10);
+		gt.setTripId("666");
+		alertSender.publishTrains(Collections.singletonList(gt));
+		
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		long found = hasDelayAlert(io);
+		assertEquals(-1L,found);
+	}
+	
+	@Test
+	public void testTrainSingleMatchingAlertOnTime() throws Exception {
+		Itinerary withCar = ObjectCreator.createTransit();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForSingle(0);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		long found = hasDelayAlert(io);
+		assertEquals(-1L, found);
+	}
+
+	@Test
+	public void testTrainMatchingAlerts() throws Exception {
+		Itinerary withCar = ObjectCreator.createTransit();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		// delay 6 min, should be registered
+		GenericTrain 
+		gt = ObjectCreator.createTrainDelayForSingle(6);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		long found = hasDelayAlert(io);
+		assertEquals(6*60*1000, found);
+		
+		// delay 6 min again, should not be registered
+		gt = ObjectCreator.createTrainDelayForSingle(6);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasDelayAlert(io);
+		assertEquals(6*60*1000, found);
+		
+		// delay 8 min, should not be registered
+		gt = ObjectCreator.createTrainDelayForSingle(8);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasDelayAlert(io);
+		assertEquals(6*60*1000, found);
+		
+		// delay 12, should be registered
+		gt = ObjectCreator.createTrainDelayForSingle(12);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasDelayAlert(io);
+		assertEquals(12*60*1000, found);
+
+		// delay 0 min, should be registered
+		gt = ObjectCreator.createTrainDelayForSingle(0);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasDelayAlert(io);
+		assertEquals(0, found);
+
+	}
+
+	private long hasDelayAlert(ItineraryObject io) {
+		for (Leg leg : io.getData().getLeg()) {
+			if (leg.getAlertDelayList().size() > 0) return leg.getAlertDelayList().get(0).getDelay(); 
+		}
+		return -1L;
+	}
+
+	@Test
+	public void testRecurrentTrainSingleMatchingAlert() throws Exception{
+		RecurrentJourney rj = ObjectCreator.createRecurrent();
+		
+		String id = new ObjectId().toString();
+		RecurrentJourneyObject ro = new RecurrentJourneyObject("1", id, rj, "test");
+		ro.setMonitor(true);
+		storage.saveRecurrent(ro);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForRecurrent(10);
+		alertSender.publishTrains(Collections.singletonList(gt));
+
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		assertNotNull(ro);
+	
+		// alert 10 min
+		String alertId = ObjectCreator.idTrainDelayForRecurrent();
+		long found = hasDelayAlert(ro, alertId);
+		assertEquals(10*60*1000,found);
+	}
+
+	@Test
+	public void testRecurrentTrainSingleNonMatchingAlert() throws Exception{
+		RecurrentJourney rj = ObjectCreator.createRecurrent();
+		
+		String id = new ObjectId().toString();
+		RecurrentJourneyObject ro = new RecurrentJourneyObject("1", id, rj, "test");
+		ro.setMonitor(true);
+		storage.saveRecurrent(ro);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForRecurrent(10);
+		gt.setTripId("666");
+		alertSender.publishTrains(Collections.singletonList(gt));
+
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		assertNotNull(ro);
+	
+		// alert 10 min
+		String alertId = ObjectCreator.idTrainDelayForRecurrent();
+		long found = hasDelayAlert(ro, alertId);
+		assertEquals(-1,found);
+	}
+
+	@Test
+	public void testRecurrentTrainSingleOnTimeAlert() throws Exception{
+		RecurrentJourney rj = ObjectCreator.createRecurrent();
+		
+		String id = new ObjectId().toString();
+		RecurrentJourneyObject ro = new RecurrentJourneyObject("1", id, rj, "test");
+		ro.setMonitor(true);
+		storage.saveRecurrent(ro);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForRecurrent(0);
+		alertSender.publishTrains(Collections.singletonList(gt));
+
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		assertNotNull(ro);
+	
+		// alert -0 min
+		String alertId = ObjectCreator.idTrainDelayForRecurrent();
+		long found = hasDelayAlert(ro, alertId);
+		assertEquals(-1,found);
+	}
+
+	@Test
+	public void testRecurrentTrainAlerts() throws Exception{
+		RecurrentJourney rj = ObjectCreator.createRecurrent();
+		
+		String id = new ObjectId().toString();
+		RecurrentJourneyObject ro = new RecurrentJourneyObject("1", id, rj, "test");
+		ro.setMonitor(true);
+		storage.saveRecurrent(ro);
+
+		GenericTrain gt = ObjectCreator.createTrainDelayForRecurrent(6);
+		alertSender.publishTrains(Collections.singletonList(gt));
+
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+	
+		// alert 6 min
+		String alertId = ObjectCreator.idTrainDelayForRecurrent();
+		long found = hasDelayAlert(ro, alertId);
+		assertEquals(60*6*1000,found);
+		
+		// alert 8 min, not registered
+		gt = ObjectCreator.createTrainDelayForRecurrent(8);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		found = hasDelayAlert(ro, alertId);
+		assertEquals(60*6*1000,found);
+
+		// alert 12 min, registered
+		gt = ObjectCreator.createTrainDelayForRecurrent(12);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		found = hasDelayAlert(ro, alertId);
+		assertEquals(60*12*1000,found);
+
+		// alert 12 min, registered
+		gt = ObjectCreator.createTrainDelayForRecurrent(0);
+		alertSender.publishTrains(Collections.singletonList(gt));
+		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+		found = hasDelayAlert(ro, alertId);
+		assertEquals(0,found);
+
+	}
+
+	/**
+	 * @param ro
+	 * @return
+	 */
+	private long hasDelayAlert(RecurrentJourneyObject ro, String id) {
+		if (ro.getAlertsSent() == null || ro.getAlertsSent().getAlertsValues() == null || ro.getAlertsSent().getAlertsValues().isEmpty()) return -1;
+		return ro.getAlertsSent().getAlertsValues().get(id);
+	}
+
+	// TODO 
+	// send parking (single matching, non-matching, two equivalent, two different)
+	// send user alert
+
+
 }

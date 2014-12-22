@@ -36,10 +36,10 @@ import smartcampus.service.trentomale.data.message.Trentomale.Train;
 
 import com.google.protobuf.ByteString;
 
-import eu.trentorise.smartcampus.mobility.processor.AlertSender;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
-import eu.trentorise.smartcampus.mobility.processor.converter.GenericTrain;
+import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni;
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni.PartArr;
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni.PartenzeArrivi;
@@ -109,7 +109,7 @@ public class TrainDelaysHandler implements ServiceHandler {
 
 	private void processTrainAlerts(List<GenericTrain> trains) {
 		logger.debug("processTrainAlerts");
-		alertSender.publishDelayAlerts(trains);
+		alertSender.publishTrains(trains);
 	}
 
 	private List<GenericTrain> convertTreni(List<ByteString> data) {

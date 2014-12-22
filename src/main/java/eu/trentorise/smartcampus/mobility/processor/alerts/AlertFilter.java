@@ -27,8 +27,6 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -96,20 +94,20 @@ public class AlertFilter {
 
 	private static boolean filterDelay(List<Leg> legs, AlertDelay alert) {
 		try {
-			Calendar ac = Calendar.getInstance();
-			ac.setTimeInMillis(alert.getFrom());
+//			Calendar ac = Calendar.getInstance();
+//			ac.setTimeInMillis(alert.getFrom());
 			for (Leg leg : legs) {
-//				if (areEqual(leg.getTransport(), alert.getTransport(), true, false, true, true)) {
-					Calendar c = Calendar.getInstance();
-					c.setTimeInMillis(leg.getStartime());
-					if (c.get(Calendar.YEAR) == ac.get(Calendar.YEAR) && c.get(Calendar.DAY_OF_YEAR) == ac.get(Calendar.DAY_OF_YEAR)) {
+				if (areEqual(leg.getTransport(), alert.getTransport(), true, false, true, true)) {
+//					Calendar c = Calendar.getInstance();
+//					c.setTimeInMillis(leg.getStartime());
+//					if (c.get(Calendar.YEAR) == ac.get(Calendar.YEAR) && c.get(Calendar.DAY_OF_YEAR) == ac.get(Calendar.DAY_OF_YEAR)) {
 						// found, check the existing alerts
 						return checkExistingDelayAlerts(leg.getAlertDelayList(),alert);
-					} else {
-						// different date, not applicable
-						return false;
-					}
-//				}
+//					} else {
+//						// different date, not applicable
+//						return false;
+//					}
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,7 +117,7 @@ public class AlertFilter {
 	}
 
 	private static boolean checkExistingDelayAlerts(List<AlertDelay> list, AlertDelay alert) {
-		if (list == null || list.isEmpty()) return true;
+		if (list == null || list.isEmpty()) return alert.getDelay() > 0;
 		// assume singleton here...
 		AlertDelay old = list.get(0);
 		if (old.getTo() < System.currentTimeMillis()) return true;
@@ -134,13 +132,12 @@ public class AlertFilter {
 			if (!journey.getMonitorLegs().containsKey(transportId) || journey.getMonitorLegs().get(transportId) == false) {
 				return false;
 			}
-			// TODO check also the period
-			Calendar cal = new GregorianCalendar();
-			if (journey.getParameters().getRecurrence().contains(cal.get(Calendar.DAY_OF_WEEK))) {
+//			Calendar cal = new GregorianCalendar();
+//			if (journey.getParameters().getRecurrence().contains(cal.get(Calendar.DAY_OF_WEEK))) {
 				// found, check the existing alerts
-				if (alerts == null) return true;
+				if (alerts == null) return alert.getDelay() > 0;
 				return alerts.check(buildId(alert), alert.getDelay(), THRESHOLD);
-			}
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Cannot filter delay for recurrent journey");			
@@ -292,7 +289,7 @@ public class AlertFilter {
 		if (alert instanceof AlertDelay) {
 			s = "AD_" + ((AlertDelay) alert).getTransport().getAgencyId() + "_" + ((AlertDelay) alert).getTransport().getRouteId() + "_" + ((AlertDelay) alert).getTransport().getTripId();
 		} else if (alert instanceof AlertStrike) {
-			s = "AD_" + ((AlertStrike) alert).getTransport().getAgencyId() + "_" + ((AlertStrike) alert).getTransport().getRouteId() + "_" + ((AlertStrike) alert).getTransport().getTripId();
+			s = "AS_" + ((AlertStrike) alert).getTransport().getAgencyId() + "_" + ((AlertStrike) alert).getTransport().getRouteId() + "_" + ((AlertStrike) alert).getTransport().getTripId();
 		} else if (alert instanceof AlertParking) {
 			s = "AP_" + ((AlertParking) alert).getPlace().getAgencyId() + "_" + ((AlertParking) alert).getPlace().getId();
 		}

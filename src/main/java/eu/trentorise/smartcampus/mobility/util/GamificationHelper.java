@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.processor.model.BasicItinerary;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 import eu.trentorise.smartcampus.network.RemoteException;

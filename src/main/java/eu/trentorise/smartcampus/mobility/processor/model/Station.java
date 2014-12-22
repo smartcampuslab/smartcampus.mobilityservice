@@ -14,7 +14,7 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package eu.trentorise.smartcampus.mobility.processor.handlers;
+package eu.trentorise.smartcampus.mobility.processor.model;
 
 import java.util.Arrays;
 

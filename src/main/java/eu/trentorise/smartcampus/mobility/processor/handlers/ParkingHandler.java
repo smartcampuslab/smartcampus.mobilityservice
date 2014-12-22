@@ -32,10 +32,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.protobuf.ByteString;
 
-import eu.trentorise.smartcampus.mobility.processor.AlertSender;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
-import eu.trentorise.smartcampus.mobility.processor.converter.Parking;
+import eu.trentorise.smartcampus.mobility.processor.model.Parking;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.service.parcheggi.data.message.Parcheggi.Parcheggio;
 
 /**
@@ -83,7 +83,7 @@ public class ParkingHandler implements ServiceHandler {
 
 	private synchronized void processParkingAlerts(List<Parking> parkings) {
 		logger.debug("processParkingAlerts");
-		alertSender.publishParkingAlerts(parkings);
+		alertSender.publishParkings(parkings);
 	}	
 
 	private List<Parking> convertParcheggi(List<ByteString> data, String source) {

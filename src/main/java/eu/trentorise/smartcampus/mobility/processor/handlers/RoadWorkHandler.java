@@ -36,9 +36,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.protobuf.ByteString;
 
-import eu.trentorise.smartcampus.mobility.processor.AlertSender;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.services.ordinanzerovereto.data.message.Ordinanzerovereto.Ordinanza;
 import eu.trentorise.smartcampus.services.ordinanzerovereto.data.message.Ordinanzerovereto.Via;
 

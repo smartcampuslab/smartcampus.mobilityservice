@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.processor.converter.Parking;
+import eu.trentorise.smartcampus.mobility.processor.model.Parking;
 
 public class ParkingChecker {
 

@@ -37,10 +37,11 @@ import org.springframework.util.StringUtils;
 
 import com.google.protobuf.ByteString;
 
-import eu.trentorise.smartcampus.mobility.processor.AlertSender;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
-import eu.trentorise.smartcampus.mobility.processor.converter.Parking;
+import eu.trentorise.smartcampus.mobility.processor.model.Parking;
+import eu.trentorise.smartcampus.mobility.processor.model.Station;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.service.tobike.data.message.Tobike.Stazione;
 
 /**
@@ -110,7 +111,7 @@ public class BikeSharingHandler implements ServiceHandler{
 	
 	private synchronized void processParkingAlerts(List<Parking> parkings) {
 		logger.debug("processBikeSharingAlerts");
-		alertSender.publishParkingAlerts(parkings);
+		alertSender.publishParkings(parkings);
 	}	
 
 	private Collection<Station> processMessages(List<ByteString> list) {
