@@ -289,5 +289,14 @@ public class OTPController extends SCController {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		}	
-	
+
+	@Override
+	protected String getUserId() {
+		try {
+			return super.getUserId();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 }
