@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
 import java.util.Collections;
@@ -32,7 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
@@ -108,9 +111,9 @@ public class TestAlertSender {
 
 	@Test
 	public void testTrainMatchingAlerts() throws Exception {
-		Itinerary withCar = ObjectCreator.createTransit();
+		Itinerary itinerary = ObjectCreator.createTransit();
 		String id = new ObjectId().toString();
-		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		ItineraryObject io = new ItineraryObject("1", id, itinerary, itinerary.getFrom(), itinerary.getTo(), "test");
 		io.setMonitor(true);
 		storage.saveItinerary(io);
 
@@ -274,9 +277,125 @@ public class TestAlertSender {
 		return ro.getAlertsSent().getAlertsValues().get(id);
 	}
 
-	// TODO 
-	// send parking (single matching, non-matching, two equivalent, two different)
-	// send user alert
+	@Test
+	public void testParking() throws Exception {
+		Itinerary withCar = ObjectCreator.createCarWithParking();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
 
+		// parking with 20 slots, should not be registered
+		Parking 
+		parking = ObjectCreator.createParking(20);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		int found = hasParkingAlert(io);
+		assertEquals(-1, found);
+		
+		// parking with 2 slots, should be registered
+		parking = ObjectCreator.createParking(2);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlert(io);
+		assertEquals(2, found);
 
+		// parking with 5 slots, should not be registered
+		parking = ObjectCreator.createParking(5);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlert(io);
+		assertEquals(2, found);
+	}
+
+	@Test
+	public void testBikeSharing() throws Exception {
+		Itinerary withCar = ObjectCreator.createWithBikeSharing();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		// parking with 10 slots, should not be registered
+		Parking 
+		parking = ObjectCreator.createBikeSharingFrom(10);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		int found = hasParkingAlertVehicles(io, "Parco Venezia");
+		assertEquals(-1, found);
+		
+		// irrelevant place, should not be registered
+		parking = ObjectCreator.createBikeSharingFrom(2);
+		parking.setId("666");
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlertVehicles(io,"Parco Venezia");
+		assertEquals(-1, found);
+		
+		// parking with 2 vehicles, should be registered
+		parking = ObjectCreator.createBikeSharingFrom(2);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlertVehicles(io, "Parco Venezia");
+		assertEquals(2, found);
+
+		// parking with 10 places, should not be registered
+		parking = ObjectCreator.createBikeSharingTo(10);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlertPlaces(io, "Biki Piazzale Follone - Rovereto");
+		assertEquals(-1, found);
+
+		// parking with 2 places, should be registered
+		parking = ObjectCreator.createBikeSharingTo(2);
+		alertSender.publishParkings(Collections.singletonList(parking));
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		found = hasParkingAlertPlaces(io, "Biki Piazzale Follone - Rovereto");
+		assertEquals(2, found);
+
+	}
+
+	private int hasParkingAlert(ItineraryObject io) {
+		for (Leg leg : io.getData().getLeg()) {
+			if (leg.getAlertParkingList().size() > 0) return leg.getAlertParkingList().get(0).getPlacesAvailable(); 
+		}
+		return -1;
+	}
+
+	private int hasParkingAlertVehicles(ItineraryObject io, String id) {
+		for (Leg leg : io.getData().getLeg()) {
+			if (leg.getAlertParkingList().size() > 0) {
+				for (AlertParking ap : leg.getAlertParkingList()) {
+					if (id.equals(ap.getPlace().getId())) return ap.getNoOfvehicles(); 
+				}
+			}
+		}
+		return -1;
+	}
+	private int hasParkingAlertPlaces(ItineraryObject io, String id) {
+		for (Leg leg : io.getData().getLeg()) {
+			if (leg.getAlertParkingList().size() > 0) {
+				for (AlertParking ap : leg.getAlertParkingList()) {
+					if (id.equals(ap.getPlace().getId())) return ap.getPlacesAvailable(); 
+				}
+			}
+		}
+		return -1;
+	}
+
+	@Test
+	public void testDelayAlert() throws Exception{
+		Itinerary withCar = ObjectCreator.createTransit();
+		String id = new ObjectId().toString();
+		ItineraryObject io = new ItineraryObject("1", id, withCar, withCar.getFrom(), withCar.getTo(), "test");
+		io.setMonitor(true);
+		storage.saveItinerary(io);
+
+		AlertDelay delay = ObjectCreator.createAlertDelay(10);
+		alertSender.publishAlert(delay);
+		
+		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
+		long found = hasDelayAlert(io);
+		assertEquals(10*60*1000,found);
+	}
 }

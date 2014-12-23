@@ -50,8 +50,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
-import eu.trentorise.smartcampus.mobility.processor.model.BasicItinerary;
-import eu.trentorise.smartcampus.mobility.processor.model.BasicRecurrentJourney;
+import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;

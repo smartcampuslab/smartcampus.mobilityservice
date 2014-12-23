@@ -32,9 +32,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.protobuf.ByteString;
 
+import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
-import eu.trentorise.smartcampus.mobility.processor.model.Parking;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.service.parcheggi.data.message.Parcheggi.Parcheggio;
 

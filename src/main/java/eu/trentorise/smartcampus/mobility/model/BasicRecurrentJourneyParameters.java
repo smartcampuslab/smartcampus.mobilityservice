@@ -13,42 +13,47 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.mobility.processor.model;
+package eu.trentorise.smartcampus.mobility.model;
 
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 
-public class BasicRecurrentJourney {
-
-	protected String clientId;
-	protected RecurrentJourney data;
-	protected String name;
-	protected boolean monitor;
+public class BasicRecurrentJourneyParameters {
 	
-	public boolean isMonitor() {
-		return monitor;
-	}
-	public void setMonitor(boolean monitor) {
-		this.monitor = monitor;
-	}
+	private String clientId;
+	private String name;
+	private RecurrentJourneyParameters data;
+	private boolean monitor;
+
 	public String getClientId() {
 		return clientId;
 	}
+
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
-	public RecurrentJourney getData() {
+
+	public RecurrentJourneyParameters getData() {
 		return data;
 	}
-	public void setData(RecurrentJourney data) {
-		this.data = data;
+
+	public void setData(RecurrentJourneyParameters content) {
+		this.data = content;
 	}
+
+	public boolean isMonitor() {
+		return monitor;
+	}
+
+	public void setMonitor(boolean monitored) {
+		this.monitor = monitored;
+	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-
 	
-
 }

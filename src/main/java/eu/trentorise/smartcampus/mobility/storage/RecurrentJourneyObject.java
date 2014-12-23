@@ -4,8 +4,8 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 
 import org.springframework.data.annotation.Id;
 
+import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.processor.alerts.RecurrentAlertsSent;
-import eu.trentorise.smartcampus.mobility.processor.model.BasicRecurrentJourney;
 
 public class RecurrentJourneyObject extends BasicRecurrentJourney {
 

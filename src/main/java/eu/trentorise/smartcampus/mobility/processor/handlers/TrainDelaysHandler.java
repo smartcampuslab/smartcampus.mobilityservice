@@ -36,9 +36,9 @@ import smartcampus.service.trentomale.data.message.Trentomale.Train;
 
 import com.google.protobuf.ByteString;
 
+import eu.trentorise.smartcampus.mobility.model.GenericTrain;
 import eu.trentorise.smartcampus.mobility.processor.ServiceHandler;
 import eu.trentorise.smartcampus.mobility.processor.ServiceKey;
-import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni;
 import eu.trentorise.smartcampus.service.oraritreni.data.message.Oraritreni.PartArr;

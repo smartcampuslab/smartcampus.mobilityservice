@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
+import eu.trentorise.smartcampus.mobility.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertFilter;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertUpdater;
@@ -27,8 +29,6 @@ import eu.trentorise.smartcampus.mobility.processor.alerts.AlertWrapper;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.mobility.processor.alerts.DelayChecker;
 import eu.trentorise.smartcampus.mobility.processor.alerts.ParkingChecker;
-import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
-import eu.trentorise.smartcampus.mobility.processor.model.Parking;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;

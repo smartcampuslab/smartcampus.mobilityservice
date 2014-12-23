@@ -56,11 +56,6 @@
 		<property name="listener" ref="serviceEventProcessor" />
 	</bean>
 	
-	<bean id="serviceSubscriber" class="eu.trentorise.smartcampus.mobility.processor.ServiceSubscriber">
-		<constructor-arg ref="serviceBusClient" />
-	</bean>		
-		
-	
 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.GreenItineraryRequestEnricher">
 	</bean>		
 	

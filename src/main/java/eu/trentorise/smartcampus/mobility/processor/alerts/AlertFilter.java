@@ -33,6 +33,9 @@ import org.apache.log4j.Logger;
 
 public class AlertFilter {
 	
+	private static final int SLOT_TRESHOLD = 3;
+	private static final int VEHICLE_TRESHOLD = 3;
+
 	private static final long THRESHOLD = 1000 * 60 * 5;
 	static Logger log = Logger.getLogger(AlertFilter.class);
 
@@ -120,7 +123,7 @@ public class AlertFilter {
 		if (list == null || list.isEmpty()) return alert.getDelay() > 0;
 		// assume singleton here...
 		AlertDelay old = list.get(0);
-		if (old.getTo() < System.currentTimeMillis()) return true;
+		if (old.getTo() < alert.getFrom()) return true;
 		else {
 			return Math.abs(old.getDelay()-alert.getDelay()) > THRESHOLD;
 		}
@@ -173,13 +176,13 @@ public class AlertFilter {
 
 			if (areEqual(stop, alert.getPlace(), true, true)) {
 				if(stop.getAgencyId().equals(leg.getTransport().getAgencyId())) {
-					if (alert.getNoOfvehicles() < 3 && alert.getNoOfvehicles() > 0) {
+					if (alert.getNoOfvehicles() < VEHICLE_TRESHOLD && alert.getNoOfvehicles() > 0) {
 //						log.info("Few vehicles to rent (" + alert.getNoOfvehicles() + ") @" + stop.getId());
 						return true;
 					}
 				}
 				if(!stop.getAgencyId().equals(leg.getTransport().getAgencyId())) {
-					if (alert.getPlacesAvailable() < 3 && alert.getPlacesAvailable() > 0) {
+					if (alert.getPlacesAvailable() < SLOT_TRESHOLD && alert.getPlacesAvailable() > 0) {
 //						log.info("Few vehicle places (" + alert.getPlacesAvailable() + ") @" + stop.getId());
 						return true;
 					}
@@ -192,13 +195,13 @@ public class AlertFilter {
 			}
 			if (areEqual(stop, alert.getPlace(), true, true)) {
 				if(stop.getAgencyId().equals(leg.getTransport().getAgencyId())) {
-					if (alert.getPlacesAvailable() < 3  && alert.getPlacesAvailable() > 0) {
+					if (alert.getPlacesAvailable() < SLOT_TRESHOLD  && alert.getPlacesAvailable() > 0) {
 //						log.info("Few vehicle places (" + alert.getPlacesAvailable() + ") @" + stop.getId());
 						return true;
 					}
 				}
 				if(!stop.getAgencyId().equals(leg.getTransport().getAgencyId())) {
-					if (alert.getNoOfvehicles() < 3 && alert.getPlacesAvailable() > 0) {
+					if (alert.getNoOfvehicles() < VEHICLE_TRESHOLD && alert.getPlacesAvailable() > 0) {
 //						log.info("Few vehicles to rent (" + alert.getNoOfvehicles() + ") @" + stop.getId());
 						return true;
 					}

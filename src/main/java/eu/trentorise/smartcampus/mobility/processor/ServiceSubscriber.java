@@ -20,18 +20,34 @@ import it.sayservice.platform.client.ServiceBusClient;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ServiceSubscriber {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Autowired
 	private List<ServiceHandler> handlers;
+
+	@Autowired
+	private ServiceBusClient client;
 	
-	public ServiceSubscriber(ServiceBusClient client) {
+	public List<ServiceHandler> getHandlers() {
+		return handlers;
+	}
+
+	@Autowired
+	public void setHandlers(List<ServiceHandler> handlers) {
+		this.handlers = handlers;
+	}
+	
+	@PostConstruct
+	public void init() {
 		try {
 			logger.debug("SUBSCRIBE SERVICES");
 			for (ServiceHandler serviceHandler : handlers) {

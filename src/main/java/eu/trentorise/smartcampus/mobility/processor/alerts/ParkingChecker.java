@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.processor.model.Parking;
+import eu.trentorise.smartcampus.mobility.model.Parking;
 
 public class ParkingChecker {
 
@@ -67,7 +67,7 @@ public class ParkingChecker {
 	public static AlertsSent checkNewAlerts(AlertsSent sent, Parking parking) {
 		AlertsSent newSent = new AlertsSent(sent);
 
-		String places = buildDate() + "_" + parking.getFreePlaces();
+		String places = buildDate() + "_" + parking.getFreePlaces()+"_"+parking.getVehicles();
 		
 		if (!sent.getParkings().containsKey(parking.getId().replace(".",""))) {
 			newSent.getParkings().put(parking.getId().replace(".",""), places);

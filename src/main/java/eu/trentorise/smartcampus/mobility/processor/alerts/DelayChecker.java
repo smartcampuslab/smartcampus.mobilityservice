@@ -28,7 +28,7 @@ import java.util.Calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.processor.model.GenericTrain;
+import eu.trentorise.smartcampus.mobility.model.GenericTrain;
 
 public class DelayChecker {
 
