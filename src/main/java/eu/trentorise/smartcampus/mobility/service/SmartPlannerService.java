@@ -99,7 +99,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	private String performPOST(String request, String body) throws Exception {
-		return HTTPConnector.doPost(request, body, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+		return HTTPConnector.doPost(otpURL+request, body, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
 	}
 
 	@Override
@@ -280,6 +280,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		}
 		for (Future<PlanRequest> plan: results) {
 			PlanRequest pr = plan.get();
+			if (pr.getPlan() == null) continue;
 			List<?> its = mapper.readValue(pr.getPlan(), List.class);
 			for (Object it : its) {
 				Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
@@ -346,8 +347,12 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		
 		@Override
 		public PlanRequest call() throws Exception {
-			String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
-			request.setPlan(plan);
+			try {
+				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
+				request.setPlan(plan);
+			} catch (Exception e) {
+				request.setPlan(null);
+			}
 			return request;
 		}
 	}
