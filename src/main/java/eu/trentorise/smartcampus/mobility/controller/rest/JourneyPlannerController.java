@@ -199,8 +199,7 @@ public class JourneyPlannerController extends SCController {
 			pars.put("clientId", itineraryId);
 //			ItineraryObject res = domainStorage.searchDomainObjectFixForSpring(pars, ItineraryObject.class);
 			ItineraryObject res = domainStorage.searchDomainObject(pars, ItineraryObject.class);
-
-			if (!userId.equals(res.getUserId())) {
+			if (res != null && !userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
