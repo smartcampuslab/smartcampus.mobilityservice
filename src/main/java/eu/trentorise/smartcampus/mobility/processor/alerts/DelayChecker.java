@@ -48,7 +48,7 @@ public class DelayChecker {
 		
 		t.setAgencyId(train.getAgencyId());
 		t.setRouteId(train.getRouteId());
-		t.setRouteShortName(buildRouteLongName(train));
+		t.setRouteShortName(buildRouteLongName(train.getAgencyId(), train.getRouteId()));
 		t.setTripId(train.getTripId());
 		t.setType(TType.TRAIN);
 		
@@ -97,23 +97,23 @@ public class DelayChecker {
 
 	}
 
-	private static String buildRouteLongName(GenericTrain train) {
+	public static String buildRouteLongName(String agencyId, String routeId) {
 		String res = "";
 		
-		if ("5".equals(train.getAgencyId())) {
-			if ("BV_R1_R".equals(train.getRouteId())) {
+		if ("5".equals(agencyId)) {
+			if ("BV_R1_R".equals(routeId)) {
 				res = "VERONA PORTA NUOVA/BOLZANO";
 			} else {
 				res = "BOLZANO/VERONA PORTA NUOVA";
 			}
-		} else if ("6".equals(train.getAgencyId())) {
-			if ("TB_R2_R".equals(train.getRouteId())) {
+		} else if ("6".equals(agencyId)) {
+			if ("TB_R2_R".equals(routeId)) {
 				res = "BASSANO DEL GRAPPA/TRENTO";
 			} else {
 				res = "TRENTO/BASSANO DEL GRAPPA";
 			}
-		} else if ("10".equals(train.getAgencyId())) {
-			if ("556".equalsIgnoreCase(train.getDirection())) {
+		} else if ("10".equals(agencyId)) {
+			if ("556".equalsIgnoreCase(routeId)) {
 				res = "Male/Trento";
 			} else {
 				res = "Trento/Male";

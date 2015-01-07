@@ -79,7 +79,9 @@ public class AlertSender {
 	 */
 	public void publishAlert(Alert alert) {
 		if (alert instanceof AlertDelay) {
-			List<AlertDelay> allDelays = Collections.singletonList((AlertDelay)alert);
+			AlertDelay delay = (AlertDelay) alert;
+			delay.getTransport().setRouteShortName(DelayChecker.buildRouteLongName(delay.getTransport().getAgencyId(), delay.getTransport().getRouteId()));
+			List<AlertDelay> allDelays = Collections.singletonList(delay);
 			List<AlertWrapper> userDelays = findDelayAlertsForUsers(allDelays);
 			publishDelayAlerts(allDelays, userDelays);
 		} 
