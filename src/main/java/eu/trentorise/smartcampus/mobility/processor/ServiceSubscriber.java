@@ -13,44 +13,48 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
+package eu.trentorise.smartcampus.mobility.processor;
 
-package eu.trentorise.smartcampus.mobility.logging;
+import it.sayservice.platform.client.InvocationException;
+import it.sayservice.platform.client.ServiceBusClient;
 
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * @author raman
- *
- */
 @Component
-public class StatLogger {
+public class ServiceSubscriber {
+
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	private List<ServiceHandler> handlers;
 
 	@Autowired
-	@Qualifier("logMongoTemplate")
-	private MongoTemplate mongoTemplate;
+	private ServiceBusClient client;
 	
-	@Value("${statlogging.enabled}")
-	private Boolean loggingEnabled;
+	public List<ServiceHandler> getHandlers() {
+		return handlers;
+	}
 
-	public void log(Object sj, String userId) {
-		if (Boolean.TRUE.equals(loggingEnabled)) {
-			mongoTemplate.save(createData(sj, userId));
+	@Autowired
+	public void setHandlers(List<ServiceHandler> handlers) {
+		this.handlers = handlers;
+	}
+	
+	@PostConstruct
+	public void init() {
+		try {
+			logger.debug("SUBSCRIBE SERVICES");
+			for (ServiceHandler serviceHandler : handlers) {
+				serviceHandler.subscribe(client);
+			}
+		} catch (InvocationException e) {
+			logger.error("Failed to subscribe for service events: "+e.getMessage());
 		}
 	}
-
-	/**
-	 * @param sj
-	 * @param userId
-	 * @return
-	 */
-	private Object createData(Object sj, String userId) {
-		return new StatDataObject(sj, userId);
-	}
-
-	
-	
 }

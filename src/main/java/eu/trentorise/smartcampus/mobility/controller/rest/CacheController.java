@@ -25,14 +25,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.MediaType;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.introspect.NopAnnotationIntrospector;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,27 +33,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
-
 @Controller
 public class CacheController {
-
-	@Autowired
-	@Value("${otp.url}")
-	private String otpURL;	
-	
-	public static final String OTP  = "/smart-planner/rest/";
-
-    private static ObjectMapper fullMapper = new ObjectMapper();
-    static {
-        fullMapper.setAnnotationIntrospector(NopAnnotationIntrospector.nopInstance());
-        fullMapper.configure(DeserializationConfig.Feature.READ_ENUMS_USING_TO_STRING, true);
-        fullMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        fullMapper.configure(DeserializationConfig.Feature.READ_ENUMS_USING_TO_STRING, true);
-
-        fullMapper.configure(SerializationConfig.Feature.WRITE_ENUMS_USING_TO_STRING, true);
-        fullMapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-    }
 
   	@RequestMapping(method = RequestMethod.POST, value = "/cachestatus")
   	public @ResponseBody
@@ -82,6 +56,7 @@ public class CacheController {
 		}
 	}
   	
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.POST, value = "/partialcachestatus")
 	public @ResponseBody
 	Map<String, CacheUpdateResponse> getPartialCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, Map> versions) {

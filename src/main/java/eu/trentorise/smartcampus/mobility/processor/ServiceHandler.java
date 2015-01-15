@@ -13,42 +13,24 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.mobility.sync;
 
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+package eu.trentorise.smartcampus.mobility.processor;
 
-public class BasicRecurrentJourney {
+import java.util.List;
+import java.util.Set;
 
-	private String clientId;
-	private RecurrentJourney data;
-	private String name;
-	private boolean monitor;
-	
-	public boolean isMonitor() {
-		return monitor;
-	}
-	public void setMonitor(boolean monitor) {
-		this.monitor = monitor;
-	}
-	public String getClientId() {
-		return clientId;
-	}
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-	public RecurrentJourney getData() {
-		return data;
-	}
-	public void setData(RecurrentJourney data) {
-		this.data = data;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
+import com.google.protobuf.ByteString;
 
-	
+import it.sayservice.platform.client.InvocationException;
+import it.sayservice.platform.client.ServiceBusClient;
 
+/**
+ * @author raman
+ *
+ */
+public interface ServiceHandler {
+
+	public void subscribe(ServiceBusClient client) throws InvocationException;
+	public void process(String serviceId, String methodName, String subscriptionId, List<ByteString> data);
+	public Set<ServiceKey> handledServices();
 }

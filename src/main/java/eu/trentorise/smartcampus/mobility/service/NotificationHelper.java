@@ -14,7 +14,7 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package eu.trentorise.smartcampus.mobility.processor;
+package eu.trentorise.smartcampus.mobility.service;
 
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
@@ -43,6 +43,7 @@ import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.EntityObject;
 import eu.trentorise.smartcampus.communicator.model.Notification;
+import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 
@@ -161,8 +162,6 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 //		Map<String, Object> content = new TreeMap<String, Object>();
 //		Notification n = prepareMessage(name, alert, content);
 //		notify(n, userId);
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -170,8 +169,6 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 //		Map<String, Object> content = new TreeMap<String, Object>();
 //		Notification n = prepareMessage(name, alert, content);
 //		notify(n, userId);
-		// TODO Auto-generated method stub
-
 	}
 
 	private void notify(Notification n, String userId) {

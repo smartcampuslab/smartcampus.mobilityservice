@@ -15,25 +15,25 @@
 
     <context:property-placeholder location="classpath:mobility.properties" />
 
-<!--    <http xmlns="http://www.springframework.org/schema/security" pattern="/cachestatus/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/partialcachestatus/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcachestatus/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcacheupdate/**" security="none"/> -->
+   <http xmlns="http://www.springframework.org/schema/security" pattern="/cachestatus/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/partialcachestatus/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getcachestatus/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getcacheupdate/**" security="none"/>
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/plansinglejourney/**" security="none"/> -->
 <!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/planrecurrent/**" security="none"/> -->
 
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/bikesharing/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getbikesharingbyagency/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getparkingsbyagency/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getroadinfobyagency/**" security="none"/> -->
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/bikesharing/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getbikesharingbyagency/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getparkingsbyagency/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getroadinfobyagency/**" security="none"/>
 
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getroutes/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getstops/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/geostops/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettimetable/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/getlimitedtimetable/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransittimes/**" security="none"/> -->
-<!--   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransitdelays/**" security="none"/> -->
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getroutes/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getstops/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/geostops/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/gettimetable/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/getlimitedtimetable/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransittimes/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransitdelays/**" security="none"/>
     
 	<http create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		 xmlns="http://www.springframework.org/schema/security" authentication-manager-ref="resourceAuthenticationManager">

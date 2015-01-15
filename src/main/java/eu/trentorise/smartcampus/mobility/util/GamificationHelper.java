@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-import eu.trentorise.smartcampus.mobility.sync.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 import eu.trentorise.smartcampus.network.RemoteException;
@@ -80,7 +80,7 @@ public class GamificationHelper {
 	}
 	
 	public void saveItinerary(final BasicItinerary itinerary, final String userId) {
-		if (!StringUtils.hasText(gamificationUrl)) return;
+		if (gamificationUrl == null) return;
 		if (System.currentTimeMillis() < START_GAME_DATE) return;
 		
 		executorService.execute(new Runnable() {
