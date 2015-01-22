@@ -17,6 +17,7 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import eu.trentorise.smartcampus.mobility.model.Timetable;
 import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingHandler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -190,6 +192,25 @@ public class OTPController extends SCController {
 			String timetable = smartPlannerHelper.transitTimes(routeId, from, to);
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
+		} catch (ConnectorException e0) {
+			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}			
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/timetable/{agencyId}/{routeId}")
+	public @ResponseBody
+	void getTodayTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId)  {
+		try {
+			long from = System.currentTimeMillis();
+			String timetable = smartPlannerHelper.transitTimes(routeId, from, from);
+			TransitTimeTable ttt = JsonUtils.toObject(timetable, TransitTimeTable.class);
+			Timetable tt = Timetable.fromTransitTimeTable(ttt);
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(JsonUtils.toJSON(tt));
 		} catch (ConnectorException e0) {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
