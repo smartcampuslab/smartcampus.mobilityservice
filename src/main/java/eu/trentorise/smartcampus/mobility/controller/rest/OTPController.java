@@ -20,6 +20,8 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +62,9 @@ public class OTPController extends SCController {
 		return services;
 	}
 
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final int DAY = 1000*60*60*24-1;
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/getroutes/{agencyId}")
 	public @ResponseBody
 	void getRoutes(HttpServletResponse response, @PathVariable String agencyId) throws InvocationException{
@@ -205,8 +210,9 @@ public class OTPController extends SCController {
 	public @ResponseBody
 	void getTodayTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId)  {
 		try {
-			long from = System.currentTimeMillis();
-			String timetable = smartPlannerHelper.transitTimes(routeId, from, from);
+			
+			long from = DATE_FORMAT.parse(DATE_FORMAT.format(new Date())).getTime();
+			String timetable = smartPlannerHelper.transitTimes(routeId, from, from+DAY);
 			TransitTimeTable ttt = JsonUtils.toObject(timetable, TransitTimeTable.class);
 			Timetable tt = Timetable.fromTransitTimeTable(ttt);
 			response.setContentType("application/json; charset=utf-8");
