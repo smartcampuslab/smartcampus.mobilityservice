@@ -229,6 +229,11 @@ public class JourneyPlannerController extends SCController {
 			pars.put("clientId", itineraryId);
 			ItineraryObject res = domainStorage.searchDomainObject(pars, ItineraryObject.class);
 
+			if (res == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return false;
+			}
+			
 			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
@@ -258,6 +263,11 @@ public class JourneyPlannerController extends SCController {
 			pars.put("clientId", itineraryId);
 			ItineraryObject res = domainStorage.searchDomainObject(pars, ItineraryObject.class);
 
+			if (res == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return false;
+			}			
+			
 			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
@@ -485,6 +495,11 @@ public class JourneyPlannerController extends SCController {
 			pars.put("clientId", itineraryId);
 			RecurrentJourneyObject res = domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class);
 
+			if (res == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return false;
+			}			
+			
 			if (!userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
@@ -514,6 +529,11 @@ public class JourneyPlannerController extends SCController {
 		pars.put("clientId", itineraryId);
 		RecurrentJourneyObject res = domainStorage.searchDomainObject(pars, RecurrentJourneyObject.class);
 
+		if (res == null) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return false;
+		}		
+		
 		if (!userId.equals(res.getUserId())) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
