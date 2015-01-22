@@ -31,6 +31,7 @@
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getstops/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/geostops/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettimetable/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/timetable/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getlimitedtimetable/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransittimes/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gettransitdelays/**" security="none"/>
