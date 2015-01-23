@@ -25,6 +25,8 @@
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/gettransittimes/{routeId}/{from}/{to}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/timetable/{agencyId}/{routeId}" method="GET"/>
+  <resourceMapping uri="mobilityservice.data" 
       pathPattern="/gettransitdelays/{routeId}/{from}/{to}" method="GET"/>
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getroadinfobyagency/{agencyId}/{from}/{to}" method="GET"/>

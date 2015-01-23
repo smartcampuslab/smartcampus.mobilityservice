@@ -17,8 +17,11 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import eu.trentorise.smartcampus.mobility.model.Timetable;
 import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingHandler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
@@ -58,6 +62,9 @@ public class OTPController extends SCController {
 		return services;
 	}
 
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final int DAY = 1000*60*60*24-1;
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/getroutes/{agencyId}")
 	public @ResponseBody
 	void getRoutes(HttpServletResponse response, @PathVariable String agencyId) throws InvocationException{
@@ -190,6 +197,26 @@ public class OTPController extends SCController {
 			String timetable = smartPlannerHelper.transitTimes(routeId, from, to);
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
+		} catch (ConnectorException e0) {
+			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}			
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/timetable/{agencyId}/{routeId}")
+	public @ResponseBody
+	void getTodayTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId)  {
+		try {
+			
+			long from = DATE_FORMAT.parse(DATE_FORMAT.format(new Date())).getTime();
+			String timetable = smartPlannerHelper.transitTimes(routeId, from, from+DAY);
+			TransitTimeTable ttt = JsonUtils.toObject(timetable, TransitTimeTable.class);
+			Timetable tt = Timetable.fromTransitTimeTable(ttt);
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(JsonUtils.toJSON(tt));
 		} catch (ConnectorException e0) {
 			response.setStatus(e0.getCode());
 		} catch (Exception e) {
