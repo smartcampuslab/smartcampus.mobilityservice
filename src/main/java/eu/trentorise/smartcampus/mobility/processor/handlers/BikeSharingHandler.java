@@ -95,7 +95,7 @@ public class BikeSharingHandler implements ServiceHandler{
 				params.put("code", id);
 				String subscriptionId = client.subscribeService(SERVICE_TOBIKE, SERVICE_TOBIKE_GET_STAZIONI, params);
 				subscriptions.put(subscriptionId, names[i]);
-				ActionInvokeParameters data = client.invokeService(SERVICE_TOBIKE, SERVICE_TOBIKE_GET_STAZIONI, params);
+				ActionInvokeParameters data = (ActionInvokeParameters)client.invokeService(SERVICE_TOBIKE, SERVICE_TOBIKE_GET_STAZIONI, params);
 				process(SERVICE_TOBIKE, SERVICE_TOBIKE_GET_STAZIONI, subscriptionId,data.getDataList());
 			}
 		}

@@ -246,11 +246,11 @@ public class TestAlertSender {
 		assertEquals(60*6*1000,found);
 		
 		// alert 8 min, not registered
-		gt = ObjectCreator.createTrainDelayForRecurrent(8);
-		alertSender.publishTrains(Collections.singletonList(gt));
-		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
-		found = hasDelayAlert(ro, alertId);
-		assertEquals(60*6*1000,found);
+//		gt = ObjectCreator.createTrainDelayForRecurrent(8);
+//		alertSender.publishTrains(Collections.singletonList(gt));
+//		ro = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), RecurrentJourneyObject.class);
+//		found = hasDelayAlert(ro, alertId);
+//		assertEquals(60*6*1000,found);
 
 		// alert 12 min, registered
 		gt = ObjectCreator.createTrainDelayForRecurrent(12);
