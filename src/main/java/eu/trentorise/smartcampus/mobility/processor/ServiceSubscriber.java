@@ -34,7 +34,7 @@ public class ServiceSubscriber {
 
 	private List<ServiceHandler> handlers;
 
-	@Autowired
+	@Autowired(required=false)
 	private ServiceBusClient client;
 	
 	public List<ServiceHandler> getHandlers() {
@@ -49,6 +49,7 @@ public class ServiceSubscriber {
 	@PostConstruct
 	public void init() {
 		try {
+			if (client == null) return;
 			logger.debug("SUBSCRIBE SERVICES");
 			for (ServiceHandler serviceHandler : handlers) {
 				serviceHandler.subscribe(client);

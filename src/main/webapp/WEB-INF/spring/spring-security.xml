@@ -13,9 +13,17 @@
     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
     ">
 
-    <context:property-placeholder location="classpath:mobility.properties" />
+	<context:property-placeholder location="classpath:mobility.properties" />
 
-   <http xmlns="http://www.springframework.org/schema/security" pattern="/cachestatus/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/css/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/img/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/js/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/fonts/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/lib/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/templates/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/webplanner/**" security="none"/>
+	 
+	<http xmlns="http://www.springframework.org/schema/security" pattern="/cachestatus/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/partialcachestatus/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcachestatus/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getcacheupdate/**" security="none"/>
@@ -77,5 +85,5 @@
 	<context:component-scan base-package="eu.trentorise.smartcampus.resourceprovider"/>
 
 	<mvc:annotation-driven />
-	
+		
 </beans>

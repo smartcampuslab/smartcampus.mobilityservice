@@ -1,0 +1,129 @@
+<div class="row">
+	<div class="col-md-8 col-md-offset-3">
+    <h2>Smart Planner</h2>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+        <h3 class="panel-title">Plan a trip</h3>
+		  </div>
+		  <div class="panel-body">
+		    <form>
+				  <div class="form-group">
+				    <label for="from">From</label>
+				    <div class="input-group">
+				    <input type="text" class="form-control" id="from" ng-model="fromMarker.address" placeholder="From...">
+            <span class="input-group-btn">
+              <button ng-click="fromCurrent(fromMarker)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
+            </span>
+				    </div>
+				  </div>
+          <div class="form-group">
+            <label for="to">To</label>
+            <div class="input-group">
+            <input type="text" class="form-control" id="to" ng-model="toMarker.address" placeholder="To...">
+            <span class="input-group-btn">
+              <button ng-click="toCurrent()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
+            </span>
+            </div>
+          </div>
+          
+          <div class="row">
+			        <div class="col-md-6">
+			            <p class="input-group" style="margin-top:34px;">
+			              <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="mydate" is-open="opened" ng-required="true" close-text="Close" />
+			              <span class="input-group-btn">
+			                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+			              </span>
+			            </p>
+			        </div>
+              <div class="col-md-6">
+                <timepicker ng-model="mytime" ng-change="changed()" hour-step="1" minute-step="15" show-meridian="false"></timepicker>              
+              </div>
+			    </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+		          <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">Car</label></div>
+		          <div class="checkbox"><label><input type="checkbox" ng-model="means.TRANSIT">Public Transport</label></div>
+		          <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">Walking</label></div>
+		          <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">Bike</label></div>
+            </div>
+            <div class="col-md-6">
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeF" value="fastest" checked>Fastest</label></div>            
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLC" value="leastChanges">Less changes</label></div>            
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLW" value="leastWalking">Less walking</label></div>            
+            </div>
+          </div>
+          <button type="button" class="btn btn-default" ng-click="reset()">Reset</button>
+				  <button type="submit" class="btn btn-primary" ng-click="plan()"><i ng-if="loading" class="glyphicon glyphicon-repeat gly-spin"></i>Submit</button>
+				</form>
+		  </div>
+		</div>
+	</div>
+	<div class="col-md-8">
+	  <div id="map"></div>
+	</div>
+</div>
+<div class="row">
+  <div class="col-md-3">
+<!--           <div> -->
+<!--           <a href="" ng-click="showPlan(plan)"> -->
+<!--           <div class="row"> -->
+<!--             <div class="col-md-2 text-center"> -->
+<!--               <div>10:00</div> -->
+<!--               <div>|</div> -->
+<!--               <div>12:00</div> -->
+<!--             </div> -->
+<!--             <div class="col-md-10"> -->
+<!--               <div class="tt thumbnail col-md-2"> -->
+<!-- 					      <img src="img/ic_mt_bus.png" > -->
+<!-- 					      <div class="text-center"><div>aaa</div><div>eee</div></div> -->
+<!-- 					    </div> -->
+            
+<!--               <div class="col-md-3 text-center"> -->
+<!--                   <img ng-src="img/ic_mt_bus.png"/> -->
+<!--                   <span>note</span> -->
+<!--               </div> -->
+<!--               <div class="col-md-2  text-center"> -->
+<!--                   <img ng-src="img/ic_mt_car.png"/> -->
+<!--                   <span>note</span> -->
+<!--               </div> -->
+<!--             </div> -->
+<!--           </div> -->
+<!--           </a> -->
+<!--         </div> -->
+  
+    <table class="table table-bordered">
+      <tr ng-repeat="plan in plans">
+        <td ng-class="{'success':plan.promoted}">
+		    <div ng-class="{'itinerary-selected':$index == currentItinerary.index}">
+		      <a href="" ng-click="showPlan(plan)">
+		      <div class="row">
+		        <div class="col-md-2 text-center">
+		          <div>{{toTime(plan.startime)}}</div>
+		          <div>|</div>
+		          <div>{{toTime(plan.endtime)}}</div>
+		        </div>
+		        <div class="col-md-10">
+		          <div class="tt thumbnail col-md-2" ng-repeat="mean in plan.means">
+                <img ng-src="{{mean.img}}" >
+                <div class="text-center">
+                  <div ng-repeat="n in mean.note">{{n}}</div>
+                </div>
+              </div>
+		        </div>
+		      </div>
+		      </a>
+		    </div>
+		    </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md-8">
+    <div ng-if="errorMsg != null"><h4>{{errorMsg}}</h4></div>
+  </div>
+</div>
