@@ -19,7 +19,36 @@ services.factory('geocoder', ['$http',
         };
     }
 ]);
-services.factory('formatter', [function () {
+services.factory('parking', ['$http',
+  function ($http) {
+      var GEOCODER = 'https://tn.smartcommunitylab.it/core.mobility/';
+      var parkings = function(agency) {
+          var url = GEOCODER + 'getparkingsbyagency/';
+          return $http.get(url + agency);
+      };
+      
+      var parkingMap = {};
+          
+      return {
+              init: function(agencies) {
+            	  agencies.forEach(function(a) {
+            		parkings(a).success(function(data) {
+            			parkingMap[a] = {};
+            			data.forEach(function(p){
+            				parkingMap[a][p.name] = p;
+            			});
+            		});  
+            	  });
+              },
+              getParking : function(agency, id) {
+            	if (parkingMap[agency]) return parkingMap[agency][id];   
+              }
+     };
+  }
+]);
+
+services.factory('formatter', ['parking',
+  function (parking) {
     var getDateStr = function(date) {
   	  return (date.getMonth() < 9 ? '0':'')+(date.getMonth()+1) +'/'+
   	  		 (date.getDate() < 10 ? '0':'')+date.getDate() +'/' +
@@ -49,29 +78,43 @@ services.factory('formatter', [function () {
     		'PARK'		: 'ic_mt_parking',
     		'STREET'	: 'ic_price_parking'
     };
+    var actionMap = {
+    		'WALK'		: 'Walk',
+    		'BICYCLE'	: 'Ride',
+    		'CAR'		: 'Drive',
+    		'BUS'		: 'Take the bus ',
+    		'TRAIN'		: 'Take the train '
+    };
     
     var extractParking = function(leg) {
-    	var res = [];
-    	var type  = null;
+    	var res = {type: null, cost:null, time: null, note: [], img: null};
     	if (leg.extra != null) {
     		if (leg.extra.costData && leg.extra.costData.fixedCost) {
     			var cost = leg.extra.costData.fixedCost > 0 ? (leg.extra.costData.fixedCost+'E/h') : 'gratis';
-    			res.push(cost);
+    			res.cost = cost;
+    			res.note.push(cost);
     		}
-    		if (leg.extra.searchTime) {
-    			res.push(leg.extra.searchTime.min+'-'+leg.extra.searchTime.max+'min');
+    		if (leg.extra.searchTime && leg.extra.searchTime.max > 0) {
+    			res.time = leg.extra.searchTime.min+'-'+leg.extra.searchTime.max+'min';
+    			res.note.push(res.time);
     		}
-    		type = 'STREET';
+    		res.type = 'STREET';
     	}
     	if (leg.to.stopId && leg.to.stopId.extra) {
     		if (leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
     			var cost = leg.to.stopId.extra.costData.fixedCost > 0 ? (leg.to.stopId.extra.costData.fixedCost+'E/h') : 'gratis';
-    			res.push(cost);
+    			res.cost = cost;
+    			res.note.push(cost);
     		}
-    		type = 'PARK';
+    		res.type = 'PARK';
     	}
-    	if (type) {
-    		return {img: 'img/'+ttMap[type]+'.png', note:res};
+    	if (leg.to.stopId && leg.to.stopId.id) {
+    		var parkingPlace = parking.getParking(leg.to.stopId.agencyId, leg.to.stopId.id);
+    		res.place = parkingPlace != null ? parkingPlace.description : leg.to.stopId.id;
+    	}
+    	if (res.type) {
+    		res.img = 'img/'+ttMap[res.type]+'.png';
+    		return res;
     	}
     };
     
@@ -93,9 +136,15 @@ services.factory('formatter', [function () {
     		} else if (t == 'CAR') {
         		if (meanTypes.indexOf('CAR') < 0) {
         			meanTypes.push('CAR');
-        			means.push(elem);
         			var parking = extractParking(it.leg[i]);
-        			if (parking) elem = parking;
+        			if (parking) {
+            			if (parking.type == 'STREET') {
+            				elem.note = parking.note;
+            			} else {
+                			means.push(elem);
+            				elem = {img:parking.img, note: parking.note};
+            			}
+        			}
         		}
     		}
     		
@@ -106,11 +155,98 @@ services.factory('formatter', [function () {
     	return means;
     };
     
+    var elemColors = ['#FF0000','#FF6600', '#6633FF', '#99FF00', '#339900'];
+    
+    var extractMapElements = function(leg, idx, map) {
+		var res = [];
+    	var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
+    	var line = new google.maps.Polyline({
+		    path: path,
+		    strokeColor: idx >= elemColors.length ? elemColors[idx % elemColors.length]: elemColors[idx],
+		    strokeOpacity: 0.8,
+		    strokeWeight: 2,
+		    map: map
+		  });
+    	res.push(line);
+		return res;
+    };
+    
+    var extractDetails = function(step, leg, idx, from) {
+    	step.action = actionMap[leg.transport.type];
+    	if (leg.transport.type == 'BICYCLE' && leg.transport.agencyId) {
+    		step.fromLabel = "Pick up a bike at bike sharing ";
+    		step.toLabel = "Leave the bike at bike sharing ";
+//    	} else if (leg.transport.type == 'CAR' && leg.transport.agencyId) {
+    	} else {
+    		step.fromLabel = "From ";
+    		step.toLabel = "To ";
+    	}
+    	if (leg.transport.type == 'BUS' || leg.transport.type == 'TRAIN' || leg.transport.type == 'TRANSIT') {
+    		step.actionDetails = leg.transport.routeShortName;
+    	}
+    	
+		if (from != null) step.from = from;
+		else {
+			step.from = leg.from.name;
+		}
+		step.to = leg.to.name;
+    };
+    
+    var process = function(plan, from, to) {
+    	plan.steps = [];
+    	var nextFrom = from;
+    	
+    	for (var i = 0; i < plan.leg.length; i++) {
+    		var step = {};
+    		step.startime = i == 0 ? plan.startime: plan.leg[i].startime;
+    		step.endtime = plan.leg[i].endtime;
+    		step.mean = {};
+    		
+    		extractDetails(step, plan.leg[i], i, nextFrom);
+    		if (i == plan.leg.length-1) step.to = to;
+    		nextFrom = null;
+
+    		var t = plan.leg[i].transport.type;
+    		step.mean.img = ttMap[t];
+    		if (!step.mean.img) {
+    			console.log('UNDEFINED: '+plan.leg[i].transport.type);
+    			step.mean.img  = ttMap['BUS'];
+    		}
+    		step.mean.img = 'img/'+step.mean.img +'.png';
+
+    		var parkingStep = null;
+    		if (t == 'CAR') {
+    			var parking = extractParking(plan.leg[i]);
+    			if (parking) {
+    				if (parking.type == 'PARK') {
+    					step.to = 'parking '+ parking.place;
+    					nextFrom = step.to;
+        				parkingStep = {
+        						startime: plan.leg[i].endtime, 
+        						endtime: plan.leg[i].endtime,
+        						action: 'Leave the car at ',
+        						actionDetails: step.to,
+        						parking: parking,
+        						mean: {img:parking.img}};
+    				} else {
+    					step.parking = parking;
+    				}
+    			}
+    		}
+    		plan.steps.push(step);
+    		if (parkingStep != null) {
+        		plan.steps.push(parkingStep);
+    		}
+    	}
+    };
+    
     return {
     	getTimeStrMeridian: getTimeStr,
     	getTimeStr: getTimeStrSimple,
     	getDateStr: getDateStr,
     	extractItineraryMeans: extractItineraryMeans,
+    	extractMapElements: extractMapElements,
+    	process: process
     }
 }]);
 

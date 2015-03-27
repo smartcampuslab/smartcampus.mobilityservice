@@ -4,9 +4,11 @@ var webplannerApp = angular.module('webplanner', [,'ui.bootstrap',
 'plannerControllers'
 ]);
 
-webplannerApp.run(['$rootScope', '$q', '$modal', '$location',
-  function($rootScope, $q, $modal, $location){
-    
+webplannerApp.run(['$rootScope', '$q', '$modal', '$location', 'parking',
+  function($rootScope, $q, $modal, $location, parking){
+    $rootScope.CENTER = new google.maps.LatLng(46.071530, 11.119497);
+    var agencies = ['COMUNE_DI_TRENTO','COMUNE_DI_ROVERETO'];
+    parking.init(agencies);
   }]);
 
 

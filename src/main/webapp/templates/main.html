@@ -125,5 +125,56 @@
   </div>
   <div class="col-md-8">
     <div ng-if="errorMsg != null"><h4>{{errorMsg}}</h4></div>
+    <div class="row" ng-if="currentItinerary != null">
+      <div class="col-md-8">
+      <div class="panel panel-default">
+        <div class="panel-body">
+        <div>
+        <div class="row green-header" ng-if="currentItinerary.promoted">
+          <div class="col-md-12">
+             Sustainable itinerary
+             <span class="glyphicon glyphicon-leaf pull-right" aria-hidden="true"></span>
+          </div>
+        </div>
+        <!-- START -->
+        <div class="row leg">
+          <div class="col-md-1 start-leg">
+            <img src="img/ic_point_outline.png">
+          </div>
+          <div class="col-md-2">{{toTime(currentItinerary.startime)}}</div>
+          <div class="col-md-9">{{fromMarker.address}}</div>
+        </div>
+        <!-- ROW -->
+        <div class="row leg" ng-repeat="step in currentItinerary.steps">
+          <div class="col-md-1">
+            <img src="img/ic_point.png">
+          </div>
+          <div class="col-md-2">{{toTime(step.startime)}}</div>
+          <div class="col-md-7 inter-leg">
+            <p ng-if="step.action">{{step.action}}<strong ng-if="step.actionDetails">{{step.actionDetails}}</strong></p>
+            <p ng-if="step.from != null">{{step.fromLabel}}<strong>{{step.from}}</strong></p>
+            <p ng-if="step.to != null">{{step.toLabel}}<strong>{{step.to}}</strong></p>
+            <p ng-if="step.parking && step.parking.cost">
+               <img src="img/ic_price_parking.png"/>{{step.parking.cost}}
+            </p>
+            <p ng-if="step.parking && step.parking.time">
+               <img src="img/ic_look_for_parking.png"/>{{step.parking.time}}
+            </p>
+          </div>
+          <div class="col-md-2">
+            <img class="pull-right" ng-src="{{step.mean.img}}" >
+          </div>
+        </div>
+        <!-- END -->
+        <div class="row leg">
+          <div class="col-md-1 end-leg"><img src="img/ic_point_outline.png"></div>
+          <div class="col-md-2">{{toTime(currentItinerary.endtime)}}</div>
+          <div class="col-md-9">{{toMarker.address}}</div>
+        </div>
+        </div>
+			  </div>
+			</div>
+      </div>
+    </div>
   </div>
 </div>

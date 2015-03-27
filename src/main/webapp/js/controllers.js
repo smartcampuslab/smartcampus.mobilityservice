@@ -4,7 +4,7 @@ var plannerControllers = angular.module('plannerControllers', [])
   function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter) {
 
 	// current user position, defaults to Trento
-	$scope.myposition = new google.maps.LatLng(46.071530, 11.119497);
+	$scope.myposition = $rootScope.CENTER;
 	
 	$scope.mytime = new Date();
 	$scope.mydate = new Date();
@@ -219,19 +219,17 @@ var plannerControllers = angular.module('plannerControllers', [])
     };
 
     $scope.showPlan = function(plan) {
+    	formatter.process(plan, $scope.fromMarker.address, $scope.toMarker.address);
+    	
     	$scope.currentItinerary = plan;
     	$scope.resetDrawings();
     	
+    	var allElements = [];
     	for (var i = 0; i < plan.leg.length; i++) {
-    		var line = new google.maps.Polyline({
-    		    path: google.maps.geometry.encoding.decodePath(plan.leg[i].legGeometery.points),
-    		    strokeColor: "#FF0000",
-    		    strokeOpacity: 0.8,
-    		    strokeWeight: 2,
-    		    map: $scope.map
-    		  });
-    		$scope.legElems.push(line);
+    		var mapElems = formatter.extractMapElements(plan.leg[i], i, $scope.map);
+    		allElements = allElements.concat(mapElems);
     	}
+		$scope.legElems = allElements;
     }
     
 }]);
