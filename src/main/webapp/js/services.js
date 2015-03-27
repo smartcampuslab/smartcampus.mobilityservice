@@ -175,10 +175,10 @@ services.factory('formatter', ['parking',
     
     var extractDetails = function(step, leg, idx, from) {
     	step.action = actionMap[leg.transport.type];
-    	if (leg.transport.type == 'BICYCLE' && leg.transport.agencyId) {
+    	if (leg.transport.type == 'BICYCLE' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
     		step.fromLabel = "Pick up a bike at bike sharing ";
     		step.toLabel = "Leave the bike at bike sharing ";
-//    	} else if (leg.transport.type == 'CAR' && leg.transport.agencyId) {
+//    	} else if (leg.transport.type == 'CAR' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
     	} else {
     		step.fromLabel = "From ";
     		step.toLabel = "To ";
