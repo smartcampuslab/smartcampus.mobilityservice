@@ -90,7 +90,8 @@ services.factory('formatter', ['parking',
     	var res = {type: null, cost:null, time: null, note: [], img: null};
     	if (leg.extra != null) {
     		if (leg.extra.costData && leg.extra.costData.fixedCost) {
-    			var cost = leg.extra.costData.fixedCost > 0 ? (leg.extra.costData.fixedCost+'E/h') : 'gratis';
+    			var cost = (leg.extra.costData.fixedCost).replace(',','.').replace(' ','');
+    			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
     			res.cost = cost;
     			res.note.push(cost);
     		}
@@ -102,7 +103,8 @@ services.factory('formatter', ['parking',
     	}
     	if (leg.to.stopId && leg.to.stopId.extra) {
     		if (leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
-    			var cost = leg.to.stopId.extra.costData.fixedCost > 0 ? (leg.to.stopId.extra.costData.fixedCost+'E/h') : 'gratis';
+    			var cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
+    			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
     			res.cost = cost;
     			res.note.push(cost);
     		}
