@@ -12,10 +12,10 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.toMarker = null;
     $scope.mode = 'fastest';
     $scope.means = {'TRANSIT':true};
-	$scope.loading = false;
 	$scope.currentItinerary = null;
 	$scope.legElems = [];
-	
+	$scope.planned = false;
+	$scope.loadingInstance = null;
 	
 	$scope.resetDrawings = function(){
 		if ($scope.legElems) {
@@ -38,7 +38,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 	  }   
       $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-	  $scope.updateAddress = function(obj, latLng) {
+	  $scope.updateAddress = function(obj, latLng, replan) {
 	    	geocoder.geocode(latLng.lat(),latLng.lng()).success(function(data){
 	    		if (data && data.response && data.response.docs) {
 	    			var point = data.response.docs[0];
@@ -57,6 +57,9 @@ var plannerControllers = angular.module('plannerControllers', [])
 		    			address += point.city;
 	    			}
 	    			obj.address = address;
+	    			if (replan && $scope.planned) {
+	    				$scope.plan();
+	    			}
 	    		}
 	    	});
 	  };
@@ -76,7 +79,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 	    $scope.updateAddress(m, pos);
 	    
 	    google.maps.event.addListener(m, 'dragend', function(evt) {
-	    	$scope.updateAddress(m, evt.latLng);
+	    	$scope.updateAddress(m, evt.latLng, true);
 	    	$scope.$apply();
 	    });
 	    return m;
@@ -148,6 +151,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     
     // clear the 'from' and 'to' markers
     $scope.reset = function() {
+    	$scope.planned = false;
     	$scope.currentItinerary = null;
     	$scope.resetDrawings();
     	if (!!$scope.fromMarker) {
@@ -178,7 +182,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     		$scope.errorMsg = 'Specify from/to locations!';
     		return;
     	}
-    	$scope.loading = true;
+    	$scope.showLoading();
+    	
     	planner.plan(
     			$scope.fromMarker.getPosition(), 
     			$scope.toMarker.getPosition(),
@@ -188,6 +193,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			$scope.mytime
     			)
     	.success(function(data){
+    		$scope.planned = true;
     		if (data && data.length > 0) {
     			data.sort(function(a,b) {
     				if (a.promoted != b.promoted) {
@@ -203,14 +209,15 @@ var plannerControllers = angular.module('plannerControllers', [])
     			
     			$scope.plans = data;
         		$scope.errorMsg = null;
+        		$scope.showPlan($scope.plans[0]);
     		} else {
         		$scope.errorMsg = 'No results found';
     		}
-    		$scope.loading = false;
+        	$scope.hideLoading();
     	})
     	.error(function(data){
     		$scope.errorMsg = 'Error planning the route';
-    		$scope.loading = false;
+        	$scope.hideLoading();
     	});
     }
     
@@ -231,5 +238,17 @@ var plannerControllers = angular.module('plannerControllers', [])
     	}
 		$scope.legElems = allElements;
     }
+    
+    $scope.showLoading = function() {
+	    $scope.loadingInstance = $modal.open({
+	      backdrop: 'static',	
+	      template: '<div class="loading"><i class="glyphicon glyphicon-repeat gly-spin"></i><span>Loading...</span></div>',
+	      size: 'sm'    	    
+	    });
+    };
+    
+    $scope.hideLoading = function() {
+    	$scope.loadingInstance.dismiss('done');
+    };
     
 }]);

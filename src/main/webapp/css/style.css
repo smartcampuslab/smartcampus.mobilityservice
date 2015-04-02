@@ -201,11 +201,25 @@ body {
 }
 
 .end-leg {
-	min-height: 40px;
-	padding-bottom:5px;
+/*	min-height: 40px;
+	padding-bottom:5px;*/
 }
 
 .end-leg > img {
-	position: absolute;
-	bottom: 5px;
+/*	position: absolute;
+	bottom: 5px;*/
+}
+
+
+.loading {
+	font-size: 28px !important;
+	margin: 8px;
+}
+
+.loading > span {
+	padding: 4px;
+}
+
+.modal-sm > div {
+	display: inline-block;
 }
