@@ -120,7 +120,7 @@
 	<repositories>
 		<repository>
 			<id>SmartCampus</id>
-			<url>http://repository.smartcampuslab.it/content/groups/public</url>
+			<url>http://repository.smartcommunitylab.it/content/groups/public</url>
 		</repository>
 	</repositories>
 

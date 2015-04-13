@@ -40,12 +40,60 @@ services.factory('parking', ['$http',
             		});  
             	  });
               },
+              getAll: function() {
+              	var res = [];
+              	for (var a in parkingMap) {
+              		for (var p in parkingMap[a]) {
+              			var e = parkingMap[a][p];
+              			res.push({title:e.name, description: e.description, position:e.position, type:'parking'});
+              		}
+              	}
+              	return res;
+              },
               getParking : function(agency, id) {
             	if (parkingMap[agency]) return parkingMap[agency][id];   
               }
      };
   }
 ]);
+
+services.factory('bikesharing', ['$http',
+     function ($http) {
+         var ENDPOINT = 'https://tn.smartcommunitylab.it/core.mobility/';
+         var parkings = function(agency) {
+             var url = ENDPOINT + 'bikesharing/';
+             return $http.get(url + agency);
+         };
+         
+         var parkingMap = {};
+             
+         return {
+                 init: function(agencies) {
+               	  agencies.forEach(function(a) {
+               		parkings(a).success(function(data) {
+               			parkingMap[a] = {};
+               			data.forEach(function(p){
+               				parkingMap[a][p.name] = p;
+               			});
+               		});  
+               	  });
+                 },
+                 getAll: function() {
+                	var res = [];
+                	for (var a in parkingMap) {
+                		for (var p in parkingMap[a]) {
+                			var e = parkingMap[a][p];
+                  			res.push({title:e.name, description: e.address, position:e.position, type:'bikesharing'});
+                		}
+                	}
+                	return res;
+                 },
+                 getParking : function(agency, id) {
+                	 if (parkingMap[agency]) return parkingMap[agency][id];   
+                 }
+        };
+     }
+   ]);
 
 services.factory('formatter', ['parking',
   function (parking) {
@@ -137,7 +185,6 @@ services.factory('formatter', ['parking',
     			elem.note = [it.leg[i].transport.routeShortName];
     		} else if (t == 'CAR') {
         		if (meanTypes.indexOf('CAR') < 0) {
-        			meanTypes.push('CAR');
         			var parking = extractParking(it.leg[i]);
         			if (parking) {
             			if (parking.type == 'STREET') {
@@ -150,8 +197,9 @@ services.factory('formatter', ['parking',
         		}
     		}
     		
-    		if (meanTypes.indexOf(t+elem.note.join(',')) >= 0) continue;
-    		meanTypes.push(t+elem.note.join(','));
+    		var newMt = t + (elem.note.length > 0 ? elem.note.join(','): '');
+    		if (meanTypes.indexOf(newMt) >= 0) continue;
+    		meanTypes.push(newMt);
         	means.push(elem);
     	}
     	return means;
@@ -177,7 +225,11 @@ services.factory('formatter', ['parking',
     	step.action = actionMap[leg.transport.type];
     	if (leg.transport.type == 'BICYCLE' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
     		step.fromLabel = "Pick up a bike at bike sharing ";
-    		step.toLabel = "Leave the bike at bike sharing ";
+    		if (leg.to.stopId && leg.to.stopId.agencyId && leg.to.stopId.agencyId != 'null') {
+        		step.toLabel = "Leave the bike at bike sharing ";
+    		} else {
+        		step.toLabel = "To ";
+    		}
 //    	} else if (leg.transport.type == 'CAR' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
     	} else {
     		step.fromLabel = "From ";
@@ -256,22 +308,28 @@ services.factory('planner', ['$http', 'formatter',
 	  function ($http, formatter) {
 	      var PLANNER = 'https://dev.smartcommunitylab.it/core.mobility';
 	      
+	      var getRequest = function(from, to, means, mode, date, time) {
+	          var data = {
+	  	        	from: {lat:""+from.lat(),lon: ""+from.lng()},
+	  	        	to: {lat: ""+to.lat(),lon: ""+to.lng()},
+	  	        	routeType: mode,
+	  	        	resultsNumber: 3,
+	  	        	date: formatter.getDateStr(date),
+	  	        	departureTime: formatter.getTimeStrMeridian(time),
+	  	        	transportTypes: means.split(',')
+	  	          };
+	          return data;
+	      }; 
+	      
 	      var plan = function(from, to, means, mode, date, time) {
 	          var url = PLANNER + '/plansinglejourney';
-	          var data = {
-	        	from: {lat:""+from.lat(),lon: ""+from.lng()},
-	        	to: {lat: ""+to.lat(),lon: ""+to.lng()},
-	        	routeType: mode,
-	        	resultsNumber: 3,
-	        	date: formatter.getDateStr(date),
-	        	departureTime: formatter.getTimeStrMeridian(time),
-	        	transportTypes: means.split(',')
-	          };
+	          var data = getRequest(from, to, means, mode, date, time);
 	          return $http.post(url,data);
           };
           
           return {
-              plan: plan
+              plan: plan,
+              getRequest: getRequest
           };
       }
   ]);

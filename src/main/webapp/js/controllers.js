@@ -1,7 +1,7 @@
 var plannerControllers = angular.module('plannerControllers', [])
 
-.controller('HomeCtrl', ['$scope', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter',
-  function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter) {
+.controller('HomeCtrl', ['$scope', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing',
+  function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing) {
 
 	// current user position, defaults to Trento
 	$scope.myposition = $rootScope.CENTER;
@@ -12,6 +12,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.toMarker = null;
     $scope.mode = 'fastest';
     $scope.means = {'TRANSIT':true};
+    $scope.layers = {'PARKING':{show: false, elements: null, get: parking.getAll},'BIKESHARING':{show: false, elements: null, get: bikesharing.getAll}};
 	$scope.currentItinerary = null;
 	$scope.legElems = [];
 	$scope.planned = false;
@@ -23,6 +24,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 				e.setMap(null);
 			});
 			$scope.legElems = [];
+		}
+		for (var l in $scope.layers) {
+			$scope.layers[l].show = false;
+			if ($scope.layers[l].elements) {
+				$scope.layers[l].elements.forEach(function(e) {
+					e.setMap(null);
+				});
+			}
 		}
 	};
 	
@@ -249,6 +258,64 @@ var plannerControllers = angular.module('plannerControllers', [])
     
     $scope.hideLoading = function() {
     	$scope.loadingInstance.dismiss('done');
+    };
+    
+    
+    $scope.popoverShown = false;
+    $scope.request = function () {
+    	var data = planner.getRequest(
+    			$scope.fromMarker.getPosition(), 
+    			$scope.toMarker.getPosition(),
+    			convertMeans(),
+    			$scope.mode,
+    			$scope.mydate,
+    			$scope.mytime);
+    	$('#reqbutton').popover('destroy');
+    	if (!$scope.popoverShown) {
+        	$('#reqbutton').popover({html:true, content:'<pre>'+JSON.stringify(data, null, 2)+'</pre>'});
+        	$('#reqbutton').popover('show');
+        	$scope.popoverShown = true;
+    	} else {
+    		$scope.popoverShown = false;    		
+    	}
+    };
+
+    $scope.infoWindow = new google.maps.InfoWindow();
+    
+    $scope.toggleLayer = function(l) {
+    	$scope.layers[l].show = !$scope.layers[l].show;
+    	if ($scope.layers[l].show) {
+    		if ($scope.layers[l].elements) {
+				$scope.layers[l].elements.forEach(function(e) {
+					e.setMap($scope.map);
+				});
+    		} else {
+    			var data = $scope.layers[l].get();
+    			$scope.layers[l].elements = [];
+    			for (var i = 0; i < data.length; i++) {
+    				var marker = new google.maps.Marker({
+    		            position: new google.maps.LatLng(data[i].position[0],data[i].position[1]),
+    		            icon: 'img/'+data[i].type+'.png',
+    		            map: $scope.map,
+    		            title: data[i].title,
+    		            description: data[i].description
+    		            
+    		        });
+    				google.maps.event.addListener(marker, 'click', function() {
+    					$scope.infoWindow.setContent( '<h4>'+this.title+'</h4>'+this.description);
+    					$scope.infoWindow.open($scope.map,this);
+    				  });
+    				$scope.layers[l].elements.push(marker);
+    			} 
+    		}
+    		
+    	} else {
+			if ($scope.layers[l].elements) {
+				$scope.layers[l].elements.forEach(function(e) {
+					e.setMap(null);
+				});
+			}
+    	}
     };
     
 }]);

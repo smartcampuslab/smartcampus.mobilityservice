@@ -223,3 +223,7 @@ body {
 .modal-sm > div {
 	display: inline-block;
 }
+
+.popover {
+	max-width: 500px !important;
+}
