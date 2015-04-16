@@ -150,14 +150,18 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 		ItinerarySorter.sort(newItineraries, criteria);
 
+		long minTime = Long.MAX_VALUE;
 		long maxTime = 0;
+		long maxDuration = 0;
 		double maxDistance = 0;
 
 		for (Itinerary it : newItineraries) {
 			if (it.isPromoted()) {
 				continue;
 			}
+			minTime = Math.min(minTime, it.getEndtime());
 			maxTime = Math.max(maxTime, it.getEndtime());
+			maxDuration = Math.max(maxDuration, it.getDuration());
 			double distance = 0;
 			for (Leg leg : it.getLeg()) {
 				distance += leg.getLength();
@@ -170,11 +174,16 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 			if (!it.isPromoted()) {
 				continue;
 			}
-			if (maxTime != 0 && it.getEndtime() > maxTime + (1000 * 60 * 30)) {
+			if ((maxTime != 0 && it.getEndtime() > maxTime + (1000 * 60 * 30))
+					|| (maxDuration != 0
+							&& it.getDuration() > Math.min(maxDuration
+									+ (1000 * 60 * 30), maxDuration * 1.5) && it
+							.getEndtime() <= minTime + (1000 * 60 * 10))) {
 				toRemove.add(it);
-				logger.info("Removing by time: " + it.getDuration() + "/" + maxTime);
+				logger.info("Removing by \"slow\" trip: " + it.getDuration() + "," + maxDuration + " / " + it.getStartime() + "," + maxTime);
 				continue;
-			}
+			}		
+			
 
 			double distance = 0;
 			for (Leg leg : it.getLeg()) {
