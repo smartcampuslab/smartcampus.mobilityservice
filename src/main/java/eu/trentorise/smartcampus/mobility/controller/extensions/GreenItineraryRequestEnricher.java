@@ -226,7 +226,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		for (PlanRequest pr : planRequests) {
 			List<TType> req = Arrays.asList(journeyRequest.getTransportTypes());
 			if (pr.getType().equals(TType.WALK) || pr.getType().equals(TType.BICYCLE) || pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
-				if (req.contains(pr.getType())) {
+				if (req.contains(pr.getType()) && pr.getValue() != 0) {
 					for (Itinerary it : pr.getItinerary()) {
 						it.setPromoted(true);
 						toKeep.add(it);
