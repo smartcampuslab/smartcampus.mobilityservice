@@ -21,7 +21,7 @@ services.factory('geocoder', ['$http',
 ]);
 services.factory('parking', ['$http',
   function ($http) {
-      var GEOCODER = 'https://tn.smartcommunitylab.it/core.mobility/';
+      var GEOCODER = 'https://dev.smartcommunitylab.it/core.mobility/';
       var parkings = function(agency) {
           var url = GEOCODER + 'getparkingsbyagency/';
           return $http.get(url + agency);
@@ -45,7 +45,7 @@ services.factory('parking', ['$http',
               	for (var a in parkingMap) {
               		for (var p in parkingMap[a]) {
               			var e = parkingMap[a][p];
-              			res.push({title:e.name, description: e.description, position:e.position, type:'parking'});
+              			res.push({title:e.name, description: e.description, position:e.position, type:e.extra && e.extra.parkAndRide ? 'parking_pnr' : 'parking'});
               		}
               	}
               	return res;
