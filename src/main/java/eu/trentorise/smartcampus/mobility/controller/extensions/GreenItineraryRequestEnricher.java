@@ -178,7 +178,7 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 					|| (maxDuration != 0
 							&& it.getDuration() > Math.min(maxDuration
 									+ (1000 * 60 * 30), maxDuration * 1.5) && it
-							.getEndtime() <= minTime + (1000 * 60 * 10))) {
+							.getEndtime() > minTime + (1000 * 60 * 10))) {
 				toRemove.add(it);
 				logger.info("Removing by \"slow\" trip: " + it.getDuration() + "," + maxDuration + " / " + it.getStartime() + "," + maxTime);
 				continue;
