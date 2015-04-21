@@ -21,7 +21,7 @@ services.factory('geocoder', ['$http',
 ]);
 services.factory('parking', ['$http',
   function ($http) {
-      var GEOCODER = 'https://tn.smartcommunitylab.it/core.mobility/';
+      var GEOCODER = 'https://dev.smartcommunitylab.it/core.mobility/';
       var parkings = function(agency) {
           var url = GEOCODER + 'getparkingsbyagency/';
           return $http.get(url + agency);
@@ -45,7 +45,7 @@ services.factory('parking', ['$http',
               	for (var a in parkingMap) {
               		for (var p in parkingMap[a]) {
               			var e = parkingMap[a][p];
-              			res.push({title:e.name, description: e.description, position:e.position, type:'parking'});
+              			res.push({title:e.name, description: e.description, position:e.position, type:e.extra && e.extra.parkAndRide ? 'parking_pnr' : 'parking'});
               		}
               	}
               	return res;
@@ -149,13 +149,14 @@ services.factory('formatter', ['parking',
     		}
     		res.type = 'STREET';
     	}
-    	if (leg.to.stopId && leg.to.stopId.extra) {
-    		if (leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
-    			var cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
+    	if (leg.to.stopId) {
+    		var cost = 'gratis';
+    		if (leg.to.stopId.extra && leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
+    			cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
     			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
-    			res.cost = cost;
-    			res.note.push(cost);
     		}
+			res.cost = cost;
+			res.note.push(cost);
     		res.type = 'PARK';
     	}
     	if (leg.to.stopId && leg.to.stopId.id) {

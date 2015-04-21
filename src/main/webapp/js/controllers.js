@@ -25,14 +25,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 			});
 			$scope.legElems = [];
 		}
-		for (var l in $scope.layers) {
-			$scope.layers[l].show = false;
-			if ($scope.layers[l].elements) {
-				$scope.layers[l].elements.forEach(function(e) {
-					e.setMap(null);
-				});
-			}
-		}
+//		for (var l in $scope.layers) {
+//			$scope.layers[l].show = false;
+//			if ($scope.layers[l].elements) {
+//				$scope.layers[l].elements.forEach(function(e) {
+//					e.setMap(null);
+//				});
+//			}
+//		}
 	};
 	
 	// initialize map
