@@ -136,15 +136,6 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 			}
 		}
 
-		for (Itinerary it1 : original) {
-			for (Itinerary it2 : promoted) {
-				if (it1.equals(it2)) {
-					toRemove.add(it2);
-				}
-			}
-		}
-		promoted.removeAll(toRemove);
-
 		newItineraries.addAll(original);
 		newItineraries.addAll(promoted);
 
@@ -199,22 +190,46 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 		newItineraries.removeAll(toRemove);
 
-		// toRemove = Lists.newArrayList();
-		// int promotedN = 0;
-		// for (Itinerary it : newItineraries) {
-		// if (it.isPromoted()) {
-		// promotedN++;
-		// } else {
-		// continue;
-		// }
-		// if (promotedN > 2 && it.isPromoted()) {
-		// logger.info("Removing too many");
-		// toRemove.add(it);
-		// }
-		// }
-		//
-		// newItineraries.removeAll(toRemove);
+		toRemove = Lists.newArrayList();
+		int promotedN = 0;
+		for (Itinerary it : newItineraries) {
+			if (it.isPromoted()) {
+				promotedN++;
+			} else {
+				continue;
+			}
+			if (promotedN > 2 && it.isPromoted()) {
+				logger.info("Removing too many");
+				toRemove.add(it);
+			}
+		}
 
+		newItineraries.removeAll(toRemove);
+
+
+		original = new HashSet<Itinerary>();
+		promoted = new HashSet<Itinerary>();
+		for (Itinerary it : newItineraries) {
+			if (it.isPromoted()) {
+				promoted.add(it);
+			} else {
+				original.add(it);
+			}
+		}
+
+		for (Itinerary it1 : promoted) {
+			for (Itinerary it2 : original) {
+				if (it1.equals(it2)) {
+					toRemove.add(it2);
+				}
+			}
+		}
+		original.removeAll(toRemove);	
+		
+		newItineraries = Lists.newArrayList(original);
+		newItineraries.addAll(promoted);
+	
+	
 		return newItineraries;
 
 	}
