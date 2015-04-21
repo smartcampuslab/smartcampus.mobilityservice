@@ -149,13 +149,14 @@ services.factory('formatter', ['parking',
     		}
     		res.type = 'STREET';
     	}
-    	if (leg.to.stopId && leg.to.stopId.extra) {
-    		if (leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
-    			var cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
+    	if (leg.to.stopId) {
+    		var cost = 'gratis';
+    		if (leg.to.stopId.extra && leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
+    			cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
     			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
-    			res.cost = cost;
-    			res.note.push(cost);
     		}
+			res.cost = cost;
+			res.note.push(cost);
     		res.type = 'PARK';
     	}
     	if (leg.to.stopId && leg.to.stopId.id) {
