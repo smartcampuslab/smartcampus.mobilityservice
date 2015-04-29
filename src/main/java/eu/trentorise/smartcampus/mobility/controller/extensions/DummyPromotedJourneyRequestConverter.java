@@ -9,7 +9,10 @@ public class DummyPromotedJourneyRequestConverter implements PromotedJourneyRequ
 
 	@Override
 	public void modifyRequest(SingleJourney request) {
-		
+	}	
+	
+	@Override
+	public void processRequests(List<PlanRequest> requests) {
 	}	
 	
 	@Override

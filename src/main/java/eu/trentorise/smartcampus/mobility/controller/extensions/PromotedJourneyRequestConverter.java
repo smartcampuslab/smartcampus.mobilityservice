@@ -8,5 +8,6 @@ import java.util.List;
 public interface PromotedJourneyRequestConverter {
 
 	public void modifyRequest(SingleJourney request);
+	public void processRequests(List<PlanRequest> requests);
 	public void promoteJourney(List<PlanRequest> requests);
 }

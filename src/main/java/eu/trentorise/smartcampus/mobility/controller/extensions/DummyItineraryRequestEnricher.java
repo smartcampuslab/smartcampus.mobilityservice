@@ -10,6 +10,8 @@ import java.util.List;
 
 import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
+
 
 public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 
@@ -30,6 +32,11 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
 	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests, List<Itinerary> itineraries) {
+	}
+
+	@Override
+	public void sort(List<Itinerary> itineraries, RType criterion) {
+		ItinerarySorter.sort(itineraries, criterion);
 	}
 
 }

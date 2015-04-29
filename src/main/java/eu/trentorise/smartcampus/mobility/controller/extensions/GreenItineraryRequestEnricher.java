@@ -274,5 +274,11 @@ public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 		Collections.reverse(itineraries);
 
 	}
+	
+	@Override
+	public void sort(List<Itinerary> itineraries, RType criterion) {
+		ItinerarySorter.sort(itineraries, criterion);
+	}	
+	
 
 }
