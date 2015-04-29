@@ -95,8 +95,8 @@ services.factory('bikesharing', ['$http',
      }
    ]);
 
-services.factory('formatter', ['parking',
-  function (parking) {
+services.factory('formatter', ['parking', '$rootScope',
+  function (parking, $rootScope) {
     var getDateStr = function(date) {
   	  return (date.getMonth() < 9 ? '0':'')+(date.getMonth()+1) +'/'+
   	  		 (date.getDate() < 10 ? '0':'')+date.getDate() +'/' +
@@ -122,9 +122,10 @@ services.factory('formatter', ['parking',
     		'BICYCLE'	: 'ic_mt_bicycle',
     		'CAR'		: 'ic_mt_car',
     		'BUS'		: 'ic_mt_bus',
+    		'EXTRA'		: 'ic_mt_extraurbano',
     		'TRAIN'		: 'ic_mt_train',
     		'PARK'		: 'ic_mt_parking',
-//    		'TRANSIT'	: 'ic_mt_gondola',
+    		'TRANSIT'	: 'ic_mt_funivia',
     		'STREET'	: 'ic_price_parking'
     };
     var actionMap = {
@@ -134,6 +135,13 @@ services.factory('formatter', ['parking',
     		'BUS'		: 'Take the bus ',
     		'TRAIN'		: 'Take the train '
     };
+
+    var getImageName = function(tt, agency) {
+    	if (tt == 'BUS' && $rootScope.EXTRAURBAN_AGENCIES.indexOf(agency)>=0) {
+    		return ttMap['EXTRA'];
+    	}
+    	return ttMap[tt];
+    }
     
     var extractParking = function(leg) {
     	var res = {type: null, cost:null, time: null, note: [], img: null};
@@ -165,7 +173,7 @@ services.factory('formatter', ['parking',
     		res.place = parkingPlace != null ? parkingPlace.description : leg.to.stopId.id;
     	}
     	if (res.type) {
-    		res.img = 'img/'+ttMap[res.type]+'.png';
+    		res.img = 'img/'+getImageName(res.type)+'.png';
     		return res;
     	}
     };
@@ -176,10 +184,10 @@ services.factory('formatter', ['parking',
     	for (var i = 0; i < it.leg.length; i++) {
     		var t = it.leg[i].transport.type;
     		var elem = {note:[],img:null};
-    		elem.img = ttMap[t];
+    		elem.img = getImageName(t,it.leg[i].transport.agencyId);
     		if (!elem.img) {
     			console.log('UNDEFINED: '+it.leg[i].transport.type);
-    			elem.img  = ttMap['BUS'];
+    			elem.img  = getImageName('BUS');
     		}
     		elem.img = 'img/'+elem.img+'.png';
     		
@@ -262,10 +270,10 @@ services.factory('formatter', ['parking',
     		nextFrom = null;
 
     		var t = plan.leg[i].transport.type;
-    		step.mean.img = ttMap[t];
+    		step.mean.img = getImageName(t,plan.leg[i].transport.agencyId);
     		if (!step.mean.img) {
     			console.log('UNDEFINED: '+plan.leg[i].transport.type);
-    			step.mean.img  = ttMap['BUS'];
+    			step.mean.img  = getImageName('BUS');
     		}
     		step.mean.img = 'img/'+step.mean.img +'.png';
 
