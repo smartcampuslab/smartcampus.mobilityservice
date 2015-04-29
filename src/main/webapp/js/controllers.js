@@ -11,6 +11,9 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.fromMarker = null;
     $scope.toMarker = null;
     $scope.mode = 'fastest';
+    
+    $scope.useCoordinates = false;
+    
     $scope.means = {'TRANSIT':true};
     $scope.layers = {'PARKING':{show: false, elements: null, get: parking.getAll},'BIKESHARING':{show: false, elements: null, get: bikesharing.getAll}};
 	$scope.currentItinerary = null;
@@ -47,8 +50,17 @@ var plannerControllers = angular.module('plannerControllers', [])
 	  }   
       $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-	  $scope.updateAddress = function(obj, latLng, replan) {
-	    	geocoder.geocode(latLng.lat(),latLng.lng()).success(function(data){
+	  $scope.updateAddress = function(obj, latLng, replan, keepAddress) {
+		  if ($scope.useCoordinates) {
+			  obj.setPosition(latLng);
+			  if (!keepAddress) {
+				  obj.address = latLng.lat()+','+latLng.lng();
+			  }
+	          if (replan && $scope.planned) {
+				$scope.plan();
+			  }
+		  } else {
+			geocoder.geocode(latLng.lat(),latLng.lng()).success(function(data){
 	    		if (data && data.response && data.response.docs) {
 	    			var point = data.response.docs[0];
 	    			var ll = point.coordinate.split(',');
@@ -71,6 +83,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 	    			}
 	    		}
 	    	});
+		  }
 	  };
 
 	  // create new marker with the specified icon and position,
@@ -99,12 +112,26 @@ var plannerControllers = angular.module('plannerControllers', [])
 	  google.maps.event.addListener($scope.map, 'click', function(evt) {
 		  if ($scope.fromMarker == null) {
 		    $scope.fromMarker = $scope.newMarker(evt.latLng, 'ic_start');
+	    	$scope.$apply();
 		  }
 		  else if ($scope.toMarker == null) {
 		    $scope.toMarker = $scope.newMarker(evt.latLng, 'ic_stop');
+	    	$scope.$apply();
 		  }
 	  });
     }
+    
+    $scope.changeAddressModality = function() {
+    	$scope.useCoordinates = !$scope.useCoordinates;
+    	$scope.reset();
+    };
+
+    $scope.changeAddress = function(m) {
+    	var coords = m.address.split(',');
+    	var ll = new google.maps.LatLng(new Number(coords[0]),new Number(coords[1]));
+    	$scope.updateAddress(m,ll,false, true);
+    	$scope.apply();
+    };
     
     $scope.initMap();
 
@@ -178,8 +205,10 @@ var plannerControllers = angular.module('plannerControllers', [])
     	res = [];
     	if ($scope.means['TRANSIT']) res.push('TRANSIT');
     	if ($scope.means['CAR']) res.push('CAR,CARWITHPARKING');
+    	if ($scope.means['SHAREDCAR']) res.push('SHAREDCAR_WITHOUT_STATION');
     	if ($scope.means['WALK']) res.push('WALK');
-    	if ($scope.means['BIKE']) res.push('BICYCLE,SHAREDBIKE,SHAREDBIKE_WITHOUT_STATION');
+    	if ($scope.means['BIKE']) res.push('BICYCLE');
+    	if ($scope.means['SHAREDBIKE']) res.push('SHAREDBIKE','SHAREDBIKE_WITHOUT_STATION');
     	return res.join(',');
     };
     
@@ -208,7 +237,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     				if (a.promoted != b.promoted) {
     					return b.promoted - a.promoted;
     				}
-    				return a.startime != b.startime ? a.startime - b.startime : a.duration - b.duration;
+    				return 0;
+    				//return a.startime != b.startime ? a.startime - b.startime : a.duration - b.duration;
     			});
     			
     			data.forEach(function(it, idx){
@@ -235,7 +265,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     };
 
     $scope.showPlan = function(plan) {
-    	formatter.process(plan, $scope.fromMarker.address, $scope.toMarker.address);
+    	formatter.process(plan, $scope.fromMarker.address, $scope.toMarker.address, $scope.useCoordinates);
     	
     	$scope.currentItinerary = plan;
     	$scope.resetDrawings();

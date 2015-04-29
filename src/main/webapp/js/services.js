@@ -124,6 +124,7 @@ services.factory('formatter', ['parking',
     		'BUS'		: 'ic_mt_bus',
     		'TRAIN'		: 'ic_mt_train',
     		'PARK'		: 'ic_mt_parking',
+//    		'TRANSIT'	: 'ic_mt_gondola',
     		'STREET'	: 'ic_price_parking'
     };
     var actionMap = {
@@ -247,18 +248,17 @@ services.factory('formatter', ['parking',
 		step.to = leg.to.name;
     };
     
-    var process = function(plan, from, to) {
+    var process = function(plan, from, to, useCoordinates) {
     	plan.steps = [];
-    	var nextFrom = from;
+    	var nextFrom = !useCoordinates ? from : nextFrom = plan.leg[0].from.name+' ('+plan.leg[0].from.lat+','+plan.leg[0].from.lon+')';
     	
     	for (var i = 0; i < plan.leg.length; i++) {
     		var step = {};
     		step.startime = i == 0 ? plan.startime: plan.leg[i].startime;
     		step.endtime = plan.leg[i].endtime;
     		step.mean = {};
-    		
+
     		extractDetails(step, plan.leg[i], i, nextFrom);
-    		if (i == plan.leg.length-1) step.to = to;
     		nextFrom = null;
 
     		var t = plan.leg[i].transport.type;
@@ -288,6 +288,7 @@ services.factory('formatter', ['parking',
     				}
     			}
     		}
+    		if (useCoordinates && i == plan.leg.length-1) step.to += ' ('+plan.leg[i].to.lat+','+plan.leg[i].to.lon+')';
     		plan.steps.push(step);
     		if (parkingStep != null) {
         		plan.steps.push(parkingStep);

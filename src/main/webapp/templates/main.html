@@ -15,7 +15,7 @@
 				  <div class="form-group">
 				    <label for="from">From</label>
 				    <div class="input-group">
-				    <input type="text" class="form-control" id="from" ng-model="fromMarker.address" placeholder="From...">
+				    <input type="text" class="form-control" ng-disabled="!useCoordinates" ng-change="changeAddress(fromMarker)" id="from" ng-model="fromMarker.address" placeholder="From...">
             <span class="input-group-btn">
               <button ng-click="fromCurrent(fromMarker)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
             </span>
@@ -24,10 +24,15 @@
           <div class="form-group">
             <label for="to">To</label>
             <div class="input-group">
-            <input type="text" class="form-control" id="to" ng-model="toMarker.address" placeholder="To...">
+            <input type="text" class="form-control" id="to" ng-disabled="!useCoordinates" ng-change="changeAddress(toMarker)" ng-model="toMarker.address" placeholder="To...">
             <span class="input-group-btn">
               <button ng-click="toCurrent()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
             </span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="checkbox"><label><input type="checkbox" ng-click="changeAddressModality()">Use coordinates directly</label></div>
             </div>
           </div>
           
@@ -47,10 +52,12 @@
           
           <div class="row">
             <div class="col-md-6">
-		          <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">Car</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">Walking</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">Bike</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDBIKE">Shared Bike</label></div>
 		          <div class="checkbox"><label><input type="checkbox" ng-model="means.TRANSIT">Public Transport</label></div>
-		          <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">Walking</label></div>
-		          <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">Bike</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">Car</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDCAR">Shared Car</label></div>
             </div>
             <div class="col-md-6">
               <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeF" value="fastest" checked>Fastest</label></div>            
