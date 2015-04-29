@@ -58,7 +58,6 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
-import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -262,6 +261,8 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		promotedJourneyRequestConverter.modifyRequest(journeyRequest);
 		
 		List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true);
+		promotedJourneyRequestConverter.processRequests(reqs);
+		
 		Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
 
 		List<Itinerary> itineraries = new ArrayList<Itinerary>();
@@ -301,10 +302,11 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
 
-		ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
+//		ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
+		itineraryRequestEnricher.sort(itineraries, journeyRequest.getRouteType());
 
 		itineraryRequestEnricher.completeResponse(journeyRequest, reqs, itineraries);
-
+		
 		promotedJourneyRequestConverter.promoteJourney(reqs);
 		
 		return itineraries;
