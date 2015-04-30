@@ -130,7 +130,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     	var coords = m.address.split(',');
     	var ll = new google.maps.LatLng(new Number(coords[0]),new Number(coords[1]));
     	$scope.updateAddress(m,ll,false, true);
-    	$scope.apply();
+    	$scope.$apply();
     };
     
     $scope.initMap();
@@ -221,6 +221,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     		return;
     	}
     	$scope.showLoading();
+		$scope.requestedFrom = $scope.fromMarker.address;
+		$scope.requestedTo = $scope.toMarker.address;
     	
     	planner.plan(
     			$scope.fromMarker.getPosition(), 
@@ -289,7 +291,6 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.hideLoading = function() {
     	$scope.loadingInstance.dismiss('done');
     };
-    
     
     $scope.popoverShown = false;
     $scope.request = function () {

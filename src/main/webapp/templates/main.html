@@ -171,7 +171,7 @@
             <img src="img/ic_point_outline.png">
           </div>
           <div class="col-md-2">{{toTime(currentItinerary.startime)}}</div>
-          <div class="col-md-9">{{fromMarker.address}}</div>
+          <div class="col-md-9">{{requestedFrom}}</div>
         </div>
         <!-- ROW -->
         <div class="row leg" ng-repeat="step in currentItinerary.steps">
@@ -198,7 +198,7 @@
         <div class="row leg">
           <div class="col-md-1 end-leg"><img src="img/ic_point_outline.png"></div>
           <div class="col-md-2">{{toTime(currentItinerary.endtime)}}</div>
-          <div class="col-md-9">{{toMarker.address}}</div>
+          <div class="col-md-9">{{requestedTo}}</div>
         </div>
         </div>
 			  </div>
