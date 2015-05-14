@@ -268,7 +268,8 @@ services.factory('formatter', ['parking', '$rootScope',
 
     		extractDetails(step, plan.leg[i], i, nextFrom);
     		nextFrom = null;
-
+    		step.length = getLength(plan.leg[i]);
+    		
     		var t = plan.leg[i].transport.type;
     		step.mean.img = getImageName(t,plan.leg[i].transport.agencyId);
     		if (!step.mean.img) {
@@ -304,12 +305,24 @@ services.factory('formatter', ['parking', '$rootScope',
     	}
     };
     
+    var getLength = function(it) {
+    	if (!it.leg && it.length) {
+    		return (it.length / 1000).toFixed(2);
+    	}
+    	var l = 0;
+    	for (var i = 0; i < it.leg.length; i++) {
+    		l += it.leg[i].length;
+    	}
+    	return (l / 1000).toFixed(2);
+    }
+    
     return {
     	getTimeStrMeridian: getTimeStr,
     	getTimeStr: getTimeStrSimple,
     	getDateStr: getDateStr,
     	extractItineraryMeans: extractItineraryMeans,
     	extractMapElements: extractMapElements,
+    	getLength: getLength, 
     	process: process
     }
 }]);

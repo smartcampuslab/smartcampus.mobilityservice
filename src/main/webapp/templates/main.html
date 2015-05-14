@@ -134,7 +134,7 @@
 		      <div class="row">
 		        <div class="col-md-2 text-center">
 		          <div>{{toTime(plan.startime)}}</div>
-		          <div>|</div>
+		          <div><small class="text-muted">({{plan.length}}km)</small></div>
 		          <div>{{toTime(plan.endtime)}}</div>
 		        </div>
 		        <div class="col-md-10">
@@ -191,7 +191,12 @@
             </p>
           </div>
           <div class="col-md-2">
-            <img class="pull-right" ng-src="{{step.mean.img}}" >
+             <div class="tt thumbnail">
+                <img ng-src="{{step.mean.img}}" >
+                <div class="text-center" ng-if="step.length > 0">
+                  <div><small>{{step.length}}km</small></div>
+                </div>
+              </div>
           </div>
         </div>
         <!-- END -->
