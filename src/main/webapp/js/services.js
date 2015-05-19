@@ -2,7 +2,6 @@ var services = angular.module('webplanner.services', []);
 
 services.factory('geocoder', ['$http',
     function ($http) {
-        var GEOCODER = 'https://os.smartcommunitylab.it/core.geocoder/';
         var getAddresses = function (userAddress) {
             var url = GEOCODER + 'spring/address?address=';
             return $http.get(url + encodeURI(userAddress));
@@ -21,9 +20,8 @@ services.factory('geocoder', ['$http',
 ]);
 services.factory('parking', ['$http',
   function ($http) {
-      var GEOCODER = 'https://dev.smartcommunitylab.it/core.mobility/';
       var parkings = function(agency) {
-          var url = GEOCODER + 'getparkingsbyagency/';
+          var url = PARKING + 'getparkingsbyagency/';
           return $http.get(url + agency);
       };
       
@@ -59,9 +57,8 @@ services.factory('parking', ['$http',
 
 services.factory('bikesharing', ['$http',
      function ($http) {
-         var ENDPOINT = 'https://tn.smartcommunitylab.it/core.mobility/';
          var parkings = function(agency) {
-             var url = ENDPOINT + 'bikesharing/';
+             var url = BIKESHARING + 'bikesharing/';
              return $http.get(url + agency);
          };
          
@@ -329,7 +326,6 @@ services.factory('formatter', ['parking', '$rootScope',
 
 services.factory('planner', ['$http', 'formatter',
 	  function ($http, formatter) {
-	      var PLANNER = 'https://dev.smartcommunitylab.it/core.mobility';
 	      
 	      var getRequest = function(from, to, means, mode, date, time) {
 	          var data = {

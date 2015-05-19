@@ -6,13 +6,10 @@ var webplannerApp = angular.module('webplanner', [,'ui.bootstrap',
 
 webplannerApp.run(['$rootScope', '$q', '$modal', '$location', 'parking', 'bikesharing',
   function($rootScope, $q, $modal, $location, parking, bikesharing){
-    $rootScope.EXTRAURBAN_AGENCIES = ['17'];
-	$rootScope.CENTER = new google.maps.LatLng(46.071530, 11.119497);
-    var agencies = ['COMUNE_DI_TRENTO','COMUNE_DI_ROVERETO'];
-    parking.init(agencies);
-    
-    var bikeAgencies = ['trento','rovereto', 'pergine_valsugana'];
-    bikesharing.init(bikeAgencies);
+    $rootScope.EXTRAURBAN_AGENCIES = EXTRAURBAN_AGENCIES;
+	$rootScope.CENTER = new google.maps.LatLng(CENTER[0],CENTER[1]);
+    parking.init(PARKING_AGENCIES);
+    bikesharing.init(BIKE_AGENCIES);
 
   }]);
 

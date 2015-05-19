@@ -20,6 +20,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
     <script src="lib/sprintf.min.js"></script>
 
+    <script src="js/props.js"></script>
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
