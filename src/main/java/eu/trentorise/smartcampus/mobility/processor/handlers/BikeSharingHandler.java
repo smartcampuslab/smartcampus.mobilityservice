@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 
 import eu.trentorise.smartcampus.mobility.model.Parking;
@@ -64,12 +65,19 @@ public class BikeSharingHandler implements ServiceHandler{
 	@Autowired
 	@Value("${bikesharing.ids}")
 	private String bikesharingIds;
+	@Value("${bikesharing.agencyIds}")
+	private String bikesharingAgencyIds;
+	@Value("${bikesharing.place}")
+	private String bikesharingPlaces;		
 	@Autowired
 	@Value("${bikesharing.user}")
 	private String bikesharingUser;
 	@Autowired
 	@Value("${bikesharing.pwd}")
 	private String bikesharingPwd;
+	
+	private Map<String, String> agenciesMap;
+	private Map<String, String> placesMap;
 
 	private static Logger logger = LoggerFactory.getLogger(BikeSharingHandler.class);
 
@@ -87,8 +95,16 @@ public class BikeSharingHandler implements ServiceHandler{
 		if (StringUtils.hasText(bikesharingIds)){
 			String[] ids = StringUtils.commaDelimitedListToStringArray(bikesharingIds);
 			String[] names= StringUtils.commaDelimitedListToStringArray(bikesharingNames);
+			String[] agencyIds = StringUtils.commaDelimitedListToStringArray(bikesharingAgencyIds);
+			String[] places = StringUtils.commaDelimitedListToStringArray(bikesharingPlaces);
+			
+			agenciesMap = Maps.newTreeMap();
+			placesMap = Maps.newTreeMap();
+			
 			for (int i = 0; i < ids.length;  i++) {
 				String id = ids[i];
+				agenciesMap.put(names[i], agencyIds[i]);
+				placesMap.put(names[i], places[i]);
 				Map<String,Object> params = new HashMap<String, Object>();
 				params.put("user", bikesharingUser);
 				params.put("password", bikesharingPwd);
@@ -104,9 +120,11 @@ public class BikeSharingHandler implements ServiceHandler{
 	@Override
 	public void process(String serviceId, String methodName, String subscriptionId, List<ByteString> list) {
 		String name = subscriptions.get(subscriptionId);
-		this.stations.put(name, new ArrayList<Station>(processMessages(list)));
-		List<Parking> parkingAlerts = convertBikeParcheggi(list);
-		processParkingAlerts(parkingAlerts);
+		if (name != null) {
+			this.stations.put(name, new ArrayList<Station>(processMessages(list)));
+			List<Parking> parkingAlerts = convertBikeParcheggi(list, name);
+			processParkingAlerts(parkingAlerts);
+		}
 	}
 	
 	private synchronized void processParkingAlerts(List<Parking> parkings) {
@@ -163,14 +181,14 @@ public class BikeSharingHandler implements ServiceHandler{
 		return Collections.emptyList();
 	}
 	
-	private List<Parking> convertBikeParcheggi(List<ByteString> data) {
+	private List<Parking> convertBikeParcheggi(List<ByteString> data, String name) {
 		List<Parking> list = new ArrayList<Parking>();
 		for (ByteString bs : data) {
 			try {
 				Stazione s = Stazione.parseFrom(bs);
 				Parking p = new Parking();
-				p.setAgencyId("BIKE_SHARING_TOBIKE_ROVERETO");
-				p.setId(s.getNome() + " - Rovereto");
+				p.setAgencyId(agenciesMap.get(name));
+				p.setId(s.getNome() + " - " + placesMap.get(name));
 				p.setAddress(s.getIndirizzo());
 				p.setFreePlaces(s.getPosti());
 				p.setVehicles(s.getBiciclette());
