@@ -58,9 +58,9 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 			// if (!requestedTypes.contains(TType.SHAREDBIKE_WITHOUT_STATION)) {
 			// types.add(TType.SHAREDBIKE_WITHOUT_STATION);
 			// }
-			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
-				types.add(TType.SHAREDBIKE);
-			}
+//			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
+//				types.add(TType.SHAREDBIKE);
+//			}
 		}
 		for (TType newType : types) {
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, itn);
@@ -184,7 +184,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 				distance += leg.getLength();
 			}
 
-			if (maxDistance != 0 && distance > 2 * maxDistance) {
+			if (maxDistance != 0 && distance > 1.5 * maxDistance) {
 				toRemove.add(it);
 				logger.info("Removing by distance: " + distance + "/" + maxDistance);
 				continue;
