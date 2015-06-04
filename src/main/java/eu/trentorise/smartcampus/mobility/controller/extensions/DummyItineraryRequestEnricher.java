@@ -6,6 +6,7 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.common.collect.Multimap;
@@ -27,7 +28,7 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria) {
-		return itineraries;
+		return new ArrayList(new HashSet<Itinerary>(itineraries));
 	}
 
 	@Override
