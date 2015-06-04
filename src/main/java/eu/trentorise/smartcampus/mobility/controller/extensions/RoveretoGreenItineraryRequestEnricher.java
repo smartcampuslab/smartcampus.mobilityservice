@@ -21,9 +21,9 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 
-public class GreenItineraryRequestEnricher implements ItineraryRequestEnricher {
+public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEnricher {
 
-	private static Log logger = LogFactory.getLog(GreenItineraryRequestEnricher.class);
+	private static Log logger = LogFactory.getLog(RoveretoGreenItineraryRequestEnricher.class);
 
 	@Override
 	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
