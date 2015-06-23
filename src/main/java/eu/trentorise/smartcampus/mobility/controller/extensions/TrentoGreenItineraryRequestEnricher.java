@@ -41,9 +41,9 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 			// if (!requestedTypes.contains(TType.SHAREDBIKE_WITHOUT_STATION)) {
 			// types.add(TType.SHAREDBIKE_WITHOUT_STATION);
 			// }
-			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
-				types.add(TType.SHAREDBIKE);
-			}
+//			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
+//				types.add(TType.SHAREDBIKE);
+//			}
 			if (!requestedTypes.contains(TType.TRANSIT)) {
 				types.add(TType.TRANSIT);
 			}
