@@ -48,13 +48,13 @@
 
 	<bean id="serviceEventProcessor" class="eu.trentorise.smartcampus.mobility.processor.ServiceEventProcessorImpl"/>
 	
-<!-- 	<bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient" scope="singleton" destroy-method="destroy"> -->
-<!-- 		<constructor-arg> -->
-<!-- 			<ref bean="connectionFactory" /> -->
-<!-- 		</constructor-arg> -->
-<!-- 		<property name="clientId" value="vas_mobility_subscriber" /> -->
-<!-- 		<property name="listener" ref="serviceEventProcessor" /> -->
-<!-- 	</bean> -->
+	<bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient" scope="singleton" destroy-method="destroy">
+		<constructor-arg>
+			<ref bean="connectionFactory" />
+		</constructor-arg>
+		<property name="clientId" value="vas_mobility_subscriber" />
+		<property name="listener" ref="serviceEventProcessor" />
+	</bean>
 	
 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher">
 	</bean>		

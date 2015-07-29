@@ -313,6 +313,19 @@ var plannerControllers = angular.module('plannerControllers', [])
     	}
     };
 
+    $scope.report = function() {
+    	var data = planner.getRequest(
+    			$scope.fromMarker.getPosition(), 
+    			$scope.toMarker.getPosition(),
+    			convertMeans(),
+    			$scope.mode,
+    			$scope.mydate,
+    			$scope.mytime);
+    	var dataTxt = JSON.stringify(data);
+    	window.open("mailto:"+MAIL+"?subject=Web Planner: segnalazione problemi&body="+dataTxt);
+    };
+
+    
     $scope.infoWindow = new google.maps.InfoWindow();
     
     $scope.toggleLayer = function(l) {
