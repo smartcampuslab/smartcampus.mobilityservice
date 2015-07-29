@@ -182,7 +182,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     
     // time picker updates time value
     $scope.changed = function () {
-        console.log('Time changed to: ' + $scope.mytime);
+        console.log('Ora cambiata in: ' + $scope.mytime);
     };
     
     // clear the 'from' and 'to' markers
@@ -217,7 +217,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     	$scope.currentItinerary = null;
     	$scope.resetDrawings();
     	if (!$scope.fromMarker || !$scope.toMarker) {
-    		$scope.errorMsg = 'Specify from/to locations!';
+    		$scope.errorMsg = 'Specifica la partenza e la destinazione!';
     		return;
     	}
     	$scope.showLoading();
@@ -246,6 +246,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			data.forEach(function(it, idx){
     				it.length = formatter.getLength(it);
     				it.means = formatter.extractItineraryMeans(it);
+    				it.price = formatter.getItineraryCost(it);
     				it.index = idx;
     			});
     			
@@ -253,12 +254,12 @@ var plannerControllers = angular.module('plannerControllers', [])
         		$scope.errorMsg = null;
         		$scope.showPlan($scope.plans[0]);
     		} else {
-        		$scope.errorMsg = 'No results found';
+        		$scope.errorMsg = 'Nessun risultato trovato.';
     		}
         	$scope.hideLoading();
     	})
     	.error(function(data){
-    		$scope.errorMsg = 'Error planning the route';
+    		$scope.errorMsg = 'Errore durante la pianificazione del percorso.';
         	$scope.hideLoading();
     	});
     }

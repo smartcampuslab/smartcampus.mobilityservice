@@ -8,23 +8,23 @@
 	<div class="col-md-3">
 		<div class="panel panel-default">
 		  <div class="panel-heading">
-        <h3 class="panel-title">Plan a trip</h3>
+        <h3 class="panel-title">Pianifica un viaggio</h3>
 		  </div>
 		  <div class="panel-body">
 		    <form>
 				  <div class="form-group">
-				    <label for="from">From</label>
+				    <label for="from">Da</label>
 				    <div class="input-group">
-				    <input type="text" class="form-control" ng-disabled="!useCoordinates" ng-change="changeAddress(fromMarker)" id="from" ng-model="fromMarker.address" placeholder="From...">
+				    <input type="text" class="form-control" ng-disabled="!useCoordinates" ng-change="changeAddress(fromMarker)" id="from" ng-model="fromMarker.address" placeholder="Da...">
             <span class="input-group-btn">
               <button ng-click="fromCurrent(fromMarker)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
             </span>
 				    </div>
 				  </div>
           <div class="form-group">
-            <label for="to">To</label>
+            <label for="to">A</label>
             <div class="input-group">
-            <input type="text" class="form-control" id="to" ng-disabled="!useCoordinates" ng-change="changeAddress(toMarker)" ng-model="toMarker.address" placeholder="To...">
+            <input type="text" class="form-control" id="to" ng-disabled="!useCoordinates" ng-change="changeAddress(toMarker)" ng-model="toMarker.address" placeholder="A...">
             <span class="input-group-btn">
               <button ng-click="toCurrent()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
             </span>
@@ -32,7 +32,7 @@
           </div>
           <div class="row">
             <div class="col-md-12">
-              <div class="checkbox"><label><input type="checkbox" ng-click="changeAddressModality()">Use coordinates directly</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-click="changeAddressModality()">Inserisci direttamente le coordinate</label></div>
             </div>
           </div>
           
@@ -52,23 +52,23 @@
           
           <div class="row">
             <div class="col-md-6">
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">Walking</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">Bike</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDBIKE">Shared Bike</label></div>
-		          <div class="checkbox"><label><input type="checkbox" ng-model="means.TRANSIT">Public Transport</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">Car</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDCAR">Shared Car</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">A piedi</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">In bicicletta</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDBIKE">Con Bike Sharing</label></div>
+		          <div class="checkbox"><label><input type="checkbox" ng-model="means.TRANSIT">Con mezzi pubblici</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">In automobile</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDCAR">Con Car Sharing</label></div>
             </div>
             <div class="col-md-6">
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeF" value="fastest" checked>Fastest</label></div>            
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLC" value="leastChanges">Less changes</label></div>            
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLW" value="leastWalking">Less walking</label></div>            
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeF" value="fastest" checked>Più veloce</label></div>            
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLC" value="leastChanges">Con meno cambi</label></div>            
+              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLW" value="leastWalking">Camminando meno</label></div>            
             </div>
           </div>
           <div class="row">
             <div class="col-md-12">
-	          <button type="button" class="btn btn-default" ng-click="reset()">Reset</button>
-	          <button type="submit" class="btn btn-primary" ng-click="plan()">Submit</button>
+	          <button type="button" class="btn btn-default" ng-click="reset()">Cancella</button>
+	          <button type="submit" class="btn btn-primary" ng-click="plan()">Invia</button>
 
             <button type="button" id="reqbutton" class="btn btn-info pull-right" ng-disabled="!fromMarker || !toMarker" ng-click="request()">?</button>
             </div>
@@ -83,12 +83,12 @@
   <div class="col-md-2">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Layers</h3>
+        <h3 class="panel-title">Punti di interesse</h3>
       </div>
       <div class="panel-body">
          <div class="row">
            <div class="col-md-12">
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Car parking</label></div>
+             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Parcheggi</label></div>
              <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('BIKESHARING')" ng-model="layers.BIKESHARING.show">Bike sharing</label></div>
            </div>
          </div>
@@ -132,17 +132,24 @@
 		    <div ng-class="{'itinerary-selected':$index == currentItinerary.index}">
 		      <a href="" ng-click="showPlan(plan)">
 		      <div class="row">
-		        <div class="col-md-2 text-center">
+		        <div class="col-md-2 text-center" style="min-height: 100px;">
 		          <div>{{toTime(plan.startime)}}</div>
-		          <div><small class="text-muted">({{plan.length}}km)</small></div>
-		          <div>{{toTime(plan.endtime)}}</div>
+		          <div style="position: absolute; bottom: 0;">{{toTime(plan.endtime)}}</div>
 		        </div>
 		        <div class="col-md-10">
-		          <div class="tt thumbnail col-md-2" ng-repeat="mean in plan.means">
-                <img ng-src="{{mean.img}}" >
-                <div class="text-center">
-                  <div ng-repeat="n in mean.note">{{n}}</div>
+              <div class="row">
+                <div class="col-md-12 text-right">
+                <small class="text-muted text-center">{{plan.length}}km</small>
+                <small class="text-muted text-center" ng-if="plan.price > 0">/ {{plan.price}} EUR</small>
                 </div>
+              </div>
+		          <div class="row">
+			          <div class="tt thumbnail col-md-2" ng-repeat="mean in plan.means">
+	                <img ng-src="{{mean.img}}" >
+	                <div class="text-center">
+	                  <div ng-repeat="n in mean.note">{{n}}</div>
+	                </div>
+	              </div>
               </div>
 		        </div>
 		      </div>
@@ -161,7 +168,7 @@
         <div>
         <div class="row green-header" ng-if="currentItinerary.promoted">
           <div class="col-md-12">
-             Sustainable itinerary
+             Itinerario sostenibile
              <span class="glyphicon glyphicon-leaf pull-right" aria-hidden="true"></span>
           </div>
         </div>
@@ -195,6 +202,9 @@
                 <img ng-src="{{step.mean.img}}" >
                 <div class="text-center" ng-if="step.length > 0">
                   <div><small>{{step.length}}km</small></div>
+                </div>
+                <div class="text-center" ng-if="step.cost > 0">
+                  <div><small>{{step.cost}} EUR</small></div>
                 </div>
               </div>
           </div>

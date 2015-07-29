@@ -58,10 +58,15 @@
 	
 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher">
 	</bean>		
-	
 	<bean id="promotedJourneyRequestConverter" class=" eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter">
-	</bean>		
+	</bean>
 	
+<!-- 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
+	</bean>		
+	<bean id="promotedJourneyRequestConverter" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyPromotedJourneyRequestConverter">
+	</bean>			
+ -->	
+ 
 	 <mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
   <bean id="logMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">

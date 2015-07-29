@@ -126,11 +126,11 @@ services.factory('formatter', ['parking', '$rootScope',
     		'STREET'	: 'ic_price_parking'
     };
     var actionMap = {
-    		'WALK'		: 'Walk',
-    		'BICYCLE'	: 'Ride',
-    		'CAR'		: 'Drive',
-    		'BUS'		: 'Take the bus ',
-    		'TRAIN'		: 'Take the train '
+    		'WALK'		: 'Cammina',
+    		'BICYCLE'	: 'Pedala',
+    		'CAR'		: 'Guida',
+    		'BUS'		: 'Prendi l\'autobus ',
+    		'TRAIN'		: 'Prendi il treno '
     };
 
     var getImageName = function(tt, agency) {
@@ -140,12 +140,16 @@ services.factory('formatter', ['parking', '$rootScope',
     	return ttMap[tt];
     }
     
-    var extractParking = function(leg) {
+    var extractParking = function(leg, extended) {
     	var res = {type: null, cost:null, time: null, note: [], img: null};
     	if (leg.extra != null) {
     		if (leg.extra.costData && leg.extra.costData.fixedCost) {
     			var cost = (leg.extra.costData.fixedCost).replace(',','.').replace(' ','');
-    			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
+    			if (extended == true) {
+    				cost = parseFloat(cost) > 0 ? leg.to.stopId.extra.costData.costDefinition : 'gratis';
+    			} else {
+    				cost = parseFloat(cost) > 0 ? '\u20AC' : 'gratis';
+    			}
     			res.cost = cost;
     			res.note.push(cost);
     		}
@@ -159,7 +163,11 @@ services.factory('formatter', ['parking', '$rootScope',
     		var cost = 'gratis';
     		if (leg.to.stopId.extra && leg.to.stopId.extra.costData && leg.to.stopId.extra.costData.fixedCost) {
     			cost = (leg.to.stopId.extra.costData.fixedCost).replace(',','.').replace(' ','');
-    			cost = parseFloat(cost) > 0 ? (cost+'E/h') : 'gratis';
+    			if (extended == true) {
+    				cost = parseFloat(cost) > 0 ? leg.to.stopId.extra.costData.costDefinition : 'gratis';    				
+    			} else {
+    				cost = parseFloat(cost) > 0 ? '\u20AC' : 'gratis';
+    			}
     		}
 			res.cost = cost;
 			res.note.push(cost);
@@ -192,7 +200,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			elem.note = [it.leg[i].transport.routeShortName];
     		} else if (t == 'CAR') {
         		if (meanTypes.indexOf('CAR') < 0) {
-        			var parking = extractParking(it.leg[i]);
+        			var parking = extractParking(it.leg[i], false);
         			if (parking) {
             			if (parking.type == 'STREET') {
             				elem.note = parking.note;
@@ -231,16 +239,16 @@ services.factory('formatter', ['parking', '$rootScope',
     var extractDetails = function(step, leg, idx, from) {
     	step.action = actionMap[leg.transport.type];
     	if (leg.transport.type == 'BICYCLE' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
-    		step.fromLabel = "Pick up a bike at bike sharing ";
+    		step.fromLabel = "Prendi una bicicletta alla stazione di bike sharing ";
     		if (leg.to.stopId && leg.to.stopId.agencyId && leg.to.stopId.agencyId != 'null') {
-        		step.toLabel = "Leave the bike at bike sharing ";
+        		step.toLabel = "Lascia la bicicletta alla stazione di bike sharing ";
     		} else {
-        		step.toLabel = "To ";
+        		step.toLabel = "A ";
     		}
 //    	} else if (leg.transport.type == 'CAR' && leg.transport.agencyId && leg.transport.agencyId != 'null') {
     	} else {
-    		step.fromLabel = "From ";
-    		step.toLabel = "To ";
+    		step.fromLabel = "Da ";
+    		step.toLabel = "A ";
     	}
     	if (leg.transport.type == 'BUS' || leg.transport.type == 'TRAIN' || leg.transport.type == 'TRANSIT') {
     		step.actionDetails = leg.transport.routeShortName;
@@ -266,6 +274,7 @@ services.factory('formatter', ['parking', '$rootScope',
     		extractDetails(step, plan.leg[i], i, nextFrom);
     		nextFrom = null;
     		step.length = getLength(plan.leg[i]);
+    		step.cost = getLegCost(plan, i);
     		
     		var t = plan.leg[i].transport.type;
     		step.mean.img = getImageName(t,plan.leg[i].transport.agencyId);
@@ -277,15 +286,15 @@ services.factory('formatter', ['parking', '$rootScope',
 
     		var parkingStep = null;
     		if (t == 'CAR') {
-    			var parking = extractParking(plan.leg[i]);
+    			var parking = extractParking(plan.leg[i], true);
     			if (parking) {
     				if (parking.type == 'PARK') {
-    					step.to = 'parking '+ parking.place;
+    					step.to = 'parcheggio '+ parking.place;
     					nextFrom = step.to;
         				parkingStep = {
         						startime: plan.leg[i].endtime, 
         						endtime: plan.leg[i].endtime,
-        						action: 'Leave the car at ',
+        						action: 'Lascia la macchina a ',
         						actionDetails: step.to,
         						parking: parking,
         						mean: {img:parking.img}};
@@ -311,7 +320,36 @@ services.factory('formatter', ['parking', '$rootScope',
     		l += it.leg[i].length;
     	}
     	return (l / 1000).toFixed(2);
-    }
+    };
+    
+    var getItineraryCost = function(plan) {
+    	var fareMap = {};
+    	var total = 0;
+    	for (var i = 0; i < plan.leg.length; i++) {
+    		if (plan.leg[i].extra) {
+        		var fare = plan.leg[i].extra.fare;
+        		var fareIdx = plan.leg[i].extra.fareIndex;
+        		if (fare && fareMap[fareIdx] == null) {
+        			fareMap[fareIdx] = fare;
+        			total += fare.cents / 100;
+        		}
+    		}
+    	}
+    	return total;
+    };
+    var getLegCost = function(plan, i) {
+    	var fareMap = {};
+    	var total = 0;
+		if (plan.leg[i].extra) {
+    		var fare = plan.leg[i].extra.fare;
+    		var fareIdx = plan.leg[i].extra.fareIndex;
+    		if (fare && fareMap[fareIdx] == null) {
+    			fareMap[fareIdx] = fare;
+    			total += fare.cents / 100;
+    		}
+		}
+    	return total;
+    };
     
     return {
     	getTimeStrMeridian: getTimeStr,
@@ -320,6 +358,8 @@ services.factory('formatter', ['parking', '$rootScope',
     	extractItineraryMeans: extractItineraryMeans,
     	extractMapElements: extractMapElements,
     	getLength: getLength, 
+    	getItineraryCost: getItineraryCost,
+    	getLegCost: getLegCost,
     	process: process
     }
 }]);
