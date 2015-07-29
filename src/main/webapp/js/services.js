@@ -266,6 +266,7 @@ services.factory('formatter', ['parking', '$rootScope',
     		extractDetails(step, plan.leg[i], i, nextFrom);
     		nextFrom = null;
     		step.length = getLength(plan.leg[i]);
+    		step.cost = getLegCost(plan, i);
     		
     		var t = plan.leg[i].transport.type;
     		step.mean.img = getImageName(t,plan.leg[i].transport.agencyId);
@@ -311,7 +312,36 @@ services.factory('formatter', ['parking', '$rootScope',
     		l += it.leg[i].length;
     	}
     	return (l / 1000).toFixed(2);
-    }
+    };
+    
+    var getItineraryCost = function(plan) {
+    	var fareMap = {};
+    	var total = 0;
+    	for (var i = 0; i < plan.leg.length; i++) {
+    		if (plan.leg[i].extra) {
+        		var fare = plan.leg[i].extra.fare;
+        		var fareIdx = plan.leg[i].extra.fareIndex;
+        		if (fare && fareMap[fareIdx] == null) {
+        			fareMap[fareIdx] = fare;
+        			total += fare.cents / 100;
+        		}
+    		}
+    	}
+    	return total;
+    };
+    var getLegCost = function(plan, i) {
+    	var fareMap = {};
+    	var total = 0;
+		if (plan.leg[i].extra) {
+    		var fare = plan.leg[i].extra.fare;
+    		var fareIdx = plan.leg[i].extra.fareIndex;
+    		if (fare && fareMap[fareIdx] == null) {
+    			fareMap[fareIdx] = fare;
+    			total += fare.cents / 100;
+    		}
+		}
+    	return total;
+    };
     
     return {
     	getTimeStrMeridian: getTimeStr,
@@ -320,6 +350,8 @@ services.factory('formatter', ['parking', '$rootScope',
     	extractItineraryMeans: extractItineraryMeans,
     	extractMapElements: extractMapElements,
     	getLength: getLength, 
+    	getItineraryCost: getItineraryCost,
+    	getLegCost: getLegCost,
     	process: process
     }
 }]);

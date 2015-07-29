@@ -132,17 +132,24 @@
 		    <div ng-class="{'itinerary-selected':$index == currentItinerary.index}">
 		      <a href="" ng-click="showPlan(plan)">
 		      <div class="row">
-		        <div class="col-md-2 text-center">
+		        <div class="col-md-2 text-center" style="min-height: 100px;">
 		          <div>{{toTime(plan.startime)}}</div>
-		          <div><small class="text-muted">({{plan.length}}km)</small></div>
-		          <div>{{toTime(plan.endtime)}}</div>
+		          <div style="position: absolute; bottom: 0;">{{toTime(plan.endtime)}}</div>
 		        </div>
 		        <div class="col-md-10">
-		          <div class="tt thumbnail col-md-2" ng-repeat="mean in plan.means">
-                <img ng-src="{{mean.img}}" >
-                <div class="text-center">
-                  <div ng-repeat="n in mean.note">{{n}}</div>
+              <div class="row">
+                <div class="col-md-12 text-right">
+                <small class="text-muted text-center">{{plan.length}}km</small>
+                <small class="text-muted text-center" ng-if="plan.price > 0">/ {{plan.price}} EUR</small>
                 </div>
+              </div>
+		          <div class="row">
+			          <div class="tt thumbnail col-md-2" ng-repeat="mean in plan.means">
+	                <img ng-src="{{mean.img}}" >
+	                <div class="text-center">
+	                  <div ng-repeat="n in mean.note">{{n}}</div>
+	                </div>
+	              </div>
               </div>
 		        </div>
 		      </div>
@@ -195,6 +202,9 @@
                 <img ng-src="{{step.mean.img}}" >
                 <div class="text-center" ng-if="step.length > 0">
                   <div><small>{{step.length}}km</small></div>
+                </div>
+                <div class="text-center" ng-if="step.cost > 0">
+                  <div><small>{{step.cost}} EUR</small></div>
                 </div>
               </div>
           </div>

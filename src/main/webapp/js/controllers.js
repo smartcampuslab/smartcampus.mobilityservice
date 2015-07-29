@@ -246,6 +246,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			data.forEach(function(it, idx){
     				it.length = formatter.getLength(it);
     				it.means = formatter.extractItineraryMeans(it);
+    				it.price = formatter.getItineraryCost(it);
     				it.index = idx;
     			});
     			
