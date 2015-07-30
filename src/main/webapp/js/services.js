@@ -146,7 +146,7 @@ services.factory('formatter', ['parking', '$rootScope',
     		if (leg.extra.costData && leg.extra.costData.fixedCost) {
     			var cost = (leg.extra.costData.fixedCost).replace(',','.').replace(' ','');
     			if (extended == true) {
-    				cost = parseFloat(cost) > 0 ? leg.to.stopId.extra.costData.costDefinition : 'gratis';
+    				cost = parseFloat(cost) > 0 ? leg.extra.costData.costDefinition : 'gratis';
     			} else {
     				cost = parseFloat(cost) > 0 ? '\u20AC' : 'gratis';
     			}
