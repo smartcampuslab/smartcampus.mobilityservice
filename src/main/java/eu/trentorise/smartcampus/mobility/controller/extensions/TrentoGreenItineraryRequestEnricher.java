@@ -29,7 +29,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	private static Log logger = LogFactory.getLog(TrentoGreenItineraryRequestEnricher.class);
 
 	@Override
-	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
 		List<TType> types = new ArrayList<TType>();
@@ -63,10 +63,11 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 //			}
 		}
 		for (TType newType : types) {
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, itn);
+			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, routeType, itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
 			pr.setType(newType);
+			pr.setRouteType(routeType);
 			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
 					pr.setValue(0);
@@ -299,6 +300,9 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 		ObjectMapper mapper = new ObjectMapper();
 		long endTime = it.getEndtime();
 		for (Leg leg: it.getLeg()) {
+			if (!leg.getTransport().getType().equals(TType.CAR)) {
+				continue;
+			}
 			if (leg.getTo().getStopId() != null && leg.getTo().getStopId().getExtra() != null && leg.getTo().getStopId().getExtra().containsKey("costData")) {
 				Map<String, String> costData = mapper.convertValue(leg.getTo().getStopId().getExtra().get("costData"), Map.class);
 				Double fixedCost = costData.containsKey("fixedCost")?Double.parseDouble(costData.get("fixedCost")):0;

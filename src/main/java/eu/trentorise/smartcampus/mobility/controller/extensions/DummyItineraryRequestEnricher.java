@@ -17,7 +17,7 @@ import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 
 	@Override
-	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		return new ArrayList<PlanRequest>();
 	}
 

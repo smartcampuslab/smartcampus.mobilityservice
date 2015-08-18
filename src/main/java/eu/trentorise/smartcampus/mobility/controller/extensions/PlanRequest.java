@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.controller.extensions;
 
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.RType;
 import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
@@ -11,6 +12,7 @@ import com.google.common.collect.Lists;
 public class PlanRequest {
 
 	private TType type;
+	private RType routeType;
 	private String request;
 	private String plan;
 	private Integer value;
@@ -26,6 +28,12 @@ public class PlanRequest {
 	}
 	public void setType(TType type) {
 		this.type = type;
+	}
+	public RType getRouteType() {
+		return routeType;
+	}
+	public void setRouteType(RType routeType) {
+		this.routeType = routeType;
 	}
 	public String getRequest() {
 		return request;

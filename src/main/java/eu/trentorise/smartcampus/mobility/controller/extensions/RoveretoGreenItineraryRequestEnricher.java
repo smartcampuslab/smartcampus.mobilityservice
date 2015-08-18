@@ -26,7 +26,7 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 	private static Log logger = LogFactory.getLog(RoveretoGreenItineraryRequestEnricher.class);
 
 	@Override
-	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type) {
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
 		List<TType> types = new ArrayList<TType>();
@@ -60,10 +60,11 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			}
 		}
 		for (TType newType : types) {
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, itn);
+			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, routeType, itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
 			pr.setType(newType);
+			pr.setRouteType(routeType);
 			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
 					pr.setValue(0);

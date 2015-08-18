@@ -11,7 +11,7 @@ import com.google.common.collect.Multimap;
 
 public interface ItineraryRequestEnricher {
 
-	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type);
+	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType);
 	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria);
 	public List<Itinerary> removeExtremeItineraties(List<Itinerary> itineraries, RType criteria);
 	public void completeResponse(SingleJourney journeyRequest, List<PlanRequest> planRequests, List<Itinerary> itineraries);

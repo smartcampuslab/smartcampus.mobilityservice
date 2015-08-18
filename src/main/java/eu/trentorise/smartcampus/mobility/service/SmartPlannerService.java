@@ -302,7 +302,6 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
 
-//		ItinerarySorter.sort(itineraries, journeyRequest.getRouteType());
 		itineraryRequestEnricher.sort(itineraries, journeyRequest.getRouteType());
 
 		itineraryRequestEnricher.completeResponse(journeyRequest, reqs, itineraries);
@@ -321,14 +320,15 @@ public class SmartPlannerService implements SmartPlannerHelper {
 				minitn = 3;
 			}
 			int itn = Math.max(request.getResultsNumber(), minitn);			
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, itn);
+			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, request.getRouteType(), itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
 			pr.setType(type);
+			pr.setRouteType(request.getRouteType());
 			pr.setValue(0);
 			reqsList.add(pr);
 			if (expand) {
-				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type));
+				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type, request.getRouteType()));
 			}
 		}
 		
