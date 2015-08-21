@@ -255,13 +255,14 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	@Override
-	public List<Itinerary> planSingleJourney(SingleJourney journeyRequest) throws Exception {
+	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration) throws Exception {
 		Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
 
 		promotedJourneyRequestConverter.modifyRequest(journeyRequest);
 		
 		List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true);
-		promotedJourneyRequestConverter.processRequests(reqs);
+		promotedJourneyRequestConverter.processRequests(reqs, iteration);
+		buildRequestString(reqs);
 		
 		Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
 
@@ -279,10 +280,17 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			Future<PlanRequest> future = executorService.submit(callableReq);
 			results.add(future);
 		}
+		
+		boolean retryOnFail = false;
 		for (Future<PlanRequest> plan: results) {
 			PlanRequest pr = plan.get();
-			if (pr.getPlan() == null) continue;
+			if (pr.getPlan() == null) {
+				continue;
+			}
 			List<?> its = mapper.readValue(pr.getPlan(), List.class);
+			if (pr.isRetryOnFail() && its.isEmpty()) {
+				retryOnFail = true;
+			}
 			for (Object it : its) {
 				Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
 				pr.getItinerary().add(itinerary);
@@ -296,6 +304,12 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			}
 		}
 		
+		if (retryOnFail) {
+			int newIteration = itineraryRequestEnricher.checkFail(itineraries, iteration);
+			if (newIteration != 0) {
+				return planSingleJourney(journeyRequest, newIteration);
+			}
+		}
 		
 		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
 		itineraries.addAll(evaluated);
@@ -320,12 +334,11 @@ public class SmartPlannerService implements SmartPlannerHelper {
 				minitn = 3;
 			}
 			int itn = Math.max(request.getResultsNumber(), minitn);			
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), type, request.getRouteType(), itn);
 			PlanRequest pr = new PlanRequest();
-			pr.setRequest(req);
 			pr.setType(type);
 			pr.setRouteType(request.getRouteType());
 			pr.setValue(0);
+			pr.setItineraryNumber(itn);
 			reqsList.add(pr);
 			if (expand) {
 				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type, request.getRouteType()));
@@ -338,6 +351,17 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		
 		return reqsList;
 	}
+	
+	
+	private List<PlanRequest> buildRequestString(List<PlanRequest> reqsList) {
+		for (PlanRequest pr: reqsList) {
+			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", pr.getOriginalRequest().getFrom().getLat(), pr.getOriginalRequest().getFrom().getLon(), pr.getOriginalRequest().getTo().getLat(), pr.getOriginalRequest().getTo().getLon(), pr.getOriginalRequest().getDate(), pr.getOriginalRequest().getDepartureTime(), pr.getType(), pr.getRouteType(), pr.getItineraryNumber());
+			pr.setRequest(req + pr.getRequest());
+		}
+		
+		return reqsList;
+	}	
+	
 
 	private class CallableItineraryRequest implements Callable<PlanRequest> {
 		
@@ -353,6 +377,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
 				request.setPlan(plan);
 			} catch (Exception e) {
+				e.printStackTrace();
 				request.setPlan(null);
 			}
 			return request;
@@ -374,7 +399,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		} else if (alert instanceof AlertRoad) {
 			param = "updateAR";
 		} else {
-			throw new IllegalArgumentException("Unknown allert type "+alert.getClass().getName());
+			throw new IllegalArgumentException("Unknown alert type "+alert.getClass().getName());
 		}
 		
 		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);

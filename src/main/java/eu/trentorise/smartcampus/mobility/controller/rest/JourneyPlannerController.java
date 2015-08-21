@@ -104,7 +104,7 @@ public class JourneyPlannerController extends SCController {
 			statLogger.log(journeyRequest, userId);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
-			return smartPlannerHelper.planSingleJourney(journeyRequest);
+			return smartPlannerHelper.planSingleJourney(journeyRequest, 0);
 //		} catch (ConnectorException e0) {
 //			e0.printStackTrace();
 //			response.setStatus(e0.getCode());

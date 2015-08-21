@@ -318,4 +318,15 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 		return endTime;
 	}
 	
+	@Override
+	public int checkFail(List<Itinerary> itineraries, int iteration) {
+		if (iteration == 0) {
+			if (itineraries.isEmpty()) {
+				return iteration + 1;
+			}
+		}
+		return 0;
+	}
+	
+	
 }

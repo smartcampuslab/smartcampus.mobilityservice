@@ -40,4 +40,9 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 		ItinerarySorter.sort(itineraries, criterion);
 	}
 
+	@Override
+	public int checkFail(List<Itinerary> itineraries, int iteration) {
+		return 0;
+	}
+
 }

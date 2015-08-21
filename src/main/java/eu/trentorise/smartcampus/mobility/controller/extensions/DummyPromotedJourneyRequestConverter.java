@@ -12,7 +12,7 @@ public class DummyPromotedJourneyRequestConverter implements PromotedJourneyRequ
 	}	
 	
 	@Override
-	public void processRequests(List<PlanRequest> requests) {
+	public void processRequests(List<PlanRequest> requests, int iteration) {
 	}	
 	
 	@Override

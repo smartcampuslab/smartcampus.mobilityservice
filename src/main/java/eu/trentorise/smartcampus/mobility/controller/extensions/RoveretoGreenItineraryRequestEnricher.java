@@ -281,5 +281,10 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 		ItinerarySorter.sort(itineraries, criterion);
 	}	
 	
+	@Override
+	public int checkFail(List<Itinerary> itineraries, int iteration) {
+		return 0;
+	}	
+	
 
 }

@@ -18,6 +18,8 @@ public class PlanRequest {
 	private Integer value;
 	private List<Itinerary> itinerary;
 	private SingleJourney originalRequest;
+	private int itineraryNumber;
+	private boolean retryOnFail = false;
 	
 	public PlanRequest() {
 		itinerary = Lists.newArrayList();
@@ -68,6 +70,22 @@ public class PlanRequest {
 	}
 	public void setOriginalRequest(SingleJourney originalRequest) {
 		this.originalRequest = originalRequest;
+	}
+
+	public int getItineraryNumber() {
+		return itineraryNumber;
+	}
+
+	public void setItineraryNumber(int itineraryNumber) {
+		this.itineraryNumber = itineraryNumber;
+	}
+
+	public boolean isRetryOnFail() {
+		return retryOnFail;
+	}
+
+	public void setRetryOnFail(boolean retryOnFail) {
+		this.retryOnFail = retryOnFail;
 	}
 
 	@Override
