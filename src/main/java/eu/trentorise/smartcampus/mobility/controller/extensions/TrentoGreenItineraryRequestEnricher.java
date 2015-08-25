@@ -32,37 +32,25 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
-		List<TType> types = new ArrayList<TType>();
+		List<TType> newTypes = new ArrayList<TType>();
 		List<TType> requestedTypes = Arrays.asList(request.getTransportTypes());
 		if (type.equals(TType.CAR)) {
 			if (!requestedTypes.contains(TType.PARK_AND_RIDE)) {
-				types.add(TType.PARK_AND_RIDE);
+				newTypes.add(TType.PARK_AND_RIDE);
 			}
-			// if (!requestedTypes.contains(TType.SHAREDBIKE_WITHOUT_STATION)) {
-			// types.add(TType.SHAREDBIKE_WITHOUT_STATION);
-			// }
-//			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
-//				types.add(TType.SHAREDBIKE);
-//			}
 			if (!requestedTypes.contains(TType.TRANSIT)) {
-				types.add(TType.TRANSIT);
+				newTypes.add(TType.TRANSIT);
 			}
 		}
 		if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 			if (!requestedTypes.contains(TType.WALK)) {
-				types.add(TType.WALK);
+				newTypes.add(TType.WALK);
 			}
 			if (!requestedTypes.contains(TType.TRAIN)) {
-				types.add(TType.TRAIN); // ???
+				newTypes.add(TType.TRAIN);
 			}
-			// if (!requestedTypes.contains(TType.SHAREDBIKE_WITHOUT_STATION)) {
-			// types.add(TType.SHAREDBIKE_WITHOUT_STATION);
-			// }
-//			if (!requestedTypes.contains(TType.SHAREDBIKE)) {
-//				types.add(TType.SHAREDBIKE);
-//			}
 		}
-		for (TType newType : types) {
+		for (TType newType : newTypes) {
 			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", request.getFrom().getLat(), request.getFrom().getLon(), request.getTo().getLat(), request.getTo().getLon(), request.getDate(), request.getDepartureTime(), newType, routeType, itn);
 			PlanRequest pr = new PlanRequest();
 			pr.setRequest(req);
@@ -173,7 +161,8 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 					|| (maxDuration != 0
 							&& it.getDuration() > Math.min(maxDuration
 									+ (1000 * 60 * 30), maxDuration * 1.5) && it
-							.getEndtime() > minTime + (1000 * 60 * 10))) {
+							.getEndtime() > minTime + (1000 * 60 * 10))
+					|| (maxDuration != 0 && it.getDuration() > maxDuration + (1000 * 60 * 15))) {
 				toRemove.add(it);
 				logger.info("Removing by \"slow\" trip: " + it.getDuration() + "," + maxDuration + " / " + it.getStartime() + "," + maxTime);
 				continue;

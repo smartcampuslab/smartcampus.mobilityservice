@@ -34,6 +34,9 @@ public class TrentoPromotedJourneyRequestConverter implements PromotedJourneyReq
 			if (pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION) || pr.getType().equals(TType.BICYCLE)) {
 				pr.setRouteType(RType.safest);
 			}
+			if (pr.getType().equals(TType.WALK) && pr.getValue() != 0) {
+				pr.setRequest(pr.getRequest() + "&maxTotalWalkDistance=1250");
+			}
 		}
 	}
 	
