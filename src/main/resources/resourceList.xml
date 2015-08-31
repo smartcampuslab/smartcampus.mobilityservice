@@ -42,6 +42,10 @@
       pathPattern="/partialcachestatus" method="POST"/>  
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/getcacheupdate/{agencyId}/{fileName}" method="GET"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/routesDB/{appId}" method="GET"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/versions" method="GET"/>      
   
   <!-- planning -->
   <resourceMapping uri="mobilityservice.plan" 

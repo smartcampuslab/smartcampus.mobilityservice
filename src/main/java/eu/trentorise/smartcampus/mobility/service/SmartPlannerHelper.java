@@ -23,6 +23,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
+import java.io.InputStream;
 import java.util.List;
 
 
@@ -50,4 +51,7 @@ public interface SmartPlannerHelper {
 	List<Stop> stops(String agencyId, double lat, double lng, double radius, Integer page, Integer count) throws Exception;
 
 	void sendAlert(Alert alert) throws Exception;
+	
+	InputStream routesDB(String appId) throws Exception;
+	String getVersions() throws Exception;
 }

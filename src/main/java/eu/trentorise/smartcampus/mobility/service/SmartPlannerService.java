@@ -32,6 +32,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public String delays(String routeId, Long from, Long to) throws Exception {
 		return performGET(OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to, null);
 	}
-
+	
 	@Override
 	public RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception {
 		List<String> reqs = buildRecurrentJourneyPlannerRequest(parameters);
@@ -405,7 +406,16 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
 		logger .info(result);				
 		
-	};		
+	}	
 
+	@Override
+	public InputStream routesDB(String appId) throws Exception {
+		return HTTPConnector.doStreamGet(otpURL + OTP + "routesDB/" + appId, null, "application/zip", null);
+	}
+
+	@Override
+	public String getVersions() throws Exception {
+		return performGET(OTP + "versions", null);
+	}		
 	
 }
