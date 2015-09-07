@@ -114,14 +114,14 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	@Override
-	public String transitTimes(String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitTimes/" + routeId + "/" + from + "/" + to, null);
+	public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
+		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
 	}
 
 	
 	@Override
-	public String delays(String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to, null);
+	public String delays(String agencyId, String routeId, Long from, Long to) throws Exception {
+		return performGET(OTP + "getTransitDelays/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
 	}
 	
 	@Override

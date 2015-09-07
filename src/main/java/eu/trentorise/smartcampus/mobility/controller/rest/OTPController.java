@@ -188,13 +188,13 @@ public class OTPController extends SCController {
 		}
 	}		
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettransittimes/{routeId}/{from}/{to}")
+	@RequestMapping(method = RequestMethod.GET, value = "/gettransittimes/{agencyId}/{routeId}/{from}/{to}")
 	public @ResponseBody
-	void getTransitTimes(HttpServletResponse response, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
+	void getTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
 //			String address =  otpURL + OTP + "getTransitTimes/" + routeId + "/" + from + "/" + to;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
-			String timetable = smartPlannerHelper.transitTimes(routeId, from, to);
+			String timetable = smartPlannerHelper.transitTimes(agencyId, routeId, from, to);
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
 		} catch (ConnectorException e0) {
@@ -212,7 +212,7 @@ public class OTPController extends SCController {
 		try {
 			
 			long from = DATE_FORMAT.parse(DATE_FORMAT.format(new Date())).getTime();
-			String timetable = smartPlannerHelper.transitTimes(routeId, from, from+DAY);
+			String timetable = smartPlannerHelper.transitTimes(agencyId, routeId, from, from+DAY);
 			TransitTimeTable ttt = JsonUtils.toObject(timetable, TransitTimeTable.class);
 			Timetable tt = Timetable.fromTransitTimeTable(ttt);
 			response.setContentType("application/json; charset=utf-8");
@@ -225,14 +225,14 @@ public class OTPController extends SCController {
 		}
 	}			
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettransitdelays/{routeId}/{from}/{to}")
+	@RequestMapping(method = RequestMethod.GET, value = "/gettransitdelays/{agencyId}/{routeId}/{from}/{to}")
 	public @ResponseBody
-	void getTransitDelays(HttpServletResponse response, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
+	void getTransitDelays(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
 			logger.info("-"+getUserId()  + "~AppConsume~delays=" + routeId);
 //			String address =  otpURL + OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
-			String timetable = smartPlannerHelper.delays(routeId, from, to);
+			String timetable = smartPlannerHelper.delays(agencyId, routeId, from, to);
 			response.setContentType("application/json; charset=utf-8");
 			
 			response.getWriter().write(timetable);

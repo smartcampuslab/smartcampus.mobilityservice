@@ -45,8 +45,8 @@ public interface SmartPlannerHelper {
 	String stops(String agencyId, String routeId, double latitude, double longitude, double radius) throws Exception;
 	String stopTimetable(String agencyId, String routeId, String stopId) throws Exception;
 	String stopTimetable(String agencyId, String stopId, Integer maxResults) throws Exception;
-	String transitTimes(String routeId, Long from, Long to) throws Exception;
-	String delays(String routeId, Long from, Long to) throws Exception;
+	String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception;
+	String delays(String agencyId, String routeId, Long from, Long to) throws Exception;
 
 	List<Stop> stops(String agencyId, double lat, double lng, double radius, Integer page, Integer count) throws Exception;
 
