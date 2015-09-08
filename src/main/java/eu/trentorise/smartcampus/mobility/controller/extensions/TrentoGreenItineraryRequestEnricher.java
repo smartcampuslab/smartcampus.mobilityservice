@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
@@ -32,6 +33,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
+		Map<TType, Integer> itnPerType = Maps.newTreeMap();
 		List<TType> newTypes = new ArrayList<TType>();
 		List<TType> requestedTypes = Arrays.asList(request.getTransportTypes());
 		if (type.equals(TType.CAR)) {
@@ -45,6 +47,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 		if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 			if (!requestedTypes.contains(TType.WALK)) {
 				newTypes.add(TType.WALK);
+				itnPerType.put(TType.WALK, 1);
 			}
 			if (!requestedTypes.contains(TType.TRAIN)) {
 				newTypes.add(TType.TRAIN);
@@ -56,6 +59,11 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 			pr.setRequest(req);
 			pr.setType(newType);
 			pr.setRouteType(routeType);
+			if (itnPerType.containsKey(newType)) {
+				pr.setItineraryNumber(itnPerType.get(newType));	
+			} else {
+				pr.setItineraryNumber(itn);
+			}
 			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
 					pr.setValue(0);
