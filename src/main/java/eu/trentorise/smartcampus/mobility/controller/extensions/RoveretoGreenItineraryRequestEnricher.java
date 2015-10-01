@@ -11,12 +11,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
@@ -29,6 +31,7 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 	public List<PlanRequest> addPromotedItineraries(SingleJourney request, TType type, RType routeType) {
 		List<PlanRequest> reqList = Lists.newArrayList();
 		int itn = Math.max(request.getResultsNumber(), 1);
+		Map<TType, Integer> itnPerType = Maps.newTreeMap();		
 		List<TType> types = new ArrayList<TType>();
 		List<TType> requestedTypes = Arrays.asList(request.getTransportTypes());
 		if (type.equals(TType.CAR)) {
@@ -48,6 +51,7 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 		if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 			if (!requestedTypes.contains(TType.WALK)) {
 				types.add(TType.WALK);
+				itnPerType.put(TType.WALK, 1);				
 			}
 			if (!requestedTypes.contains(TType.TRAIN)) {
 				types.add(TType.TRAIN); // ???
@@ -65,6 +69,11 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			pr.setRequest(req);
 			pr.setType(newType);
 			pr.setRouteType(routeType);
+			if (itnPerType.containsKey(newType)) {
+				pr.setItineraryNumber(itnPerType.get(newType));	
+			} else {
+				pr.setItineraryNumber(itn);
+			}			
 			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
 					pr.setValue(0);

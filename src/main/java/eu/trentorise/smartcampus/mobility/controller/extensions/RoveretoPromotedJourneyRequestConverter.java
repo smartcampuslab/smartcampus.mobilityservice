@@ -42,6 +42,9 @@ public class RoveretoPromotedJourneyRequestConverter implements PromotedJourneyR
 	}
 	
 	public void processRequests(List<PlanRequest> requests, int iteration) {
+		for (PlanRequest pr: requests) {
+			pr.setRequest("");
+		}
 	}
 	
 	@Override

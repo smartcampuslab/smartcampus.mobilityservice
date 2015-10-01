@@ -16,6 +16,7 @@
 package eu.trentorise.smartcampus.mobility.util;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -29,13 +30,13 @@ public class HTTPConnector {
 
 		StringBuffer response = new StringBuffer();
 
-		URL url = new URL(address + ((req != null)?("?" + req):""));
+		URL url = new URL(address + ((req != null) ? ("?" + req) : ""));
 
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
-	  conn.setDoOutput(true);
-	  conn.setDoInput(true);
-		
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
+
 		if (accept != null) {
 			conn.setRequestProperty("Accept", accept);
 		}
@@ -45,7 +46,7 @@ public class HTTPConnector {
 		if (conn.getResponseCode() != 200) {
 			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
 		}
-		
+
 		BufferedReader br;
 		if (encoding != null) {
 			br = new BufferedReader(new InputStreamReader((conn.getInputStream()), encoding));
@@ -62,6 +63,31 @@ public class HTTPConnector {
 		return response.toString();
 	}
 
+	public static InputStream doStreamGet(String address, String req, String accept, String contentType) throws Exception {
+
+		StringBuffer response = new StringBuffer();
+
+		URL url = new URL(address + ((req != null) ? ("?" + req) : ""));
+
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
+
+		if (accept != null) {
+			conn.setRequestProperty("Accept", accept);
+		}
+		if (contentType != null) {
+			conn.setRequestProperty("Content-Type", contentType);
+		}
+		if (conn.getResponseCode() != 200) {
+			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
+		}
+
+		return conn.getInputStream();
+	}
+	
+	
 	
 	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
 

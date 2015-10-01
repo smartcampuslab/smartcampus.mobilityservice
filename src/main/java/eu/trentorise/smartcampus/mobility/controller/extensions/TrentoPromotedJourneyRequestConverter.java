@@ -35,7 +35,11 @@ public class TrentoPromotedJourneyRequestConverter implements PromotedJourneyReq
 				pr.setRouteType(RType.safest);
 			}
 			if (pr.getType().equals(TType.WALK) && pr.getValue() != 0) {
-				pr.setRequest(pr.getRequest() + "&maxTotalWalkDistance=1250");
+				if (pr.getRouteType().equals(RType.leastWalking)) {
+					pr.setRequest(pr.getRequest() + "&maxTotalWalkDistance=500");
+				} else {
+					pr.setRequest(pr.getRequest() + "&maxTotalWalkDistance=1000");
+				}
 			}
 		}
 	}

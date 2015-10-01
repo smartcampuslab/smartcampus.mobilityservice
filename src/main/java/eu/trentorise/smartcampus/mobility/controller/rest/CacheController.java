@@ -18,6 +18,7 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.CompressedTransitTimeTable;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,8 +36,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.io.ByteStreams;
+
+import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
+
 @Controller
 public class CacheController {
+	
+	@Autowired
+	private SmartPlannerHelper smartPlannerHelper;	
 
   	@RequestMapping(method = RequestMethod.POST, value = "/cachestatus")
   	public @ResponseBody
@@ -126,5 +136,37 @@ public class CacheController {
 		}
 	}  	
   	
+  	
+  	@RequestMapping(method = RequestMethod.GET, value = "/routesDB/{appId}", produces = "application/zip")
+  	public @ResponseBody
+  	void getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String appId) {
+  		try {
+  			response.setContentType("application/zip");
+			response.setHeader("Content-Disposition", "attachment; filename=\"routesdb.zip\""); 
+			
+			InputStream is = smartPlannerHelper.routesDB(appId);
+			
+			ByteStreams.copy(is, response.getOutputStream());
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}    
+  	
+  	@RequestMapping(method = RequestMethod.GET, value = "/versions")
+  	public @ResponseBody
+  	Map getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+  		try {
+			String versions = smartPlannerHelper.getVersions();
+			
+			ObjectMapper mapper = new ObjectMapper();
+			Map result = mapper.readValue(versions, Map.class);
+
+			return result;
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return null;
+		}
+	}  	
 		
 }
