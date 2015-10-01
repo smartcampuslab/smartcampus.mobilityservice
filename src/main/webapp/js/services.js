@@ -148,7 +148,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			if (extended == true) {
     				cost = parseFloat(cost) > 0 ? leg.extra.costData.costDefinition : 'gratis';
     			} else {
-    				cost = parseFloat(cost) > 0 ? cost/*'\u20AC'*/ : 'gratis';
+    				cost = parseFloat(cost) > 0 ? (cost+'\u20AC') : 'gratis';
     			}
     			res.cost = cost;
     			res.note.push(cost);
@@ -166,7 +166,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			if (extended == true) {
     				cost = parseFloat(cost) > 0 ? leg.to.stopId.extra.costData.costDefinition : 'gratis';    				
     			} else {
-    				cost = parseFloat(cost) > 0 ? cost/*'\u20AC'*/ : 'gratis';
+    				cost = parseFloat(cost) > 0 ? (cost+'\u20AC') : 'gratis';
     			}
     		}
 			res.cost = cost;
