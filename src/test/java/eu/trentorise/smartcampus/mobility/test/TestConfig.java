@@ -28,6 +28,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
+import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -85,7 +86,7 @@ public class TestConfig {
 	public SmartPlannerHelper getSmartPlannerHelper() {
 		return new SmartPlannerHelper() {
 			@Override
-			public String transitTimes(String routeId, Long from, Long to) throws Exception { return null; }
+			public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception { return null; }
 			@Override
 			public List<Stop> stops(String agencyId, double lat, double lng,double radius, Integer page, Integer count) throws Exception { return null; }
 			@Override
@@ -105,15 +106,23 @@ public class TestConfig {
 			@Override
 			public RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney)	throws Exception { return null; }
 			@Override
-			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest)throws Exception { return null; }
+			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration)throws Exception { return null; }
 			@Override
 			public RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception { return null; }
 			@Override
 			public String parkingsByAgency(String agencyId) throws Exception { return null; }
 			@Override
-			public String delays(String routeId, Long from, Long to) throws Exception { return null; }
+			public String delays(String agencyId, String routeId, Long from, Long to) throws Exception { return null; }
 			@Override
 			public String bikeSharingByAgency(String agencyId) throws Exception { return null; }
+			@Override
+			public InputStream routesDB(String appId) throws Exception {
+				return null;
+			}
+			@Override
+			public String getVersions() throws Exception {
+				return null;
+			}
 		};
 	}
 }
