@@ -203,7 +203,24 @@ public class OTPController extends SCController {
 			e.printStackTrace();
 			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-	}			
+	}		
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/gettransittimes/{agencyId}/{routeId}/{from}/{to}/extended")
+	public @ResponseBody
+	void getExtendedTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
+		try {
+//			String address =  otpURL + OTP + "getTransitTimes/" + routeId + "/" + from + "/" + to;
+//			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
+			String timetable = smartPlannerHelper.extendedTransitTimes(agencyId, routeId, from, to);
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(timetable);
+		} catch (ConnectorException e0) {
+			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.printStackTrace();response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}	
 	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/timetable/{agencyId}/{routeId}")
