@@ -153,6 +153,22 @@ public class CacheController {
 		}
 	}    
   	
+  	@RequestMapping(method = RequestMethod.GET, value = "/routesDB/{appId}/extended", produces = "application/zip")
+  	public @ResponseBody
+  	void getExtendedRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String appId) {
+  		try {
+  			response.setContentType("application/zip");
+			response.setHeader("Content-Disposition", "attachment; filename=\"routesdb.zip\""); 
+			
+			InputStream is = smartPlannerHelper.extendedRoutesDB(appId);
+			
+			ByteStreams.copy(is, response.getOutputStream());
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}  	
+  	
   	@RequestMapping(method = RequestMethod.GET, value = "/versions")
   	public @ResponseBody
   	Map getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
