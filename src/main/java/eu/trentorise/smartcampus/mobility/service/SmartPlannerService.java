@@ -33,6 +33,7 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedSto
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -115,19 +116,19 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 	@Override
 	public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
+		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
 	}
 	
 	@Override
 	public String extendedTransitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to + "/extended", null);
+		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to + "/extended", null);
 	}
 	
 
 	
 	@Override
 	public String delays(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitDelays/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
+		return performGET(OTP + "getTransitDelays/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
 	}
 	
 	@Override
