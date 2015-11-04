@@ -88,6 +88,8 @@ public class TestConfig {
 			@Override
 			public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception { return null; }
 			@Override
+			public String extendedTransitTimes(String agencyId, String routeId, Long from, Long to) throws Exception { return null; }			
+			@Override
 			public List<Stop> stops(String agencyId, double lat, double lng,double radius, Integer page, Integer count) throws Exception { return null; }
 			@Override
 			public String stops(String agencyId, String routeId, double latitude,double longitude, double radius) throws Exception { return null; }
@@ -119,6 +121,10 @@ public class TestConfig {
 			public InputStream routesDB(String appId) throws Exception {
 				return null;
 			}
+			@Override
+			public InputStream extendedRoutesDB(String appId) throws Exception {
+				return null;
+			}			
 			@Override
 			public String getVersions() throws Exception {
 				return null;
