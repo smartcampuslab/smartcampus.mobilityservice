@@ -117,6 +117,12 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
 		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
 	}
+	
+	@Override
+	public String extendedTransitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
+		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to + "/extended", null);
+	}
+	
 
 	
 	@Override
@@ -414,8 +420,13 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	@Override
+	public InputStream extendedRoutesDB(String appId) throws Exception {
+		return HTTPConnector.doStreamGet(otpURL + OTP + "routesDB/" + appId + "/extended", null, "application/zip", null);
+	}	
+	
+	@Override
 	public String getVersions() throws Exception {
 		return performGET(OTP + "versions", null);
-	}		
-	
+	}
+
 }
