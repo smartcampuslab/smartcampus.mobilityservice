@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
@@ -98,13 +99,13 @@ public class JourneyPlannerController extends SCController {
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
 	public @ResponseBody
-	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest) throws InvocationException {
+	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false) String policyId) throws InvocationException {
 		try {
 			String userId = getUserId();
 			statLogger.log(journeyRequest, userId);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
-			return smartPlannerHelper.planSingleJourney(journeyRequest, 0);
+			return smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
 //		} catch (ConnectorException e0) {
 //			e0.printStackTrace();
 //			response.setStatus(e0.getCode());

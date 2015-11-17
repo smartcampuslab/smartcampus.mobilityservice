@@ -37,59 +37,91 @@
 	<!-- MVC Controllers -->
 	<context:component-scan base-package="eu.trentorise.smartcampus.mobility" />
 
-	<context:property-placeholder  location="classpath:mobility.properties" />
+	<context:property-placeholder location="classpath:mobility.properties" />
 
-	<bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
+	<bean
+		class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 
 	<!-- JMS Configuration -->
-		<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
 		<property name="brokerURL" value="${smartcampus.vas.web.activeMQ.brokerURL}" />
 	</bean>
 
-	<bean id="serviceEventProcessor" class="eu.trentorise.smartcampus.mobility.processor.ServiceEventProcessorImpl"/>
-	
-	<bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient" scope="singleton" destroy-method="destroy">
+	<bean id="serviceEventProcessor"
+		class="eu.trentorise.smartcampus.mobility.processor.ServiceEventProcessorImpl" />
+
+	<bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient"
+		scope="singleton" destroy-method="destroy">
 		<constructor-arg>
 			<ref bean="connectionFactory" />
 		</constructor-arg>
 		<property name="clientId" value="vas_mobility_subscriber" />
 		<property name="listener" ref="serviceEventProcessor" />
 	</bean>
-	
-	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher">
-	</bean>		
-	<bean id="promotedJourneyRequestConverter" class=" eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter">
-	</bean>
-	
-<!-- 	<bean id="itineraryRequestEnricher" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher">
-	</bean>		
-	<bean id="promotedJourneyRequestConverter" class=" eu.trentorise.smartcampus.mobility.controller.extensions.DummyPromotedJourneyRequestConverter">
-	</bean>			
- -->	
- 
-	 <mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
-  <bean id="logMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
-    <constructor-arg ref="mongo" />
-    <constructor-arg name="databaseName" value="${statlogging.dbname}" />
-  </bean>
-  
+	<util:map id = "enrichersMap">
+		<entry key="Dummy">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher" />
+		</entry>
+		<entry key="Trento">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher" />
+		</entry>
+		<entry key="Rovereto">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoGreenItineraryRequestEnricher" />
+		</entry>
+		<entry key="default">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoGreenItineraryRequestEnricher" />
+		</entry>		
+	</util:map>
+	
+	<util:map id = "convertersMap">
+		<entry key="Dummy">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPromotedJourneyRequestConverter" />
+		</entry>
+		<entry key="Trento">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
+		</entry>
+		<entry key="Rovereto">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPromotedJourneyRequestConverter" />
+		</entry>
+		<entry key="default">
+			<bean
+				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPromotedJourneyRequestConverter" />
+		</entry>		
+	</util:map>	
+
+
+	<mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
+
+	<bean id="logMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg ref="mongo" />
+		<constructor-arg name="databaseName" value="${statlogging.dbname}" />
+	</bean>
+
 	<bean id="domainMongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
 		<constructor-arg ref="mongo" />
 		<constructor-arg name="databaseName" value="mobility-domain" />
 	</bean>
 
-	
-  <bean id="viewResolver"
-    class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-    <property name="viewResolvers">
-      <bean
-        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/jsp/"></property>
-        <property name="suffix" value=".jsp"></property>
-      </bean>
-    </property>
-  </bean>
-	
-  <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="viewResolvers">
+			<bean
+				class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="prefix" value="/WEB-INF/jsp/"></property>
+				<property name="suffix" value=".jsp"></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="executorService" class="java.util.concurrent.Executors"
+		factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
 </beans>

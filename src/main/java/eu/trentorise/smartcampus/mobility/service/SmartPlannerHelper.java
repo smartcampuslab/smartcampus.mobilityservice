@@ -35,7 +35,7 @@ public interface SmartPlannerHelper {
 
 	RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception;
 	RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney) throws Exception;
-	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration) throws Exception;
+	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception;
 	
 	String parkingsByAgency(String agencyId) throws Exception;
 	String bikeSharingByAgency(String agencyId) throws Exception;

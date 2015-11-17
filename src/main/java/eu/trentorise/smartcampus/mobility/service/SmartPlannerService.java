@@ -42,6 +42,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.annotation.Resource;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
@@ -70,6 +71,7 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 @Component
 public class SmartPlannerService implements SmartPlannerHelper {
 
+	private static final String DEFAULT = "default";
 	private static final String SMARTPLANNER = "/smart-planner/api-webapp/planner/";
 	private static final String OTP  = "/smart-planner/rest/";
 
@@ -86,15 +88,35 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
-	@Autowired
-	private PromotedJourneyRequestConverter promotedJourneyRequestConverter;
-	@Autowired
-	private ItineraryRequestEnricher itineraryRequestEnricher;
+	@Resource(name="enrichersMap")
+	private Map<String, ItineraryRequestEnricher> enrichersMap;
+	
+	@Resource(name="convertersMap")
+	private Map<String, PromotedJourneyRequestConverter> convertersMap;	
+	
+	
 	@Autowired
 	private ExecutorService executorService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SmartPlannerService.class);
 
+	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
+		PromotedJourneyRequestConverter promotedJourneyRequestConverter = convertersMap.get(policyId);
+		if (promotedJourneyRequestConverter == null) {
+			promotedJourneyRequestConverter = convertersMap.get(DEFAULT);
+		}
+		return promotedJourneyRequestConverter;
+	}
+	
+	private ItineraryRequestEnricher getItineraryRequestEnricher(String policyId) {
+		ItineraryRequestEnricher itineraryRequestEnricher = enrichersMap.get(policyId);
+		if (itineraryRequestEnricher == null) {
+			itineraryRequestEnricher = enrichersMap.get(DEFAULT);
+		}
+		return itineraryRequestEnricher;
+	}	
+	
+	
 	private String performGET(String request, String query) throws Exception {
 		return HTTPConnector.doGet(otpURL+request, query, MediaType.APPLICATION_JSON, null, "UTF-8");
 	}
@@ -263,12 +285,15 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	@Override
-	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration) throws Exception {
+	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception {
 		Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
 
+		PromotedJourneyRequestConverter promotedJourneyRequestConverter = getPromotedJourneyRequestConverter(policyId);
+		ItineraryRequestEnricher itineraryRequestEnricher = getItineraryRequestEnricher(policyId);
+		
 		promotedJourneyRequestConverter.modifyRequest(journeyRequest);
 		
-		List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true);
+		List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true, itineraryRequestEnricher);
 		promotedJourneyRequestConverter.processRequests(reqs, iteration);
 		buildRequestString(reqs);
 		
@@ -315,7 +340,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		if (retryOnFail) {
 			int newIteration = itineraryRequestEnricher.checkFail(itineraries, iteration);
 			if (newIteration != 0) {
-				return planSingleJourney(journeyRequest, newIteration);
+				return planSingleJourney(journeyRequest, newIteration, policyId);
 			}
 		}
 		
@@ -334,7 +359,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 	}
 	
-	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand) {
+	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand, ItineraryRequestEnricher itineraryRequestEnricher) {
 		List<PlanRequest> reqsList = Lists.newArrayList();
 		for (TType type : request.getTransportTypes()) {
 			int minitn = 1;
