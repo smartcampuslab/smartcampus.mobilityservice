@@ -11,6 +11,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.fromMarker = null;
     $scope.toMarker = null;
     $scope.mode = 'fastest';
+    $scope.policy = 'Dummy';
     
     $scope.useCoordinates = false;
     
@@ -230,7 +231,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     			convertMeans(),
     			$scope.mode,
     			$scope.mydate,
-    			$scope.mytime
+    			$scope.mytime,
+    			$scope.policy
     			)
     	.success(function(data){
     		$scope.planned = true;
@@ -239,7 +241,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     				if (a.promoted != b.promoted) {
     					return b.promoted - a.promoted;
     				}
-    				return 0;
+    				return (a.endtime - a.startime) - (b.endtime - b.startime);
+    				//return 0;
     				//return a.startime != b.startime ? a.startime - b.startime : a.duration - b.duration;
     			});
     			

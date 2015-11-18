@@ -367,7 +367,7 @@ services.factory('formatter', ['parking', '$rootScope',
 services.factory('planner', ['$http', 'formatter',
 	  function ($http, formatter) {
 	      
-	      var getRequest = function(from, to, means, mode, date, time) {
+	      var getRequest = function(from, to, means, mode, date, time, policy) {
 	          var data = {
 	  	        	from: {lat:""+from.lat(),lon: ""+from.lng()},
 	  	        	to: {lat: ""+to.lat(),lon: ""+to.lng()},
@@ -380,9 +380,9 @@ services.factory('planner', ['$http', 'formatter',
 	          return data;
 	      }; 
 	      
-	      var plan = function(from, to, means, mode, date, time) {
-	          var url = PLANNER + '/plansinglejourney';
-	          var data = getRequest(from, to, means, mode, date, time);
+	      var plan = function(from, to, means, mode, date, time, policy) {
+	          var url = PLANNER + '/plansinglejourney?policyId=' + policy;
+	          var data = getRequest(from, to, means, mode, date, time, policy);
 	          return $http.post(url,data);
           };
           
