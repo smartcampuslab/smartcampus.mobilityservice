@@ -1,6 +1,5 @@
 package eu.trentorise.smartcampus.mobility.controller.extensions;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Position;
 import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
@@ -49,15 +48,33 @@ public class RoveretoPromotedJourneyRequestConverter implements PromotedJourneyR
 	
 	@Override
 	public void promoteJourney(List<PlanRequest> requests) {
-		for (PlanRequest req: requests) {
-			if (!isPromoted(req.getOriginalRequest())) {
-				continue;
-			}
-			for (Itinerary it: req.getItinerary()) {
-				it.setPromoted(true);
-			}
-		}
-	}	
+	}		
+	
+//	@Override
+//	public void promoteJourney(List<PlanRequest> requests) {
+//		for (PlanRequest req: requests) {
+//			if (!isPromoted(req.getOriginalRequest())) {
+//				continue;
+//			}
+//			for (Itinerary it: req.getItinerary()) {
+//				it.setPromoted(true);
+//			}
+//		}
+//	}	
+	
+//	@Override
+//	public void promoteJourney(List<PlanRequest> requests) {
+//		for (PlanRequest req: requests) {
+//			for (Itinerary it: req.getItinerary()) {
+//				for (Leg leg: it.getLeg()) {
+//					if (leg.getTransport() != null && "116".equals(leg.getTransport().getAgencyId()) && isPromoted(req.getOriginalRequest())) {
+//						it.setPromoted(true);
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}		
 	
 	private boolean isPromoted(SingleJourney journeyRequest) {
 	boolean promoted = false;
