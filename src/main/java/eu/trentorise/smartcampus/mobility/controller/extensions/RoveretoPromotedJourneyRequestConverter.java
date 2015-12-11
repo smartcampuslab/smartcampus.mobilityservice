@@ -78,9 +78,9 @@ public class RoveretoPromotedJourneyRequestConverter implements PromotedJourneyR
 	
 	private boolean isPromoted(SingleJourney journeyRequest) {
 	boolean promoted = false;
-	for (Position pos : positions) {
-		promoted |= (journeyRequest.getTo().getLat().equals(pos.getLat()) && journeyRequest.getTo().getLon().equals(pos.getLon()));
-	}	
+//	for (Position pos : positions) {
+//		promoted |= (journeyRequest.getTo().getLat().equals(pos.getLat()) && journeyRequest.getTo().getLon().equals(pos.getLon()));
+//	}	
 	return promoted;
 	}
 	
