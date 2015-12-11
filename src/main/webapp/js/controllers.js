@@ -152,7 +152,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     };
 
     // localize the user
-    if(navigator.geolocation) {
+//    if(navigator.geolocation) {
+    if(false) {
         navigator.geolocation.getCurrentPosition(function(position) {
           var pos = new google.maps.LatLng(position.coords.latitude,
                                            position.coords.longitude);
