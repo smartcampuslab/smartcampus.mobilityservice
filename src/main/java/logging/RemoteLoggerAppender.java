@@ -1,6 +1,7 @@
 package logging;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.chainsaw.Main;
 import org.apache.log4j.spi.LoggingEvent;
 
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
@@ -38,6 +39,7 @@ public class RemoteLoggerAppender extends AppenderSkeleton
 	}
 
 	private String convertLogMessage(String msg) {
+		msg = msg.replace("-null", "-0");
 		if ((msg.replaceAll("[^~]", "")).length() == 2) {
 			return msg.replace("~", "/");
 		} else {
