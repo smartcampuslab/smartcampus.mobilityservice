@@ -21,6 +21,9 @@ import it.sayservice.platform.smartplanner.data.message.Position;
 public class BasicItinerary {
 	
 	protected String clientId;
+
+	protected String appId;
+	
 	protected Itinerary data;
 	protected boolean monitor;
 	protected Position originalFrom;
@@ -33,6 +36,14 @@ public class BasicItinerary {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 	public Itinerary getData() {

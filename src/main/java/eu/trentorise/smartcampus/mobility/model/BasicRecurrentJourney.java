@@ -17,9 +17,15 @@ package eu.trentorise.smartcampus.mobility.model;
 
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class BasicRecurrentJourney {
 
 	protected String clientId;
+	
+	@JsonIgnore
+	protected String appId;
+	
 	protected RecurrentJourney data;
 	protected String name;
 	protected boolean monitor;
@@ -35,6 +41,12 @@ public class BasicRecurrentJourney {
 	}
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+	public String getAppId() {
+		return appId;
+	}
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 	public RecurrentJourney getData() {
 		return data;
