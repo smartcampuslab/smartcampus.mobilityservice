@@ -39,6 +39,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
@@ -70,15 +71,17 @@ public class TestConfig {
 	public AlertNotifier getAlertNotifier() {
 		return new AlertNotifier() {
 			@Override
-			public void notifyStrike(String userId, String clientId, AlertStrike alert, String name) {}
+			public void notifyStrike(String userId, String clientId, String appId, AlertStrike alert, String name) {}
 			@Override
-			public void notifyRoad(String userId, String clientId, AlertRoad alert, String name) {}
+			public void notifyRoad(String userId, String clientId, String appId, AlertRoad alert, String name) {}
 			@Override
-			public void notifyParking(String userId, String clientId, AlertParking alert, String name) {}
+			public void notifyParking(String userId, String clientId, String appId, AlertParking alert, String name) {}
 			@Override
-			public void notifyDelay(String userId, String clientId, AlertDelay alert,String name) {}
+			public void notifyDelay(String userId, String clientId, String appId, AlertDelay alert,String name) {}
 			@Override
-			public void notifyAccident(String userId, String clientId, AlertAccident alert, String name) {}
+			public void notifyAccident(String userId, String clientId, String appId, AlertAccident alert, String name) {}
+			@Override
+			public void notifyAnnouncement(Announcement announcement, String appId) {}
 		};
 	}
 	
