@@ -1,0 +1,11 @@
+apps:
+  - appId: trento
+    password: pwd
+    messagingAppId : mobility.trento 
+    gcmSenderApiKey : GCM_SENDER_API_KEY
+    gcmSenderId : GCM_SENDER_ID
+  - appId: rovereto
+    password: pwd
+    messagingAppId : mobility.rovereto
+    gcmSenderApiKey : GCM_SENDER_API_KEY
+    gcmSenderId : GCM_SENDER_ID    
