@@ -82,6 +82,7 @@ public class AppSetup {
 					do {
 						try {
 							communicator.registerApp(signature, cred.getMessagingAppId(), token);
+							ok = true;
 						} catch (CommunicatorConnectorException e) {
 							ok = false;
 							try {
