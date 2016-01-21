@@ -176,7 +176,8 @@ public class AlertSender {
 					wrapper.setAlert(alert);
 					wrapper.setClientId(it.getClientId());
 					wrapper.setName(it.getName());
-					wrapper.setUserId(it.getUserId());					
+					wrapper.setUserId(it.getUserId());		
+					wrapper.setAppId(it.getAppId());
 					result.add(wrapper);
 				}
 			}
@@ -235,7 +236,7 @@ public class AlertSender {
 		
 		for (AlertWrapper wrapper : userAlerts) {		
 			if (statLogger != null) statLogger.log(wrapper.getAlert(), wrapper.getUserId());
-			notifier.notifyDelay(wrapper.getUserId(), wrapper.getClientId(), (AlertDelay)wrapper.getAlert(), wrapper.getName());		
+			notifier.notifyDelay(wrapper.getUserId(), wrapper.getClientId(), wrapper.getAppId(), (AlertDelay)wrapper.getAlert(), wrapper.getName());		
 		}
 	}	
 	
@@ -290,6 +291,7 @@ public class AlertSender {
 					wrapper.setClientId(it.getClientId());
 					wrapper.setName(it.getName());
 					wrapper.setUserId(it.getUserId());
+					wrapper.setAppId(it.getAppId());
 					result.add(wrapper);
 				}
 			}		
@@ -312,7 +314,7 @@ public class AlertSender {
 		
 		for (AlertWrapper wrapper : userAlerts) {		
 			if (statLogger != null) statLogger.log(wrapper.getAlert(), wrapper.getUserId());
-			notifier.notifyParking(wrapper.getUserId(), wrapper.getClientId(), (AlertParking)wrapper.getAlert(), wrapper.getName());		
+			notifier.notifyParking(wrapper.getUserId(), wrapper.getClientId(), wrapper.getAppId(), (AlertParking)wrapper.getAlert(), wrapper.getName());		
 		}
 	}
 
@@ -336,7 +338,7 @@ public class AlertSender {
 		
 		for (AlertWrapper wrapper : userAlerts) {		
 			if (statLogger != null) statLogger.log(wrapper.getAlert(), wrapper.getUserId());
-			notifier.notifyRoad(wrapper.getUserId(), wrapper.getClientId(), (AlertRoad)wrapper.getAlert(), wrapper.getName());		
+			notifier.notifyRoad(wrapper.getUserId(), wrapper.getClientId(), wrapper.getAppId(), (AlertRoad)wrapper.getAlert(), wrapper.getName());		
 		}
 	}
 
@@ -389,7 +391,7 @@ public class AlertSender {
 		
 		for (AlertWrapper wrapper : userAlerts) {		
 			if (statLogger != null) statLogger.log(wrapper.getAlert(), wrapper.getUserId());
-			notifier.notifyAccident(wrapper.getUserId(), wrapper.getClientId(), (AlertAccident)wrapper.getAlert(), wrapper.getName());		
+			notifier.notifyAccident(wrapper.getUserId(), wrapper.getClientId(), wrapper.getAppId(), (AlertAccident)wrapper.getAlert(), wrapper.getName());		
 		}
 	}
 	/**
@@ -418,7 +420,7 @@ public class AlertSender {
 		
 		for (AlertWrapper wrapper : userAlerts) {		
 			if (statLogger != null) statLogger.log(wrapper.getAlert(), wrapper.getUserId());
-			notifier.notifyStrike(wrapper.getUserId(), wrapper.getClientId(), (AlertStrike)wrapper.getAlert(), wrapper.getName());		
+			notifier.notifyStrike(wrapper.getUserId(), wrapper.getClientId(), wrapper.getAppId(), (AlertStrike)wrapper.getAlert(), wrapper.getName());		
 		}
 	}
 	/**
