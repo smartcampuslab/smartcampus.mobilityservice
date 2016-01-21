@@ -54,6 +54,7 @@ import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
+import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
@@ -152,6 +153,11 @@ public class JourneyPlannerController extends SCController {
 			io.setOriginalTo(itinerary.getOriginalTo());
 			io.setName(itinerary.getName());
 			io.setData(itinerary.getData());
+			if (itinerary.getAppId() == null || itinerary.getAppId().isEmpty()) {
+				io.setAppId(NotificationHelper.MS_APP);
+			} else {
+				io.setAppId(itinerary.getAppId());
+			}			
 
 			domainStorage.saveItinerary(io);
 			itinerary.setClientId(clientId);
@@ -335,6 +341,11 @@ public class JourneyPlannerController extends SCController {
 			rec.setUserId(userId);
 			rec.setMonitor(recurrent.isMonitor());
 			rec.setClientId(clientId);
+			if (recurrent.getAppId() == null || recurrent.getAppId().isEmpty()) {
+				rec.setAppId(NotificationHelper.MS_APP);
+			} else {
+				rec.setAppId(recurrent.getAppId());
+			}
 			
 			domainStorage.saveRecurrent(rec);
 			
