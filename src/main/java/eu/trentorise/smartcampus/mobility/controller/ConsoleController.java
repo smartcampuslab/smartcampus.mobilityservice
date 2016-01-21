@@ -30,4 +30,9 @@ public class ConsoleController {
 	public String webPlanner() {
 		return "webplanner";
 	}
+
+	@RequestMapping(value = "/login")
+	public String login() {
+		return "login";
+	}		
 }
