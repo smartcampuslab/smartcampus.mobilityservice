@@ -8,6 +8,7 @@ public class AlertWrapper {
 	private String userId;
 	private String clientId;
 	private String name;
+	private String appId;
 	
 	public Alert getAlert() {
 		return alert;
@@ -32,6 +33,12 @@ public class AlertWrapper {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getAppId() {
+		return appId;
+	}
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 	

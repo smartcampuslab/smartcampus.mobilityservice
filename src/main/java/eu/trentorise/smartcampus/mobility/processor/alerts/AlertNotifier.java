@@ -21,6 +21,7 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
+import eu.trentorise.smartcampus.mobility.model.Announcement;
 
 /**
  * @author raman
@@ -34,7 +35,7 @@ public interface AlertNotifier {
 	 * @param alert
 	 * @param name 
 	 */
-	void notifyStrike(String userId, String clientId, AlertStrike alert, String name);
+	void notifyStrike(String userId, String clientId, String appId, AlertStrike alert, String name);
 
 	/**
 	 * @param userId
@@ -42,7 +43,7 @@ public interface AlertNotifier {
 	 * @param alert
 	 * @param name 
 	 */
-	void notifyDelay(String userId, String clientId, AlertDelay alert, String name);
+	void notifyDelay(String userId, String clientId, String appId, AlertDelay alert, String name);
 
 	/**
 	 * @param userId
@@ -50,7 +51,7 @@ public interface AlertNotifier {
 	 * @param alert
 	 * @param name 
 	 */
-	void notifyParking(String userId, String clientId, AlertParking alert, String name);
+	void notifyParking(String userId, String clientId, String appId, AlertParking alert, String name);
 
 	/**
 	 * @param userId
@@ -58,7 +59,7 @@ public interface AlertNotifier {
 	 * @param alert
 	 * @param name 
 	 */
-	void notifyAccident(String userId, String clientId, AlertAccident alert, String name);
+	void notifyAccident(String userId, String clientId, String appId, AlertAccident alert, String name);
 
 	/**
 	 * @param userId
@@ -66,6 +67,15 @@ public interface AlertNotifier {
 	 * @param alert
 	 * @param name
 	 */
-	void notifyRoad(String userId, String clientId, AlertRoad alert, String name);
+	void notifyRoad(String userId, String clientId, String appId, AlertRoad alert, String name);
+	
+
+	/**
+	 * 
+	 * @param announcement
+	 * @param appId
+	 */
+	void notifyAnnouncement(Announcement announcement, String appId);
+	
 
 }

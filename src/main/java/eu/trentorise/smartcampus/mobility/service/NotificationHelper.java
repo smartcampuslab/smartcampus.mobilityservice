@@ -31,10 +31,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,8 +39,9 @@ import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.EntityObject;
 import eu.trentorise.smartcampus.communicator.model.Notification;
+import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
-import eu.trentorise.smartcampus.network.JsonUtils;
+import eu.trentorise.smartcampus.mobility.util.TokenHelper;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 
 /**
@@ -56,23 +53,14 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 
 	private static final String PATH_TOKEN = "oauth/token";
 
-	private static final String MS_APP = "core.mobility";
+	public static final String MS_APP = "core.mobility";
 	
 	@Autowired
 	@Value("${communicatorURL}")
 	private String communicatorURL;
-	@Autowired
-	@Value("${aacURL}")
-	private String aacURL;
-	@Autowired
-	@Value("${smartcampus.clientId}")
-	private String clientId = null;
-	@Autowired
-	@Value("${smartcampus.clientSecret}")
-	private String clientSecret = null;
 	
-	private String token = null;
-	private Long expiresAt = null;
+	@Autowired
+	private TokenHelper tokenHelper;
 	
 	private CommunicatorConnector connector = null;
 
@@ -89,31 +77,10 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		}
 		return connector;
 	}
-	@SuppressWarnings("rawtypes")
-	private String getToken() {
-		if (token == null || System.currentTimeMillis() + 10000 > expiresAt) {
-	        final HttpResponse resp;
-	        if (!aacURL.endsWith("/")) aacURL += "/";
-	        String url = aacURL + PATH_TOKEN+"?grant_type=client_credentials&client_id="+clientId +"&client_secret="+clientSecret;
-	        final HttpGet get = new HttpGet(url);
-	        get.setHeader("Accept", "application/json");
-            try {
-				resp = getHttpClient().execute(get);
-				final String response = EntityUtils.toString(resp.getEntity());
-				if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-					Map map = JsonUtils.toObject(response, Map.class);
-					expiresAt = System.currentTimeMillis()+(Integer)map.get("expires_in")*1000;
-					token = (String)map.get("access_token");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return token;
-	}
+
 
 	@Override
-	public void notifyStrike(String userId, String clientId, AlertStrike alert, String name) {
+	public void notifyStrike(String userId, String clientId, String appId, AlertStrike alert, String name) {
 		Map<String, Object> content = new TreeMap<String, Object>();
 		content.put("type", "alertStrike");
 		content.put("agencyId", ((AlertStrike) alert).getTransport().getAgencyId());
@@ -122,11 +89,11 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		content.put("tripId", ((AlertStrike) alert).getTransport().getTripId());
 		content.put("stopId", ((AlertStrike) alert).getStop().getId());
 		Notification n = prepareMessage(name, alert, content, clientId);
-		notify(n, userId);
+		notify(n, userId, appId == null ? MS_APP : appId);
 	}
 
 	@Override
-	public void notifyDelay(String userId, String clientId, AlertDelay alert, String name) {
+	public void notifyDelay(String userId, String clientId, String appId, AlertDelay alert, String name) {
 		Map<String, Object> content = new TreeMap<String, Object>();
 		content.put("type", "alertDelay");
 		content.put("agencyId", ((AlertDelay) alert).getTransport().getAgencyId());
@@ -138,11 +105,11 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 			content.put("station", ((AlertDelay) alert).getPosition().getName());
 		}
 		Notification n = prepareMessage(name, alert, content, clientId);
-		notify(n, userId);
+		notify(n, userId, appId == null ? MS_APP : appId);
 	}
 
 	@Override
-	public void notifyParking(String userId, String clientId, AlertParking alert, String name) {
+	public void notifyParking(String userId, String clientId, String appId, AlertParking alert, String name) {
 		Map<String, Object> content = new TreeMap<String, Object>();
 		content.put("type", "alertParking");
 		AlertParking parking = ((AlertParking) alert);
@@ -154,33 +121,44 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 			content.put("transport", parking.getPlace().getExtra().get("transport"));
 		}
 		Notification n = prepareMessage(name, alert, content, clientId);
-		notify(n, userId);
+		notify(n, userId, appId == null ? MS_APP : appId);
 	}
 
 	@Override
-	public void notifyAccident(String userId, String clientId, AlertAccident alert, String name) {
+	public void notifyAccident(String userId, String clientId, String appId, AlertAccident alert, String name) {
 //		Map<String, Object> content = new TreeMap<String, Object>();
 //		Notification n = prepareMessage(name, alert, content);
 //		notify(n, userId);
 	}
 
 	@Override
-	public void notifyRoad(String userId, String clientId, AlertRoad alert, String name) {
+	public void notifyRoad(String userId, String clientId, String appId, AlertRoad alert, String name) {
 //		Map<String, Object> content = new TreeMap<String, Object>();
 //		Notification n = prepareMessage(name, alert, content);
 //		notify(n, userId);
 	}
 
-	private void notify(Notification n, String userId) {
+	private void notify(Notification n, String userId, String appId) {
 			long when = System.currentTimeMillis();
 			n.setTimestamp(when);
 			try {
-				connector().sendAppNotification(n, MS_APP, Collections.singletonList(userId), getToken());
+				connector().sendAppNotification(n, appId, Collections.singletonList(userId), tokenHelper.getToken());
 			} catch (CommunicatorConnectorException e) {
 				e.printStackTrace();
 				logger .error("Failed to send notifications: "+e.getMessage(), e);
 			}
 	}
+	
+	private void notify(Notification n, String appId) {
+		long when = System.currentTimeMillis();
+		n.setTimestamp(when);
+		try {
+			connector().sendAppNotification(n, appId, Collections.EMPTY_LIST, tokenHelper.getToken());
+		} catch (CommunicatorConnectorException e) {
+			e.printStackTrace();
+			logger .error("Failed to send notifications: "+e.getMessage(), e);
+		}
+}	
 
 	private Notification prepareMessage(String name, Alert alert, Map<String, Object> content, String clientId) {
 		Notification not = new Notification();
@@ -202,6 +180,20 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		not.setContent(content);
 		
 		return not;
+	}
+	
+	@Override
+	public void notifyAnnouncement(Announcement announcement, String appId) {
+		Notification not = new Notification();
+		
+		not.setTitle(announcement.getTitle());
+		not.setDescription(announcement.getDescription());
+		
+		Map<String, Object> content = new TreeMap<String, Object>();
+		content.put("type", "announcement");
+		not.setContent(content);
+		
+		notify(not, appId);
 	}
 	
 }
