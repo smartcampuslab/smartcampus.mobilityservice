@@ -69,12 +69,15 @@ public class AppSetup {
 				String token = helper.getToken();
 				for (AppInfo cred : appsMap.values()) {
 					AppSignature signature = new AppSignature();
+					
 					Map<String, Object> map = Maps.newHashMap();
 					map.put("GCM_SENDER_API_KEY", cred.getGcmSenderApiKey());
+					signature.setPrivateKey(map);
+					
+					map = Maps.newHashMap();
 					map.put("GCM_SENDER_ID", cred.getGcmSenderId());
-
-					signature.setPrivateKey(new HashMap<String, Object>());
 					signature.setPublicKey(map);
+					
 					signature.setAppId(cred.getMessagingAppId());
 
 					boolean ok = true;
