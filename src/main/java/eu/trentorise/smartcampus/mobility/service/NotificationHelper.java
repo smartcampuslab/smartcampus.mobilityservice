@@ -23,6 +23,8 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -188,9 +190,24 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		
 		not.setTitle(announcement.getTitle());
 		not.setDescription(announcement.getDescription());
+	
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		long from = -1;
+		long to = -1;
+		
+		try {
+			from = sdf.parse(announcement.getFrom()).getTime();
+		} catch (Exception e) {
+		}
+		try {
+			to = sdf.parse(announcement.getTo()).getTime();
+		} catch (Exception e) {
+		}
 		
 		Map<String, Object> content = new TreeMap<String, Object>();
 		content.put("type", "announcement");
+		content.put("from", from);
+		content.put("to", to);
 		not.setContent(content);
 		
 		notify(not, appId);

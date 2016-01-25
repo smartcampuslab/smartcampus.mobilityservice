@@ -18,6 +18,7 @@
 	      <script src="lib/angular/angular.min.js"></script>
 	      <script src="lib/angular/angular-route.min.js"></script>
 	      <script src="lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
+	      <script src='lib/ngMask.min.js'></script>
 	      
 	      <script src="js/notification.js"></script>
 
@@ -32,6 +33,8 @@
                 <div>&nbsp;</div>
                 <div class="col-md-12 form-group"><label> Title: </label><input class="form-control" type="text" ng-model="form.title" name="title"/></div>
                 <div class="col-md-12 form-group"><label> Description: </label><input class="form-control" type="text" ng-model="form.description" name="description"/></div>
+                <div class="col-md-12 form-group"><label> From (dd/mm/yyyy): </label><input class="form-control" type="text" ng-model="form.from" name="from" restrict="reject" mask="39/19/9999" /></div>
+                <div class="col-md-12 form-group"><label> To (dd/mm/yyyy): </label><input class="form-control" type="text" ng-model="form.to" name="to" restrict="reject" mask="39/19/9999" /></div>
                 <div class="col-md-12 form-group"><button class="btn btn-primary" ng-click="submit"/>Send</button></div>
                 <div>&nbsp;</div>
                 <div class="col-md-12 form-group">
