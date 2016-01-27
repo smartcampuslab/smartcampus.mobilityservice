@@ -21,7 +21,7 @@
 	      <script src='lib/ngMask.min.js'></script>
 	      
 	      <script src="js/notification.js"></script>
-
+	      
     </head>
     <body>
       <div class="container">
@@ -38,8 +38,8 @@
                 <div class="col-md-12 form-group"><button class="btn btn-primary" ng-click="submit"/>Send</button></div>
                 <div>&nbsp;</div>
                 <div class="col-md-12 form-group">
-					<span ng-bind="notifyMessage"></span>
-					<span ng-bind="notifyError"></span>
+					<span ng-bind="notifyMessage" class="notification-ok"></span>
+					<span ng-bind="notifyError" class="notification-error"></span>
 				</div>                
             </form>
             <a href="j_spring_security_logout">Logout</a>
