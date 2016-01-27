@@ -227,3 +227,12 @@ body {
 .popover {
 	max-width: 500px !important;
 }
+
+.notification-ok {
+	color : LimeGreen;
+	font-weight : bold;
+}
+.notification-error {
+	color : Red;
+	font-weight : bold;
+}
