@@ -23,7 +23,6 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -206,6 +205,9 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 		
 		Map<String, Object> content = new TreeMap<String, Object>();
 		content.put("type", "announcement");
+		if (announcement.getHtml() != null && !announcement.getHtml().isEmpty()) {
+			content.put("_html", announcement.getHtml());
+		}
 		content.put("from", from);
 		content.put("to", to);
 		not.setContent(content);

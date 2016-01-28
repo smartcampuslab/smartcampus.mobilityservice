@@ -31,8 +31,9 @@
             <h3 style="text-align:center">Mobility Communicator Console Login</h3>
             <form ng-controller="notification" ng-submit="notify()">
                 <div>&nbsp;</div>
-                <div class="col-md-12 form-group"><label> Title: </label><input class="form-control" type="text" ng-model="form.title" name="title"/></div>
+                <div class="col-md-12 form-group"><label> *Title: </label><input class="form-control" type="text" ng-model="form.title" name="title"/></div>
                 <div class="col-md-12 form-group"><label> Description: </label><input class="form-control" type="text" ng-model="form.description" name="description"/></div>
+                <div class="col-md-12 form-group"><label> HTML Description: </label><input class="form-control" type="text" ng-model="form.html" name="html"/></div>
                 <div class="col-md-12 form-group"><label> From (dd/mm/yyyy): </label><input class="form-control" type="text" ng-model="form.from" name="from" restrict="reject" mask="39/19/9999" /></div>
                 <div class="col-md-12 form-group"><label> To (dd/mm/yyyy): </label><input class="form-control" type="text" ng-model="form.to" name="to" restrict="reject" mask="39/19/9999" /></div>
                 <div class="col-md-12 form-group"><button class="btn btn-primary" ng-click="submit"/>Send</button></div>

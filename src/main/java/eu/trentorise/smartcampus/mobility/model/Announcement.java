@@ -4,6 +4,7 @@ public class Announcement {
 
 	private String title;
 	private String description;
+	private String html;
 	private String appId;
 	private String from;
 	private String to;
@@ -22,6 +23,14 @@ public class Announcement {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getHtml() {
+		return html;
+	}
+
+	public void setHtml(String html) {
+		this.html = html;
 	}
 
 	public String getAppId() {

@@ -6,6 +6,7 @@ notification.controller('notification', function($scope, $http) {
 			$http.post("notification/notify", {
 				'title' : $scope.form.title,
 				'description' : $scope.form.description,
+				'html' : $scope.form.html,
 				'from' : $scope.form.from,
 				'to' : $scope.form.to
 			}).success(function(data) {
