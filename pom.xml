@@ -125,7 +125,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>core.mobility</finalName>
+		<finalName>bologna.mobility</finalName>
 	</build>
 
 	<repositories>
