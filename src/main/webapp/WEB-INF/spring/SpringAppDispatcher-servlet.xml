@@ -43,7 +43,7 @@
 		class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 
 	<!-- JMS Configuration -->
-	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+<!-- 	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
 		<property name="brokerURL" value="${smartcampus.vas.web.activeMQ.brokerURL}" />
 	</bean>
 
@@ -57,7 +57,7 @@
 		</constructor-arg>
 		<property name="clientId" value="vas_mobility_subscriber" />
 		<property name="listener" ref="serviceEventProcessor" />
-	</bean>
+	</bean> -->
 
 	<util:map id = "enrichersMap">
 		<entry key="Dummy">

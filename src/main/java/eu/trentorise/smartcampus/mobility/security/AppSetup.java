@@ -42,7 +42,7 @@ public class AppSetup {
 	public AppSetup() {
 	}	
 	
-	@PostConstruct
+	//@PostConstruct
 	public void init() throws Exception {
 		communicator = new CommunicatorConnector(communicatorURL);
 		Yaml yaml = new Yaml(new Constructor(AppSetup.class));
