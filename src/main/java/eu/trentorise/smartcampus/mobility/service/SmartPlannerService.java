@@ -80,7 +80,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 
 	@Autowired
-	@Value("${otp.url}")
+	@Value("${otp.url.bologna}")
 	private String otpURL;	
 
 	private static ObjectMapper mapper = new ObjectMapper();
