@@ -21,7 +21,7 @@ import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 
 @Controller
-@RequestMapping(value = "/notification")
+@RequestMapping(value = "/web/notification")
 public class NotificationController {
 
 	@Autowired

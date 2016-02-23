@@ -31,7 +31,7 @@ public class ConsoleController {
 		return "webplanner";
 	}
 
-	@RequestMapping(value = "/login")
+	@RequestMapping(value = "/web/login")
 	public String login() {
 		return "login";
 	}		
