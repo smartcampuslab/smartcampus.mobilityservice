@@ -168,7 +168,13 @@ public class AlertSender {
 				logger.debug("{} -> {}",its.size(), alert.getTransport().getAgencyId());
 			}
 
+			Calendar now = Calendar.getInstance();
 			for (ItineraryObject it : its) {
+				if (it.getRecurrency() != null && it.getRecurrency().getDaysOfWeek() != null) {
+					if (!it.getRecurrency().getDaysOfWeek().contains(now.get(Calendar.DAY_OF_WEEK))) {
+						continue;
+					}
+				}
 				if (AlertFilter.filterDelay(it.getData(), alert)) {
 					it.setData(AlertUpdater.updateAlerts(it.getData(), alert));
 					domainStorage.saveItinerary(it);

@@ -157,7 +157,8 @@ public class JourneyPlannerController extends SCController {
 				io.setAppId(NotificationHelper.MS_APP);
 			} else {
 				io.setAppId(itinerary.getAppId());
-			}			
+			}
+			io.setRecurrency(itinerary.getRecurrency());
 
 			domainStorage.saveItinerary(io);
 			itinerary.setClientId(clientId);
