@@ -1,4 +1,4 @@
-var notification = angular.module('notification', [ 'ngMask' ]);
+var notification = angular.module('notification', [ 'ngMask', 'textAngular' ]);
 
 notification.controller('notification', function($scope, $http) {
 	$scope.notify = function() {
@@ -8,7 +8,11 @@ notification.controller('notification', function($scope, $http) {
 				'description' : $scope.form.description,
 				'html' : $scope.form.html,
 				'from' : $scope.form.from,
-				'to' : $scope.form.to
+				'to' : $scope.form.to,
+				'notification' : $scope.form.notification,
+				'news' : $scope.form.news,
+				'agencyId' : $scope.form.agencyId,
+				'routeId' : $scope.form.routeId
 			}).success(function(data) {
 				$scope.notifyMessage = data.message;
 				$scope.notifyError = data.error;

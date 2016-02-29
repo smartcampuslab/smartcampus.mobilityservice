@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
+import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -25,6 +25,7 @@ public class DomainStorage {
 	private static final String ITINERARY = "itinerary";
 	private static final String RECURRENT = "recurrent";
 	private static final String DATA = "data";
+	private static final String NEWS = "news";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -38,6 +39,7 @@ public class DomainStorage {
 		if (cls == ItineraryObject.class) return ITINERARY;
 		if (cls == RecurrentJourneyObject.class) return RECURRENT;
 		if (cls == AlertsSent.class) return DATA;
+		if (cls == Announcement.class) return NEWS;
 		throw new IllegalArgumentException("Unknown class: "+cls.getName());
 	}
 	
@@ -87,11 +89,20 @@ public class DomainStorage {
 		}
 	}
 	
+	public void saveNews(Announcement announcment) {
+		template.save(announcment, NEWS);
+	}
+	
 	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
 		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.find(query, clz, getClassCollection(clz));
 	}
+	
+	public <T> List<T> searchDomainObjects(Query query, Class<T> clz) {
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		return template.find(query, clz, getClassCollection(clz));
+	}	
 	
 	public <T> List<T> searchDomainObjects(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
@@ -133,6 +144,7 @@ public class DomainStorage {
 		template.dropCollection(ITINERARY);
 		template.dropCollection(RECURRENT);
 		template.dropCollection(DATA);
+		template.dropCollection(NEWS);
 	}
 	
 }

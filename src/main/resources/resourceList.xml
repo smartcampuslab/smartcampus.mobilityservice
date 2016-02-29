@@ -86,6 +86,13 @@
   <resourceMapping uri="mobilityservice.service.alert" 
       pathPattern="/alert/service"/>
   
+  <!-- announcement -->
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/announcements/news/{appId}"/>
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/announcements/notifications/{appId}"/>
+  
+  
 </service>
 
 
