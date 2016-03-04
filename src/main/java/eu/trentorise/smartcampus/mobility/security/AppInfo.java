@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.security;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 public class AppInfo implements Serializable {
@@ -12,6 +13,7 @@ public class AppInfo implements Serializable {
     private String messagingAppId;
     private String gcmSenderApiKey;
     private String gcmSenderId;
+    private List<String> agencyIds;
 
 	public String getAppId() {
 		return appId;
@@ -51,6 +53,14 @@ public class AppInfo implements Serializable {
 
 	public void setGcmSenderId(String gcmSenderId) {
 		this.gcmSenderId = gcmSenderId;
+	}
+
+	public List<String> getAgencyIds() {
+		return agencyIds;
+	}
+
+	public void setAgencyIds(List<String> agencyIds) {
+		this.agencyIds = agencyIds;
 	}
 
 	@Override
