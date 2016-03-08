@@ -37,7 +37,8 @@ import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
-public class GeolocationController extends SCController {
+@RequestMapping(value = "/gamification")
+public class GamificationController extends SCController {
 
 	 @Autowired
 	 private DomainStorage storage;

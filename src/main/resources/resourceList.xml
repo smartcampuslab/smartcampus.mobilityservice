@@ -94,7 +94,7 @@
   
   <!-- geolocation -->
   <resourceMapping uri="mobilityservice.data" 
-      pathPattern="/geolocations"/>
+      pathPattern="/gamification/geolocations"/>
   
 </service>
 
