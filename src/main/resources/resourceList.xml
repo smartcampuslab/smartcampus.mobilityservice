@@ -92,6 +92,9 @@
   <resourceMapping uri="mobilityservice.data" 
       pathPattern="/announcements/notifications/{appId}"/>
   
+  <!-- geolocation -->
+  <resourceMapping uri="mobilityservice.data" 
+      pathPattern="/geolocations"/>
   
 </service>
 

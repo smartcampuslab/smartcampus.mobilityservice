@@ -8,13 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
+import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -26,6 +29,7 @@ public class DomainStorage {
 	private static final String RECURRENT = "recurrent";
 	private static final String DATA = "data";
 	private static final String NEWS = "news";
+	private static final String GEOLOCATIONS = "geolocations";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -40,7 +44,8 @@ public class DomainStorage {
 		if (cls == RecurrentJourneyObject.class) return RECURRENT;
 		if (cls == AlertsSent.class) return DATA;
 		if (cls == Announcement.class) return NEWS;
-		throw new IllegalArgumentException("Unknown class: "+cls.getName());
+		if (cls == Geolocation.class) return GEOLOCATIONS;
+		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
 	
 	public void saveItinerary(ItineraryObject io) {
@@ -93,6 +98,54 @@ public class DomainStorage {
 		template.save(announcment, NEWS);
 	}
 	
+	public void saveGeolocation(Geolocation geolocation) {
+		Query query = new Query(new Criteria("userId").is(geolocation.getUserId()).and("recorded_at").is(geolocation.getRecorded_at()));
+		Geolocation geolocationDB = searchDomainObject(query, Geolocation.class);
+		if (geolocationDB == null) {
+			template.save(geolocation, GEOLOCATIONS);
+		} else {
+
+			// ObjectMapper mapper = new ObjectMapper();
+			// BasicDBObject dbObject = mapper.convertValue(geolocation,
+			// BasicDBObject.class);
+			//
+			// Update update = Update.fromDBObject(dbObject);
+
+			Update update = new Update();
+			update.set("userId", geolocation.getUserId());
+			update.set("travelId", geolocation.getTravelId());
+
+			update.set("uuid", geolocation.getUuid());
+			update.set("device_id", geolocation.getDevice_id());
+			update.set("device_model", geolocation.getDevice_model());
+
+			update.set("latitude", geolocation.getLatitude());
+			update.set("longitude", geolocation.getLongitude());
+			update.set("geocoding", geolocation.getGeocoding());
+			update.set("accuracy", geolocation.getAccuracy());
+			update.set("altitude", geolocation.getAltitude());
+			update.set("speed", geolocation.getSpeed());
+			update.set("heading", geolocation.getHeading());
+			update.set("activity_type", geolocation.getActivity_type());
+			update.set("activity_confidence", geolocation.getActivity_confidence());
+			update.set("battery_level", geolocation.getBattery_level());
+			update.set("battery_is_charging", geolocation.getBattery_is_charging());
+
+			update.set("is_moving", geolocation.getIs_moving());
+			update.set("geofence", geolocation.getGeofence());
+			update.set("recorded_at", geolocation.getRecorded_at());
+			update.set("created_at", geolocation.getCreated_at());
+
+			template.updateFirst(query, update, GEOLOCATIONS);
+		}
+	}
+	
+	public Geolocation getLastGeolocationByUserId(String userId) {
+		Criteria criteria = new Criteria("userId").is(userId);
+		Query query = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
+		return searchDomainObject(query, Geolocation.class);
+	}
+	
 	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
 		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
@@ -102,6 +155,11 @@ public class DomainStorage {
 	public <T> List<T> searchDomainObjects(Query query, Class<T> clz) {
 		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.find(query, clz, getClassCollection(clz));
+	}	
+	
+	public <T> T searchDomainObject(Query query, Class<T> clz) {
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
 	public <T> List<T> searchDomainObjects(Map<String, Object> pars, Class<T> clz) {
@@ -126,6 +184,8 @@ public class DomainStorage {
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
+	
+	
 //	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {
 //		Criteria criteria = new Criteria();
 //		for (String key : pars.keySet()) {
@@ -145,6 +205,7 @@ public class DomainStorage {
 		template.dropCollection(RECURRENT);
 		template.dropCollection(DATA);
 		template.dropCollection(NEWS);
+		template.dropCollection(GEOLOCATIONS);
 	}
 	
 }
