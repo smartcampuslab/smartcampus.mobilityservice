@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,6 +35,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
@@ -160,7 +163,7 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
-	public @ResponseBody List<Geolocation> storeGeolocationEvent(@RequestParam  Map<String, Object> query, HttpServletResponse response) throws Exception {
+	public @ResponseBody List<Geolocation> searchGeolocationEvent(@RequestParam  Map<String, Object> query, HttpServletResponse response) throws Exception {
 		
 		Criteria criteria = new Criteria();
 		for (String key: query.keySet()) {
@@ -170,6 +173,31 @@ public class GamificationController extends SCController {
 		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));;
 		
 		return storage.searchDomainObjects(mongoQuery, Geolocation.class);
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
+	public @ResponseBody void finishJourney(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+		try {
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
+
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			ItineraryObject res = storage.searchDomainObject(pars, ItineraryObject.class);
+			if (res != null && !userId.equals(res.getUserId())) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
+			if (res == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	private String buildInsert(Geolocation geolocation) {
