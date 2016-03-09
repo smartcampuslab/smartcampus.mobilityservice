@@ -112,12 +112,13 @@ notification.controller('notification', function($scope, $http) {
 			}).success(function(data) {
 				$scope.notifyMessage = data.message;
 				$scope.notifyError = data.error;
+				$scope.resetNews();
 			}).error(function(error) {
 				$scope.notifyMessage = data.message;
 				$scope.notifyError = data.error;
+				$scope.resetNews();
 			});
 		}
-		$scope.resetNews();
 	}
 	$scope.validate = function() {
 		if ($scope.form.news == false && $scope.form.notification == false) {

@@ -43,7 +43,7 @@
 			<div ng-controller="notification">
 				<div class="panel panel-default ">
 					<h3 style="text-align: center">Mobility Communicator Console
-						for {{ appId }} {{ agencyIds }}</h3>
+						for {{ appId }}</h3>
 
 					<!-- <div class="panel-body" align="center"> -->
 
