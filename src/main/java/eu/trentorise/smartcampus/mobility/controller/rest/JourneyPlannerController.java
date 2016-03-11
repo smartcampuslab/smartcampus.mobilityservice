@@ -106,10 +106,11 @@ public class JourneyPlannerController extends SCController {
 			statLogger.log(journeyRequest, userId);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
-			return smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
-//		} catch (ConnectorException e0) {
-//			e0.printStackTrace();
-//			response.setStatus(e0.getCode());
+			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
+			for (Itinerary itinerary: results) {
+				gamificationHelper.computeEstimatedGameScore(itinerary);
+			}
+			return results;
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -128,7 +129,6 @@ public class JourneyPlannerController extends SCController {
 			}
 
 			statLogger.log(itinerary, userId);
-			gamificationHelper.saveItinerary(itinerary, userId);
 			
 			String clientId = itinerary.getClientId();
 			

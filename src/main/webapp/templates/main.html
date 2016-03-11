@@ -161,6 +161,7 @@
                 <div class="col-md-12 text-right">
                 <small class="text-muted text-center">{{plan.length}}km</small>
                 <small class="text-muted text-center" ng-if="plan.price > 0">/ {{plan.price}} EUR</small>
+                <small class="text-muted text-center" ng-if="plan.customData['estimatedScore'] > 0">/ {{plan.customData["estimatedScore"]}} points</small>
                 </div>
               </div>
 		          <div class="row">

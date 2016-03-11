@@ -23,7 +23,6 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -38,10 +37,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Maps;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
+import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 import eu.trentorise.smartcampus.network.RemoteException;
@@ -52,6 +55,11 @@ import eu.trentorise.smartcampus.network.RemoteException;
  */
 @Component
 public class GamificationHelper {
+
+	private static final double SPACE_ERROR = 1E-1;
+	private static final double TIME_ERROR = 1000 * 60 * 15;
+
+	private static final String SAVE_ITINERARY = "save_itinerary";
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 	
@@ -68,6 +76,8 @@ public class GamificationHelper {
 	@Autowired
 	private ExecutorService executorService;
 	
+	private final static int EARTH_RADIUS = 6371; // Earth radius in km.
+	
 	@PostConstruct
 	public void initConnector() {
 		if (StringUtils.hasText(gameStart)) {
@@ -79,84 +89,152 @@ public class GamificationHelper {
 		}
 	}
 	
-	public void saveItinerary(final BasicItinerary itinerary, final String userId) {
+	public void saveItinerary(final BasicItinerary itinerary, final String gameId, final String userId) {
 		if (gamificationUrl == null) return;
 		if (System.currentTimeMillis() < START_GAME_DATE) return;
 		
 		executorService.execute(new Runnable() {
 			@Override
 			public void run() {
-				saveTrip(itinerary, userId);
+				saveTrip(itinerary, gameId, userId);
 			}
 		});
 	}
 	
-	private void saveTrip(BasicItinerary itinerary, String userId) {
+	private void saveTrip(BasicItinerary itinerary, String gameId, String userId) {
 		try {
-			String actionId = "save_itinerary";
-			Map<String,Object> data = new HashMap<String, Object>();
-			String parkName = null; // name of the parking 
-			boolean pnr = false; // (park-n-ride)
-			boolean bikeSharing = false;
-			double bikeDist = 0; // km
-			double walkDist = 0; // km
-			double trainDist = 0; // km
-			double busDist = 0; // km
-			double carDist = 0; // km
+			Map<String,Object> data = computeTripData(itinerary.getData());
 			
-			Itinerary it = itinerary.getData();
-			logger.info("Analyzing itinerary for gamification.");
-			if (it != null) {
-				for (Leg leg : it.getLeg()) {
-					if (leg.getTransport().getType().equals(TType.CAR)) {
-						carDist += leg.getLength() / 1000;
-						if (leg.getTo().getStopId() != null) {
-							pnr = true;
-							parkName = leg.getTo().getStopId().getId();
-						}						
-					}					
-					if (leg.getTransport().getType().equals(TType.BICYCLE)) {
-						bikeDist += leg.getLength() / 1000;
-						if (leg.getTo().getStopId() != null) {
-							bikeSharing = true;
-						}						
-					}
-					if (leg.getTransport().getType().equals(TType.WALK)) {
-						walkDist += leg.getLength() / 1000;
-					}
-					if (leg.getTransport().getType().equals(TType.TRAIN)) {
-						trainDist += leg.getLength() / 1000;
-					}
-					if (leg.getTransport().getType().equals(TType.BUS)) {
-						busDist += leg.getLength() / 1000;
-					}
-				}
-			}
-			logger.info("Analysis results:");
-			logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
-			logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
-			logger.info("Park = " + parkName);
+			ExecutionDataDTO ed = new ExecutionDataDTO();
+			ed.setGameId(gameId);
+			ed.setPlayerId(userId);
+			ed.setActionId(SAVE_ITINERARY);			
+			ed.setData(data);
 			
+			String content = JsonUtils.toJSON(ed);
 			
-			if (bikeDist > 0) data.put("bikeDistance", bikeDist);
-			if (walkDist > 0) data.put("walkDistance", walkDist);
-			if (busDist > 0) data.put("busDistance", busDist);
-			if (trainDist > 0) data.put("trainDistance", trainDist);
-			if (carDist > 0) data.put("carDistance", carDist);
-			if (bikeSharing) data.put("bikesharing", bikeSharing);
-			if (parkName != null) data.put("park", parkName);
-			if (pnr) data.put("p+r", pnr);
-			data.put("sustainable", itinerary.getData().isPromoted());
-			
-			Map<String,Object> body = new HashMap<String, Object>();
-			body.put("actionId", actionId);
-			body.put("userId", userId);
-			body.put("data", data);
-			RemoteConnector.postJSON(gamificationUrl, "/execute", JsonUtils.toJSON(body), null);
+			RemoteConnector.postJSON(gamificationUrl, "/gengine/execute", content, null);
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: "+e.getMessage());
 		}
 	}
+	
+	private Map<String,Object> computeTripData(Itinerary itinerary) {
+		Map<String,Object> data = Maps.newTreeMap();
+		
+		String parkName = null; // name of the parking 
+		boolean pnr = false; // (park-n-ride)
+		boolean bikeSharing = false;
+		double bikeDist = 0; // km
+		double walkDist = 0; // km
+		double trainDist = 0; // km
+		double busDist = 0; // km
+		double carDist = 0; // km
+		
+		logger.info("Analyzing itinerary for gamification.");
+		if (itinerary != null) {
+			for (Leg leg : itinerary.getLeg()) {
+				if (leg.getTransport().getType().equals(TType.CAR)) {
+					carDist += leg.getLength() / 1000;
+					if (leg.getTo().getStopId() != null) {
+						pnr = true;
+						parkName = leg.getTo().getStopId().getId();
+					}						
+				}					
+				if (leg.getTransport().getType().equals(TType.BICYCLE)) {
+					bikeDist += leg.getLength() / 1000;
+					if (leg.getTo().getStopId() != null) {
+						bikeSharing = true;
+					}						
+				}
+				if (leg.getTransport().getType().equals(TType.WALK)) {
+					walkDist += leg.getLength() / 1000;
+				}
+				if (leg.getTransport().getType().equals(TType.TRAIN)) {
+					trainDist += leg.getLength() / 1000;
+				}
+				if (leg.getTransport().getType().equals(TType.BUS)) {
+					busDist += leg.getLength() / 1000;
+				}
+			}
+		}
+		logger.info("Analysis results:");
+		logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
+		logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
+		logger.info("Park = " + parkName);
+		
+		Long score = (long)((bikeDist + walkDist) * 5 + (busDist + trainDist) + (itinerary.isPromoted() ? 5 : 0) + (pnr ? 10 : 0));
+		
+		if (bikeDist > 0) data.put("bikeDistance", bikeDist);
+		if (walkDist > 0) data.put("walkDistance", walkDist);
+		if (busDist > 0) data.put("busDistance", busDist);
+		if (trainDist > 0) data.put("trainDistance", trainDist);
+		if (carDist > 0) data.put("carDistance", carDist);
+		if (bikeSharing) data.put("bikesharing", bikeSharing);
+		if (parkName != null) data.put("park", parkName);
+		if (pnr) data.put("p+r", pnr);
+		data.put("sustainable", itinerary.isPromoted());	
+		data.put("estimatedScore", score);
+		
+		return data;
+	}
+	
+	public void computeEstimatedGameScore(Itinerary itinerary) {
+		Long score =  (Long)(computeTripData(itinerary).get("estimatedScore"));
+		itinerary.getCustomData().put("estimatedScore", score);
+	}	
+	
+	public static boolean checkItineraryCompletion(ItineraryObject itinerary, List<Geolocation> geolocations) throws Exception {
+		if (geolocations.size() > 1) {
+			boolean started = false;
+			boolean ended = false;
+			
+			double fromLat =  Double.parseDouble(itinerary.getData().getFrom().getLat());
+			double fromLon =  Double.parseDouble(itinerary.getData().getFrom().getLon());
+			double toLat = Double.parseDouble(itinerary.getData().getTo().getLat());
+			double toLon = Double.parseDouble(itinerary.getData().getTo().getLon());				
+			long startTime = itinerary.getData().getStartime();
+			long endTime = itinerary.getData().getEndtime();
+			
+			for (Geolocation geolocation: geolocations) {
+				double lat = geolocation.getLatitude();
+				double lon = geolocation.getLongitude();
+				long time = geolocation.getCreated_at().getTime();
+				if (!started) {
+					double fromD = harvesineDistance(lat, lon, fromLat, fromLon);
+					long fromT = Math.abs(time - startTime);
+					started = fromD <= SPACE_ERROR & fromT <= TIME_ERROR;
+				}
+				if (!ended) {
+					double toD = harvesineDistance(geolocation.getLatitude(), geolocation.getLongitude(), toLat, toLon);
+					long toT = Math.abs(time - endTime);
+					ended = toD <= SPACE_ERROR & toT <= TIME_ERROR;
+				}
+				if (started && ended) {
+					return true;
+				}
+			}
+		} 
+		
+		return false;	
+	}	
+	
+	private static double harvesineDistance(double lat1, double lon1, double lat2, double lon2) {
+		lat1 = Math.toRadians(lat1);
+	    lon1 = Math.toRadians(lon1);
+	    lat2 = Math.toRadians(lat2);
+	    lon2 = Math.toRadians(lon2);
+
+	    double dlon = lon2 - lon1;
+	    double dlat = lat2 - lat1;
+
+		double a = Math.pow((Math.sin(dlat / 2)), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2), 2);
+
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		return EARTH_RADIUS * c;
+	}		
+	
 	
 	public static void main(String[] args) throws UnknownHostException, MongoException, SecurityException, RemoteException {
 		MongoTemplate mg = new MongoTemplate(new Mongo("127.0.0.1", 37017), "mobility-logging");

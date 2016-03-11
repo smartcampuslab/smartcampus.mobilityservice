@@ -36,6 +36,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
@@ -55,7 +56,14 @@ public class GamificationController extends SCController {
 	
 	@Autowired
 	@Value("${geolocations.db}")
-	private String geolocationsDB;		
+	private String geolocationsDB;	
+	
+	@Autowired
+	@Value("${gamification.gameId}")
+	private String gameId;	
+	
+	@Autowired
+	private GamificationHelper gamificationHelper;
 
 	private Connection connection;
 	
@@ -176,7 +184,7 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void finishJourney(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+	public @ResponseBody void sendItineraryToGamification(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -194,6 +202,9 @@ public class GamificationController extends SCController {
 			if (res == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			}
+			
+			sendIntineraryDataToGamificationEngine(gameId, userId, res);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -245,6 +256,19 @@ public class GamificationController extends SCController {
 	private String escape(Object o) {
 		return ((o != null)?o.toString().replace("\"", "\"\""):"");
 	}	
+	
+	private void sendIntineraryDataToGamificationEngine(String gameId, String playerId, ItineraryObject itinerary) throws Exception {
+		Criteria criteria = new Criteria("userId").is(itinerary.getUserId()).and("travelId").is(itinerary.getClientId());
+		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
+		
+		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
+		
+		if (GamificationHelper.checkItineraryCompletion(itinerary, geolocations)) {
+			gamificationHelper.saveItinerary(itinerary, gameId, playerId);
+		}
+	}
+	
+	
 
 	@Override
 	protected AuthServices getAuthServices() {
