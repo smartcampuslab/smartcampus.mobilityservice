@@ -267,8 +267,6 @@ public class GamificationController extends SCController {
 			gamificationHelper.saveItinerary(itinerary, gameId, playerId);
 		}
 	}
-	
-	
 
 	@Override
 	protected AuthServices getAuthServices() {
