@@ -23,6 +23,7 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +38,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -163,7 +165,19 @@ public class GamificationHelper {
 		logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
 		logger.info("Park = " + parkName);
 		
-		Long score = (long)((bikeDist + walkDist) * 5 + (busDist + trainDist) + (itinerary.isPromoted() ? 5 : 0) + (pnr ? 10 : 0));
+		// old score
+//		Long score = (long)((bikeDist + walkDist) * 5 + (busDist + trainDist) + (itinerary.isPromoted() ? 5 : 0) + (pnr ? 10 : 0));
+		
+		Double score = 0.0;
+		score += (walkDist< 0.1 ? 0 : Math.min(5, walkDist)) * 10;
+		score += (bikeDist< 0.1 ? 0 : Math.min(10, bikeDist)) * 5;
+		if (busDist > 0) {
+			score += ((busDist < 5) ? 15 : (busDist >= 5 && busDist < 10) ? 20 : 30);
+		}
+		if (trainDist > 0) {
+			score += ((trainDist > 0 && trainDist < 10) ? 10 : (trainDist >= 10 && trainDist < 20) ? 20 : 30);
+		}
+		score += (itinerary.isPromoted() ? 5 : 0);
 		
 		if (bikeDist > 0) data.put("bikeDistance", bikeDist);
 		if (walkDist > 0) data.put("walkDistance", walkDist);
@@ -174,7 +188,7 @@ public class GamificationHelper {
 		if (parkName != null) data.put("park", parkName);
 		if (pnr) data.put("p+r", pnr);
 		data.put("sustainable", itinerary.isPromoted());	
-		data.put("estimatedScore", score);
+		data.put("estimatedScore", score.longValue());
 		
 		return data;
 	}
@@ -218,6 +232,57 @@ public class GamificationHelper {
 		
 		return false;	
 	}	
+	
+	
+	public static boolean checkItineraryMatching(ItineraryObject itinerary, List<Geolocation> geolocations) throws Exception {
+		if (geolocations.size() > 1) {
+			
+			List<Geolocation> positions = Lists.newArrayList();
+			List<Geolocation> matchedPositions = Lists.newArrayList();
+			for (Leg leg: itinerary.getData().getLeg()) {
+				Geolocation onLeg = new Geolocation();
+				onLeg.setLatitude(Double.parseDouble(leg.getFrom().getLat()));
+				onLeg.setLongitude(Double.parseDouble(leg.getFrom().getLon()));
+				onLeg.setCreated_at(new Date(leg.getStartime()));
+				positions.add(onLeg);
+			}
+			Leg lastLeg = itinerary.getData().getLeg().get(itinerary.getData().getLeg().size() - 1);
+			Geolocation onLeg = new Geolocation();
+			onLeg.setLatitude(Double.parseDouble(lastLeg.getFrom().getLat()));
+			onLeg.setLongitude(Double.parseDouble(lastLeg.getFrom().getLon()));
+			onLeg.setCreated_at(new Date(lastLeg.getEndtime()));
+			positions.add(onLeg);			
+			
+			
+			for (Geolocation geolocation: geolocations) {
+				double lat = geolocation.getLatitude();
+				double lon = geolocation.getLongitude();
+
+				Geolocation toRemove = null;
+				for (Geolocation pos: positions) {
+					double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
+					double t = Math.abs(pos.getCreated_at().getTime() - geolocation.getCreated_at().getTime());
+					if (d <= SPACE_ERROR && t <= TIME_ERROR) {
+						toRemove = pos;
+						break;
+					}
+				}
+				if (toRemove != null) {
+					positions.remove(toRemove);
+					matchedPositions.add(toRemove);
+				}
+				
+			}
+			
+			System.out.println(positions.size() + " / " + matchedPositions.size());
+			
+		} 
+		
+
+		
+		return false;	
+	}	
+	
 	
 	private static double harvesineDistance(double lat1, double lon1, double lat2, double lon2) {
 		lat1 = Math.toRadians(lat1);
