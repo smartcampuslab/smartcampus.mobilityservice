@@ -201,6 +201,7 @@ public class GamificationController extends SCController {
 			}
 			if (res == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
 			}
 			
 			sendIntineraryDataToGamificationEngine(gameId, userId, res);
