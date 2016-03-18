@@ -170,6 +170,60 @@ public class JourneyPlannerController extends SCController {
 		return null;
 	}
 	
+	@RequestMapping(method = RequestMethod.PUT, value = "/itinerary/{itineraryId}")
+	public @ResponseBody
+	Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId) throws InvocationException {
+		try {
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return null;
+			}
+
+			String objectClientId = itinerary.getClientId();
+			if (!itineraryId.equals(objectClientId)) {
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				return null;
+			}
+
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", itineraryId);
+			
+			ItineraryObject res = domainStorage.searchDomainObject(pars, ItineraryObject.class);				
+			
+			if (res != null) {
+				if (!userId.equals(res.getUserId())) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					return null;
+				}
+				
+				res.setClientId(itinerary.getClientId());
+				res.setUserId(userId);
+				res.setOriginalFrom(itinerary.getOriginalFrom());
+				res.setOriginalTo(itinerary.getOriginalTo());
+				res.setName(itinerary.getName());
+				res.setData(itinerary.getData());
+				if (itinerary.getAppId() == null || itinerary.getAppId().isEmpty()) {
+					res.setAppId(NotificationHelper.MS_APP);
+				} else {
+					res.setAppId(itinerary.getAppId());
+				}
+				res.setRecurrency(itinerary.getRecurrency());
+				
+				domainStorage.saveItinerary(res);
+
+				return true;
+			} else {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+		return null;
+	}	
+	
+	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary")
 	public @ResponseBody
