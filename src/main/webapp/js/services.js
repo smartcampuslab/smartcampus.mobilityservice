@@ -220,14 +220,22 @@ services.factory('formatter', ['parking', '$rootScope',
     	return means;
     };
     
-    var elemColors = ['#FF0000','#FF6600', '#6633FF', '#99FF00', '#339900'];
+//  var elemColors = ['#FF0000','#FF6600', '#6633FF', '#99FF00', '#339900'];
+    var elemColors = {
+    		'WALK'		: '#8cc04c',
+    		'BICYCLE'	: '#922d66',
+    		'CAR'		: '#757575',
+    		'BUS'		: '#eb8919',
+    		'TRAIN'		: '#cd251c',
+    		'TRANSIT'	: '#016a6a'
+    };        
     
     var extractMapElements = function(leg, idx, map) {
 		var res = [];
     	var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
     	var line = new google.maps.Polyline({
 		    path: path,
-		    strokeColor: idx >= elemColors.length ? elemColors[idx % elemColors.length]: elemColors[idx],
+		    strokeColor: leg.transport.agencyId == '17' ? "#00588e" : elemColors[leg.transport.type],
 		    strokeOpacity: 0.8,
 		    strokeWeight: 2,
 		    map: map
@@ -312,7 +320,7 @@ services.factory('formatter', ['parking', '$rootScope',
     };
     
     var getLength = function(it) {
-    	if (!it.leg && it.length) {
+    	if (!it.leg && it.length != null) {
     		return (it.length / 1000).toFixed(2);
     	}
     	var l = 0;
