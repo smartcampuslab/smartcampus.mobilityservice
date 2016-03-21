@@ -125,6 +125,8 @@ public class GamificationHelper {
 		Map<String,Object> data = Maps.newTreeMap();
 		
 		String parkName = null; // name of the parking 
+		String startBikesharingName = null; // name of starting bike sharing station
+		String endBikesharingName = null; // name of ending bike sharing station
 		boolean pnr = false; // (park-n-ride)
 		boolean bikeSharing = false;
 		double bikeDist = 0; // km
@@ -145,8 +147,13 @@ public class GamificationHelper {
 				}					
 				if (leg.getTransport().getType().equals(TType.BICYCLE)) {
 					bikeDist += leg.getLength() / 1000;
+					if (leg.getFrom().getStopId() != null) {
+						bikeSharing = true;
+						startBikesharingName = leg.getFrom().getStopId().getId();
+					}						
 					if (leg.getTo().getStopId() != null) {
 						bikeSharing = true;
+						endBikesharingName = leg.getTo().getStopId().getId();
 					}						
 				}
 				if (leg.getTransport().getType().equals(TType.WALK)) {
@@ -164,6 +171,7 @@ public class GamificationHelper {
 		logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
 		logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
 		logger.info("Park = " + parkName);
+		logger.info("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
 		
 		// old score
 //		Long score = (long)((bikeDist + walkDist) * 5 + (busDist + trainDist) + (itinerary.isPromoted() ? 5 : 0) + (pnr ? 10 : 0));
@@ -179,14 +187,36 @@ public class GamificationHelper {
 		}
 		score += (itinerary.isPromoted() ? 5 : 0);
 		
-		if (bikeDist > 0) data.put("bikeDistance", bikeDist);
-		if (walkDist > 0) data.put("walkDistance", walkDist);
-		if (busDist > 0) data.put("busDistance", busDist);
-		if (trainDist > 0) data.put("trainDistance", trainDist);
-		if (carDist > 0) data.put("carDistance", carDist);
-		if (bikeSharing) data.put("bikesharing", bikeSharing);
-		if (parkName != null) data.put("park", parkName);
-		if (pnr) data.put("p+r", pnr);
+		if (bikeDist > 0) {
+			data.put("bikeDistance", bikeDist);
+		}
+		if (walkDist > 0) {
+			data.put("walkDistance", walkDist);
+		}
+		if (busDist > 0) {
+			data.put("busDistance", busDist);
+		}
+		if (trainDist > 0) {
+			data.put("trainDistance", trainDist);
+		}
+		if (carDist > 0) {
+			data.put("carDistance", carDist);
+		}
+		if (bikeSharing) {
+			data.put("bikesharing", bikeSharing);
+		}
+		if (parkName != null) {
+			data.put("park", parkName);
+		}
+		if (startBikesharingName != null) {
+			data.put("startBike", startBikesharingName);
+		}
+		if (endBikesharingName != null) {
+			data.put("endBike", endBikesharingName);
+		}
+		if (pnr) {
+			data.put("p+r", pnr);
+		}
 		data.put("sustainable", itinerary.isPromoted());	
 		data.put("estimatedScore", score.longValue());
 		
