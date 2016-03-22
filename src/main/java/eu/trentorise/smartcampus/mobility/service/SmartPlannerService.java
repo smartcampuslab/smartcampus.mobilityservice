@@ -362,11 +362,13 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		List<PlanRequest> reqsList = Lists.newArrayList();
 		for (TType type : request.getTransportTypes()) {
 			int minitn = 1;
+			PlanRequest pr = new PlanRequest();
 			if (type.equals(TType.TRANSIT)) {
 				minitn = 3;
+				pr.setWheelChair(request.getWheelchair());
 			}
 			int itn = Math.max(request.getResultsNumber(), minitn);			
-			PlanRequest pr = new PlanRequest();
+			
 			pr.setType(type);
 			pr.setRouteType(request.getRouteType());
 			pr.setValue(0);
