@@ -29,6 +29,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
@@ -161,6 +163,10 @@ public class JourneyPlannerController extends SCController {
 			io.setRecurrency(itinerary.getRecurrency());
 
 			domainStorage.saveItinerary(io);
+			
+			SavedTrip st = new SavedTrip(new Date(), io, RequestMethod.POST.toString());
+			domainStorage.saveSavedTrips(st);
+			
 			itinerary.setClientId(clientId);
 			return itinerary;
 		} catch (Exception e) {
@@ -211,6 +217,9 @@ public class JourneyPlannerController extends SCController {
 				res.setRecurrency(itinerary.getRecurrency());
 				
 				domainStorage.saveItinerary(res);
+				
+				SavedTrip st = new SavedTrip(new Date(), res, RequestMethod.PUT.toString());
+				domainStorage.saveSavedTrips(st);				
 
 				return true;
 			} else {
@@ -302,6 +311,10 @@ public class JourneyPlannerController extends SCController {
 			}
 
 			domainStorage.deleteItinerary(itineraryId);
+			
+			SavedTrip st = new SavedTrip(new Date(), res, RequestMethod.DELETE.toString());
+			domainStorage.saveSavedTrips(st);							
+			
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -23,6 +23,7 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +229,10 @@ public class GamificationHelper {
 		itinerary.getCustomData().put("estimatedScore", score);
 	}	
 	
-	public static boolean checkItineraryCompletion(ItineraryObject itinerary, List<Geolocation> geolocations) throws Exception {
+	public static boolean checkItineraryCompletion(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
+		if (itinerary == null) {
+			return false;
+		}
 		if (geolocations.size() > 1) {
 			boolean started = false;
 			boolean ended = false;

@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
@@ -30,6 +32,8 @@ public class DomainStorage {
 	private static final String DATA = "data";
 	private static final String NEWS = "news";
 	private static final String GEOLOCATIONS = "geolocations";
+	private static final String TRACKED = "trackedInstances";
+	private static final String SAVED = "savedtrips";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -40,11 +44,27 @@ public class DomainStorage {
 	}
 
 	private String getClassCollection(Class<?> cls) {
-		if (cls == ItineraryObject.class) return ITINERARY;
-		if (cls == RecurrentJourneyObject.class) return RECURRENT;
-		if (cls == AlertsSent.class) return DATA;
-		if (cls == Announcement.class) return NEWS;
-		if (cls == Geolocation.class) return GEOLOCATIONS;
+		if (cls == ItineraryObject.class) {
+			return ITINERARY;
+		}
+		if (cls == RecurrentJourneyObject.class) {
+			return RECURRENT;
+		}
+		if (cls == AlertsSent.class) {
+			return DATA;
+		}
+		if (cls == Announcement.class) {
+			return NEWS;
+		}
+		if (cls == Geolocation.class) {
+			return GEOLOCATIONS;
+		}
+		if (cls == TrackedInstance.class) {
+			return TRACKED;
+		}	
+		if (cls == SavedTrip.class) {
+			return SAVED;
+		}			
 		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
 	
@@ -138,6 +158,38 @@ public class DomainStorage {
 
 			template.updateFirst(query, update, GEOLOCATIONS);
 		}
+	}
+	
+	public void saveTrackedInstance(TrackedInstance tracked) {
+		Query query = new Query(new Criteria("clientId").is(tracked.getClientId()));
+		Geolocation geolocationDB = searchDomainObject(query, Geolocation.class);
+		if (geolocationDB == null) {
+			template.save(tracked, TRACKED);
+		} else {
+			Update update = new Update();
+			if (tracked.getItinerary() != null) {
+				update.set("itinerary", tracked.getItinerary());
+			}
+			if (tracked.getItinerary() != null) {
+				update.set("getGeolocationEvents", tracked.getGeolocationEvents());
+			}
+
+			if (tracked.getStarted() != null) {
+				update.set("started", tracked.getStarted());
+			}
+			if (tracked.getComplete() != null) {
+				update.set("complete", tracked.getComplete());
+			}
+			if (tracked.getValid() != null) {
+				update.set("validity", tracked.getValid());
+			}
+			
+			template.updateFirst(query, update, TRACKED);
+		}
+	}
+	
+	public void saveSavedTrips(SavedTrip savedTrip) {
+		template.save(savedTrip, SAVED);
 	}
 	
 	public Geolocation getLastGeolocationByUserId(String userId) {

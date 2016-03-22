@@ -27,6 +27,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Coords;
@@ -101,6 +105,8 @@ public class GamificationController extends SCController {
 				lastTravelId = lastGeolocation.getTravelId();
 			}
 
+			Multimap<String , Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
+			
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
 					Coords coords = location.getCoords();
@@ -159,11 +165,28 @@ public class GamificationController extends SCController {
 					
 					geolocation.setGeofence(location.getGeofence());
 					
-					storage.saveGeolocation(geolocation);
+					geolocationsByItinerary.put(geolocation.getTravelId(), geolocation);
 					
-			
+					storage.saveGeolocation(geolocation);
 				}
 			}
+			
+			for (String travelId: geolocationsByItinerary.keySet()) {
+				Map<String, Object> pars = new TreeMap<String, Object>();
+				pars.put("clientId", travelId);
+				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
+				if (res == null) {
+					res = new TrackedInstance();
+					res.setClientId(travelId);
+					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
+					res.setItinerary(res2);
+				}
+				res.getGeolocationEvents().addAll(geolocationsByItinerary.get(travelId));
+				res.setComplete(true);
+				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+				storage.saveTrackedInstance(res);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -204,7 +227,16 @@ public class GamificationController extends SCController {
 				return;
 			}
 			
-			sendIntineraryDataToGamificationEngine(gameId, userId, res);
+			TrackedInstance res2 = storage.searchDomainObject(pars, TrackedInstance.class);
+			if (res2 == null) {
+				res2 = new TrackedInstance();
+				res2.setClientId(itineraryId);
+			}
+			res2.setItinerary(res);
+			res2.setStarted(true);
+			storage.saveTrackedInstance(res2);
+			
+//			sendIntineraryDataToGamificationEngine(gameId, userId, res);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

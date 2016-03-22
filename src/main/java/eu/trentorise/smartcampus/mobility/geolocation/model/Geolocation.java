@@ -194,24 +194,39 @@ public class Geolocation {
         this.geocoding = geocoding;
     }
 
-	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((recorded_at == null) ? 0 : recorded_at.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Geolocation other = (Geolocation) obj;
+		if (recorded_at == null) {
+			if (other.recorded_at != null)
+				return false;
+		} else if (!recorded_at.equals(other.recorded_at))
+			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
+	}
+    
+    
+    
+    
 }
 
-// "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL",
-// "uuid TEXT",
-// "device_id TEXT",
-// "device_model TEXT",
-// "latitude REAL",
-// "longitude REAL",
-// "accuracy INTEGER",
-// "altitude REAL",
-// "speed REAL",
-// "heading REAL",
-// "activity_type TEXT",
-// "activity_confidence INTEGER",
-// "battery_level REAL",
-// "battery_is_charging BOOLEAN",
-// "is_moving BOOLEAN",
-// "geofence TEXT",
-// "recorded_at DATETIME",
-// "created_at DATETIME"
