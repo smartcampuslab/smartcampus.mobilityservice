@@ -132,6 +132,16 @@ public class TestConfig {
 			public String getVersions() throws Exception {
 				return null;
 			}
+			@Override
+			public String getTaxiStations(double latitude, double longitude, double radius) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public String getAllTaxiStations() throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 	}
 }

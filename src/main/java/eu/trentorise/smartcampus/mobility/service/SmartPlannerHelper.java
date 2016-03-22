@@ -56,4 +56,6 @@ public interface SmartPlannerHelper {
 	InputStream routesDB(String appId) throws Exception;
 	InputStream extendedRoutesDB(String appId) throws Exception;
 	String getVersions() throws Exception;
+	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
+	String getAllTaxiStations() throws Exception;
 }
