@@ -167,7 +167,7 @@
 										<label> Type: </label><br /> <span> <input
 											id="news-checkbox" type="checkbox" ng-model="form.news"
 											name="type" value="news" ng-init="form.news=true"
-											ng-checked="form.news"><label>News</label> <input
+											ng-checked="form.news" ><label>News</label> <input
 											type="checkbox" ng-model="form.notification" name="type"
 											value="notification" ng-init="form.notification=false"
 											ng-checked="form.notification"><label>Notification</label>
@@ -189,11 +189,11 @@
 													</ul>
 												</div>
 
-												<div class="btn-group ">
-													<button type="button"
+												<div class="btn-group " id="agencyId-dropdown">
+													<button type="button" 
 														class="btn btn-danger dropdown-toggle"
 														data-toggle="dropdown" aria-haspopup="true"
-														aria-expanded="false"">
+														aria-expanded="false"" >
 														{{ (agencyId != null) ? agencyId : 'AgencyId' }} <span
 															class="caret"></span>
 													</button>
