@@ -20,6 +20,7 @@ public class PlanRequest {
 	private SingleJourney originalRequest;
 	private int itineraryNumber;
 	private boolean retryOnFail = false;
+	private boolean wheelChair = false;
 	
 	public PlanRequest() {
 		itinerary = Lists.newArrayList();
@@ -86,6 +87,10 @@ public class PlanRequest {
 
 	public void setRetryOnFail(boolean retryOnFail) {
 		this.retryOnFail = retryOnFail;
+	}
+	
+	public void setWheelChair(boolean wheelChair) {
+		this.wheelChair = wheelChair;
 	}
 
 	@Override

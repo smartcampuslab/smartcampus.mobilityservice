@@ -334,6 +334,37 @@ public class OTPController extends SCController {
 			}
 		}	
 
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/{latitude}/{longitude}/{radius}")
+	public @ResponseBody void getTaxiStations(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session, @PathVariable double latitude, @PathVariable double longitude,
+			@PathVariable double radius) throws InvocationException {
+		try {
+
+			String stops = smartPlannerHelper.getTaxiStations(latitude, longitude, radius);
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(stops);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/")
+	public @ResponseBody void getAllTaxiStations(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws InvocationException {
+		try {
+
+			String stops = smartPlannerHelper.getAllTaxiStations();
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(stops);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@Override
 	protected String getUserId() {
 		try {
