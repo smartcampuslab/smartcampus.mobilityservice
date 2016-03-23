@@ -13,6 +13,8 @@ import java.util.TreeMap;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +71,8 @@ public class GamificationController extends SCController {
 	@Autowired
 	private GamificationHelper gamificationHelper;
 
+	private static Log logger = LogFactory.getLog(GamificationController.class);
+	
 	private Connection connection;
 	
 	private SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
@@ -92,6 +96,7 @@ public class GamificationController extends SCController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
 	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, HttpServletResponse response) throws Exception {
+		logger.info("Receiving geolocation events");
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -191,6 +196,8 @@ public class GamificationController extends SCController {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+		
+		logger.info("Saved geolocation events");
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
