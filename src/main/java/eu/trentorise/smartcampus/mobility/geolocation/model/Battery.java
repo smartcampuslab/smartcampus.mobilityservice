@@ -1,5 +1,8 @@
 package eu.trentorise.smartcampus.mobility.geolocation.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Battery {
 	
 	private boolean is_charging;

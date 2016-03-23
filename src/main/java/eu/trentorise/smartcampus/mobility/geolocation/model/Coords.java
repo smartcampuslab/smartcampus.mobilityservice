@@ -1,5 +1,8 @@
 package eu.trentorise.smartcampus.mobility.geolocation.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Coords {
 	private long accuracy;
 

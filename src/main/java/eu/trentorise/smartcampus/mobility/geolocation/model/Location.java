@@ -1,7 +1,11 @@
 package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.Date;
+import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Location {
 	private Activity activity;
 
@@ -16,6 +20,8 @@ public class Location {
 	private String uuid;
 	
 	private Object geofence;
+	
+	private Map<String, Object> extras;
 
 	public Activity getActivity() {
 		return this.activity;
@@ -71,6 +77,14 @@ public class Location {
 
 	public void setGeofence(Object geofence) {
 		this.geofence = geofence;
+	}
+
+	public Map<String, Object> getExtras() {
+		return extras;
+	}
+
+	public void setExtras(Map<String, Object> extras) {
+		this.extras = extras;
 	}
 
 	@Override

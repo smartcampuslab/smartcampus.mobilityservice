@@ -126,7 +126,16 @@ public class GamificationController extends SCController {
 					Geolocation geolocation = new Geolocation();
 
 					geolocation.setUserId(userId);
-					geolocation.setTravelId(geolocationsEvent.getTravelId() != null ? geolocationsEvent.getTravelId() : lastTravelId);
+					
+					String locationTravelId = null;
+					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
+						locationTravelId = (String)location.getExtras().get("idTrip"); 
+						lastTravelId = locationTravelId;
+					} else {
+						locationTravelId = lastTravelId;
+					}
+					
+					geolocation.setTravelId(locationTravelId);
 
 					geolocation.setUuid(location.getUuid());
 					if (device != null) {

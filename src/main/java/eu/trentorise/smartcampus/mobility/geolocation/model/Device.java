@@ -1,5 +1,8 @@
 package eu.trentorise.smartcampus.mobility.geolocation.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Device {
 	private boolean available;
 

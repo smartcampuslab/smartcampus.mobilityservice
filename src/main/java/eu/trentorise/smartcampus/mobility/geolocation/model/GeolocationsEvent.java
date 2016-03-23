@@ -2,21 +2,24 @@ package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.ArrayList;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class GeolocationsEvent {
 	
-	private String travelId;
+//	private String travelId;
 	
 	private Device device;
 
 	private ArrayList<Location> location;
 
-	public String getTravelId() {
-		return travelId;
-	}
-
-	public void setTravelId(String travelId) {
-		this.travelId = travelId;
-	}
+//	public String getTravelId() {
+//		return travelId;
+//	}
+//
+//	public void setTravelId(String travelId) {
+//		this.travelId = travelId;
+//	}
 
 	public Device getDevice() {
 		return this.device;
