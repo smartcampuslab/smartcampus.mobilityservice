@@ -96,10 +96,6 @@ public class PlanRequest {
 	public void setWheelChair(boolean wheelChair) {
 		this.wheelChair = wheelChair;
 	}
-	
-	public boolean isWheelChair() {
-		return wheelChair;
-	}
 
 	@Override
 	public String toString() {
