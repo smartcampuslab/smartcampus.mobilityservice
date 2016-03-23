@@ -97,12 +97,16 @@ public class GamificationController extends SCController {
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
 	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, HttpServletResponse response) throws Exception {
 		logger.info("Receiving geolocation events");
+		ObjectMapper mapper = new ObjectMapper();
+		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
 			String userId = getUserId();
 			if (userId == null) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
+			
+			logger.info("UserId: " + userId);
 
 			Geolocation lastGeolocation = storage.getLastGeolocationByUserId(userId);
 			String lastTravelId = null;
@@ -158,7 +162,6 @@ public class GamificationController extends SCController {
 					geolocation.setCreated_at(new Date(System.currentTimeMillis()));
 
 					if (location.getGeofence() != null) {
-						ObjectMapper mapper = new ObjectMapper();
 						geolocation.setGeofence(mapper.writeValueAsString(location.getGeofence())); 
 																									
 					}
