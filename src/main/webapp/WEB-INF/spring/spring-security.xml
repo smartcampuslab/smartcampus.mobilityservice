@@ -54,7 +54,6 @@
   <http xmlns="http://www.springframework.org/schema/security" pattern="/versions/**" security="none"/>
   
   <http xmlns="http://www.springframework.org/schema/security" pattern="/announcements/**" security="none"/>
-  <http xmlns="http://www.springframework.org/schema/security" pattern="gamification/geolocations/**" security="none"/>
   
   <http xmlns="http://www.springframework.org/schema/security" pattern="/getTaxiStation/**" security="none"/>
   
