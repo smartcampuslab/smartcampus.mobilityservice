@@ -260,6 +260,7 @@ var plannerControllers = angular.module('plannerControllers', [])
         		$scope.showPlan($scope.plans[0]);
     		} else {
         		$scope.errorMsg = 'Nessun risultato trovato.';
+        		$scope.plans = null;
     		}
         	$scope.hideLoading();
     	})
