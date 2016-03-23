@@ -375,7 +375,7 @@ services.factory('formatter', ['parking', '$rootScope',
 services.factory('planner', ['$http', 'formatter',
 	  function ($http, formatter) {
 	      
-	      var getRequest = function(from, to, means, mode, date, time, policy) {
+	      var getRequest = function(from, to, means, mode, date, time, policy, wheelchair) {
 	          var data = {
 	  	        	from: {lat:""+from.lat(),lon: ""+from.lng()},
 	  	        	to: {lat: ""+to.lat(),lon: ""+to.lng()},
@@ -383,14 +383,15 @@ services.factory('planner', ['$http', 'formatter',
 	  	        	resultsNumber: 3,
 	  	        	date: formatter.getDateStr(date),
 	  	        	departureTime: formatter.getTimeStrMeridian(time),
-	  	        	transportTypes: means.split(',')
+	  	        	transportTypes: means.split(','),
+	  	        	wheelchair : wheelchair
 	  	          };
 	          return data;
 	      }; 
 	      
-	      var plan = function(from, to, means, mode, date, time, policy) {
+	      var plan = function(from, to, means, mode, date, time, policy, wheelchair) {
 	          var url = PLANNER + '/plansinglejourney?policyId=' + policy;
-	          var data = getRequest(from, to, means, mode, date, time, policy);
+	          var data = getRequest(from, to, means, mode, date, time, policy, wheelchair);
 	          return $http.post(url,data);
           };
           

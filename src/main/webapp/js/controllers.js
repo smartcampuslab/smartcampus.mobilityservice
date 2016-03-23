@@ -233,7 +233,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     			$scope.mode,
     			$scope.mydate,
     			$scope.mytime,
-    			$scope.policy
+    			$scope.policy,
+    			$scope.wheelchair
     			)
     	.success(function(data){
     		$scope.planned = true;
