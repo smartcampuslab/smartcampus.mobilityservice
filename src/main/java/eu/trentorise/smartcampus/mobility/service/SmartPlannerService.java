@@ -16,6 +16,22 @@
 
 package eu.trentorise.smartcampus.mobility.service;
 
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
+import it.sayservice.platform.smartplanner.data.message.TType;
+import it.sayservice.platform.smartplanner.data.message.Transport;
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
+
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -47,21 +63,6 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
-import it.sayservice.platform.smartplanner.data.message.TType;
-import it.sayservice.platform.smartplanner.data.message.Transport;
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 /**
  * @author raman
@@ -365,7 +366,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			PlanRequest pr = new PlanRequest();
 			if (type.equals(TType.TRANSIT)) {
 				minitn = 3;
-				pr.setWheelChair(request.getWheelchair());
+				pr.setWheelChair(request.isWheelchair());
 			}
 			int itn = Math.max(request.getResultsNumber(), minitn);			
 			

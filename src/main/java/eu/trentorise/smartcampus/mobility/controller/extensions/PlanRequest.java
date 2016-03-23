@@ -89,6 +89,10 @@ public class PlanRequest {
 		this.retryOnFail = retryOnFail;
 	}
 	
+	public boolean isWheelChair() {
+		return wheelChair;
+	}
+
 	public void setWheelChair(boolean wheelChair) {
 		this.wheelChair = wheelChair;
 	}
