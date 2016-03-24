@@ -12,6 +12,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.toMarker = null;
     $scope.mode = 'fastest';
     $scope.policy = 'Dummy';
+    $scope.wheelchair = false;
     
     $scope.useCoordinates = false;
     
@@ -322,7 +323,9 @@ var plannerControllers = angular.module('plannerControllers', [])
     			convertMeans(),
     			$scope.mode,
     			$scope.mydate,
-    			$scope.mytime);
+    			$scope.mytime,
+    			$scope.policy,
+    			$scope.wheelchair);
     	$('#reqbutton').popover('destroy');
     	if (!$scope.popoverShown) {
         	$('#reqbutton').popover({html:true, content:'<pre>'+JSON.stringify(data, null, 2)+'</pre>'});
@@ -340,7 +343,9 @@ var plannerControllers = angular.module('plannerControllers', [])
     			convertMeans(),
     			$scope.mode,
     			$scope.mydate,
-    			$scope.mytime);
+    			$scope.mytime,
+    			$scope.policy,
+    			$scope.wheelchair);
     	var dataTxt = JSON.stringify(data);
     	window.open("mailto:"+MAIL+"?subject=Web Planner: segnalazione problemi&body="+dataTxt);
     };
