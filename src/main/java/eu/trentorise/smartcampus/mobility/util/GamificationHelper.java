@@ -135,6 +135,7 @@ public class GamificationHelper {
 		double trainDist = 0; // km
 		double busDist = 0; // km
 		double carDist = 0; // km
+		double transitDist = 0;
 		
 		logger.info("Analyzing itinerary for gamification.");
 		if (itinerary != null) {
@@ -145,8 +146,7 @@ public class GamificationHelper {
 						pnr = true;
 						parkName = leg.getTo().getStopId().getId();
 					}						
-				}					
-				if (leg.getTransport().getType().equals(TType.BICYCLE)) {
+				} else  if (leg.getTransport().getType().equals(TType.BICYCLE)) {
 					bikeDist += leg.getLength() / 1000;
 					if (leg.getFrom().getStopId() != null) {
 						bikeSharing = true;
@@ -156,15 +156,14 @@ public class GamificationHelper {
 						bikeSharing = true;
 						endBikesharingName = leg.getTo().getStopId().getId();
 					}						
-				}
-				if (leg.getTransport().getType().equals(TType.WALK)) {
+				} else if (leg.getTransport().getType().equals(TType.WALK)) {
 					walkDist += leg.getLength() / 1000;
-				}
-				if (leg.getTransport().getType().equals(TType.TRAIN)) {
+				} else if (leg.getTransport().getType().equals(TType.TRAIN)) {
 					trainDist += leg.getLength() / 1000;
-				}
-				if (leg.getTransport().getType().equals(TType.BUS)) {
+				} else if (leg.getTransport().getType().equals(TType.BUS)) {
 					busDist += leg.getLength() / 1000;
+				} else if (leg.getTransport().getType().equals(TType.TRANSIT)) {
+					transitDist += leg.getLength() / 1000;
 				}
 			}
 		}
@@ -186,6 +185,7 @@ public class GamificationHelper {
 		if (trainDist > 0) {
 			score += ((trainDist > 0 && trainDist < 10) ? 10 : (trainDist >= 10 && trainDist < 20) ? 20 : 30);
 		}
+		score *= (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0) ? 2 : 1; // zero impact
 		score += (itinerary.isPromoted() ? 5 : 0);
 		
 		if (bikeDist > 0) {
