@@ -92,6 +92,42 @@ services.factory('bikesharing', ['$http',
      }
    ]);
 
+
+services.factory('taxi', ['$http',
+     function ($http) {
+         var taxi = function() {
+             var url = TAXI + 'getTaxiStation/';
+             return $http.get(url);
+         };
+         
+         var taxiMap = {};
+             
+         return {
+                 init: function() {
+               		taxi().success(function(data) {
+               			taxiMap = {};
+               			data.forEach(function(p){
+               				taxiMap[p.stationId.id] = p;
+               			});
+               		});  
+                 },
+                 getAll: function() {
+                	var res = [];
+                		for (var p in taxiMap) {
+                			var e = taxiMap[p];
+                  			res.push({title:e.stationId.id, description: '', position:e.location, type:'taxi'});
+                		}
+                	return res;
+                 },
+                 getTaxi : function(id) {
+                	 return taxiMap[id];   
+                 }
+        };
+     }
+   ]);
+
+
+
 services.factory('formatter', ['parking', '$rootScope',
   function (parking, $rootScope) {
     var getDateStr = function(date) {

@@ -1,7 +1,7 @@
 var plannerControllers = angular.module('plannerControllers', [])
 
-.controller('HomeCtrl', ['$scope', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing',
-  function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing) {
+.controller('HomeCtrl', ['$scope', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing', 'taxi',
+  function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing, taxi) {
 
 	// current user position, defaults to Trento
 	$scope.myposition = $rootScope.CENTER;
@@ -17,7 +17,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.useCoordinates = false;
     
     $scope.means = {'TRANSIT':true};
-    $scope.layers = {'PARKING':{show: false, elements: null, get: parking.getAll},'BIKESHARING':{show: false, elements: null, get: bikesharing.getAll}};
+    $scope.layers = {'PARKING':{show: false, elements: null, get: parking.getAll},'BIKESHARING':{show: false, elements: null, get: bikesharing.getAll},'TAXI':{show: false, elements: null, get: taxi.getAll}};
 	$scope.currentItinerary = null;
 	$scope.legElems = [];
 	$scope.planned = false;
