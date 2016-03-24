@@ -243,9 +243,23 @@ var plannerControllers = angular.module('plannerControllers', [])
     				if (a.promoted != b.promoted) {
     					return b.promoted - a.promoted;
     				}
-    				return (a.endtime - a.startime) - (b.endtime - b.startime);
-    				//return 0;
-    				//return a.startime != b.startime ? a.startime - b.startime : a.duration - b.duration;
+    				if ($scope.mode == 'fastest') {
+    					return (a.endtime - a.startime) - (b.endtime - b.startime);
+    				} else if ($scope.mode == 'leastChanges') {
+    					return (a.leg.length - b.leg.length); 
+    				} else if ($scope.mode == 'leastWalking') {
+    					var al = 0;
+    					var bl = 0;
+    					for (var i = 0; i < a.leg.length; i++) {
+    						al += (a.leg[i].transport.type == 'WALK') ? a.leg[i].length : 0;
+    					}
+    					for (var i = 0; i < b.leg.length; i++) {
+    						bl += (b.leg[i].transport.type == 'WALK') ? b.leg[i].length : 0;
+    					}    			
+    					return al - bl;
+    				} else {
+    					return 0;
+    				}
     			});
     			
     			data.forEach(function(it, idx){
