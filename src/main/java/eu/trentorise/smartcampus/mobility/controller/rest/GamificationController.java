@@ -70,8 +70,8 @@ public class GamificationController extends SCController {
 	private String gameId;	
 	
 	@Autowired
-	@Value("${aacExtURL}")
-	private String aacExtURL;	
+	@Value("${aacURL}")
+	private String aacURL;	
 	
 	private BasicProfileService basicProfileService;
 	
@@ -88,7 +88,7 @@ public class GamificationController extends SCController {
 
 	@PostConstruct
 	public void init() throws Exception {
-		basicProfileService = new BasicProfileService(aacExtURL);
+		basicProfileService = new BasicProfileService(aacURL);
 		
 		File f = new File(geolocationsDBDir);
 		if (!f.exists()) {
