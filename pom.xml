@@ -122,7 +122,11 @@
 			<version>1.5</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>eu.trentorise.smartcampus</groupId>
+			<artifactId>profileservice.client</artifactId>
+			<version>2.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

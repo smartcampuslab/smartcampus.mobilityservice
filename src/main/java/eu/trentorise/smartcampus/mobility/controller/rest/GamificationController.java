@@ -43,6 +43,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
 import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
@@ -69,6 +70,12 @@ public class GamificationController extends SCController {
 	private String gameId;	
 	
 	@Autowired
+	@Value("${aacExtURL}")
+	private String aacExtURL;	
+	
+	private BasicProfileService basicProfileService;
+	
+	@Autowired
 	private GamificationHelper gamificationHelper;
 
 	private static Log logger = LogFactory.getLog(GamificationController.class);
@@ -81,6 +88,8 @@ public class GamificationController extends SCController {
 
 	@PostConstruct
 	public void init() throws Exception {
+		basicProfileService = new BasicProfileService(aacExtURL);
+		
 		File f = new File(geolocationsDBDir);
 		if (!f.exists()) {
 			f.mkdir();
@@ -95,16 +104,12 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, HttpServletResponse response) throws Exception {
+	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, HttpServletResponse response) throws Exception {
 		logger.info("Receiving geolocation events");
 		ObjectMapper mapper = new ObjectMapper();
 		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
-			String userId = getUserId();
-			if (userId == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				return;
-			}
+			String userId = basicProfileService.getBasicProfile(token).getUserId();
 			
 			logger.info("UserId: " + userId);
 
