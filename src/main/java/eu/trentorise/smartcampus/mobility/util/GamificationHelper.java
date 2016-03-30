@@ -75,6 +75,12 @@ public class GamificationHelper {
 	@Autowired(required=false)
 	@Value("${gamification.startgame}")
 	private String gameStart;
+	
+	@Value("${gamification.user}")
+	private String user;
+	
+	@Value("${gamification.password}")
+	private String password;	
 
 	@Autowired
 	private ExecutorService executorService;
@@ -107,6 +113,7 @@ public class GamificationHelper {
 	private void saveTrip(BasicItinerary itinerary, String gameId, String userId) {
 		try {
 			Map<String,Object> data = computeTripData(itinerary.getData());
+			data.remove("estimatedScore");
 			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
 			ed.setGameId(gameId);
@@ -116,9 +123,9 @@ public class GamificationHelper {
 			
 			String content = JsonUtils.toJSON(ed);
 			
-			RemoteConnector.postJSON(gamificationUrl, "/gengine/execute", content, null);
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
 		} catch (Exception e) {
-			logger.error("Error sending gamification action: "+e.getMessage());
+			logger.error("Error sending gamification action: " + e.getMessage());
 		}
 	}
 	
@@ -219,7 +226,7 @@ public class GamificationHelper {
 			data.put("p+r", pnr);
 		}
 		data.put("sustainable", itinerary.isPromoted());	
-		data.put("estimatedScore", score.longValue());
+		data.put("estimatedScore", Math.round(score));
 		
 		return data;
 	}
