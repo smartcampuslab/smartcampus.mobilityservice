@@ -349,6 +349,62 @@ var plannerControllers = angular.module('plannerControllers', [])
     	var dataTxt = JSON.stringify(data);
     	window.open("mailto:"+MAIL+"?subject=Web Planner: segnalazione problemi&body="+dataTxt);
     };
+    
+    $scope.recenter = function(lat, lon) {
+    	var newCenter = new google.maps.LatLng(lat, lon);
+    	$scope.map.setCenter(newCenter);
+    	$scope.map.panTo(newCenter);
+    	$scope.map.setZoom(15);
+    }
+    
+    $scope.centerItinerary = function() {
+        var bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < $scope.currentItinerary.leg.length; i++) {
+	        var points = decodePolyline($scope.currentItinerary.leg[i].legGeometery.points);
+	        for (var j = 0; j < points.length; j++) {
+	        	bounds.extend(points[j]);
+	        }
+        }
+    	$scope.map.fitBounds(bounds);
+    }    
+    
+    function decodePolyline(encoded) {
+        if (!encoded) {
+            return [];
+        }
+        var poly = [];
+        var index = 0, len = encoded.length;
+        var lat = 0, lng = 0;
+
+        while (index < len) {
+            var b, shift = 0, result = 0;
+
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result = result | ((b & 0x1f) << shift);
+                shift += 5;
+            } while (b >= 0x20);
+
+            var dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result = result | ((b & 0x1f) << shift);
+                shift += 5;
+            } while (b >= 0x20);
+
+            var dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+            lng += dlng;
+
+            var p = new google.maps.LatLng({lat: lat / 1e5, lng: lng / 1e5});
+            poly.push(p);
+        }
+        return poly;
+    }    
 
     
     $scope.infoWindow = new google.maps.InfoWindow();
