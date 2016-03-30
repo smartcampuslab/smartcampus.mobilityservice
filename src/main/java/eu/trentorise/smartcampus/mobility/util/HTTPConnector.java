@@ -24,6 +24,8 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.apache.commons.codec.binary.Base64;
+
 public class HTTPConnector {
 	
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
@@ -87,33 +89,34 @@ public class HTTPConnector {
 		return conn.getInputStream();
 	}
 	
-	
-	
-	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
-
+	public static String doAuthenticatedPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
 		StringBuffer response = new StringBuffer();
 
 		URL url = new URL(address);
 
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("POST");
-	  conn.setDoOutput(true);
-	  conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
 		
+		String authString = user + ":" + password;
+		byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+		String authStringEnc = new String(authEncBytes);
+		conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
+
 		if (accept != null) {
 			conn.setRequestProperty("Accept", accept);
 		}
 		if (contentType != null) {
 			conn.setRequestProperty("Content-Type", contentType);
-		}
+		}		
 		
 		OutputStream out = conn.getOutputStream();
-	  Writer writer = new OutputStreamWriter(out, "UTF-8");
-	  writer.write(req);
-	  writer.close();
-	  out.close();		
-		
-		
+		Writer writer = new OutputStreamWriter(out, "UTF-8");
+		writer.write(req);
+		writer.close();
+		out.close();
+
 		if (conn.getResponseCode() < 200 || conn.getResponseCode() > 299) {
 			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
 		}
@@ -127,6 +130,45 @@ public class HTTPConnector {
 		conn.disconnect();
 
 		return response.toString();
-	}	
-	
+	}
+
+	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
+
+		StringBuffer response = new StringBuffer();
+
+		URL url = new URL(address);
+
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
+
+		if (accept != null) {
+			conn.setRequestProperty("Accept", accept);
+		}
+		if (contentType != null) {
+			conn.setRequestProperty("Content-Type", contentType);
+		}
+
+		OutputStream out = conn.getOutputStream();
+		Writer writer = new OutputStreamWriter(out, "UTF-8");
+		writer.write(req);
+		writer.close();
+		out.close();
+
+		if (conn.getResponseCode() < 200 || conn.getResponseCode() > 299) {
+			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
+		}
+		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+		String output = null;
+		while ((output = br.readLine()) != null) {
+			response.append(output);
+		}
+
+		conn.disconnect();
+
+		return response.toString();
+	}
+
 }
