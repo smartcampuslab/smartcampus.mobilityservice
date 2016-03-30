@@ -204,8 +204,14 @@ public class GamificationController extends SCController {
 					res.setItinerary(res2);
 				}
 				res.getGeolocationEvents().addAll(geolocationsByItinerary.get(travelId));
+				
+				if (res.getStarted() == false) {
+					sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+				}				
+				
 				res.setComplete(true);
 				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+				
 				storage.saveTrackedInstance(res);
 			}
 			
@@ -231,7 +237,7 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void sendItineraryToGamification(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+	public @ResponseBody void startItinerary(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -257,10 +263,13 @@ public class GamificationController extends SCController {
 				res2.setClientId(itineraryId);
 			}
 			res2.setItinerary(res);
+			
+			if (res2.getStarted() == false) {
+				sendIntineraryDataToGamificationEngine(gameId, userId, res);
+			}
+			
 			res2.setStarted(true);
 			storage.saveTrackedInstance(res2);
-			
-//			sendIntineraryDataToGamificationEngine(gameId, userId, res);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -320,9 +329,7 @@ public class GamificationController extends SCController {
 		
 		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
 		
-		if (GamificationHelper.checkItineraryCompletion(itinerary, geolocations)) {
-			gamificationHelper.saveItinerary(itinerary, gameId, playerId);
-		}
+		gamificationHelper.saveItinerary(itinerary, gameId, playerId);
 	}
 
 	@Override
