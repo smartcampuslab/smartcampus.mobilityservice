@@ -368,6 +368,17 @@ var plannerControllers = angular.module('plannerControllers', [])
     	$scope.map.fitBounds(bounds);
     }    
     
+    $scope.centerUser = function() {
+    	if (navigator.geolocation) {
+    	    navigator.geolocation.getCurrentPosition(function(position) {
+    	      var pos = {lat: position.coords.latitude,lng: position.coords.longitude};
+    	      $scope.map.setCenter(pos);
+    	      $scope.map.panTo(pos);
+    	      $scope.map.setZoom(15);    	      
+    	    });
+    	}
+    }
+    
     function decodePolyline(encoded) {
         if (!encoded) {
             return [];
