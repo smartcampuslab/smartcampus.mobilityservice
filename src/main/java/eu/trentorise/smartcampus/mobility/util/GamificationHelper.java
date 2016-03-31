@@ -123,6 +123,7 @@ public class GamificationHelper {
 			
 			String content = JsonUtils.toJSON(ed);
 			
+			logger.info("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY +") = " + data);
 			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());

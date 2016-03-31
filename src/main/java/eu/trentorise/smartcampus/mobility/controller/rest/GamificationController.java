@@ -251,10 +251,12 @@ public class GamificationController extends SCController {
 			ItineraryObject res = storage.searchDomainObject(pars, ItineraryObject.class);
 			if (res != null && !userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				logger.info("Unauthorized.");
 				return;
 			}
 			if (res == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				logger.info("Bad request.");
 				return;
 			}
 			
@@ -325,10 +327,11 @@ public class GamificationController extends SCController {
 	}	
 	
 	private void sendIntineraryDataToGamificationEngine(String gameId, String playerId, ItineraryObject itinerary) throws Exception {
-		Criteria criteria = new Criteria("userId").is(itinerary.getUserId()).and("travelId").is(itinerary.getClientId());
-		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
-		
-		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
+		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
+//		Criteria criteria = new Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());
+//		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
+//		
+//		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
 		
 		gamificationHelper.saveItinerary(itinerary, gameId, playerId);
 	}
