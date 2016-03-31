@@ -110,7 +110,7 @@ public class JourneyPlannerController extends SCController {
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
 			for (Itinerary itinerary: results) {
-				gamificationHelper.computeEstimatedGameScore(itinerary);
+				gamificationHelper.computeEstimatedGameScore(itinerary, false);
 			}
 			return results;
 		} catch (Exception e) {

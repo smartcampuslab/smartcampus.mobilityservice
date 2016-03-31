@@ -238,6 +238,7 @@ public class GamificationController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
 	public @ResponseBody void startItinerary(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+		logger.info("Starting journey for gamification");
 		try {
 			String userId = getUserId();
 			if (userId == null) {

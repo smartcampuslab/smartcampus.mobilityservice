@@ -112,7 +112,7 @@ public class GamificationHelper {
 	
 	private void saveTrip(BasicItinerary itinerary, String gameId, String userId) {
 		try {
-			Map<String,Object> data = computeTripData(itinerary.getData());
+			Map<String,Object> data = computeTripData(itinerary.getData(), true);
 			data.remove("estimatedScore");
 			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
@@ -129,7 +129,7 @@ public class GamificationHelper {
 		}
 	}
 	
-	private Map<String,Object> computeTripData(Itinerary itinerary) {
+	private Map<String,Object> computeTripData(Itinerary itinerary, boolean log) {
 		Map<String,Object> data = Maps.newTreeMap();
 		
 		String parkName = null; // name of the parking 
@@ -174,14 +174,14 @@ public class GamificationHelper {
 				}
 			}
 		}
-		logger.info("Analysis results:");
-		logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
-		logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
-		logger.info("Park = " + parkName);
-		logger.info("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
 		
-		// old score
-//		Long score = (long)((bikeDist + walkDist) * 5 + (busDist + trainDist) + (itinerary.isPromoted() ? 5 : 0) + (pnr ? 10 : 0));
+		if (log) {
+			logger.info("Analysis results:");
+			logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
+			logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
+			logger.info("Park = " + parkName);
+			logger.info("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
+		}
 		
 		Double score = 0.0;
 		score += (walkDist< 0.1 ? 0 : Math.min(5, walkDist)) * 10;
@@ -231,8 +231,8 @@ public class GamificationHelper {
 		return data;
 	}
 	
-	public void computeEstimatedGameScore(Itinerary itinerary) {
-		Long score =  (Long)(computeTripData(itinerary).get("estimatedScore"));
+	public void computeEstimatedGameScore(Itinerary itinerary, boolean log) {
+		Long score =  (Long)(computeTripData(itinerary, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
 	}	
 	
