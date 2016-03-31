@@ -66,7 +66,7 @@ public class GamificationHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 	
-	private static long START_GAME_DATE = Long.MAX_VALUE;
+	private static long startGameDate = Long.MAX_VALUE;
 	
 	@Autowired(required=false)
 	@Value("${gamification.url}")
@@ -91,7 +91,7 @@ public class GamificationHelper {
 	public void initConnector() {
 		if (StringUtils.hasText(gameStart)) {
 			try {
-				START_GAME_DATE = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
+				startGameDate = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -100,7 +100,7 @@ public class GamificationHelper {
 	
 	public void saveItinerary(final BasicItinerary itinerary, final String gameId, final String userId) {
 		if (gamificationUrl == null) return;
-		if (System.currentTimeMillis() < START_GAME_DATE) return;
+		if (System.currentTimeMillis() < startGameDate) return;
 		
 		executorService.execute(new Runnable() {
 			@Override
