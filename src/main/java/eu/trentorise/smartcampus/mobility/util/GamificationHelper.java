@@ -187,14 +187,14 @@ public class GamificationHelper {
 		Double score = 0.0;
 		score += (walkDist< 0.1 ? 0 : Math.min(5, walkDist)) * 10;
 		score += (bikeDist< 0.1 ? 0 : Math.min(10, bikeDist)) * 5;
-		if (busDist > 0) {
-			score += ((busDist < 5) ? 15 : (busDist >= 5 && busDist < 10) ? 20 : 30);
+		
+		double busTrainDist = busDist + trainDist;
+		if (busTrainDist> 0) {
+			score += ((busTrainDist > 0 && busTrainDist < 5) ? 10 : (busTrainDist >= 5 && busTrainDist < 10) ? 20 : (busTrainDist >= 10 && busTrainDist < 30) ? 30 : 40);
 		}
-		if (trainDist > 0) {
-			score += ((trainDist > 0 && trainDist < 10) ? 10 : (trainDist >= 10 && trainDist < 20) ? 20 : 30);
-		}
+		
 		score *= (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0) ? 2 : 1; // zero impact
-		score += (itinerary.isPromoted() ? 5 : 0);
+		score += (itinerary.isPromoted() ? 10 : 0);
 		
 		if (bikeDist > 0) {
 			data.put("bikeDistance", bikeDist);
