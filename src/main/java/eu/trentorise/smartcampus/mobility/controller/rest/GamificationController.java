@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
@@ -279,7 +282,43 @@ public class GamificationController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
+	@RequestMapping("/console")
+	public String vewConsole() {
+		return "viewconsole";
+	}
 
+	@RequestMapping("/console/itinerary")
+	public @ResponseBody List<ItineraryDescriptor> getItineraryList() {
+		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
+		List<ItineraryObject> data = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), ItineraryObject.class);
+		if (data != null) {
+			for (ItineraryObject o : data) {
+				ItineraryDescriptor descr = new ItineraryDescriptor();
+				descr.setTripId(o.getClientId());
+				descr.setStartTime(o.getData().getStartime());
+				descr.setEndTime(o.getData().getEndtime());
+				descr.setUserId(o.getUserId());
+				descr.setTripName(o.getName());
+				descr.setRecurrency(o.getRecurrency());
+				
+				Map<String, Object> pars = new TreeMap<String, Object>();
+				pars.put("clientId", o.getClientId());
+				List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
+				descr.setInstances(instances);
+				list.add(descr);
+			}
+		}
+		return list;
+	}
+
+	@RequestMapping("/console/itinerary/{instanceId}")
+	public @ResponseBody TrackedInstance getItineraryData( @PathVariable String instanceId) {
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("id", instanceId);
+		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
+		return instance;
+	}
+	
 	private String buildInsert(Geolocation geolocation) {
 		String s = "INSERT INTO geolocations VALUES($next_id,";
 		s += convertToInsert(geolocation.getUuid()) + "," 
