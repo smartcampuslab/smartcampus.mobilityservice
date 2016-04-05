@@ -86,6 +86,7 @@ public class GamificationController extends SCController {
 	private Connection connection;
 	
 	private SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
+	private SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
 
 	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
@@ -113,7 +114,7 @@ public class GamificationController extends SCController {
 		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
 			String userId = basicProfileService.getBasicProfile(token).getUserId();
-			
+
 			logger.info("UserId: " + userId);
 
 			Geolocation lastGeolocation = storage.getLastGeolocationByUserId(userId);
@@ -122,8 +123,8 @@ public class GamificationController extends SCController {
 				lastTravelId = lastGeolocation.getTravelId();
 			}
 
-			Multimap<String , Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
-			
+			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
+
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
 					Coords coords = location.getCoords();
@@ -134,15 +135,15 @@ public class GamificationController extends SCController {
 					Geolocation geolocation = new Geolocation();
 
 					geolocation.setUserId(userId);
-					
+
 					String locationTravelId = null;
 					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
-						locationTravelId = (String)location.getExtras().get("idTrip"); 
+						locationTravelId = (String) location.getExtras().get("idTrip");
 						lastTravelId = locationTravelId;
 					} else {
 						locationTravelId = lastTravelId;
 					}
-					
+
 					geolocation.setTravelId(locationTravelId);
 
 					geolocation.setUuid(location.getUuid());
@@ -155,7 +156,7 @@ public class GamificationController extends SCController {
 					if (coords != null) {
 						geolocation.setLatitude(coords.getLatitude());
 						geolocation.setLongitude(coords.getLongitude());
-						double c[]= new double[2];
+						double c[] = new double[2];
 						c[0] = geolocation.getLongitude();
 						c[1] = geolocation.getLatitude();
 						geolocation.setGeocoding(c);
@@ -179,50 +180,65 @@ public class GamificationController extends SCController {
 					geolocation.setCreated_at(new Date(System.currentTimeMillis()));
 
 					if (location.getGeofence() != null) {
-						geolocation.setGeofence(mapper.writeValueAsString(location.getGeofence())); 
-																									
+						geolocation.setGeofence(mapper.writeValueAsString(location.getGeofence()));
+
 					}
 
 					Statement statement = connection.createStatement();
 					String s = buildInsert(geolocation);
 					statement.execute(s);
-					statement.close();							
-					
+					statement.close();
+
 					geolocation.setGeofence(location.getGeofence());
-					
-					geolocationsByItinerary.put(geolocation.getTravelId(), geolocation);
-					
+
+					String day = shortSdf.format(geolocation.getRecorded_at());
+					geolocationsByItinerary.put(geolocation.getTravelId() + "@" + day, geolocation);
+
 					storage.saveGeolocation(geolocation);
+					lastGeolocation = geolocation;
+					lastTravelId = geolocation.getTravelId();
 				}
 			}
-			
-			for (String travelId: geolocationsByItinerary.keySet()) {
-				Map<String, Object> pars = new TreeMap<String, Object>();
-				pars.put("clientId", travelId);
-				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
-				if (res == null) {
-					res = new TrackedInstance();
-					res.setClientId(travelId);
-					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
-					res.setItinerary(res2);
+
+			for (String key : geolocationsByItinerary.keySet()) {
+
+				String splitKey[] = key.split("@");
+				String travelId = splitKey[0];
+				String day = splitKey[1];
+				
+				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
+
+					Map<String, Object> pars = new TreeMap<String, Object>();
+					pars.put("clientId", travelId);
+					pars.put("day", day);
+					TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
+					if (res == null) {
+						res = new TrackedInstance();
+						res.setClientId(travelId);
+						res.setDay(day);
+						pars.remove("day");
+						ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
+						res.setItinerary(res2);
+					}
+					res.getGeolocationEvents().add(geoloc);
+
+
+					if (res.getStarted() == false) {
+						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+					}
+
+					res.setComplete(true);
+					res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+
+					storage.saveTrackedInstance(res);
 				}
-				res.getGeolocationEvents().addAll(geolocationsByItinerary.get(travelId));
-				
-				if (res.getStarted() == false) {
-					sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
-				}				
-				
-				res.setComplete(true);
-				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
-				
-				storage.saveTrackedInstance(res);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-		
+
 		logger.info("Saved geolocation events");
 	}
 	
@@ -250,6 +266,7 @@ public class GamificationController extends SCController {
 			}
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
+
 			pars.put("clientId", itineraryId);
 			ItineraryObject res = storage.searchDomainObject(pars, ItineraryObject.class);
 			if (res != null && !userId.equals(res.getUserId())) {
@@ -263,10 +280,14 @@ public class GamificationController extends SCController {
 				return;
 			}
 			
+			Date date = new Date(System.currentTimeMillis());
+			String day = shortSdf.format(date);
+			pars.put("day", day);
 			TrackedInstance res2 = storage.searchDomainObject(pars, TrackedInstance.class);
 			if (res2 == null) {
 				res2 = new TrackedInstance();
 				res2.setClientId(itineraryId);
+				res2.setDay(day);
 			}
 			res2.setItinerary(res);
 			

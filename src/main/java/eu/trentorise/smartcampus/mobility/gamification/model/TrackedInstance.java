@@ -21,6 +21,8 @@ public class TrackedInstance {
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
 	private Boolean valid = Boolean.FALSE;
+	
+	private String day;
 
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
@@ -81,5 +83,14 @@ public class TrackedInstance {
 	public void setValid(Boolean validity) {
 		this.valid = validity;
 	}
+
+	public String getDay() {
+		return day;
+	}
+
+	public void setDay(String day) {
+		this.day = day;
+	}
+
 
 }
