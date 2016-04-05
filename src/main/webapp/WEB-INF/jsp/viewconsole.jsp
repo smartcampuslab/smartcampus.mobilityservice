@@ -40,8 +40,8 @@
         <div ng-repeat="user in users">
           <h3><a ng-click="selectUser(user)">{{user}}</a></h3>
           <div ng-if="selectedUser == user">
-            <div ng-repeat="itinerary in userMap[user]" ng-click="selectItinerary(itinerary)">
-              <h5>{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
+            <div ng-repeat="itinerary in userMap[user]">
+              <h5  ng-click="selectItinerary(itinerary)">{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
               <p>{{itinerary.startTime|date:'dd/MM/yyyy HH:mm'}}</p>
               <p ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</p>
               <div ng-if="itinerary.instances.length > 1">
