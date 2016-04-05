@@ -117,16 +117,30 @@ public class GamificationController extends SCController {
 
 			logger.info("UserId: " + userId);
 
-			Geolocation lastGeolocation = storage.getLastGeolocationByUserId(userId);
+//			Geolocation lastGeolocation = storage.getLastGeolocationByUserId(userId);
 			String lastTravelId = null;
-			if (lastGeolocation != null) {
-				lastTravelId = lastGeolocation.getTravelId();
-			}
+//			if (lastGeolocation != null) {
+//				lastTravelId = lastGeolocation.getTravelId();
+//			}
 
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 
+			Collections.sort(geolocationsEvent.getLocation());
+			
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
+					String locationTravelId = null;
+					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
+						locationTravelId = (String) location.getExtras().get("idTrip");
+						lastTravelId = locationTravelId;
+					} else {
+						if (lastTravelId != null) {
+							locationTravelId = lastTravelId;
+						} else {
+							continue;
+						}
+					}
+					
 					Coords coords = location.getCoords();
 					Device device = geolocationsEvent.getDevice();
 					Activity activity = location.getActivity();
@@ -136,13 +150,7 @@ public class GamificationController extends SCController {
 
 					geolocation.setUserId(userId);
 
-					String locationTravelId = null;
-					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
-						locationTravelId = (String) location.getExtras().get("idTrip");
-						lastTravelId = locationTravelId;
-					} else {
-						locationTravelId = lastTravelId;
-					}
+
 
 					geolocation.setTravelId(locationTravelId);
 
@@ -195,8 +203,6 @@ public class GamificationController extends SCController {
 					geolocationsByItinerary.put(geolocation.getTravelId() + "@" + day, geolocation);
 
 					storage.saveGeolocation(geolocation);
-					lastGeolocation = geolocation;
-					lastTravelId = geolocation.getTravelId();
 				}
 			}
 

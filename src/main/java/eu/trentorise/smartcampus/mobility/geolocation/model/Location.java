@@ -6,7 +6,7 @@ import java.util.Map;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class Location {
+public class Location implements Comparable<Location> {
 	private Activity activity;
 
 	private Battery battery;
@@ -87,6 +87,11 @@ public class Location {
 		this.extras = extras;
 	}
 
+	@Override
+	public int compareTo(Location o) {
+		return timestamp.compareTo(o.timestamp);
+	}	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
