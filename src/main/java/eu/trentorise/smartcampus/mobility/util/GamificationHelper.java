@@ -186,7 +186,7 @@ public class GamificationHelper {
 		
 		Double score = 0.0;
 		score += (walkDist< 0.1 ? 0 : Math.min(3.5, walkDist)) * 10;
-		score += (bikeDist< 0.1 ? 0 : Math.min(3.5, bikeDist)) * 5;
+		score += (bikeDist< 0.1 ? 0 : Math.min(7, bikeDist)) * 5;
 		
 		double busTrainDist = busDist + trainDist;
 		if (busTrainDist> 0) {
