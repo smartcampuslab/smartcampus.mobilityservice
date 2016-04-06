@@ -297,7 +297,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		promotedJourneyRequestConverter.processRequests(reqs, iteration);
 		buildRequestString(reqs);
 		
-		Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
+		Multimap<Double, Itinerary> evalIts = ArrayListMultimap.create();
 
 		List<Itinerary> itineraries = new ArrayList<Itinerary>();
 
@@ -344,7 +344,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			}
 		}
 		
-		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
+		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, reqMap.values(), journeyRequest);
 		itineraries.addAll(evaluated);
 
 		itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
@@ -372,7 +372,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			
 			pr.setType(type);
 			pr.setRouteType(request.getRouteType());
-			pr.setValue(0);
+			pr.setValue(0.0);
 			pr.setItineraryNumber(itn);
 			reqsList.add(pr);
 			if (expand) {
