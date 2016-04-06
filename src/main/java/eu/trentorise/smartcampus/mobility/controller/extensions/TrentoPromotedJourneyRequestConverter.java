@@ -12,19 +12,19 @@ public class TrentoPromotedJourneyRequestConverter implements PromotedJourneyReq
 	public void modifyRequest(SingleJourney request) {
 	}	
 	
-	public void processRequests(List<PlanRequest> requests, int iteration) {
+	public void processRequests(List<PlanRequest> requests, boolean retried) {
 		for (PlanRequest pr: requests) {
 			pr.setRequest("");
 			if (pr.getType().equals(TType.CARWITHPARKING)) {
 				pr.setRequest(pr.getRequest() + "&extraTransport=WALK");
 			}
 			if (pr.getType().equals(TType.TRANSIT) || pr.getType().equals(TType.BUS)) {
-				if (pr.getRouteType().equals(RType.leastWalking) && iteration == 0) {
+				if (pr.getRouteType().equals(RType.leastWalking) && !retried) {
 					pr.setRequest(pr.getRequest() + "&maxWalkDistance=500");
-					pr.setRetryOnFail(true);
+					pr.setRetryOnEmpty(true);
 				} else {
 					pr.setRequest(pr.getRequest() + "&maxWalkDistance=1000");
-					pr.setRetryOnFail(false);
+					pr.setRetryOnEmpty(false);
 				}
 			}			
 			if (pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION) || pr.getType().equals(TType.SHAREDCAR) || pr.getType().equals(TType.SHAREDCAR_WITHOUT_STATION)
@@ -34,7 +34,7 @@ public class TrentoPromotedJourneyRequestConverter implements PromotedJourneyReq
 			if (pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION) || pr.getType().equals(TType.BICYCLE)) {
 				pr.setRouteType(RType.safest);
 			}
-			if (pr.getType().equals(TType.WALK) && pr.getValue() != 0) {
+			if (pr.getType().equals(TType.WALK) && pr.getValue() != 0.0) {
 				if (pr.getRouteType().equals(RType.leastWalking)) {
 					pr.setRequest(pr.getRequest() + "&maxTotalWalkDistance=500");
 				} else {

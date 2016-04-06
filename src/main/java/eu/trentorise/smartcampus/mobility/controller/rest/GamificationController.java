@@ -234,7 +234,7 @@ public class GamificationController extends SCController {
 				}
 
 				res.setComplete(true);
-				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+				res.setValid(GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents()));
 
 				storage.saveTrackedInstance(res);
 			}

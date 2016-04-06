@@ -22,7 +22,7 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 	}
 
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
 		return new ArrayList<Itinerary>();
 	}
 
@@ -41,8 +41,8 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 	}
 
 	@Override
-	public int checkFail(List<Itinerary> itineraries, int iteration) {
-		return 0;
+	public boolean mustRetry(List<Itinerary> itineraries) {
+		return false;
 	}
 
 }

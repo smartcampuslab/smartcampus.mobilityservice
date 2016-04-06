@@ -66,19 +66,19 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 			}
 			if (newType.equals(TType.WALK) || newType.equals(TType.BICYCLE) || newType.equals(TType.SHAREDBIKE) || newType.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
 				if (requestedTypes.contains(newType)) {
-					pr.setValue(0);
+					pr.setValue(0.0);
 					reqList.add(pr);
 					continue;
 				}
 			}
 			if (type.equals(TType.CAR)) {
 				if (newType.equals(TType.PARK_AND_RIDE)) {
-					pr.setValue(1);
+					pr.setValue(1.0);
 				} else {
-					pr.setValue(-1);
+					pr.setValue(-1.0);
 				}
 			} else if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
-				pr.setValue(2);
+				pr.setValue(2.0);
 			} else {
 				System.out.println();
 			}
@@ -88,16 +88,16 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	}
 
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Integer, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
 		List<Itinerary> kept = new ArrayList<Itinerary>();
 		List<Itinerary> toRemove;
-		for (Integer key : itineraries.keySet()) {
+		for (Double key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
 			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
 			toSort = new ArrayList<Itinerary>(toSortSet);
 			ItinerarySorter.sort(toSort, criteria);
 			Collections.reverse(toSort);
-			int removeN = toSort.size() - Math.min(Math.abs(key), toSort.size());
+			int removeN = toSort.size() - (int)Math.min(Math.abs(key), toSort.size());
 			toRemove =  new ArrayList<Itinerary>();
 			for (Itinerary it: toSort) {
 				if (toRemove.size() == removeN) {
@@ -242,7 +242,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 		for (PlanRequest pr : planRequests) {
 			List<TType> req = Arrays.asList(journeyRequest.getTransportTypes());
 			if (pr.getType().equals(TType.WALK) || pr.getType().equals(TType.BICYCLE) || pr.getType().equals(TType.SHAREDBIKE) || pr.getType().equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
-				if (req.contains(pr.getType()) && pr.getValue() != 0) {
+				if (req.contains(pr.getType()) && pr.getValue() != 0.0) {
 					for (Itinerary it : pr.getItinerary()) {
 						it.setPromoted(true);
 						toKeep.add(it);
@@ -316,14 +316,11 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	}
 	
 	@Override
-	public int checkFail(List<Itinerary> itineraries, int iteration) {
-		if (iteration == 0) {
-			if (itineraries.isEmpty()) {
-				return iteration + 1;
-			}
+	public boolean mustRetry(List<Itinerary> itineraries) {
+		if (itineraries.isEmpty()) {
+			return true;
 		}
-		return 0;
-	}
-	
+		return false;
+	}	
 	
 }

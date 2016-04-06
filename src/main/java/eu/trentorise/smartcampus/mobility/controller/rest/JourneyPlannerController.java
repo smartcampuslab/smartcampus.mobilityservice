@@ -108,7 +108,7 @@ public class JourneyPlannerController extends SCController {
 			statLogger.log(journeyRequest, userId);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
-			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
+			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, false, policyId);
 			for (Itinerary itinerary: results) {
 				gamificationHelper.computeEstimatedGameScore(itinerary, false);
 			}
