@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 
 public class TrackedInstance {
@@ -15,6 +16,7 @@ public class TrackedInstance {
 	private String id;
 
 	private String clientId;
+	private String userId;
 	
 	private ItineraryObject itinerary;
 	private Set<Geolocation> geolocationEvents;
@@ -23,6 +25,8 @@ public class TrackedInstance {
 	private Boolean valid = Boolean.FALSE;
 	
 	private String day;
+	
+	private ValidationResult validationResult;
 
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
@@ -42,6 +46,14 @@ public class TrackedInstance {
 
 	public void setClientId(String travelId) {
 		this.clientId = travelId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public ItineraryObject getItinerary() {
@@ -90,6 +102,14 @@ public class TrackedInstance {
 
 	public void setDay(String day) {
 		this.day = day;
+	}
+
+	public ValidationResult getValidationResult() {
+		return validationResult;
+	}
+
+	public void setValidationResult(ValidationResult validationResult) {
+		this.validationResult = validationResult;
 	}
 
 

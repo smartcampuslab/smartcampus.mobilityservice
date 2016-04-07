@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -41,11 +42,14 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -59,7 +63,10 @@ import eu.trentorise.smartcampus.network.RemoteException;
 @Component
 public class GamificationHelper {
 
-	private static final double SPACE_ERROR = 1E-1;
+	private static final String ON_FOOT = "on_foot";
+	private static final String ON_BICYCLE = "on_bicycle";
+	private static final String IN_VEHICLE = "in_vehicle";
+	private static final double SPACE_ERROR = 0.1;
 	private static final double TIME_ERROR = 1000 * 60 * 15;
 
 	private static final String SAVE_ITINERARY = "save_itinerary";
@@ -67,6 +74,8 @@ public class GamificationHelper {
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 	
 	private static long startGameDate = Long.MAX_VALUE;
+	
+	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 	
 	@Autowired(required=false)
 	@Value("${gamification.url}")
@@ -284,54 +293,102 @@ public class GamificationHelper {
 	}	
 	
 	
-	public static boolean checkItineraryMatching(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
-		if (geolocations.size() > 1) {
-			
-			List<Geolocation> positions = Lists.newArrayList();
-			List<Geolocation> matchedPositions = Lists.newArrayList();
-			for (Leg leg: itinerary.getData().getLeg()) {
-				Geolocation onLeg = new Geolocation();
-				onLeg.setLatitude(Double.parseDouble(leg.getFrom().getLat()));
-				onLeg.setLongitude(Double.parseDouble(leg.getFrom().getLon()));
-				onLeg.setRecorded_at(new Date(leg.getStartime()));
-				positions.add(onLeg);
-			}
-			Leg lastLeg = itinerary.getData().getLeg().get(itinerary.getData().getLeg().size() - 1);
+	public static ValidationResult checkItineraryMatching(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
+
+		boolean legWalkOnly = true;
+		boolean geolocationWalkOnly = true;
+		
+		Set<String> geolocationModes = Sets.newHashSet();
+		Set<String> legsModes = Sets.newHashSet();
+
+		ValidationResult vr = new ValidationResult();
+		vr.setGeoLocationsN(geolocations.size());
+		vr.setGeoActivities(geolocationModes);
+		vr.setLegsActivities(legsModes);
+		
+		List<Geolocation> legPositions = Lists.newArrayList();
+		List<Geolocation> matchedPositions = Lists.newArrayList();
+		for (Leg leg : itinerary.getData().getLeg()) {
 			Geolocation onLeg = new Geolocation();
-			onLeg.setLatitude(Double.parseDouble(lastLeg.getFrom().getLat()));
-			onLeg.setLongitude(Double.parseDouble(lastLeg.getFrom().getLon()));
-			onLeg.setRecorded_at(new Date(lastLeg.getEndtime()));
-			positions.add(onLeg);			
-			
-			
-			for (Geolocation geolocation: geolocations) {
-				double lat = geolocation.getLatitude();
-				double lon = geolocation.getLongitude();
+			onLeg.setLatitude(Double.parseDouble(leg.getFrom().getLat()));
+			onLeg.setLongitude(Double.parseDouble(leg.getFrom().getLon()));
+			onLeg.setRecorded_at(new Date(leg.getStartime()));
 
-				Geolocation toRemove = null;
-				for (Geolocation pos: positions) {
-					double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
-					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
-					if (d <= SPACE_ERROR && t <= TIME_ERROR) {
-						toRemove = pos;
-						break;
-					}
-				}
-				if (toRemove != null) {
-					positions.remove(toRemove);
-					matchedPositions.add(toRemove);
-				}
-				
+			TType tt = leg.getTransport().getType();
+			if (FAST_TRANSPORTS.contains(tt)) {
+				// onLeg.setActivity_type(IN_VEHICLE);
+				legsModes.add(IN_VEHICLE);
+				legWalkOnly = false;
+			} else if (tt.equals(TType.BICYCLE)) {
+				// onLeg.setActivity_type(ON_BICYCLE);
+				legsModes.add(ON_BICYCLE);
+				legWalkOnly = false;
+			} else if (tt.equals(TType.WALK)) {
+				// onLeg.setActivity_type(ON_FOOT);
+				legsModes.add(ON_FOOT);
 			}
-			
-			System.out.println(positions.size() + " / " + matchedPositions.size());
-			
-		} 
-		
 
+			legPositions.add(onLeg);
+		}
 		
-		return false;	
-	}	
+		Leg lastLeg = itinerary.getData().getLeg().get(itinerary.getData().getLeg().size() - 1);
+		Geolocation onLeg = new Geolocation();
+		onLeg.setLatitude(Double.parseDouble(lastLeg.getTo().getLat()));
+		onLeg.setLongitude(Double.parseDouble(lastLeg.getTo().getLon()));
+		onLeg.setRecorded_at(new Date(lastLeg.getEndtime()));
+		legPositions.add(onLeg);
+		
+		vr.setLegsLocationsN(legPositions.size());
+
+		for (Geolocation geolocation : geolocations) {
+			double lat = geolocation.getLatitude();
+			double lon = geolocation.getLongitude();
+			
+//			if (geolocation.getAccuracy() != null && geolocation.getAccuracy() < 66) {
+//				continue;
+//			}
+//			if (geolocation.getActivity_confidence() != null && geolocation.getActivity_confidence() < 66) {
+//				continue;
+//			}			
+
+			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
+				geolocationModes.add(geolocation.getActivity_type());
+				if (!geolocation.getActivity_type().equals("on_foot")) {
+					geolocationWalkOnly = false;
+				}
+			}
+
+			Geolocation toRemove = null;
+			double minD = Double.MAX_VALUE;
+			for (Geolocation pos : legPositions) {
+				double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
+//				System.err.println("\t" + geolocation + " / " + pos + " = " + d);
+				double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
+				if (d <= SPACE_ERROR && d < minD) {
+					toRemove = pos;
+					minD = d;
+				}
+			}
+//			System.err.println(minD);
+			if (toRemove != null) {
+				legPositions.remove(toRemove);
+				matchedPositions.add(toRemove);
+			}
+
+		}
+
+//		System.err.println(legPositions.size() + " / " + matchedPositions.size());
+
+		SetView<String> diffModes = Sets.difference(legsModes, geolocationModes);
+				
+		vr.setMatchedLocationsN(matchedPositions.size());
+		vr.setMatchedActivities(diffModes.size() == 0);
+		vr.setTooFast(legWalkOnly & geolocationWalkOnly);
+		
+		vr.setValid(vr.getMatchedActivities() && vr.getMatchedLocationsN() >= Math.min(vr.getLegsLocationsN(), vr.getGeoLocationsN()) && !vr.getTooFast());
+
+		return vr;
+	}
 	
 	
 	private static double harvesineDistance(double lat1, double lon1, double lat2, double lon2) {

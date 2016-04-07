@@ -43,6 +43,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Device;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -220,6 +221,7 @@ public class GamificationController extends SCController {
 					res = new TrackedInstance();
 					res.setClientId(travelId);
 					res.setDay(day);
+					res.setUserId(userId);
 					pars.remove("day");
 					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
 					res.setItinerary(res2);
@@ -234,7 +236,9 @@ public class GamificationController extends SCController {
 				}
 
 				res.setComplete(true);
-				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+				ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
+				res.setValidationResult(vr);
+				res.setValid(vr.getValid());
 
 				storage.saveTrackedInstance(res);
 			}
@@ -293,6 +297,7 @@ public class GamificationController extends SCController {
 				res2 = new TrackedInstance();
 				res2.setClientId(itineraryId);
 				res2.setDay(day);
+				res2.setUserId(userId);
 			}
 			res2.setItinerary(res);
 			
