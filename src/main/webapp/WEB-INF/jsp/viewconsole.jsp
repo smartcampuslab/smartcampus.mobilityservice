@@ -31,29 +31,61 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <style type="text/css">
+      .console {
+        padding: 20px;
+      }
+      .user-row {
+        border: 1px solid #bbb;
+        padding: 5px;
+      }
+      .user-row a {
+        font-size: 24px;
+      }
+      .instance-row {
+        background-color: #eee;
+        border: 1px solid #ddd;
+      }
+      .itinerary-row {
+        padding: 5px 0;
+        border-top: 1px solid #bbb;
+      }
+      table {
+        width: 100%;
+      }
+      thead td {
+        font-weight: bold;
+      } 
+      td {
+        border: 1px solid #ddd;
+        padding: 5px;
+      }
+    </style>
   </head>
 
   <body>
-   <div class="container" ng-controller="GameCtrl">
+   <div class="console" ng-controller="GameCtrl">
     <div class="row">
-      <div class="col-md-2">
-        <div ng-repeat="user in users">
-          <h3><a ng-click="selectUser(user)">{{user}}</a></h3>
+      <div class="col-md-3">
+        <div ng-repeat="user in users" class="user-row">
+          <div class="row">
+            <div class="col-md-6"><a ng-click="selectUser(user)">{{user}} </a></div>
+            <div class="col-md-6 pull-right">(X tracked, Y invalid)</div>
+          </div>  
           <div ng-if="selectedUser == user">
-            <div ng-repeat="itinerary in userMap[user]">
+            <div ng-repeat="itinerary in userMap[user]"  class="itinerary-row">
               <h5  ng-click="selectItinerary(itinerary)">{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
-              <p>{{itinerary.startTime|date:'dd/MM/yyyy HH:mm'}}</p>
-              <p ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</p>
-              <div ng-if="itinerary.instances.length > 1">
-                <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)">
-                   {{instance.day}}                   
+              {{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
+              <div>
+                <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row">
+                   date: {{instance.day ? instance.day : '--'}}                   
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-md-10">
+      <div class="col-md-9">
         <div id="map"></div>
         <div class="row" ng-if="selectedInstance != null">
           <div class="col-md-6">
@@ -69,6 +101,31 @@
              <p ng-repeat="evt in selectedInstance.legs"><b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span ng-if="evt.recorded_till != null"> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)</p>
 <!--               <p ng-repeat="evt in selectedInstance.geolocationEvents">{{evt.activity_type ? evt.activity_type : '--'}} ({{evt.recorded_at|date:'HH:mm:ss'}})</p> -->
            </div>
+        </div>
+        <div class="row" ng-if="selectedInstance != null">
+          <div class="col-md-12">
+            <h3>Tracked events:</h3>
+            <table>
+              <thead>
+                <td>When</td>
+                <td>Accuracy</td>
+                <td>Activity</td>
+                <td>Activity Confidence</td>
+                <td>Is moving</td>
+                <td>Speed</td>
+              </thead>
+              <tbody>
+                <tr ng-repeat="evt in selectedInstance.geolocationEvents">
+                  <td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
+                  <td>{{evt.accuracy}}</td>
+                  <td>{{evt.activity_type}}</td>
+                  <td>{{evt.activity_confidence}}</td>
+                  <td>{{evt.is_moving}}</td>
+                  <td>{{evt.speed}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

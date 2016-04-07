@@ -16,6 +16,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 				map[descr.userId] = [];
 				$scope.users.push(descr.userId);
 			}
+			$scope.users.sort(function(a,b) {return parseInt(a) - parseInt(b);});
+			
 			map[descr.userId].push(descr);
 		});
 		$scope.userMap = map;
@@ -31,9 +33,14 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.selectItinerary = function(itinerary) {
 		$scope.selectedInstance = null;
 		$scope.selectedItinerary = itinerary;
-		if (itinerary.instances.length == 1) {
-			$scope.selectInstance(itinerary.instances[0]);
-		}
+		itinerary.instances.sort(function(a,b) {
+			if (!a && !b) return 0;
+			if (a) return a.localeCompare(b);
+			return -b.localeCompare(a);
+		});
+//		if (itinerary.instances.length == 1) {
+//			$scope.selectInstance(itinerary.instances[0]);
+//		}
 	}
 
 	var resetLayers = function() {
