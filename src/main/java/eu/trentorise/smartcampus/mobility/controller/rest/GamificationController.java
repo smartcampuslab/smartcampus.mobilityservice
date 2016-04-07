@@ -211,33 +211,32 @@ public class GamificationController extends SCController {
 				String splitKey[] = key.split("@");
 				String travelId = splitKey[0];
 				String day = splitKey[1];
-				
-				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 
-					Map<String, Object> pars = new TreeMap<String, Object>();
-					pars.put("clientId", travelId);
-					pars.put("day", day);
-					TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
-					if (res == null) {
-						res = new TrackedInstance();
-						res.setClientId(travelId);
-						res.setDay(day);
-						pars.remove("day");
-						ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
-						res.setItinerary(res2);
-					}
-					res.getGeolocationEvents().add(geoloc);
-
-
-					if (res.getStarted() == false) {
-						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
-					}
-
-					res.setComplete(true);
-					res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
-
-					storage.saveTrackedInstance(res);
+				Map<String, Object> pars = new TreeMap<String, Object>();
+				pars.put("clientId", travelId);
+				pars.put("day", day);
+				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
+				if (res == null) {
+					res = new TrackedInstance();
+					res.setClientId(travelId);
+					res.setDay(day);
+					pars.remove("day");
+					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
+					res.setItinerary(res2);
 				}
+
+				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
+					res.getGeolocationEvents().add(geoloc);
+				}
+
+				if (res.getStarted() == false) {
+					sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+				}
+
+				res.setComplete(true);
+				res.setValid(GamificationHelper.checkItineraryCompletion(res.getItinerary(), res.getGeolocationEvents()));
+
+				storage.saveTrackedInstance(res);
 			}
 
 		} catch (Exception e) {

@@ -185,16 +185,24 @@ public class GamificationHelper {
 		}
 		
 		Double score = 0.0;
-		score += (walkDist< 0.1 ? 0 : Math.min(5, walkDist)) * 10;
-		score += (bikeDist< 0.1 ? 0 : Math.min(10, bikeDist)) * 5;
+		score += (walkDist< 0.1 ? 0 : Math.min(3.5, walkDist)) * 10;
+		score += (bikeDist< 0.1 ? 0 : Math.min(7, bikeDist)) * 5;
 		
 		double busTrainDist = busDist + trainDist;
 		if (busTrainDist> 0) {
-			score += ((busTrainDist > 0 && busTrainDist < 5) ? 10 : (busTrainDist >= 5 && busTrainDist < 10) ? 20 : (busTrainDist >= 10 && busTrainDist < 30) ? 30 : 40);
+			score += (busTrainDist > 0 && busTrainDist < 1) ? 10 : ((busTrainDist > 1 && busTrainDist < 5) ? 15 : (busTrainDist >= 5 && busTrainDist < 10) ? 20 : (busTrainDist >= 10 && busTrainDist < 30) ? 30 : 40);
 		}
 		
-		score *= (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0) ? 2 : 1; // zero impact
-		score += (itinerary.isPromoted() ? 10 : 0);
+		if ((busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0) && itinerary.isPromoted()) {
+			score *= 1.7;
+		} else {
+			if ((busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0)) {
+				score *= 1.5;
+			}
+			if (itinerary.isPromoted()) {
+				score *= 1.2;
+			}
+		}
 		
 		if (bikeDist > 0) {
 			data.put("bikeDistance", bikeDist);
@@ -276,7 +284,7 @@ public class GamificationHelper {
 	}	
 	
 	
-	public static boolean checkItineraryMatching(ItineraryObject itinerary, List<Geolocation> geolocations) throws Exception {
+	public static boolean checkItineraryMatching(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
 		if (geolocations.size() > 1) {
 			
 			List<Geolocation> positions = Lists.newArrayList();
@@ -285,14 +293,14 @@ public class GamificationHelper {
 				Geolocation onLeg = new Geolocation();
 				onLeg.setLatitude(Double.parseDouble(leg.getFrom().getLat()));
 				onLeg.setLongitude(Double.parseDouble(leg.getFrom().getLon()));
-				onLeg.setCreated_at(new Date(leg.getStartime()));
+				onLeg.setRecorded_at(new Date(leg.getStartime()));
 				positions.add(onLeg);
 			}
 			Leg lastLeg = itinerary.getData().getLeg().get(itinerary.getData().getLeg().size() - 1);
 			Geolocation onLeg = new Geolocation();
 			onLeg.setLatitude(Double.parseDouble(lastLeg.getFrom().getLat()));
 			onLeg.setLongitude(Double.parseDouble(lastLeg.getFrom().getLon()));
-			onLeg.setCreated_at(new Date(lastLeg.getEndtime()));
+			onLeg.setRecorded_at(new Date(lastLeg.getEndtime()));
 			positions.add(onLeg);			
 			
 			
@@ -303,7 +311,7 @@ public class GamificationHelper {
 				Geolocation toRemove = null;
 				for (Geolocation pos: positions) {
 					double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
-					double t = Math.abs(pos.getCreated_at().getTime() - geolocation.getCreated_at().getTime());
+					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
 					if (d <= SPACE_ERROR && t <= TIME_ERROR) {
 						toRemove = pos;
 						break;

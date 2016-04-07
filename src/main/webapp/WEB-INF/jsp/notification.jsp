@@ -158,7 +158,7 @@
 					<div class="modal-dialog modal-lg">
 						<div class="modal-content">
 							<div class="modal-header">
-								<h3 class="modal-title">Send notification</h3>
+								<h3 class="modal-title">Send notification to {{ appId }}</h3>
 							</div>
 							<div class="modal-body">
 								<form id="notification-form" ng-submit="notify()">
