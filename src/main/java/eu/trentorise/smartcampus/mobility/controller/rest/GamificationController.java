@@ -313,6 +313,24 @@ public class GamificationController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/validate")
+	public @ResponseBody void validate(HttpServletResponse response) throws Exception {
+		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+		for (TrackedInstance ti: result) {
+			try {
+				ValidationResult vr = gamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
+				ti.setValidationResult(vr);
+				ti.setValid(vr.getValid());
+				storage.saveTrackedInstance(ti);
+			} catch (Exception e) {
+				logger.error("Failed to validate tracked itinerary: " + ti.getId());
+			}
+			
+		}
+	}
+	
+	
 	@RequestMapping("/console")
 	public String vewConsole() {
 		return "viewconsole";
