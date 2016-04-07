@@ -364,9 +364,9 @@ public class GamificationController extends SCController {
 					descr.setRecurrency(o.getItinerary().getRecurrency());
 					descr.setInstances(new ArrayList<TrackedInstance>());
 					map.put(o.getClientId(), descr);
+					list.add(descr);
 				}
 				descr.getInstances().add(o);
-				list.add(descr);
 			}
 		}
 		return list;
