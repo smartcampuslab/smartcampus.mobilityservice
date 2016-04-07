@@ -43,8 +43,16 @@
         font-size: 24px;
       }
       .instance-row {
-        background-color: #eee;
         border: 1px solid #ddd;
+      }
+      .instance-row.valid {
+        background-color: lightgreen;
+      }
+      .instance-row.invalid {
+        background-color: lightpink;
+      }
+      .selected {
+        border: 2px solid blue;
       }
       .itinerary-row {
         padding: 5px 0;
@@ -70,33 +78,38 @@
         <div ng-repeat="user in users" class="user-row">
           <div class="row">
             <div class="col-md-6"><a ng-click="selectUser(user)">{{user}} </a></div>
-            <div class="col-md-6 pull-right">(X tracked, Y invalid)</div>
+            <div class="col-md-6 pull-right">({{userTotals[user].total}} tracked, <span style="color:red;">{{userTotals[user].failed}} invalid</span>)</div>
           </div>  
           <div ng-if="selectedUser == user">
             <div ng-repeat="itinerary in userMap[user]"  class="itinerary-row">
               <h5  ng-click="selectItinerary(itinerary)">{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
               {{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
               <div>
-                <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row">
-                   date: {{instance.day ? instance.day : '--'}}
-                   <span class="glyphicon glyphicon-play"></span>                   
+                <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row" ng-class="{'selected':selectedInstance == instance, 'valid': instance.valid, 'invalid': !instance.valid}">
+                   <div class="row">
+                    <div class="col-md-6">date: {{instance.day ? instance.day : '--'}}</div>
+                    <div class="col-md-6 pull-right">game points: {{instance.itinerary.data.customData.estimatedScore}}</div>
+                   </div>                   
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div>
+          <a ng-click="revalidate()">Re-validate</a>
         </div>
       </div>
       <div class="col-md-9">
         <div id="map"></div>
         <div class="row" ng-if="selectedInstance != null">
           <div class="col-md-6">
-            <h3 style="color:#00FF00;">Planned</h3>
+            <h3 style="color:green;">Planned</h3>
             <p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
             <hr/>
             <p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
           </div>
           <div class="col-md-6">
-            <h3 style="color:#FF0000;">Tracked (valid: {{selectedInstance.valid}})</h3>
+            <h3><span style="color:blue;">Tracked</span> (valid: <span style="{{selectedInstance.valid ? 'color: green' : 'color:red'}}">{{selectedInstance.valid}}</span>)</h3>
             <p>{{selectedInstance.geolocationEvents[0].recorded_at|date:'HH:mm'}} - {{selectedInstance.geolocationEvents[selectedInstance.geolocationEvents.length-1].recorded_at|date:'HH:mm'}}</p>
             <hr/>
              <p ng-repeat="evt in selectedInstance.legs"><b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span ng-if="evt.recorded_till != null"> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)</p>
