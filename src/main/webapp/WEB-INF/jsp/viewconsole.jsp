@@ -78,7 +78,8 @@
               {{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
               <div>
                 <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row">
-                   date: {{instance.day ? instance.day : '--'}}                   
+                   date: {{instance.day ? instance.day : '--'}}
+                   <span class="glyphicon glyphicon-play"></span>                   
                 </div>
               </div>
             </div>
