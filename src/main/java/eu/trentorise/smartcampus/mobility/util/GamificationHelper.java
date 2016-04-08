@@ -66,6 +66,9 @@ public class GamificationHelper {
 	private static final String ON_FOOT = "on_foot";
 	private static final String ON_BICYCLE = "on_bicycle";
 	private static final String IN_VEHICLE = "in_vehicle";
+	private static final String WALKING = "walking";
+	private static final String RUNNING = "running";
+	private static final String UNKNOWN = "unknown";
 	private static final double SPACE_ERROR = 0.1;
 	private static final double TIME_ERROR = 1000 * 60 * 15;
 
@@ -76,6 +79,7 @@ public class GamificationHelper {
 	private static long startGameDate = Long.MAX_VALUE;
 	
 	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
+	public static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN);
 	
 	@Autowired(required=false)
 	@Value("${gamification.url}")
@@ -352,7 +356,12 @@ public class GamificationHelper {
 //			}			
 
 			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
-				geolocationModes.add(geolocation.getActivity_type());
+				if (WALKLIKE.contains(geolocation.getActivity_type())) {
+					geolocationModes.addAll(WALKLIKE);
+				} else {
+					geolocationModes.add(geolocation.getActivity_type());
+				}
+				
 				if (geolocation.getActivity_type().equals(IN_VEHICLE)) {
 					geolocationWalkOnly = false;
 				}
