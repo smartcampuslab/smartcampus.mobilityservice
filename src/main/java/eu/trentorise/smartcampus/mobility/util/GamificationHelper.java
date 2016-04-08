@@ -383,7 +383,7 @@ public class GamificationHelper {
 				
 		vr.setMatchedLocationsN(matchedPositions.size());
 		vr.setMatchedActivities(diffModes.size() == 0);
-		vr.setTooFast(legWalkOnly & geolocationWalkOnly);
+		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
 		
 		vr.setValid(vr.getMatchedActivities() && vr.getMatchedLocationsN() >= Math.min(vr.getLegsLocationsN(), vr.getGeoLocationsN()) && !vr.getTooFast());
 
