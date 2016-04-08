@@ -136,11 +136,15 @@ public class GamificationController extends SCController {
 						locationTravelId = (String) location.getExtras().get("idTrip");
 						lastTravelId = locationTravelId;
 					} else {
-						if (lastTravelId != null) {
-							locationTravelId = lastTravelId;
-						} else {
-							continue;
-						}
+						// now the plugin supports correctly the extras for each location.
+						// locations with empty idTrip are possible only upon initialization/synchronization.
+						// we skip them here
+						continue;
+//						if (lastTravelId != null) {
+//							locationTravelId = lastTravelId;
+//						} else {
+//							continue;
+//						}
 					}
 					
 					Coords coords = location.getCoords();
