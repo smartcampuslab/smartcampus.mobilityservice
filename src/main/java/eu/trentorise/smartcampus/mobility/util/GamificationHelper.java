@@ -353,7 +353,7 @@ public class GamificationHelper {
 
 			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
 				geolocationModes.add(geolocation.getActivity_type());
-				if (!geolocation.getActivity_type().equals("on_foot")) {
+				if (geolocation.getActivity_type().equals(IN_VEHICLE)) {
 					geolocationWalkOnly = false;
 				}
 			}
