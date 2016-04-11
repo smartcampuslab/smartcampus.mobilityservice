@@ -335,9 +335,9 @@ public class GamificationHelper {
 
 		for (Geolocation geolocation : geolocations) {
 			
-			if (geolocation.getActivity_type() != null && geolocation.getActivity_confidence() != null && !WALKLIKE.contains(geolocation.getActivity_type()) && geolocation.getActivity_confidence() < 50) {
-				continue;
-			}
+//			if (geolocation.getActivity_type() != null && geolocation.getActivity_confidence() != null && !WALKLIKE.contains(geolocation.getActivity_type()) && geolocation.getActivity_confidence() < 50) {
+//				continue;
+//			}
 			
 			double lat = geolocation.getLatitude();
 			double lon = geolocation.getLongitude();
