@@ -353,8 +353,8 @@ public class GamificationController extends SCController {
 		int i = 0;
 		for (TrackedInstance ti: result) {
 			try {
-				logger.info("Sending for player " + ti.getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
-				sendIntineraryDataToGamificationEngine(gameId, ti.getUserId(), ti.getItinerary());
+				logger.info("Sending for player " + ti.getItinerary().getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
+				sendIntineraryDataToGamificationEngine(gameId, ti.getItinerary().getUserId(), ti.getItinerary());
 				i++;
 				logger.info("Resent " + i + "/" + result.size());
 				Thread.sleep(1000);
