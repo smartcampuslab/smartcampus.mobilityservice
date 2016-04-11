@@ -36,6 +36,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
+import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
@@ -229,21 +230,32 @@ public class GamificationController extends SCController {
 					res.setUserId(userId);
 					pars.remove("day");
 					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
-					res.setItinerary(res2);
+					if (res2 == null) {
+						pars = new TreeMap<String, Object>();
+						pars.put("itinerary.clientId", travelId);
+						SavedTrip res3 = storage.searchDomainObject(pars, SavedTrip.class);
+						if (res3 != null) {
+							res.setItinerary(res3.getItinerary());
+						}
+					} else {
+						res.setItinerary(res2);
+					}
 				}
 
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 					res.getGeolocationEvents().add(geoloc);
 				}
 
-				if (res.getStarted() == false) {
-					sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
-				}
+				if (res.getItinerary() != null) {
+					if (res.getStarted() == false) {
+						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+					}
 
-				res.setComplete(true);
-				ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
-				res.setValidationResult(vr);
-				res.setValid(vr.getValid());
+					res.setComplete(true);
+					ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
+					res.setValidationResult(vr);
+					res.setValid(vr.getValid());
+				}
 
 				storage.saveTrackedInstance(res);
 			}
