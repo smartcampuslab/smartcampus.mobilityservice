@@ -106,7 +106,7 @@
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/gamification/journey/{itineraryId}" />
 	<resourceMapping uri="mobilityservice.data"
-		pathPattern="/gamification/validate" />		
+		pathPattern="/gamification/r353nd" />		
 
 </service>
 

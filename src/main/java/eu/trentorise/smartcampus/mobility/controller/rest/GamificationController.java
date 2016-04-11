@@ -347,6 +347,23 @@ public class GamificationController extends SCController {
 		}
 	}
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
+	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
+		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+		int i = 0;
+		for (TrackedInstance ti: result) {
+			try {
+				sendIntineraryDataToGamificationEngine(gameId, ti.getUserId(), ti.getItinerary());
+				i++;
+				logger.info("Resent " + i + "/" + result.size());
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				logger.error("Failed to resend gamification data for: " + ti.getId());
+			}
+			
+		}
+	}	
+	
 	
 	@RequestMapping("/console")
 	public String vewConsole() {
