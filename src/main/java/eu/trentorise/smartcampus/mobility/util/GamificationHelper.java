@@ -69,6 +69,7 @@ public class GamificationHelper {
 	private static final String WALKING = "walking";
 	private static final String RUNNING = "running";
 	private static final String UNKNOWN = "unknown";
+	private static final String EMPTY = "unknown";
 	private static final double SPACE_ERROR = 0.1;
 	private static final double TIME_ERROR = 1000 * 60 * 15;
 
@@ -79,7 +80,7 @@ public class GamificationHelper {
 	private static long startGameDate = Long.MAX_VALUE;
 	
 	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
-	public static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN);
+	public static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN, EMPTY);
 	
 	@Autowired(required=false)
 	@Value("${gamification.url}")
@@ -310,14 +311,11 @@ public class GamificationHelper {
 		vr.setGeoActivities(geolocationModes);
 		vr.setLegsActivities(legsModes);
 		
-		List<Geolocation> legPositions = Lists.newArrayList();
-		List<Geolocation> matchedPositions = Lists.newArrayList();
+		List<List<Geolocation>> legPositions = Lists.newArrayList();
+		List<List<Geolocation>> matchedPositions = Lists.newArrayList();
 		for (Leg leg : itinerary.getData().getLeg()) {
-			Geolocation onLeg = new Geolocation();
-			onLeg.setLatitude(Double.parseDouble(leg.getFrom().getLat()));
-			onLeg.setLongitude(Double.parseDouble(leg.getFrom().getLon()));
-			onLeg.setRecorded_at(new Date(leg.getStartime()));
-
+			legPositions.add(decodePoly(leg));
+			
 			TType tt = leg.getTransport().getType();
 			if (FAST_TRANSPORTS.contains(tt)) {
 				// onLeg.setActivity_type(IN_VEHICLE);
@@ -331,20 +329,16 @@ public class GamificationHelper {
 				// onLeg.setActivity_type(ON_FOOT);
 				legsModes.add(ON_FOOT);
 			}
-
-			legPositions.add(onLeg);
 		}
-		
-		Leg lastLeg = itinerary.getData().getLeg().get(itinerary.getData().getLeg().size() - 1);
-		Geolocation onLeg = new Geolocation();
-		onLeg.setLatitude(Double.parseDouble(lastLeg.getTo().getLat()));
-		onLeg.setLongitude(Double.parseDouble(lastLeg.getTo().getLon()));
-		onLeg.setRecorded_at(new Date(lastLeg.getEndtime()));
-		legPositions.add(onLeg);
 		
 		vr.setLegsLocationsN(legPositions.size());
 
 		for (Geolocation geolocation : geolocations) {
+			
+			if (geolocation.getActivity_type() != null && geolocation.getActivity_confidence() != null && !WALKLIKE.contains(geolocation.getActivity_type()) && geolocation.getActivity_confidence() < 50) {
+				continue;
+			}
+			
 			double lat = geolocation.getLatitude();
 			double lon = geolocation.getLongitude();
 			
@@ -366,27 +360,31 @@ public class GamificationHelper {
 					geolocationWalkOnly = false;
 				}
 			}
-
-			Geolocation toRemove = null;
-			double minD = Double.MAX_VALUE;
-			for (Geolocation pos : legPositions) {
-				double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
-//				System.err.println("\t" + geolocation + " / " + pos + " = " + d);
-				double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
-				if (d <= SPACE_ERROR && d < minD) {
-					toRemove = pos;
-					minD = d;
-				}
+			if (geolocation.getActivity_type() == null) {
+				geolocationModes.addAll(WALKLIKE);
 			}
-//			System.err.println(minD);
+
+			List<Geolocation> toRemove = null;
+			for (List<Geolocation> poss : legPositions) {
+				for (Geolocation pos : poss) {
+					double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
+					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
+					if (d <= SPACE_ERROR) {
+						toRemove = poss;
+						break;
+					}
+				}
+				if (toRemove != null) {
+					break;
+				}				
+			}
 			if (toRemove != null) {
 				legPositions.remove(toRemove);
 				matchedPositions.add(toRemove);
-			}
+			}				
+
 
 		}
-
-//		System.err.println(legPositions.size() + " / " + matchedPositions.size());
 
 		SetView<String> diffModes = Sets.difference(legsModes, geolocationModes);
 				
@@ -415,6 +413,42 @@ public class GamificationHelper {
 
 		return EARTH_RADIUS * c;
 	}		
+	
+	public static List<Geolocation> decodePoly(Leg leg) {
+		List<Geolocation> legPositions = Lists.newArrayList();
+		String encoded = leg.getLegGeometery().getPoints();
+		int index = 0, len = encoded.length();
+		int lat = 0, lng = 0;
+		while (index < len) {
+			int b, shift = 0, result = 0;
+			do {
+				b = encoded.charAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+			int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+			lat += dlat;
+			shift = 0;
+			result = 0;
+			do {
+				b = encoded.charAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+			int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+			lng += dlng;
+			
+			Geolocation onLeg = new Geolocation();
+			onLeg.setLatitude((((double) lat / 1E5)));
+			onLeg.setLongitude((((double) lng / 1E5)));
+			onLeg.setRecorded_at(new Date(leg.getStartime()));
+
+			legPositions.add(onLeg);
+
+		}
+		return legPositions;
+	}	
+	
 	
 	
 	public static void main(String[] args) throws UnknownHostException, MongoException, SecurityException, RemoteException {
