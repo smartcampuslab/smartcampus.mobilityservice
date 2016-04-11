@@ -102,19 +102,23 @@
       <div class="col-md-9">
         <div id="map"></div>
         <div class="row" ng-if="selectedInstance != null">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <h3 style="color:green;">Planned</h3>
             <p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
             <hr/>
             <p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <h3><span style="color:blue;">Tracked</span> (valid: <span style="{{selectedInstance.valid ? 'color: green' : 'color:red'}}">{{selectedInstance.valid}}</span>)</h3>
             <p>{{selectedInstance.geolocationEvents[0].recorded_at|date:'HH:mm'}} - {{selectedInstance.geolocationEvents[selectedInstance.geolocationEvents.length-1].recorded_at|date:'HH:mm'}}</p>
             <hr/>
              <p ng-repeat="evt in selectedInstance.legs"><b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span ng-if="evt.recorded_till != null"> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)</p>
 <!--               <p ng-repeat="evt in selectedInstance.geolocationEvents">{{evt.activity_type ? evt.activity_type : '--'}} ({{evt.recorded_at|date:'HH:mm:ss'}})</p> -->
            </div>
+          <div class="col-md-4">
+            <h3 style="{{selectedInstance.valid ? 'color: green' : 'color:red'}}">Validation</h3>
+            <pre>{{selectedInstance.validationResult | json}}</pre>
+          </div>           
         </div>
         <div class="row" ng-if="selectedInstance != null">
           <div class="col-md-12">
