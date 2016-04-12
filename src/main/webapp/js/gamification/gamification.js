@@ -1,5 +1,4 @@
-var notification = angular.module('gameconsole', []);
-
+var notification = angular.module('gameconsole', ['ngScrollable']);
 
 notification.controller('GameCtrl', function($scope, $http) {
 	$scope.users = [];
@@ -156,6 +155,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 
 	
 	$scope.initMap = function() {
+		  document.getElementById("left-scrollable").style.height = (window.innerHeight - 100) + "px";
 	      if (!document.getElementById('map')) return;
 	      var ll = null;
 	      var mapOptions = null;

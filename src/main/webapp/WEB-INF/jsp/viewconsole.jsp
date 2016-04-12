@@ -13,9 +13,11 @@
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/ng-scrollable.min.css" rel="stylesheet">
 
     <script src="../lib/angular/angular.min.js"></script>
     <script src="../lib/angular/angular-route.min.js"></script>
+    <script src="../lib/ng-scrollable.min.js"></script>
     <script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
     <script src="../lib/sprintf.min.js"></script>
@@ -73,8 +75,11 @@
 
   <body>
    <div class="console" ng-controller="GameCtrl">
+   	
     <div class="row">
+     
       <div class="col-md-3">
+      <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
         <div ng-repeat="user in users" class="user-row">
           <div class="row">
             <div class="col-md-6"><a ng-click="selectUser(user)">{{user}} </a></div>
@@ -87,7 +92,13 @@
               <div>
                 <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row" ng-class="{'selected':selectedInstance == instance, 'valid': instance.valid, 'invalid': !instance.valid}">
                    <div class="row">
-                    <div class="col-md-6">date: {{instance.day ? instance.day : '--'}}</div>
+                    <div class="col-md-6">date: {{instance.day ? instance.day : '--'}}
+                    	<span ng-show="instance.validationResult.geoLocationsN <= 2" class="glyphicon glyphicon-exclamation-sign"></span>
+                    	<!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
+                    	<span ng-show="!instance.validationResult.matchedLocations" class="glyphicon glyphicon-move"></span>
+                    	<span ng-show="!instance.validationResult.matchedActivities" class="glyphicon glyphicon-plane"></span>
+                    	<span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road"></span>
+                    </div>
                     <div class="col-md-6 pull-right">game points: {{instance.itinerary.data.customData.estimatedScore}}</div>
                    </div>                   
                 </div>
@@ -97,6 +108,7 @@
         </div>
         <div>
           <a ng-click="revalidate()">Re-validate</a>
+        </div>
         </div>
       </div>
       <div class="col-md-9">
