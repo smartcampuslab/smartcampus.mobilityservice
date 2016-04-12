@@ -7,6 +7,7 @@ public class ValidationResult {
 	private int geoLocationsN;
 	private int legsLocationsN;
 	private int matchedLocationsN;
+	private Boolean matchedLocations;
 	
 	private Set<String> geoActivities;
 	private Set<String> legsActivities;
@@ -37,6 +38,14 @@ public class ValidationResult {
 
 	public void setMatchedLocationsN(int matchedLocationsN) {
 		this.matchedLocationsN = matchedLocationsN;
+	}
+
+	public Boolean getMatchedLocations() {
+		return matchedLocations;
+	}
+
+	public void setMatchedLocations(Boolean matchedLocations) {
+		this.matchedLocations = matchedLocations;
 	}
 
 	public Boolean getValid() {
