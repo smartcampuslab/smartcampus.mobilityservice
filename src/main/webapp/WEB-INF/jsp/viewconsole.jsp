@@ -83,7 +83,7 @@
         <div ng-repeat="user in users" class="user-row">
           <div class="row">
             <div class="col-md-6"><a ng-click="selectUser(user)">{{user}} </a></div>
-            <div class="col-md-6 pull-right">({{userTotals[user].total}} tracked, <span style="{{userTotals[user].failed == 0 ? 'color: lime' : 'color:red'}}">{{userTotals[user].failed}} invalid</span>)</div>
+            <div class="col-md-6 pull-right"><strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].failed}} invalid</span>)</strong></div>
           </div>  
           <div ng-if="selectedUser == user">
             <div ng-repeat="itinerary in userMap[user]"  class="itinerary-row">

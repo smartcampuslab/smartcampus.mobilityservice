@@ -57,6 +57,12 @@ notification.controller('GameCtrl', function($scope, $http) {
 //			$scope.selectInstance(itinerary.instances[0]);
 //		}
 	}
+	
+	$scope.validColor = function(totals) {
+		var r = Math.floor(255 * Math.pow(totals.failed / totals.total, 1.5));
+		var g = Math.floor(255 * ((totals.total - totals.failed) / totals.total));
+		return "color:rgb("+r+","+g+","+64+")";
+	}
 
 	var resetLayers = function() {
 		if (!$scope.layers) return;
