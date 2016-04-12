@@ -316,7 +316,7 @@ public class GamificationHelper {
 		List<List<Geolocation>> legPositions = Lists.newArrayList();
 		List<List<Geolocation>> matchedPositions = Lists.newArrayList();
 		for (Leg leg : itinerary.getData().getLeg()) {
-			legPositions.add(decodePoly(leg));
+			legPositions.addAll(splitList(decodePoly(leg)));
 			
 			TType tt = leg.getTransport().getType();
 			if (FAST_TRANSPORTS.contains(tt)) {
@@ -337,20 +337,13 @@ public class GamificationHelper {
 
 		for (Geolocation geolocation : geolocations) {
 			
-//			if (geolocation.getActivity_type() != null && geolocation.getActivity_confidence() != null && !WALKLIKE.contains(geolocation.getActivity_type()) && geolocation.getActivity_confidence() < 50) {
-//				continue;
-//			}
+			if (geolocation.getAccuracy() != null && geolocation.getActivity_confidence() != null && geolocation.getAccuracy() > SPACE_ERROR * 1000 * 2 && geolocation.getActivity_confidence() < 50) {
+				continue;
+			}
 			
 			double lat = geolocation.getLatitude();
 			double lon = geolocation.getLongitude();
 			
-//			if (geolocation.getAccuracy() != null && geolocation.getAccuracy() < 66) {
-//				continue;
-//			}
-//			if (geolocation.getActivity_confidence() != null && geolocation.getActivity_confidence() < 66) {
-//				continue;
-//			}			
-
 			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
 				if (WALKLIKE.contains(geolocation.getActivity_type())) {
 					geolocationModes.addAll(WALKLIKE);
@@ -358,7 +351,7 @@ public class GamificationHelper {
 					geolocationModes.add(geolocation.getActivity_type());
 				}
 				
-				if (geolocation.getActivity_type().equals(IN_VEHICLE)) {
+				if (geolocation.getActivity_type().equals(IN_VEHICLE) && geolocation.getActivity_confidence() > 50) {
 					geolocationWalkOnly = false;
 				}
 			}
@@ -371,7 +364,7 @@ public class GamificationHelper {
 				for (Geolocation pos : poss) {
 					double d = harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
 					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
-					if (d <= SPACE_ERROR) {
+					if (d <= Math.max(SPACE_ERROR, geolocation.getAccuracy() != null ? ((double)geolocation.getAccuracy() / 10000) : 0)) {
 						toRemove = poss;
 						break;
 					}
@@ -391,10 +384,11 @@ public class GamificationHelper {
 		SetView<String> diffModes = Sets.difference(legsModes, geolocationModes);
 				
 		vr.setMatchedLocationsN(matchedPositions.size());
+		vr.setMatchedLocations(vr.getMatchedLocationsN() > Math.ceil(vr.getLegsLocationsN() / 2));
 		vr.setMatchedActivities(diffModes.size() == 0);
 		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
 		
-		vr.setValid(vr.getMatchedActivities() && vr.getMatchedLocationsN() >= Math.min(vr.getLegsLocationsN(), vr.getGeoLocationsN()) && !vr.getTooFast());
+		vr.setValid(vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast());
 
 		return vr;
 	}
@@ -449,7 +443,17 @@ public class GamificationHelper {
 
 		}
 		return legPositions;
-	}	
+	}
+	
+	private static List<List<Geolocation>> splitList(List<Geolocation> list) {
+		List<List<Geolocation>> result = Lists.newArrayList();
+		int half = list.size() / 2;
+		List<Geolocation> l1 = list.subList(0, half);
+		List<Geolocation> l2 = list.subList(half, list.size());
+		result.add(l1);
+		result.add(l2);
+		return result;
+	}
 	
 	
 	
