@@ -113,6 +113,8 @@
       </div>
       <div class="col-md-9">
         <div id="map"></div>
+        <br/>
+        <div id="right-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
         <div class="row" ng-if="selectedInstance != null">
           <div class="col-md-4">
             <h3 style="color:green;">Planned</h3>
@@ -157,6 +159,7 @@
             </table>
           </div>
         </div>
+      </div>
       </div>
     </div>
    </div>

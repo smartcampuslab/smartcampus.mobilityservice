@@ -59,8 +59,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 	}
 	
 	$scope.validColor = function(totals) {
-		var r = Math.floor(255 * Math.pow(totals.failed / totals.total, 1.5));
-		var g = Math.floor(255 * ((totals.total - totals.failed) / totals.total));
+		var r = 127 + Math.floor(128 * Math.pow(totals.failed / totals.total, 1.5));
+		var g = 0 + Math.floor(255 * ((totals.total - totals.failed) / totals.total));
 		return "color:rgb("+r+","+g+","+64+")";
 	}
 
@@ -162,6 +162,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	
 	$scope.initMap = function() {
 		  document.getElementById("left-scrollable").style.height = (window.innerHeight - 100) + "px";
+		  document.getElementById("right-scrollable").style.height = (window.innerHeight  / 2 - 60) + "px";
 	      if (!document.getElementById('map')) return;
 	      var ll = null;
 	      var mapOptions = null;
