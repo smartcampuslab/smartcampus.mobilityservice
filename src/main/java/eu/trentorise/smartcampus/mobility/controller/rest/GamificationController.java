@@ -258,6 +258,8 @@ public class GamificationController extends SCController {
 				}
 
 				storage.saveTrackedInstance(res);
+				
+				logger.info("Saved geolocation events");
 			}
 
 		} catch (Exception e) {
@@ -265,7 +267,6 @@ public class GamificationController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
-		logger.info("Saved geolocation events");
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
@@ -342,6 +343,7 @@ public class GamificationController extends SCController {
 				storage.saveTrackedInstance(ti);
 			} catch (Exception e) {
 				logger.error("Failed to validate tracked itinerary: " + ti.getId());
+				e.printStackTrace();
 			}
 			
 		}
