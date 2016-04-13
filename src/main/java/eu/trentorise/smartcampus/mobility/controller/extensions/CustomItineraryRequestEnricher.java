@@ -8,6 +8,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -94,14 +95,14 @@ public class CustomItineraryRequestEnricher implements ItineraryRequestEnricher 
 
 	// same for all
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, Collection<PlanRequest> requests, SingleJourney request) {
 		List<Itinerary> kept = new ArrayList<Itinerary>();
 		List<Itinerary> toRemove;
 		for (Double key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
 			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
 			toSort = new ArrayList<Itinerary>(toSortSet);
-			ItinerarySorter.sort(toSort, criteria);
+			ItinerarySorter.sort(toSort, request.getRouteType());
 			Collections.reverse(toSort);
 			int removeN = toSort.size() - (int)Math.min(Math.abs(key), toSort.size());
 			toRemove =  new ArrayList<Itinerary>();
