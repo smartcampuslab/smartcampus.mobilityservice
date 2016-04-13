@@ -59,16 +59,29 @@
   
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/geolocations/**" security="none"/>
 
-  <http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/console/**" security="none"/>
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/r353nd/**" security="none"/>
   
   
-	<http xmlns="http://www.springframework.org/schema/security" pattern="/web/**" auto-config="true" use-expressions="true">
+<!-- 	<http xmlns="http://www.springframework.org/schema/security" pattern="/web/**" auto-config="true" use-expressions="true">
 		<anonymous enabled="false" />
         <security:intercept-url  pattern="/web/notification/**" access="isFullyAuthenticated()" />
 		<security:form-login login-page="/web/login" default-target-url="/web/notification" login-processing-url="/web/j_spring_security_check"  />
 		<security:logout logout-success-url="/web/notification" logout-url="/web/notification/j_spring_security_logout" />
-	</http>    
+	</http>     -->
+	
+	<http xmlns="http://www.springframework.org/schema/security" pattern="/web/**" auto-config="true" use-expressions="true">
+		<anonymous enabled="false" />
+        <security:intercept-url  pattern="/web/notification/**" access="isFullyAuthenticated()" />
+		<security:form-login login-page="/web/login" authentication-success-handler-ref="loginSuccessHandler" login-processing-url="/web/j_spring_security_check"  />
+		<security:logout logout-success-url="/web/notification" logout-url="/web/notification/j_spring_security_logout" />
+	</http>    	
+	
+	<http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/console/**" auto-config="true" use-expressions="true">
+		<anonymous enabled="false" />
+        <security:intercept-url  pattern="/gamification/console/**" access="isFullyAuthenticated()" />
+		<security:form-login login-page="/web/login" authentication-success-handler-ref="loginSuccessHandler" login-processing-url="/web/j_spring_security_check"  />
+		<security:logout logout-success-url="/gamification/console" logout-url="/web/notification/j_spring_security_logout" />
+	</http>   	
 	
 	<http create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		 xmlns="http://www.springframework.org/schema/security" authentication-manager-ref="authenticationManager">
@@ -113,6 +126,10 @@
     </bean>         
     
 	<bean id="customAuthenticationProvider" class="eu.trentorise.smartcampus.mobility.security.CustomAuthenticationProvider">
+    </bean>  
+    
+    <bean id="loginSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+    	<property name="useReferer" value="true"/>
     </bean>    
     
 	<security:authentication-manager alias="authenticationManager">
