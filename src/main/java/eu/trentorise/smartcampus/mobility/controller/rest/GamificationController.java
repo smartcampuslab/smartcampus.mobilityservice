@@ -116,7 +116,13 @@ public class GamificationController extends SCController {
 		ObjectMapper mapper = new ObjectMapper();
 		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
-			String userId = basicProfileService.getBasicProfile(token).getUserId();
+			String userId = null;
+			try {
+				userId = basicProfileService.getBasicProfile(token).getUserId();
+			} catch (SecurityException e) {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
 
 			logger.info("UserId: " + userId);
 
