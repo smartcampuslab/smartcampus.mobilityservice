@@ -165,8 +165,10 @@ public class GamificationHelper {
 				if (leg.getTransport().getType().equals(TType.CAR)) {
 					carDist += leg.getLength() / 1000;
 					if (leg.getTo().getStopId() != null) {
-						if (leg.getTo().getStopId().getExtra().containsKey("parkAndRide")) {
-								pnr |= (Boolean)leg.getTo().getStopId().getExtra().get("parkAndRide");
+						if (leg.getTo().getStopId().getExtra() != null) {
+							if (leg.getTo().getStopId().getExtra().containsKey("parkAndRide")) {
+								pnr |= (Boolean) leg.getTo().getStopId().getExtra().get("parkAndRide");
+							}
 						}
 						parkName = leg.getTo().getStopId().getId();
 					}						
