@@ -6,6 +6,7 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class DummyItineraryRequestEnricher implements ItineraryRequestEnricher {
 	}
 
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, Collection<PlanRequest> requests, SingleJourney request) {
 		return new ArrayList<Itinerary>();
 	}
 

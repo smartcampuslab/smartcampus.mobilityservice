@@ -1,5 +1,4 @@
-var notification = angular.module('gameconsole', []);
-
+var notification = angular.module('gameconsole', ['ngScrollable']);
 
 notification.controller('GameCtrl', function($scope, $http) {
 	$scope.users = [];
@@ -9,31 +8,60 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.selectedInstance = null;
 	$scope.layers = [];
 
-	$http.get("console/itinerary").then(function(data) {	
-		var map = {};
-		data.data.forEach(function(descr) {
-			if (!map[descr.userId]) {
-				map[descr.userId] = [];
-				$scope.users.push(descr.userId);
-			}
-			map[descr.userId].push(descr);
+	var load = function() {
+		$http.get("console/itinerary").then(function(data) {	
+			var map = {};
+			var users = [];
+			$scope.counters = {};
+			$scope.userTotals = {};
+			data.data.forEach(function(descr) {
+				if (!map[descr.userId]) {
+					map[descr.userId] = [];
+					users.push(descr.userId);
+					$scope.userTotals[descr.userId] = {total:0, failed: 0};
+				}
+				map[descr.userId].push(descr);
+				descr.instances.forEach(function(i) {
+					$scope.userTotals[descr.userId].total++;
+					if (!i.valid) {
+						$scope.userTotals[descr.userId].failed++;
+					}
+				});
+			});
+			$scope.users = users;
+			users.sort(function(a,b) {return parseInt(a) - parseInt(b);});
+			$scope.userMap = map;
 		});
-		$scope.userMap = map;
-	});	
+	}
+	load();
 	
 	$scope.selectUser = function(user) {
 		if ($scope.selectedUser == user) $scope.selectedUser = null;
 		else $scope.selectedUser = user;
 		$scope.selectedItinerary = null;
 		$scope.selectedInstance = null;
+		resetLayers();
 	}
 	
 	$scope.selectItinerary = function(itinerary) {
+		resetLayers();
 		$scope.selectedInstance = null;
 		$scope.selectedItinerary = itinerary;
-		if (itinerary.instances.length == 1) {
-			$scope.selectInstance(itinerary.instances[0]);
-		}
+		itinerary.instances.sort(function(a,b) {
+			if (!a.day && !b.day) return 0;
+			if (!a.day) return -1;
+			if (!b.day) return 1;
+			return a.day.localeCompare(b.day);
+		});
+//		if (itinerary.instances.length == 1) {
+//			$scope.selectInstance(itinerary.instances[0]);
+//		}
+	}
+	
+	$scope.validColor = function(totals) {
+		var r = 127 + Math.floor(128 * Math.pow(totals.failed / totals.total, 1.5));
+		var g = 0 + Math.floor(255 * ((totals.total - totals.failed) / totals.total));
+		return "color:rgb("+r+","+g+","+64+")";
 	}
 
 	var resetLayers = function() {
@@ -45,6 +73,12 @@ notification.controller('GameCtrl', function($scope, $http) {
 		$scope.layers = [];
 	}
     
+	$scope.revalidate = function() {
+		$http.post("console/validate",{}).then(function(data) {	
+			load();
+		});		
+	}
+	
 	$scope.selectInstance = function(instance) {
 		$scope.selectedInstance = instance;
 		
@@ -89,7 +123,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	    var path = new google.maps.Polyline({
 	       path: coordinates,
 	       geodesic: true,
-	       strokeColor: '#FF0000',
+	       strokeColor: 'blue',
 	       strokeOpacity: 1.0,
 	       strokeWeight: 2
 	    });
@@ -101,7 +135,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	    	var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
 	    	var line = new google.maps.Polyline({
 			    path: path,
-			    strokeColor: '#00FF00',
+			    strokeColor: 'green',
 			    strokeOpacity: 0.8,
 			    strokeWeight: 2,
 			    map: $scope.map
@@ -127,6 +161,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 
 	
 	$scope.initMap = function() {
+		  document.getElementById("left-scrollable").style.height = (window.innerHeight - 100) + "px";
+		  document.getElementById("right-scrollable").style.height = (window.innerHeight  / 2 - 60) + "px";
 	      if (!document.getElementById('map')) return;
 	      var ll = null;
 	      var mapOptions = null;

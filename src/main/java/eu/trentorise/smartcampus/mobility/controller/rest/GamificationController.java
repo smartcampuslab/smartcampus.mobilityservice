@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,6 +36,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
+import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
@@ -43,6 +45,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Device;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -113,7 +116,13 @@ public class GamificationController extends SCController {
 		ObjectMapper mapper = new ObjectMapper();
 		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
-			String userId = basicProfileService.getBasicProfile(token).getUserId();
+			String userId = null;
+			try {
+				userId = basicProfileService.getBasicProfile(token).getUserId();
+			} catch (SecurityException e) {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
 
 			logger.info("UserId: " + userId);
 
@@ -134,11 +143,15 @@ public class GamificationController extends SCController {
 						locationTravelId = (String) location.getExtras().get("idTrip");
 						lastTravelId = locationTravelId;
 					} else {
-						if (lastTravelId != null) {
-							locationTravelId = lastTravelId;
-						} else {
-							continue;
-						}
+						// now the plugin supports correctly the extras for each location.
+						// locations with empty idTrip are possible only upon initialization/synchronization.
+						// we skip them here
+						continue;
+//						if (lastTravelId != null) {
+//							locationTravelId = lastTravelId;
+//						} else {
+//							continue;
+//						}
 					}
 					
 					Coords coords = location.getCoords();
@@ -220,23 +233,39 @@ public class GamificationController extends SCController {
 					res = new TrackedInstance();
 					res.setClientId(travelId);
 					res.setDay(day);
+					res.setUserId(userId);
 					pars.remove("day");
 					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
-					res.setItinerary(res2);
+					if (res2 == null) {
+						pars = new TreeMap<String, Object>();
+						pars.put("itinerary.clientId", travelId);
+						SavedTrip res3 = storage.searchDomainObject(pars, SavedTrip.class);
+						if (res3 != null) {
+							res.setItinerary(res3.getItinerary());
+						}
+					} else {
+						res.setItinerary(res2);
+					}
 				}
 
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 					res.getGeolocationEvents().add(geoloc);
 				}
 
-				if (res.getStarted() == false) {
-					sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+				if (res.getItinerary() != null) {
+					if (res.getStarted() == false) {
+						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+					}
+
+					res.setComplete(true);
+					ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
+					res.setValidationResult(vr);
+					res.setValid(vr.getValid());
 				}
 
-				res.setComplete(true);
-				res.setValid(GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents()));
-
 				storage.saveTrackedInstance(res);
+				
+				logger.info("Saved geolocation events");
 			}
 
 		} catch (Exception e) {
@@ -244,7 +273,6 @@ public class GamificationController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
-		logger.info("Saved geolocation events");
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
@@ -293,6 +321,7 @@ public class GamificationController extends SCController {
 				res2 = new TrackedInstance();
 				res2.setClientId(itineraryId);
 				res2.setDay(day);
+				res2.setUserId(userId);
 			}
 			res2.setItinerary(res);
 			
@@ -308,6 +337,43 @@ public class GamificationController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
+	public @ResponseBody void validate(HttpServletResponse response) throws Exception {
+		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+		for (TrackedInstance ti: result) {
+			try {
+				ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
+				ti.setValidationResult(vr);
+				ti.setValid(vr.getValid());
+				storage.saveTrackedInstance(ti);
+			} catch (Exception e) {
+				logger.error("Failed to validate tracked itinerary: " + ti.getId());
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
+	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
+		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+		int i = 0;
+		for (TrackedInstance ti: result) {
+			try {
+				logger.info("Sending for player " + ti.getItinerary().getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
+				sendIntineraryDataToGamificationEngine(gameId, ti.getItinerary().getUserId(), ti.getItinerary());
+				i++;
+				logger.info("Resent " + i + "/" + result.size());
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				logger.error("Failed to resend gamification data for: " + ti.getId());
+			}
+			
+		}
+	}	
+	
+	
 	@RequestMapping("/console")
 	public String vewConsole() {
 		return "viewconsole";
@@ -316,22 +382,33 @@ public class GamificationController extends SCController {
 	@RequestMapping("/console/itinerary")
 	public @ResponseBody List<ItineraryDescriptor> getItineraryList() {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
-		List<ItineraryObject> data = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), ItineraryObject.class);
-		if (data != null) {
-			for (ItineraryObject o : data) {
-				ItineraryDescriptor descr = new ItineraryDescriptor();
-				descr.setTripId(o.getClientId());
-				descr.setStartTime(o.getData().getStartime());
-				descr.setEndTime(o.getData().getEndtime());
-				descr.setUserId(o.getUserId());
-				descr.setTripName(o.getName());
-				descr.setRecurrency(o.getRecurrency());
-				
-				Map<String, Object> pars = new TreeMap<String, Object>();
-				pars.put("clientId", o.getClientId());
-				List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
-				descr.setInstances(instances);
-				list.add(descr);
+		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
+		List<TrackedInstance> instances = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), TrackedInstance.class);
+		if (instances != null) {
+			for (TrackedInstance o : instances) {
+				ItineraryDescriptor descr = map.get(o.getClientId());
+				if (map.get(o.getClientId()) == null) {
+					descr = new ItineraryDescriptor();
+					if (o.getUserId() != null) {
+						descr.setUserId(o.getUserId());
+					} else {
+						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+						if (itinerary != null) {
+							descr.setUserId(itinerary.getUserId());
+						} else {
+							continue;
+						}
+					}
+					descr.setTripId(o.getClientId());
+					descr.setStartTime(o.getItinerary().getData().getStartime());
+					descr.setEndTime(o.getItinerary().getData().getEndtime());
+					descr.setTripName(o.getItinerary().getName());
+					descr.setRecurrency(o.getItinerary().getRecurrency());
+					descr.setInstances(new ArrayList<TrackedInstance>());
+					map.put(o.getClientId(), descr);
+					list.add(descr);
+				}
+				descr.getInstances().add(o);
 			}
 		}
 		return list;

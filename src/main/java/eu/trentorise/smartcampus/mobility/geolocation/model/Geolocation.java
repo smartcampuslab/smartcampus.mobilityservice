@@ -225,7 +225,10 @@ public class Geolocation {
 		return true;
 	}
     
-    
+    @Override
+    public String toString() {
+    	return latitude + "," + longitude;
+    }
     
     
 }

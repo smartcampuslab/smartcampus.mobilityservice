@@ -384,7 +384,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			}
 		}
 		
-		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
+		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, reqMap.values(), journeyRequest);
 		itineraries.addAll(evaluated);
 
 		itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());

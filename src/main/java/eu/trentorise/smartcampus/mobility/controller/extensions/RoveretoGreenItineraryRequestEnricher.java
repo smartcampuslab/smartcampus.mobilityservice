@@ -8,6 +8,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,9 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			if (!requestedTypes.contains(TType.TRANSIT)) {
 				types.add(TType.TRANSIT);
 			}
+			if (!requestedTypes.contains(TType.WALK)) {
+				types.add(TType.WALK);
+			}			
 		}
 		if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 			if (!requestedTypes.contains(TType.WALK)) {
@@ -84,8 +88,10 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			if (type.equals(TType.CAR)) {
 				if (newType.equals(TType.PARK_AND_RIDE)) {
 					pr.setValue(1.0);
-				} else {
+				} else if (newType.equals(TType.WALK)) {
 					pr.setValue(1.1);
+				} else {
+					pr.setValue(1.2);
 				}
 			} else if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 				pr.setValue(2.0);
@@ -98,14 +104,15 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 	}
 
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, Collection<PlanRequest> requests, SingleJourney request) {
+
 		List<Itinerary> kept = new ArrayList<Itinerary>();
 		List<Itinerary> toRemove;
 		for (Double key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
 			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
 			toSort = new ArrayList<Itinerary>(toSortSet);
-			ItinerarySorter.sort(toSort, criteria);
+			ItinerarySorter.sort(toSort, request.getRouteType());
 			Collections.reverse(toSort);
 			int removeN = toSort.size() - Math.min(key.intValue(), toSort.size());
 			toRemove =  new ArrayList<Itinerary>();
@@ -128,6 +135,24 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			toSort.removeAll(toRemove);
 			kept.addAll(toSort);
 		}
+		
+		toRemove = Lists.newArrayList();
+		for (PlanRequest pr: requests) {
+			List<TType> tt = (List<TType>)Arrays.asList(pr.getOriginalRequest().getTransportTypes());
+			if (tt.contains(TType.CAR) && pr.getType().equals(TType.WALK)) {
+				for (Itinerary it: pr.getItinerary()) {
+					double length = 0;
+					for (Leg leg: it.getLeg()) {
+						length += leg.getLength();
+					}
+					if (length > 2000) {
+						toRemove.add(it);
+					}
+				}
+			}
+			kept.removeAll(toRemove);
+		}
+		
 		return kept;
 	}
 

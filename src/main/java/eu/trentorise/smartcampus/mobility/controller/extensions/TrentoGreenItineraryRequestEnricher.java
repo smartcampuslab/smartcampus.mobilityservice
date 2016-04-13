@@ -8,6 +8,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -75,7 +76,7 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 				if (newType.equals(TType.PARK_AND_RIDE)) {
 					pr.setValue(1.0);
 				} else {
-					pr.setValue(-1.0);
+					pr.setValue(1.1);
 				}
 			} else if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 				pr.setValue(2.0);
@@ -88,14 +89,14 @@ public class TrentoGreenItineraryRequestEnricher implements ItineraryRequestEnri
 	}
 
 	@Override
-	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, RType criteria) {
+	public List<Itinerary> filterPromotedItineraties(Multimap<Double, Itinerary> itineraries, Collection<PlanRequest> requests, SingleJourney request) {
 		List<Itinerary> kept = new ArrayList<Itinerary>();
 		List<Itinerary> toRemove;
 		for (Double key : itineraries.keySet()) {
 			List<Itinerary> toSort = (List<Itinerary>) itineraries.get(key);
 			Set<Itinerary> toSortSet = new HashSet<Itinerary>(toSort);
 			toSort = new ArrayList<Itinerary>(toSortSet);
-			ItinerarySorter.sort(toSort, criteria);
+			ItinerarySorter.sort(toSort, request.getRouteType());
 			Collections.reverse(toSort);
 			int removeN = toSort.size() - (int)Math.min(Math.abs(key), toSort.size());
 			toRemove =  new ArrayList<Itinerary>();
