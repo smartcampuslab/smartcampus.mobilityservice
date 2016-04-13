@@ -25,7 +25,7 @@
         <div class="row">
           <div class="col-md-offset-4 col-md-4">
             <div class="panel panel-default">
-            <h3 style="text-align:center">Mobility Communicator Console Login</h3>
+            <h3 style="text-align:center">Mobility Console Login</h3>
             <form action="j_spring_security_check" method="post">
                 <div>&nbsp;</div>
                 <div class="col-md-12 form-group"><label> Username: </label><input class="form-control" type="text" name="j_username"/></div>
