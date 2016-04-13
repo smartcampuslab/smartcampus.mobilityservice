@@ -112,7 +112,7 @@ public class GamificationController extends SCController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
 	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, HttpServletResponse response) throws Exception {
-		logger.info("Receiving geolocation events");
+		logger.info("Receiving geolocation events, token = "+token);
 		ObjectMapper mapper = new ObjectMapper();
 		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
