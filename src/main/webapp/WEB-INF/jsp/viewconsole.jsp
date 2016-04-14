@@ -79,7 +79,11 @@
     <div class="row">
      
       <div class="col-md-3">
+      <div class="panel panel-default">
+      <div class="panel-heading "><button class="btn btn-primary btn-sm" ng-click="revalidate()">Re-validate</button></div>
+      
       <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
+      <div class="panel-body panel-collapse">
         <div ng-repeat="user in users" class="user-row">
           <div class="row">
             <div class="col-md-6"><a ng-click="selectUser(user)">{{user}} </a></div>
@@ -107,7 +111,8 @@
           </div>
         </div>
         <div>
-          <a ng-click="revalidate()">Re-validate</a>
+        </div>
+        </div>
         </div>
         </div>
       </div>

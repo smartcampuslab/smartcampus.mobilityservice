@@ -161,7 +161,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 
 	
 	$scope.initMap = function() {
-		  document.getElementById("left-scrollable").style.height = (window.innerHeight - 100) + "px";
+		  document.getElementById("left-scrollable").style.height = (window.innerHeight - 185) + "px";
 		  document.getElementById("right-scrollable").style.height = (window.innerHeight  / 2 - 60) + "px";
 	      if (!document.getElementById('map')) return;
 	      var ll = null;
