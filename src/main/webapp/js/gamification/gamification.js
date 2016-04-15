@@ -176,6 +176,18 @@ notification.controller('GameCtrl', function($scope, $http) {
 	
 	$scope.initMap();
 })
+.directive('toggle', function(){
+  return {
+    span: function(scope, element, attrs){
+      if (attrs.toggle=="tooltip"){
+        $(element).tooltip();
+      }
+      if (attrs.toggle=="popover"){
+        $(element).popover();
+      }
+    }
+  };
+})
 	
 	
 

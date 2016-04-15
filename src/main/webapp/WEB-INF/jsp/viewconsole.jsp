@@ -97,11 +97,11 @@
                 <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row" ng-class="{'selected':selectedInstance == instance, 'valid': instance.valid, 'invalid': !instance.valid}">
                    <div class="row">
                     <div class="col-md-6">date: {{instance.day ? instance.day : '--'}}
-                    	<span ng-show="instance.validationResult.geoLocationsN <= 2" class="glyphicon glyphicon-exclamation-sign"></span>
+                    	<span ng-show="instance.validationResult.geoLocationsN <= 2" class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"></span>
                     	<!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
-                    	<span ng-show="!instance.validationResult.matchedLocations" class="glyphicon glyphicon-move"></span>
-                    	<span ng-show="!instance.validationResult.matchedActivities" class="glyphicon glyphicon-plane"></span>
-                    	<span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road"></span>
+                    	<span ng-show="!instance.validationResult.matchedLocations" class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"></span>
+                    	<span ng-show="!instance.validationResult.matchedActivities" class="glyphicon glyphicon-plane" title="Mismatched activities" data-toggle="tooltip"></span>
+                    	<span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
                     </div>
                     <div class="col-md-6 pull-right">game points: {{instance.itinerary.data.customData.estimatedScore}}</div>
                    </div>                   
