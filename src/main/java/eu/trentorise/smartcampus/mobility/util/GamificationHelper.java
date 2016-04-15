@@ -137,7 +137,7 @@ public class GamificationHelper {
 			
 			String content = JsonUtils.toJSON(ed);
 			
-			logger.info("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY +") = " + data);
+			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY +") = " + data);
 			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
@@ -159,7 +159,7 @@ public class GamificationHelper {
 		double carDist = 0; // km
 		double transitDist = 0;
 		
-		logger.info("Analyzing itinerary for gamification.");
+		logger.debug("Analyzing itinerary for gamification.");
 		if (itinerary != null) {
 			for (Leg leg : itinerary.getLeg()) {
 				if (leg.getTransport().getType().equals(TType.CAR)) {
@@ -195,11 +195,11 @@ public class GamificationHelper {
 		}
 		
 		if (log) {
-			logger.info("Analysis results:");
-			logger.info("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
-			logger.info("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
-			logger.info("Park = " + parkName);
-			logger.info("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
+			logger.debug("Analysis results:");
+			logger.debug("Distances [walk = " +walkDist + ", bike = "  + bikeDist +", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
+			logger.debug("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
+			logger.debug("Park = " + parkName);
+			logger.debug("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
 		}
 		
 		Double score = 0.0;
