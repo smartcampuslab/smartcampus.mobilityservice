@@ -111,17 +111,17 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody void storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, HttpServletResponse response) throws Exception {
-		logger.info("Receiving geolocation events, token = "+token);
+	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, HttpServletResponse response) throws Exception {
+		logger.info("Receiving geolocation events, token = "+token+", "+ geolocationsEvent.getLocation().size() +" events");
 		ObjectMapper mapper = new ObjectMapper();
-		logger.info(mapper.writeValueAsString(geolocationsEvent));
+//		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
 			String userId = null;
 			try {
 				userId = basicProfileService.getBasicProfile(token).getUserId();
 			} catch (SecurityException e) {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-				return;
+				return "";
 			}
 
 			logger.info("UserId: " + userId);
@@ -146,6 +146,7 @@ public class GamificationController extends SCController {
 						// now the plugin supports correctly the extras for each location.
 						// locations with empty idTrip are possible only upon initialization/synchronization.
 						// we skip them here
+						logger.info("location without idTrip, user: "+userId);
 						continue;
 //						if (lastTravelId != null) {
 //							locationTravelId = lastTravelId;
@@ -271,8 +272,9 @@ public class GamificationController extends SCController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return "";
 		}
-
+		return "{\"storeResult\":\"OK\"}";
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
