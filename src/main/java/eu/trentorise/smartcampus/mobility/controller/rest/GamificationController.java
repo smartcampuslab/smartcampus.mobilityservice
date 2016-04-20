@@ -291,8 +291,8 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void startItinerary(@PathVariable String itineraryId, HttpServletResponse response) throws Exception {
-		logger.info("Starting journey for gamification");
+	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+		logger.info("Starting journey for gamification, device = "+device);
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -330,7 +330,9 @@ public class GamificationController extends SCController {
 			if (res2.getStarted() == false) {
 				sendIntineraryDataToGamificationEngine(gameId, userId, res);
 			}
-			
+			if (device != null) {
+				res2.setDeviceInfo(device);
+			}
 			res2.setStarted(true);
 			storage.saveTrackedInstance(res2);
 			

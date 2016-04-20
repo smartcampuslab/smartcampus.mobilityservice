@@ -24,6 +24,8 @@ public class TrackedInstance {
 	private Boolean complete = Boolean.FALSE;
 	private Boolean valid = Boolean.FALSE;
 	
+	private String deviceInfo;
+	
 	private String day;
 	
 	private ValidationResult validationResult;
@@ -112,5 +114,18 @@ public class TrackedInstance {
 		this.validationResult = validationResult;
 	}
 
+	/**
+	 * @return the deviceInfo
+	 */
+	public String getDeviceInfo() {
+		return deviceInfo;
+	}
+
+	/**
+	 * @param deviceInfo the deviceInfo to set
+	 */
+	public void setDeviceInfo(String deviceInfo) {
+		this.deviceInfo = deviceInfo;
+	}
 
 }
