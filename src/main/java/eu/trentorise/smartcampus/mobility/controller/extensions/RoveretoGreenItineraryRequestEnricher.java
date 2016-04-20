@@ -48,9 +48,9 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			if (!requestedTypes.contains(TType.TRANSIT)) {
 				types.add(TType.TRANSIT);
 			}
-			if (!requestedTypes.contains(TType.WALK)) {
-				types.add(TType.WALK);
-			}			
+//			if (!requestedTypes.contains(TType.WALK)) {
+//				types.add(TType.WALK);
+//			}			
 		}
 		if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 			if (!requestedTypes.contains(TType.WALK)) {
@@ -88,10 +88,8 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 			if (type.equals(TType.CAR)) {
 				if (newType.equals(TType.PARK_AND_RIDE)) {
 					pr.setValue(1.0);
-				} else if (newType.equals(TType.WALK)) {
-					pr.setValue(1.1);
 				} else {
-					pr.setValue(1.2);
+					pr.setValue(1.1);
 				}
 			} else if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 				pr.setValue(2.0);
@@ -129,7 +127,7 @@ public class RoveretoGreenItineraryRequestEnricher implements ItineraryRequestEn
 				}
 				
 				if (rem) {
-					toRemove.add(it);
+//					toRemove.add(it);
 				}
 			}
 			toSort.removeAll(toRemove);
