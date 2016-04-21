@@ -111,9 +111,9 @@ public class TestConfig {
 			@Override
 			public RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney)	throws Exception { return null; }
 			@Override
-			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId)throws Exception { return null; }
-			@Override
 			public RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception { return null; }
+			@Override
+			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception { return null; }			
 			@Override
 			public String parkingsByAgency(String agencyId) throws Exception { return null; }
 			@Override

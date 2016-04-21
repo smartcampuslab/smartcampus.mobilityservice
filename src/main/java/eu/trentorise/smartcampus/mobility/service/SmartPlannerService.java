@@ -64,7 +64,10 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.CustomItineraryR
 import eu.trentorise.smartcampus.mobility.controller.extensions.CustomPromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
+import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policies;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
@@ -129,6 +132,10 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			customConvertersMap.put(policy.getName(), jre);
 			
 		}
+	}
+	
+	private PlanningPolicy getPlanningPolicy(String policyId) {
+		return new RoveretoPlanningPolicy();
 	}
 
 	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
@@ -321,6 +328,44 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 	}
 
+	public synchronized List<Itinerary> newPlan(SingleJourney journeyRequest, String policyId) throws Exception {
+		PlanningPolicy planningPolicy = getPlanningPolicy(policyId);
+
+		List<PlanningRequest> planRequests = planningPolicy.generatePlanRequests(journeyRequest);
+		List<PlanningRequest> successfulPlanRequests = Lists.newArrayList();
+		
+		do {
+
+			List<Future<PlanningRequest>> results = Lists.newArrayList();
+
+			for (PlanningRequest pr : planRequests) {
+				CallablePlanningRequest callableReq = new CallablePlanningRequest();
+				callableReq.setRequest(pr);
+				Future<PlanningRequest> future = executorService.submit(callableReq);
+				results.add(future);
+			}
+
+			for (Future<PlanningRequest> plan : results) {
+				PlanningRequest pr = plan.get();
+				List<?> its = mapper.readValue(pr.getPlan(), List.class);
+				for (Object it : its) {
+					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
+					pr.getItinerary().add(itinerary);
+					itinerary.setPromoted(pr.isPromoted());
+				}
+			}
+			
+			successfulPlanRequests.addAll(planningPolicy.evaluatePlanResults(planRequests));
+
+		} while (!planRequests.isEmpty());
+
+		List<Itinerary> itineraries = planningPolicy.filterPlanResults(journeyRequest, successfulPlanRequests);
+		
+		List<Itinerary> sortedItineraries = planningPolicy.filterAndSortItineraries(journeyRequest, itineraries);
+		
+		return sortedItineraries; 
+	}
+	
 	@Override
 	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, boolean retried, String policyId) throws Exception {
 		Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
@@ -437,6 +482,27 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		return reqsList;
 	}	
 	
+	
+	private class CallablePlanningRequest implements Callable<PlanningRequest> {
+		
+		private PlanningRequest request;
+		
+		public void setRequest(PlanningRequest req) {
+			this.request = req;
+		}
+		
+		@Override
+		public PlanningRequest call() throws Exception {
+			try {
+				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
+				request.setPlan(plan);
+			} catch (Exception e) {
+				e.printStackTrace();
+				request.setPlan(null);
+			}
+			return request;
+		}
+	}	
 
 	private class CallableItineraryRequest implements Callable<PlanRequest> {
 		

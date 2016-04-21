@@ -23,9 +23,152 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 public class ItinerarySorter {
 
+	public static void sort(List<Itinerary> itineraries, Comparator<Itinerary> comparator) {
+		Collections.sort(itineraries, comparator);
+	}
+	
+	public static Comparator<Itinerary> comparatorByRouteType(RType criterion) {
+		if (criterion != null) {
+			switch (criterion) {
+			case fastest:
+				return fastestComparator();
+			case greenest:
+				return greenComparator();
+			case healthy:
+				return healthyrComparator();
+			case leastChanges:
+				return leastChangesComparator();
+			case leastWalking:
+				return lessWalkingComparator();
+			}
+		}
+		
+		return dummyComparator();
+	}
+	
+	public static Comparator<Itinerary> dummyComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return 0;
+			}
+		};
+	}	
+	
+	public static Comparator<Itinerary> fastestComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return (int) (o1.getEndtime() - o2.getEndtime());
+			}
+		};
+	}
+	
+	public static Comparator<Itinerary> greenComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return computeGreenness(o1) - computeGreenness(o2);
+			}
+
+			private int computeGreenness(Itinerary itinerary) {
+				int h = 0;
+				for (Leg leg : itinerary.getLeg()) {
+					h += leg.getLegGeometery().getLength() * leg.getTransport().getType().getGreen();
+				}
+				return h;
+			}
+
+		};
+	}	
+	
+	public static Comparator<Itinerary> healthyrComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return computeHealthiness(o2) - computeHealthiness(o1);
+			}
+
+			private int computeHealthiness(Itinerary itinerary) {
+				int h = 0;
+				for (Leg leg : itinerary.getLeg()) {
+					h += leg.getLegGeometery().getLength() * leg.getTransport().getType().getHealth();
+				}
+				return h;
+			}
+
+		};
+	}	
+	
+	public static Comparator<Itinerary> leastChangesComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return (int) (o1.getLeg().size() - o2.getLeg().size());
+			}
+		};
+	}	
+	
+	public static Comparator<Itinerary> lessWalkingComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				return computeWalking(o1) - computeWalking(o2);
+			}
+
+			private int computeWalking(Itinerary itinerary) {
+				int h = 0;
+				for (Leg leg : itinerary.getLeg()) {
+					h += (leg.getTransport().getType().equals(TType.WALK) ? leg.getLegGeometery().getLength() : 0);
+				}
+				return h;
+			}
+
+		};
+	}		
+	
+	public static Comparator<Itinerary> fasterAndCheaperComparator() {
+		return new Comparator<Itinerary>() {
+			@Override
+			public int compare(Itinerary o1, Itinerary o2) {
+				long o1End = getModifiedEndTime(o1);
+				long o2End = getModifiedEndTime(o2);
+				
+				return (int) (o1End - o2End);
+			}
+		};
+	}	
+	
+	private static long getModifiedEndTime(Itinerary it) {
+		ObjectMapper mapper = new ObjectMapper();
+		long endTime = it.getEndtime();
+		for (Leg leg: it.getLeg()) {
+			if (!leg.getTransport().getType().equals(TType.CAR)) {
+				continue;
+			}
+			if (leg.getTo().getStopId() != null && leg.getTo().getStopId().getExtra() != null && leg.getTo().getStopId().getExtra().containsKey("costData")) {
+				Map<String, String> costData = mapper.convertValue(leg.getTo().getStopId().getExtra().get("costData"), Map.class);
+				Double fixedCost = costData.containsKey("fixedCost")?Double.parseDouble(costData.get("fixedCost")):0;
+				endTime += (long)(8 * 1000 * 60 * fixedCost);
+			}
+			if (leg.getTo().getStopId() != null && leg.getTo().getStopId().getExtra() != null && leg.getTo().getStopId().getExtra().containsKey("searchTime")) {
+				Map<String, String> searchTime = mapper.convertValue(leg.getTo().getStopId().getExtra().get("searchTime"), Map.class);
+				Integer max = searchTime.containsKey("searchTime")?Integer.parseInt(searchTime.get("max")):0;
+				endTime += max * 1000 * 60;
+			}			
+		}
+		
+		return endTime;
+	}	
+	
+	
+	
 	public static void sort(List<Itinerary> itineraries, RType criterion) {
 		if (criterion != null) {
 			switch (criterion) {
@@ -56,8 +199,6 @@ public class ItinerarySorter {
 			@Override
 			public int compare(Itinerary o1, Itinerary o2) {
 				return (int) (o1.getEndtime() - o2.getEndtime());
-//				return (int) (o1.getDuration() - o2.getDuration());
-//				return (int) (o1.getEndtime() - o1.getStartime() - (o2.getEndtime() - o2.getStartime()));
 			}
 		});
 	}
@@ -128,5 +269,8 @@ public class ItinerarySorter {
 
 		});
 	}
+	
+	
+	
 
 }
