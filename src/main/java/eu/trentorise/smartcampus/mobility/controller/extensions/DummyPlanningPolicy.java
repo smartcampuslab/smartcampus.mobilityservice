@@ -16,7 +16,7 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 	@Override
 	public List<PlanningRequest> generatePlanRequests(SingleJourney journeyRequest) {
 		List<PlanningRequest> result = PlanningPolicyHelper.generateOriginalPlanRequests(journeyRequest);
-		PlanningPolicyHelper.buildSmartplannerRequest(result);
+		PlanningPolicyHelper.buildSmartplannerRequests(result);
 		return result;
 	}
 

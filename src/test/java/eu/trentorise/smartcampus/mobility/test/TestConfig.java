@@ -39,6 +39,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
@@ -113,7 +114,7 @@ public class TestConfig {
 			@Override
 			public RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception { return null; }
 			@Override
-			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception { return null; }			
+			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, boolean retried, String policyId) throws Exception { return null; }			
 			@Override
 			public String parkingsByAgency(String agencyId) throws Exception { return null; }
 			@Override
@@ -142,6 +143,17 @@ public class TestConfig {
 				// TODO Auto-generated method stub
 				return null;
 			}
+			@Override
+			public List<Itinerary> newPlan(SingleJourney journeyRequest, String policyId) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public void addPolicy(ParametricPolicy policy) {
+				// TODO Auto-generated method stub
+				
+			}
+
 		};
 	}
 }

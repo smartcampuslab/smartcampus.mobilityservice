@@ -2,6 +2,7 @@ package eu.trentorise.smartcampus.mobility.util;
 
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.RType;
 import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
@@ -64,10 +65,14 @@ public class PlanningPolicyHelper {
 //		pr.setGroup(group);
 //	}	
 	
-	public static PlanningRequest buildDefaultDerivedRequest(SingleJourney request, PlanningRequest originalPlanningRequest, TType ttype, Integer itineraryNumber, boolean promoted, PlanningResultGroup group) {
+	public static PlanningRequest buildDefaultDerivedRequest(SingleJourney request, PlanningRequest originalPlanningRequest, TType ttype,  RType rtype, Integer itineraryNumber, boolean promoted, PlanningResultGroup group) {
 		PlanningRequest pr = new PlanningRequest();
 		pr.setParentRequest(pr);
-		pr.setRouteType(request.getRouteType());
+		if (rtype != null) {
+			pr.setRouteType(rtype);
+		} else {
+			pr.setRouteType(request.getRouteType());
+		}
 		if (itineraryNumber != null) {
 			pr.setItineraryNumber(itineraryNumber);
 		} else {
@@ -84,16 +89,23 @@ public class PlanningPolicyHelper {
 		return pr;
 	}
 
-	public static void buildSmartplannerRequest(List<PlanningRequest> planRequests) {
+	public static void buildSmartplannerRequests(List<PlanningRequest> planRequests) {
 		for (PlanningRequest pr: planRequests) {
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s&wheelchair=%b", pr.getOriginalRequest().getFrom().getLat(), pr.getOriginalRequest().getFrom().getLon(), pr.getOriginalRequest().getTo().getLat(), pr.getOriginalRequest().getTo().getLon(), pr.getOriginalRequest().getDate(), pr.getOriginalRequest().getDepartureTime(), pr.getType(), pr.getRouteType(), pr.getItineraryNumber(), pr.isWheelChair());
-			for (SmartplannerParameter key: pr.getSmartplannerParameters().keySet()) {
-				Object value = pr.getSmartplannerParameters().get(key);
-				req += "&" + key + "=" + value;
-			}
-			pr.setRequest(req);
+			buildSmartplannerRequest(pr);
 		}
 		
+	}
+	
+	public static void buildSmartplannerRequest(PlanningRequest pr) {
+		String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s&wheelchair=%b", pr.getOriginalRequest().getFrom().getLat(), pr
+				.getOriginalRequest().getFrom().getLon(), pr.getOriginalRequest().getTo().getLat(), pr.getOriginalRequest().getTo().getLon(), pr.getOriginalRequest().getDate(), pr
+				.getOriginalRequest().getDepartureTime(), pr.getType(), pr.getRouteType(), pr.getItineraryNumber(), pr.isWheelChair());
+		for (SmartplannerParameter key : pr.getSmartplannerParameters().keySet()) {
+			Object value = pr.getSmartplannerParameters().get(key);
+			req += "&" + key + "=" + value;
+		}
+		pr.setRequest(req);
+
 	}
 	
 	public static List<Itinerary> filterByGroups(List<PlanningRequest> planRequests, Comparator<Itinerary> comparator) {

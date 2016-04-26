@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class Policies {
+public class Policy {
 
 	private String name;
 	private List<AddPromotedPolicy> addPromotedPolicies;
@@ -13,7 +13,7 @@ public class Policies {
 	
 	private Boolean retryOnFail;
 
-	public Policies() {
+	public Policy() {
 		addPromotedPolicies = Lists.newArrayList();
 		processRequestPolicies = Lists.newArrayList();
 	}

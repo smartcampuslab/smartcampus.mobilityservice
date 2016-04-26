@@ -60,15 +60,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.CustomItineraryRequestEnricher;
-import eu.trentorise.smartcampus.mobility.controller.extensions.CustomPromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
+import eu.trentorise.smartcampus.mobility.controller.extensions.ParametricPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policies;
+import eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricEvaluate;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricGenerate;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricModify;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricRemove;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -104,9 +109,11 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	private Map<String, PromotedJourneyRequestConverter> convertersMap;	
 	
 	
-	private Map<String, ItineraryRequestEnricher> customEnrichersMap;
+//	private Map<String, ItineraryRequestEnricher> customEnrichersMap;
+//	
+//	private Map<String, PromotedJourneyRequestConverter> customConvertersMap;		
 	
-	private Map<String, PromotedJourneyRequestConverter> customConvertersMap;		
+	private Map<String, ParametricPolicy> policiesMap;
 	
 	
 	@Autowired
@@ -119,46 +126,52 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		customEnrichersMap = Maps.newTreeMap();
-		customConvertersMap = Maps.newTreeMap();
+		policiesMap = Maps.newTreeMap();
 		
-		List<Policies> policies = storage.searchDomainObjects(new Criteria(), Policies.class);
-		for (Policies policy: policies) {
-			CustomItineraryRequestEnricher ire = new CustomItineraryRequestEnricher();
-			ire.setPolicies(policy);
-			customEnrichersMap.put(policy.getName(), ire);
-			CustomPromotedJourneyRequestConverter jre = new CustomPromotedJourneyRequestConverter();
-			jre.setPolicies(policy);
-			customConvertersMap.put(policy.getName(), jre);
-			
+		List<ParametricPolicy> policies = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
+		for (ParametricPolicy policy: policies) {
+			policiesMap.put(policy.getName(), policy);
 		}
+	}
+	
+	public void addPolicy(ParametricPolicy policy) {
+		policiesMap.put(policy.getName(), policy);
 	}
 	
 	private PlanningPolicy getPlanningPolicy(String policyId) {
-		return new RoveretoPlanningPolicy();
+		ParametricPolicy policy = policiesMap.get(policyId);
+		if (policy == null) {
+			if ("Trento".equals(policyId)) {
+				return new TrentoPlanningPolicy();
+			} else {
+				return new RoveretoPlanningPolicy();
+			}
+		} else {
+			return new ParametricPlanningPolicy(policy);
+		}
 	}
 
-	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
-		PromotedJourneyRequestConverter promotedJourneyRequestConverter = convertersMap.get(policyId);
-		if (promotedJourneyRequestConverter == null) {
-			promotedJourneyRequestConverter = customConvertersMap.get(policyId);
-			if (promotedJourneyRequestConverter == null) {
-				promotedJourneyRequestConverter = convertersMap.get(DEFAULT);
-			}
-		}
-		return promotedJourneyRequestConverter;
-	}
-	
-	private ItineraryRequestEnricher getItineraryRequestEnricher(String policyId) {
-		ItineraryRequestEnricher itineraryRequestEnricher = enrichersMap.get(policyId);
-		if (itineraryRequestEnricher == null) {
-			itineraryRequestEnricher = customEnrichersMap.get(policyId);
-			if (itineraryRequestEnricher == null) {
-				itineraryRequestEnricher = enrichersMap.get(DEFAULT);
-			}
-		}
-		return itineraryRequestEnricher;
-	}	
+//	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
+//		PromotedJourneyRequestConverter promotedJourneyRequestConverter = convertersMap.get(policyId);
+//		if (promotedJourneyRequestConverter == null) {
+//			promotedJourneyRequestConverter = customConvertersMap.get(policyId);
+//			if (promotedJourneyRequestConverter == null) {
+//				promotedJourneyRequestConverter = convertersMap.get(DEFAULT);
+//			}
+//		}
+//		return promotedJourneyRequestConverter;
+//	}
+//	
+//	private ItineraryRequestEnricher getItineraryRequestEnricher(String policyId) {
+//		ItineraryRequestEnricher itineraryRequestEnricher = enrichersMap.get(policyId);
+//		if (itineraryRequestEnricher == null) {
+//			itineraryRequestEnricher = customEnrichersMap.get(policyId);
+//			if (itineraryRequestEnricher == null) {
+//				itineraryRequestEnricher = enrichersMap.get(DEFAULT);
+//			}
+//		}
+//		return itineraryRequestEnricher;
+//	}	
 	
 	
 	private String performGET(String request, String query) throws Exception {
@@ -329,11 +342,32 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	public synchronized List<Itinerary> newPlan(SingleJourney journeyRequest, String policyId) throws Exception {
+		{
+		ParametricPolicy pp = new ParametricPolicy();
+		ParametricGenerate pg = new ParametricGenerate();
+		ParametricModify pm = new ParametricModify();
+		ParametricRemove pr = new ParametricRemove();
+		ParametricEvaluate pe = new ParametricEvaluate();
+		PlanningResultGroup prg = new PlanningResultGroup();
+		pp.getGenerate().add(pg);
+		pp.getModify().add(pm);
+		pp.getEvaluate().add(pe);
+		pp.setRemove(pr);
+		pp.getGroups().add(prg);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT);
+		System.out.println(mapper.writeValueAsString(pp));
+		}
+		
+		
+		
 		PlanningPolicy planningPolicy = getPlanningPolicy(policyId);
 
 		List<PlanningRequest> planRequests = planningPolicy.generatePlanRequests(journeyRequest);
 		List<PlanningRequest> successfulPlanRequests = Lists.newArrayList();
 		
+		int iteration = 0;
 		do {
 
 			List<Future<PlanningRequest>> results = Lists.newArrayList();
@@ -357,7 +391,12 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			
 			successfulPlanRequests.addAll(planningPolicy.evaluatePlanResults(planRequests));
 
-		} while (!planRequests.isEmpty());
+			iteration++;
+			for (PlanningRequest pr: planRequests) {
+				pr.setIteration(iteration);
+			}
+			
+		} while (!planRequests.isEmpty() && iteration < 2);
 
 		List<Itinerary> itineraries = planningPolicy.filterPlanResults(journeyRequest, successfulPlanRequests);
 		
@@ -370,8 +409,8 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, boolean retried, String policyId) throws Exception {
 		Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
 
-		PromotedJourneyRequestConverter promotedJourneyRequestConverter = getPromotedJourneyRequestConverter(policyId);
-		ItineraryRequestEnricher itineraryRequestEnricher = getItineraryRequestEnricher(policyId);
+		PromotedJourneyRequestConverter promotedJourneyRequestConverter = null;
+		ItineraryRequestEnricher itineraryRequestEnricher = null;
 		
 		promotedJourneyRequestConverter.modifyRequest(journeyRequest);
 		
@@ -494,6 +533,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		@Override
 		public PlanningRequest call() throws Exception {
 			try {
+				System.out.println("TRY: " + request.getIteration() + " / " + request.getType());
 				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
 				request.setPlan(plan);
 			} catch (Exception e) {

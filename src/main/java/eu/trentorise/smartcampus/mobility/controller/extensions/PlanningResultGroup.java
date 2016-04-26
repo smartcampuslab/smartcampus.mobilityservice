@@ -3,7 +3,7 @@ package eu.trentorise.smartcampus.mobility.controller.extensions;
 public class PlanningResultGroup {
 
 	private String name;
-	private Integer maxEntries;
+	private Integer maxEntries = Integer.MAX_VALUE;
 	
 	public static final PlanningResultGroup FAKE_GROUP = new PlanningResultGroup(); 
 	

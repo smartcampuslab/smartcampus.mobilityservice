@@ -21,12 +21,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.AddPromotedPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policies;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policy;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 
 public class CustomItineraryRequestEnricher implements ItineraryRequestEnricher {
 
-	private Policies policies;
+	private Policy policies;
 	
 	private final static double KEY_INC = 0.01;
 	
@@ -38,11 +38,11 @@ public class CustomItineraryRequestEnricher implements ItineraryRequestEnricher 
 		return ire;
 	}
 	
-	public Policies getPolicies() {
+	public Policy getPolicies() {
 		return policies;
 	}
 
-	public void setPolicies(Policies policies) {
+	public void setPolicies(Policy policies) {
 		this.policies = policies;
 	}
 

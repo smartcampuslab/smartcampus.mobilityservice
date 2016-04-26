@@ -35,6 +35,8 @@ public class PlanningRequest {
 	
 	private Map<SmartplannerParameter, Object> smartplannerParameters;
 	
+	private int iteration;
+	
 	public PlanningRequest() {
 		itinerary = Lists.newArrayList();
 		smartplannerParameters = Maps.newTreeMap();
@@ -148,6 +150,14 @@ public class PlanningRequest {
 		this.parentRequest = parentRequest;
 	}
 
+	public int getIteration() {
+		return iteration;
+	}
+
+	public void setIteration(int iteration) {
+		this.iteration = iteration;
+	}
+	
 	@Override
 	public String toString() {
 		return type.toString();

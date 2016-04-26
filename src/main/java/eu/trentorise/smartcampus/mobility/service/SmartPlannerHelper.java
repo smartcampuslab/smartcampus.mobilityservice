@@ -26,6 +26,8 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
+
 
 /**
  * @author raman
@@ -59,4 +61,6 @@ public interface SmartPlannerHelper {
 	String getVersions() throws Exception;
 	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
 	String getAllTaxiStations() throws Exception;
+	
+	public void addPolicy(ParametricPolicy policy);
 }

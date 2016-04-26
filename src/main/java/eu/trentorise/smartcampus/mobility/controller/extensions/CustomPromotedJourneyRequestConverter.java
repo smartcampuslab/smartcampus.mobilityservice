@@ -4,12 +4,12 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.List;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policies;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ProcessRequestPolicy;
 
 public class CustomPromotedJourneyRequestConverter implements PromotedJourneyRequestConverter {
 
-	private Policies policies;
+	private Policy policies;
 	
 	public static CustomPromotedJourneyRequestConverter build(String name) {
 		// load policies from mongo
@@ -18,11 +18,11 @@ public class CustomPromotedJourneyRequestConverter implements PromotedJourneyReq
 		return jrc;
 	}	
 	
-	public Policies getPolicies() {
+	public Policy getPolicies() {
 		return policies;
 	}
 
-	public void setPolicies(Policies policies) {
+	public void setPolicies(Policy policies) {
 		this.policies = policies;
 	}
 

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.Policies;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -67,7 +67,7 @@ public class DomainStorage {
 		if (cls == SavedTrip.class) {
 			return SAVED;
 		}	
-		if (cls == Policies.class) {
+		if (cls == ParametricPolicy.class) {
 			return POLICY;
 		}			
 		throw new IllegalArgumentException("Unknown class: " + cls.getName());
@@ -200,17 +200,18 @@ public class DomainStorage {
 		template.save(savedTrip, SAVED);
 	}
 	
-	public void savePolicies(Policies policies) {
-		Query query = new Query(new Criteria("name").is(policies.getName()));
-		Policies policiesDB = searchDomainObject(query, Policies.class);
+	public void savePolicies(ParametricPolicy policy) {
+		Query query = new Query(new Criteria("name").is(policy.getName()));
+		ParametricPolicy policiesDB = searchDomainObject(query, ParametricPolicy.class);
 		if (policiesDB == null) {
-			template.save(policies, POLICY);
+			template.save(policy, POLICY);
 		} else {
 			Update update = new Update();
-			update.set("addPromotedPolicies", policies.getAddPromotedPolicies());
-			update.set("processRequestPolicies", policies.getProcessRequestPolicies());
-			update.set("removeItinerariesPolicy", policies.getRemoveItinerariesPolicy());
-			update.set("retryOnFail", policies.getRetryOnFail());
+			update.set("evaluate", policy.getEvaluate());
+			update.set("generate", policy.getGenerate());
+			update.set("groups", policy.getGroups());
+			update.set("modify", policy.getModify());
+			update.set("remove", policy.getRemove());
 			template.updateFirst(query, update, POLICY);
 		}
 	}	
