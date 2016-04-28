@@ -160,23 +160,33 @@
 		</nav>
 	</div>
 	<div class="col-md-2">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Punti di interesse</h3>
-      </div>
-      <div class="panel-body">
-         <div class="row">
-           <div class="col-md-12">
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Parcheggi</label></div>
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('BIKESHARING')" ng-model="layers.BIKESHARING.show">Bike sharing</label></div>
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('TAXI')" ng-model="layers.TAXI.show">Taxi</label></div>
-           </div>
-         </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Punti di interesse</h3>
+			</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Parcheggi</label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('BIKESHARING')"
+								ng-model="layers.BIKESHARING.show">Bike sharing</label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('TAXI')" ng-model="layers.TAXI.show">Taxi</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--   <div class="col-md-2">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Politiche sostenibili</h3>
@@ -185,6 +195,7 @@
          <div class="row">
            <div class="col-md-6">
            <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN2" value="_Trento">Park and Ride custom</label></div>
+           <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyRV2" value="_Rovereto">Bike Sharing custom</label></div>
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN" value="Trento">Park and Ride</label></div>            
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyROV" value="Rovereto">Bike Sharing</label></div>            
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyDUMMY" value="Dummy" checked>Nessuna</label></div>            
@@ -192,10 +203,41 @@
          </div> 
       </div>
     </div>
-  </div>  
-  
+  </div> -->
+
+	<div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Politiche sostenibili</h3>
+			</div>
+			<div class="panel-body">
+				<nav class="navbar navbar-default">
+					<div class="container-fluid">
+						<ul class="nav navbar-nav navbar-left">
+							<li><button class="btn btn-default navbar-btn"
+									data-toggle="dropdown" aria-haspopup="true"
+									aria-expanded="false"">
+									{{ policyIds[policy] }}<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu routeId-dropdown">
+									<li class="list-group-item"
+										ng-repeat="(name, description) in policyIds"
+										ng-click="setPolicy(name, description)"><a>{{
+											description }}</a></li>
+								</ul></li>
+							</ul>								
+							<ul class="nav navbar-nav navbar-right">
+								<li><a class="pull-right">({{ policy}})</a></li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</div>
+	</div>
+
+
 </div>
-<div class="row">
+	<div class="row">
   <div class="col-md-3">
 <!--           <div> -->
 <!--           <a href="" ng-click="showPlan(plan)"> -->

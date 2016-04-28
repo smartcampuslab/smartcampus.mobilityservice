@@ -6,9 +6,10 @@ import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 
-public class ParametricPolicy {
+public class ParametricPolicy implements StorablePolicy {
 
 	private String name;
+	private String description;
 
 	private List<ParametricGenerate> generate;
 	private List<ParametricModify> modify;
@@ -30,6 +31,14 @@ public class ParametricPolicy {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public List<ParametricGenerate> getGenerate() {
@@ -71,5 +80,4 @@ public class ParametricPolicy {
 	public void setGroups(List<PlanningResultGroup> groups) {
 		this.groups = groups;
 	}
-
 }

@@ -61,6 +61,8 @@
 
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/r353nd/**" security="none"/>
   
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/policies/" security="none"/>
+  
   
 <!-- 	<http xmlns="http://www.springframework.org/schema/security" pattern="/web/**" auto-config="true" use-expressions="true">
 		<anonymous enabled="false" />

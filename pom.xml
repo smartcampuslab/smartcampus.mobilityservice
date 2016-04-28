@@ -127,6 +127,17 @@
 			<artifactId>profileservice.client</artifactId>
 			<version>2.1</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.2.4</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>2.4.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>

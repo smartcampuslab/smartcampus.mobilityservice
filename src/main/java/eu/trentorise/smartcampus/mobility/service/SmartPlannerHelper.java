@@ -25,8 +25,10 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.StorablePolicy;
 
 
 /**
@@ -62,5 +64,6 @@ public interface SmartPlannerHelper {
 	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
 	String getAllTaxiStations() throws Exception;
 	
-	public void addPolicy(ParametricPolicy policy);
+	public void addPolicy(StorablePolicy policy);
+	public Map<String, PlanningPolicy> getPolicies();
 }

@@ -28,7 +28,7 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 	}
 
 	@Override
-	public List<Itinerary> filterPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
+	public List<Itinerary> extractItinerariesFromPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
 		List<Itinerary> result = Lists.newArrayList();
 		for (PlanningRequest pr: planRequests) {
 			if (pr.getItinerary() != null) {
@@ -44,6 +44,16 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 		Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(journeyRequest.getRouteType());
 		ItinerarySorter.sort(result, comparator);
 		return result;
+	}
+
+	@Override
+	public String getName() {
+		return "Dummy";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Nessuna";
 	}
 
 }

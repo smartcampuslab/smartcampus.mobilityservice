@@ -67,13 +67,14 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
-import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.ScriptedPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricEvaluate;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricGenerate;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricModify;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricRemove;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.ScriptedPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.StorablePolicy;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -108,12 +109,15 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	@Resource(name="convertersMap")
 	private Map<String, PromotedJourneyRequestConverter> convertersMap;	
 	
+	@Resource(name="basicPoliciesMap")
+	private Map<String, PlanningPolicy> policiesMap;
+	
 	
 //	private Map<String, ItineraryRequestEnricher> customEnrichersMap;
 //	
 //	private Map<String, PromotedJourneyRequestConverter> customConvertersMap;		
 	
-	private Map<String, ParametricPolicy> policiesMap;
+//	private Map<String, StorablePolicy> policiesMap;
 	
 	
 	@Autowired
@@ -126,29 +130,49 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		policiesMap = Maps.newTreeMap();
-		
-		List<ParametricPolicy> policies = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
-		for (ParametricPolicy policy: policies) {
-			policiesMap.put(policy.getName(), policy);
+		List<ParametricPolicy> parametric = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
+		for (ParametricPolicy policy: parametric) {
+//			policiesMap.put(policy.getName(), policy);
+			policiesMap.put(policy.getName(), new ParametricPlanningPolicy(policy));
 		}
+		List<ScriptedPolicy> scripted = storage.searchDomainObjects(new Criteria(), ScriptedPolicy.class);
+		for (ScriptedPolicy policy: scripted) {
+//			policiesMap.put(policy.getName(), policy);
+			policiesMap.put(policy.getName(), new ScriptedPlanningPolicy(policy));
+		}		
 	}
 	
-	public void addPolicy(ParametricPolicy policy) {
-		policiesMap.put(policy.getName(), policy);
+	@Override
+	public void addPolicy(StorablePolicy policy) {
+		if (policy instanceof ParametricPolicy) {
+			policiesMap.put(policy.getName(), new ParametricPlanningPolicy((ParametricPolicy)policy));
+		}
+		if (policy instanceof ScriptedPolicy) {
+			policiesMap.put(policy.getName(), new ScriptedPlanningPolicy((ScriptedPolicy)policy));
+		}		
+	}
+	
+	@Override
+	public Map<String, PlanningPolicy> getPolicies() {
+		return Maps.newHashMap(policiesMap);
 	}
 	
 	private PlanningPolicy getPlanningPolicy(String policyId) {
-		ParametricPolicy policy = policiesMap.get(policyId);
-		if (policy == null) {
-			if ("Trento".equals(policyId)) {
-				return new TrentoPlanningPolicy();
-			} else {
-				return new RoveretoPlanningPolicy();
-			}
-		} else {
-			return new ParametricPlanningPolicy(policy);
-		}
+		PlanningPolicy policy = policiesMap.get(policyId);
+		return policy; 
+		
+//		if (policy != null) {
+//			return policy;
+//		}
+//
+//		StorablePolicy storable = policiesMap.get(policyId);
+//		if (storable instanceof ParametricPolicy) {
+//			return new ParametricPlanningPolicy((ParametricPolicy) storable);
+//		} else if (storable instanceof ScriptedPolicy) {
+//			return new ScriptedPlanningPolicy((ScriptedPolicy) storable);
+//		}
+//
+//		return null;
 	}
 
 //	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
@@ -398,7 +422,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			
 		} while (!planRequests.isEmpty() && iteration < 2);
 
-		List<Itinerary> itineraries = planningPolicy.filterPlanResults(journeyRequest, successfulPlanRequests);
+		List<Itinerary> itineraries = planningPolicy.extractItinerariesFromPlanResults(journeyRequest, successfulPlanRequests);
 		
 		List<Itinerary> sortedItineraries = planningPolicy.filterAndSortItineraries(journeyRequest, itineraries);
 		

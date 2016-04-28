@@ -116,6 +116,7 @@ public class JourneyPlannerController extends SCController {
 			return results;
 		} catch (Exception e) {
 			e.printStackTrace();
+			response.addHeader("error_msg", e.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;

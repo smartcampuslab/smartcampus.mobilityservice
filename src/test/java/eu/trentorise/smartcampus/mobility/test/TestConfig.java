@@ -31,6 +31,7 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +40,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.model.StorablePolicy;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
@@ -149,9 +151,14 @@ public class TestConfig {
 				return null;
 			}
 			@Override
-			public void addPolicy(ParametricPolicy policy) {
+			public void addPolicy(StorablePolicy policy) {
 				// TODO Auto-generated method stub
 				
+			}
+			@Override
+			public Map<String, PlanningPolicy> getPolicies() {
+				// TODO Auto-generated method stub
+				return null;
 			}
 
 		};

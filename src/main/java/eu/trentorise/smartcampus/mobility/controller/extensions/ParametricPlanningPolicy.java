@@ -190,7 +190,7 @@ public class ParametricPlanningPolicy implements PlanningPolicy {
 	
 	
 	@Override
-	public List<Itinerary> filterPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
+	public List<Itinerary> extractItinerariesFromPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
 		Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(journeyRequest.getRouteType());
 		
 		List<Itinerary> remaining = PlanningPolicyHelper.filterByGroups(planRequests, comparator);
@@ -251,4 +251,15 @@ public class ParametricPlanningPolicy implements PlanningPolicy {
 		this.parameters = parameters;
 	}
 
+	@Override
+	public String getName() {
+		return parameters.getName();
+	}
+
+
+	@Override
+	public String getDescription() {
+		return parameters.getDescription();
+	}	
+	
 }

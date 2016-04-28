@@ -96,6 +96,19 @@
 				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
 		</entry>		
 	</util:map>	
+	
+	
+	<util:map id = "basicPoliciesMap">
+		<entry key="Dummy">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
+		</entry>
+		<entry key="Trento">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
+		</entry>
+		<entry key="Rovereto">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
+		</entry>				
+	</util:map>	
 
 
 	<mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
@@ -132,4 +145,6 @@
 
 	<bean id="executorService" class="java.util.concurrent.Executors"
 		factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
+		
+		
 </beans>

@@ -125,7 +125,7 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 	}
 
 	@Override
-	public List<Itinerary> filterPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
+	public List<Itinerary> extractItinerariesFromPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests) {
 		Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(journeyRequest.getRouteType());
 		
 		List<Itinerary> remaining = PlanningPolicyHelper.filterByGroups(planRequests, comparator);
@@ -197,4 +197,14 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		return result;
 	}
 
+	@Override
+	public String getName() {
+		return "Rovereto";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Bike Sharing";
+	}	
+	
 }

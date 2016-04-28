@@ -1,7 +1,7 @@
 var plannerControllers = angular.module('plannerControllers', [])
 
-.controller('HomeCtrl', ['$scope', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing', 'taxi',
-  function($scope, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing, taxi) {
+.controller('HomeCtrl', ['$scope', '$http', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing', 'taxi',
+  function($scope, $http, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing, taxi) {
 
 	// current user position, defaults to Trento
 	$scope.myposition = $rootScope.CENTER;
@@ -12,6 +12,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.toMarker = null;
     $scope.mode = 'fastest';
     $scope.policy = 'Dummy';
+    $scope.policyDescr = 'Nessuna'
     $scope.wheelchair = false;
     
     $scope.useCoordinates = false;
@@ -22,6 +23,17 @@ var plannerControllers = angular.module('plannerControllers', [])
 	$scope.legElems = [];
 	$scope.planned = false;
 	$scope.loadingInstance = null;
+	
+	$scope.init = function($http) {
+		$http.get("policies/").success(function(data) {	
+			$scope.policyIds = data;
+		}); 
+	}
+	
+	$scope.setPolicy = function($name, $description) {
+		$scope.policy = $name;
+		$scope.policyDescr = $description;
+	}
 	
 	$scope.resetDrawings = function(){
 		if ($scope.legElems) {
@@ -135,6 +147,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     	$scope.$apply();
     };
     
+	$scope.init($http);
     $scope.initMap();
 
     // set the 'from' field and the 'from' marker to the current position
@@ -279,8 +292,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     		}
         	$scope.hideLoading();
     	})
-    	.error(function(data){
-    		$scope.errorMsg = 'Errore durante la pianificazione del percorso.';
+    	.error(function(data, status, headers, config) {
+    		$scope.errorMsg = 'Errore durante la pianificazione del percorso: ' + headers('error_msg');
         	$scope.hideLoading();
     	});
     }

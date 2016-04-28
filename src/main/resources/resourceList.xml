@@ -108,9 +108,13 @@
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/gamification/r353nd" />		
 
+	<!-- planning policies -->
 	<resourceMapping uri="mobilityservice.data"
-		pathPattern="/policies/policy" />
-
+		pathPattern="/policies/parametric" />
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/policies/scripted" />
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/policies/" />		
 
 
 </service>
