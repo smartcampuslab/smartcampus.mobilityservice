@@ -114,7 +114,9 @@
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/policies/scripted" />
 	<resourceMapping uri="mobilityservice.data"
-		pathPattern="/policies/" />		
+		pathPattern="/policies/" />
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/policies/{name}" />						
 
 
 </service>

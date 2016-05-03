@@ -222,20 +222,25 @@ public class DomainStorage {
 		}
 	}	
 	
-	public void savePolicy(ScriptedPolicy policy) {
+	public boolean savePolicy(ScriptedPolicy policy, boolean canUpdate) {
 		Query query = new Query(new Criteria("name").is(policy.getName()));
 		ScriptedPolicy policiesDB = searchDomainObject(query, ScriptedPolicy.class);
 		if (policiesDB == null) {
 			template.save(policy, SCRIPTED_POLICY);
-		} else {
+		} else if (canUpdate) {
 			Update update = new Update();
 			update.set("description", policy.getDescription());
 			update.set("generatePlanRequests", policy.getGeneratePlanRequests());
 			update.set("evaluatePlanResults", policy.getEvaluatePlanResults());
 			update.set("extractItinerariesFromPlanResults", policy.getExtractItinerariesFromPlanResults());
 			update.set("filterAndSortItineraries", policy.getFilterAndSortItineraries());
+			update.set("draft", policy.getDraft());
 			template.updateFirst(query, update, SCRIPTED_POLICY);
+		} else {
+			return false;
 		}
+		
+		return true;
 	}		
 	
 	public Geolocation getLastGeolocationByUserId(String userId) {
@@ -282,6 +287,12 @@ public class DomainStorage {
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
+	public <T> void deleteDomainObject(Criteria criteria, Class<T> clz) {
+		Query query = new Query(criteria);
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		template.remove(query, getClassCollection(clz));
+	}	
+		
 	
 	
 //	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {

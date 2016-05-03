@@ -101,7 +101,7 @@
 						<div class="col-md-6">
 							<div class="radio">
 								<label><input type="radio" ng-model="mode" name="mode"
-									id="modeF" value="fastest" checked>Più veloce</label>
+									id="modeF" value="fastest" checked>Più  veloce</label>
 							</div>
 							<div class="radio">
 								<label><input type="radio" ng-model="mode" name="mode"
@@ -245,6 +245,28 @@
 		</div>
 	</div>
 
+	<div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Gestione politiche sostenibili</h3>
+			</div>
+			<div class="panel-body">
+				<button class="btn btn-primary navbar-btn" ng-click="resetPolicy(); actionMsg='Crea'" data-toggle="modal" style="width:250px"
+					data-target="#policyModal">
+					Crea nuova politica
+				</button>
+				<button class="btn btn-primary navbar-btn" ng-click="readPolicy(); actionMsg='Modifica'" data-toggle="modal" style="width:250px" ng-disabled="!policyeditable"
+					data-target="#policyModal">
+					Modifica la politica corrente
+				</button>	
+				<button class="btn btn-primary navbar-btn" ng-click="deletePolicy()" actionMsg='Elimina'" data-toggle="modal" style="width:250px" ng-disabled="!policyeditable">
+					Elimina la politica corrente
+				</button>				
+			</div>
+		</div>
+	</div>
+
+
 </div>
 	<div class="row">
   <div class="col-md-3">
@@ -258,16 +280,16 @@
 <!--             </div> -->
 <!--             <div class="col-md-10"> -->
 <!--               <div class="tt thumbnail col-md-2"> -->
-<!-- 					      <img src="img/ic_mt_bus.png" > -->
+<!-- 					      <img src="../img/ic_mt_bus.png" > -->
 <!-- 					      <div class="text-center"><div>aaa</div><div>eee</div></div> -->
 <!-- 					    </div> -->
             
 <!--               <div class="col-md-3 text-center"> -->
-<!--                   <img ng-src="img/ic_mt_bus.png"/> -->
+<!--                   <img ng-src="../img/ic_mt_bus.png"/> -->
 <!--                   <span>note</span> -->
 <!--               </div> -->
 <!--               <div class="col-md-2  text-center"> -->
-<!--                   <img ng-src="img/ic_mt_car.png"/> -->
+<!--                   <img ng-src="../img/ic_mt_car.png"/> -->
 <!--                   <span>note</span> -->
 <!--               </div> -->
 <!--             </div> -->
@@ -326,7 +348,7 @@
         <!-- START -->
         <div class="row leg">
           <div class="col-md-1 start-leg">
-            <img src="img/ic_point_outline.png">
+            <img src="../img/ic_point_outline.png">
           </div>
           <div class="col-md-2">{{toTime(currentItinerary.startime)}}</div>
           <div class="col-md-9">{{requestedFrom}}</div>
@@ -334,7 +356,7 @@
         <!-- ROW -->
         <div class="row leg" ng-repeat="step in currentItinerary.steps">
           <div class="col-md-1">
-            <img src="img/ic_point.png">
+            <img src="../img/ic_point.png">
           </div>
           <div class="col-md-2">{{toTime(step.startime)}}</div>
           <div class="col-md-7 inter-leg">
@@ -342,10 +364,10 @@
             <p ng-if="step.from != null">{{step.fromLabel}}<strong>{{step.from}}</strong></p>
             <p ng-if="step.to != null">{{step.toLabel}}<strong>{{step.to}}</strong></p>
             <p ng-if="step.parking && step.parking.cost">
-               <img src="img/ic_price_parking.png"/>{{step.parking.cost}}
+               <img src="../img/ic_price_parking.png"/>{{step.parking.cost}}
             </p>
             <p ng-if="step.parking && step.parking.time">
-               <img src="img/ic_look_for_parking.png"/>{{step.parking.time}}
+               <img src="../img/ic_look_for_parking.png"/>{{step.parking.time}}
             </p>
           </div>
           <div class="col-md-2">
@@ -362,7 +384,7 @@
         </div>
         <!-- END -->
         <div class="row leg">
-          <div class="col-md-1 end-leg"><img src="img/ic_point_outline.png"></div>
+          <div class="col-md-1 end-leg"><img src="../img/ic_point_outline.png"></div>
           <div class="col-md-2">{{toTime(currentItinerary.endtime)}}</div>
           <div class="col-md-9">{{requestedTo}}</div>
         </div>
@@ -375,3 +397,74 @@
  </div>
 
 
+<div id="policyModal" class="modal fade" role="dialog">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title">{{actionMsg}} politica</h3>
+			</div>
+			<div class="modal-body">
+				<form id="policy-form" ng-submit="savePolicy()">
+					<div class="form-group">
+						<label> *Nome </label><input class="form-control" type="text" required
+							ng-model="policyform.name" name="name" ng-readonly="!policyeditable" />
+					</div>		
+					<div class="form-group">					
+						<label> Descrizione </label><input class="form-control" required
+							type="text" ng-model="policyform.description" name="description" ng-readonly="!policyeditable" />
+					</div>
+					<div class="form-group">
+						<label> <i>generatePlanRequests()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="6"  required
+							ng-model="policyform.generatePlanRequests" ng-trim="false"
+							name="generatePlanRequests" ng-readonly="!policyeditable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>evaluatePlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="6" required
+							ng-model="policyform.evaluatePlanResults" ng-trim="false"
+							name="evaluatePlanResults" ng-readonly="!policyeditable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>extractItinerariesFromPlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="6" required
+							ng-model="policyform.extractItinerariesFromPlanResults" ng-trim="false"
+							name="extractItinerariesFromPlanResults" ng-readonly="!policyeditable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>filterAndSortItineraries()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="6" required 
+							ng-model="policyform.filterAndSortItineraries" ng-trim="false"
+							name="filterAndSortItineraries" ng-readonly="!policyeditable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<input type="checkbox"  
+							ng-model="policyform.draft"
+							name="draft" ng-readonly="!policyeditable" >
+						</input>
+						<label> <i> DRAFT</i>
+						</label>						
+					</div>					
+					<div class=" form-group">
+						<button class="btn btn-primary" ng-click="submit">
+						Salva
+						</button>
+					</div>
+					<div>
+						<span ng-bind="message" class="notification-ok"></span>
+						<span ng-bind="error" class="notification-error"></span>
+						<span>&nbsp;</span>
+					</div>					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

@@ -86,6 +86,7 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 @Component
 public class SmartPlannerService implements SmartPlannerHelper {
 
+	private static final String DUMMY = "Dummy";
 	private static final String DEFAULT = "default";
 	private static final String SMARTPLANNER = "/smart-planner/api-webapp/planner/";
 	private static final String OTP  = "/smart-planner/rest/";
@@ -130,16 +131,16 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		List<ParametricPolicy> parametric = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
-		for (ParametricPolicy policy: parametric) {
-//			policiesMap.put(policy.getName(), policy);
-			policiesMap.put(policy.getName(), new ParametricPlanningPolicy(policy));
-		}
-		List<ScriptedPolicy> scripted = storage.searchDomainObjects(new Criteria(), ScriptedPolicy.class);
-		for (ScriptedPolicy policy: scripted) {
-//			policiesMap.put(policy.getName(), policy);
-			policiesMap.put(policy.getName(), new ScriptedPlanningPolicy(policy));
-		}		
+//		List<ParametricPolicy> parametric = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
+//		for (ParametricPolicy policy: parametric) {
+////			policiesMap.put(policy.getName(), policy);
+//			policiesMap.put(policy.getName(), new ParametricPlanningPolicy(policy));
+//		}
+//		List<ScriptedPolicy> scripted = storage.searchDomainObjects(new Criteria(), ScriptedPolicy.class);
+//		for (ScriptedPolicy policy: scripted) {
+////			policiesMap.put(policy.getName(), policy);
+//			policiesMap.put(policy.getName(), new ScriptedPlanningPolicy(policy));
+//		}		
 	}
 	
 	@Override
@@ -153,12 +154,56 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 	
 	@Override
-	public Map<String, PlanningPolicy> getPolicies() {
-		return Maps.newHashMap(policiesMap);
+	public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
+		Map<String, PlanningPolicy> result = Maps.newHashMap(); 
+		//newHashMap(policiesMap);
+		result.putAll(getStoredPolicies(draft));
+		return result;
 	}
 	
-	private PlanningPolicy getPlanningPolicy(String policyId) {
+	private Map<String, PlanningPolicy> getStoredPolicies(Boolean draft) {
+		 Map<String, PlanningPolicy> result = Maps.newTreeMap();
+		 Criteria criteria = new Criteria();
+		 if (draft != null) {
+			 criteria.and("draft").is(draft);
+		 }
+		List<ParametricPolicy> parametric = storage.searchDomainObjects(criteria, ParametricPolicy.class);
+		for (ParametricPolicy policy: parametric) {
+			result.put(policy.getName(), new ParametricPlanningPolicy(policy));
+		}
+		List<ScriptedPolicy> scripted = storage.searchDomainObjects(criteria, ScriptedPolicy.class);
+		for (ScriptedPolicy policy: scripted) {
+			result.put(policy.getName(), new ScriptedPlanningPolicy(policy));
+		}
+		return result;
+	}
+	
+	
+	private PlanningPolicy getPlanningPolicy(String policyId, Boolean draft) {
 		PlanningPolicy policy = policiesMap.get(policyId);
+		
+		if (policy == null) {
+			Map<String, PlanningPolicy> stored = getStoredPolicies(draft);
+			
+			policy = stored.get(policyId);
+			if (policy == null) {
+				return policiesMap.get(DUMMY);
+			}
+//			List<ParametricPolicy> parametric = storage.searchDomainObjects(new Criteria(), ParametricPolicy.class);
+//			for (ParametricPolicy pol: parametric) {
+//				if (pol.getName().equals(policyId)) {
+//					return new ParametricPlanningPolicy(pol);
+//				}
+//			}
+//			List<ScriptedPolicy> scripted = storage.searchDomainObjects(new Criteria(), ScriptedPolicy.class);
+//			for (ScriptedPolicy pol: scripted) {
+//				if (pol.getName().equals(policyId)) {
+//					return new ScriptedPlanningPolicy(pol);
+//				}
+//			}	
+
+		}
+		
 		return policy; 
 		
 //		if (policy != null) {
@@ -385,8 +430,8 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		}
 		
 		
-		
-		PlanningPolicy planningPolicy = getPlanningPolicy(policyId);
+		// TODO: final only? draft?
+		PlanningPolicy planningPolicy = getPlanningPolicy(policyId, null);
 
 		List<PlanningRequest> planRequests = planningPolicy.generatePlanRequests(journeyRequest);
 		List<PlanningRequest> successfulPlanRequests = Lists.newArrayList();

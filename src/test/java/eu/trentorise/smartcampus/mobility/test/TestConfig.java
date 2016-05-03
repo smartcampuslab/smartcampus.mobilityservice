@@ -156,7 +156,7 @@ public class TestConfig {
 				
 			}
 			@Override
-			public Map<String, PlanningPolicy> getPolicies() {
+			public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
 				// TODO Auto-generated method stub
 				return null;
 			}

@@ -56,4 +56,9 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 		return "Nessuna";
 	}
 
+	@Override
+	public Boolean getDraft() {
+		return false;
+	}
+
 }

@@ -13,6 +13,8 @@ public class ScriptedPolicy implements StorablePolicy {
 	private String extractItinerariesFromPlanResults;
 	private String filterAndSortItineraries;
 	
+	private Boolean draft = true;
+	
 	public ScriptedPolicy() {
 	}
 
@@ -64,4 +66,12 @@ public class ScriptedPolicy implements StorablePolicy {
 		this.filterAndSortItineraries = remove;
 	}
 
+	public Boolean getDraft() {
+		return draft;
+	}
+
+	public void setDraft(Boolean draft) {
+		this.draft = draft;
+	}		
+	
 }

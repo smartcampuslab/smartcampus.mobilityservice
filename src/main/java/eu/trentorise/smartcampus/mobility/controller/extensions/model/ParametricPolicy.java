@@ -12,11 +12,14 @@ public class ParametricPolicy implements StorablePolicy {
 	private String description;
 
 	private List<ParametricGenerate> generate;
+
 	private List<ParametricModify> modify;
 	private List<ParametricEvaluate> evaluate;
 	private ParametricRemove remove;
 	
 	private List<PlanningResultGroup> groups;
+	
+	private Boolean draft = true;
 
 	public ParametricPolicy() {
 		generate = Lists.newArrayList();
@@ -80,4 +83,13 @@ public class ParametricPolicy implements StorablePolicy {
 	public void setGroups(List<PlanningResultGroup> groups) {
 		this.groups = groups;
 	}
+	
+	public Boolean getDraft() {
+		return draft;
+	}
+
+	public void setDraft(Boolean draft) {
+		this.draft = draft;
+	}	
+	
 }

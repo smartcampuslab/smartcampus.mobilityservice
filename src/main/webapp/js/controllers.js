@@ -13,6 +13,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.mode = 'fastest';
     $scope.policy = 'Dummy';
     $scope.policyDescr = 'Nessuna'
+    $scope.policyform = { 'name' : 'Dummy', 'description' : 'Nessuna'};
     $scope.wheelchair = false;
     
     $scope.useCoordinates = false;
@@ -25,14 +26,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 	$scope.loadingInstance = null;
 	
 	$scope.init = function($http) {
-		$http.get("policies/").success(function(data) {	
+		$http.get($rootScope.controllerBase + ($rootScope.publishedOnly?'?draft=false':'')).success(function(data) {	
 			$scope.policyIds = data;
-		}); 
-	}
-	
-	$scope.setPolicy = function($name, $description) {
-		$scope.policy = $name;
-		$scope.policyDescr = $description;
+		}).error(function(data){
+			$scope.policyIds = data;
+		});
+//		$http.get("notification/announcements/appId").success(function(data) {	
+//			$scope.appId = data;
+//		});		
 	}
 	
 	$scope.resetDrawings = function(){
@@ -105,7 +106,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 	  $scope.newMarker = function(pos, icon) {
 	    var m = new google.maps.Marker({
             position: pos,
-            icon: 'img/'+icon+'.png',
+            icon: $rootScope.imgBase + 'img/'+icon+'.png',
             map: $scope.map,
             draggable: true,
             labelContent: "A",
@@ -446,7 +447,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			for (var i = 0; i < data.length; i++) {
     				var marker = new google.maps.Marker({
     		            position: new google.maps.LatLng(data[i].position[0],data[i].position[1]),
-    		            icon: 'img/'+data[i].type+'.png',
+    		            icon: $rootScope.imgBase + 'img/'+data[i].type+'.png',
     		            map: $scope.map,
     		            title: data[i].title,
     		            description: data[i].description
@@ -469,4 +470,113 @@ var plannerControllers = angular.module('plannerControllers', [])
     	}
     };
     
+    
+	$scope.resetPolicy = function() {
+		$scope.policyform = {};
+		$scope.policyeditable = true;
+		$scope.updatePolicy = false;
+	}
+	
+	$scope.setPolicy = function($policy, $editable) {
+		$scope.policy = $policy.name;
+		$scope.policyDescr = $policy.description;
+		$scope.policyeditable = $editable;
+		if (!$editable) {
+			$scope.policyform = {};
+			$scope.policyform.name = $policy.name;
+			$scope.policyform.description = $description;
+		}
+		$('#policyIds-dropdown').attr('data-original-title', $policy.description);
+	}    
+    
+	$scope.readPolicies = function(draft) {
+		$http.get($rootScope.controllerBase + "?draft=" + draft).success(function(data) {	
+			$scope.policyIds = data;
+		}); 
+	}    
+    
+    $scope.readPolicy = function() {
+		$scope.message = "";
+		$scope.error = "";    	
+    	$http.get($rootScope.controllerBase + $scope.policy, {
+			headers : {
+				'Content-Type' : "application/json",
+				'Accept' : "application/json"
+			}
+		}).success(function(data) {
+			$scope.policyform = data;
+			$scope.policyeditable = true;
+			$scope.updatePolicy = true;
+		}).error(function(data) {
+			$scope.policyeditable = false;
+		});
+    }
+
+    $scope.savePolicy = function() {
+	if ($scope.policyform) {
+		$http({
+			'method' : ($scope.updatePolicy ? 'PUT' : 'POST'),
+			'url' : $rootScope.controllerBase + "/scripted/",
+			'data' : {
+				'name' : $scope.policyform.name,
+				'description' : $scope.policyform.description,
+				'generatePlanRequests' : $scope.policyform.generatePlanRequests,
+				'evaluatePlanResults' : $scope.policyform.evaluatePlanResults,
+				'extractItinerariesFromPlanResults' : $scope.policyform.extractItinerariesFromPlanResults,
+				'filterAndSortItineraries' : $scope.policyform.filterAndSortItineraries,
+				'draft' : $scope.policyform.draft
+			},
+			'headers' : {
+				'Content-Type' : "application/json",
+				'Accept' : "application/json"
+			}
+		}).success(function(data, status, headers, config) {
+			$scope.message = headers("msg");
+			$scope.error = "";
+			$http.get($rootScope.controllerBase).success(function(data) {
+				$scope.policyIds = data;
+			});
+		}).error(function(data, status, headers, config) {
+			$scope.message = "";
+			$scope.error = headers("error_msg");
+		});
+	}
+}
+    
+
+	    $scope.deletePolicy = function() {
+		if (confirm('Sei sicuro di voler eliminare la politica "' + $scope.policyDescr + ' (' + $scope.policy + ')"?')) {
+
+			$scope.message = "";
+			$scope.error = "";
+			$http({
+				'method' : 'DELETE',
+				'url' : $rootScope.controllerBase + $scope.policy,
+			}).success(function(data) {
+				$scope.policy = 'Dummy';
+				$scope.policyDescr = 'Nessuna'
+				$scope.policyform = {
+					'name' : 'Dummy',
+					'description' : 'Nessuna'
+				};
+				$http.get($rootScope.controllerBase).success(function(data) {
+					$scope.policyIds = data;
+				});
+			}).error(function(data) {
+				X
+			});
+		}
+	} 
+    
+    
+    
+    
+    $(document).ready(function(){
+    	$('#policyIds-dropdown').tooltip({placement: 'left', title: $scope.policyDescr, html: true});   
+    }); 
+    
 }]);
+
+
+
+

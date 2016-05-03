@@ -262,4 +262,9 @@ public class ParametricPlanningPolicy implements PlanningPolicy {
 		return parameters.getDescription();
 	}	
 	
+	@Override
+	public Boolean getDraft() {
+		return parameters.getDraft();
+	}	
+	
 }

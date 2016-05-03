@@ -207,4 +207,9 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		return "Bike Sharing";
 	}	
 	
+	@Override
+	public Boolean getDraft() {
+		return false;
+	}	
+	
 }

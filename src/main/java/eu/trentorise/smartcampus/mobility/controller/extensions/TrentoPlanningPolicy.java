@@ -189,4 +189,9 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 		return "Park and Ride";
 	}
 
+	@Override
+	public Boolean getDraft() {
+		return false;
+	}	
+	
 }

@@ -9,6 +9,7 @@ public interface PlanningPolicy {
 
 	public String getName();
 	public String getDescription();
+	public Boolean getDraft();
 	public List<PlanningRequest> generatePlanRequests(SingleJourney journeyRequest);
 	public List<PlanningRequest> evaluatePlanResults(List<PlanningRequest> planRequests); // remove from planRequests a List<PlanRequest> that must not be retried and return it
 	public List<Itinerary> extractItinerariesFromPlanResults(SingleJourney journeyRequest, List<PlanningRequest> planRequests);

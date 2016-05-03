@@ -65,5 +65,5 @@ public interface SmartPlannerHelper {
 	String getAllTaxiStations() throws Exception;
 	
 	public void addPolicy(StorablePolicy policy);
-	public Map<String, PlanningPolicy> getPolicies();
+	public Map<String, PlanningPolicy> getPolicies(Boolean draft);
 }

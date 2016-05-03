@@ -93,5 +93,10 @@ public class ScriptedPlanningPolicy implements PlanningPolicy {
 	public String getDescription() {
 		return scripts.getDescription();
 	}
-
+	
+	@Override
+	public Boolean getDraft() {
+		return scripts.getDraft();
+	}	
+	
 }
