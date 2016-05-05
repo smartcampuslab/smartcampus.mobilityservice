@@ -327,7 +327,7 @@ public class GamificationController extends SCController {
 			}
 			res2.setItinerary(res);
 			
-			if (res2.getStarted() == false) {
+			if (!res2.getStarted() && !res2.getComplete()) {
 				sendIntineraryDataToGamificationEngine(gameId, userId, res);
 			}
 			if (device != null) {
@@ -359,23 +359,23 @@ public class GamificationController extends SCController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
-	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
-		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
-		int i = 0;
-		for (TrackedInstance ti: result) {
-			try {
-				logger.info("Sending for player " + ti.getItinerary().getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
-				sendIntineraryDataToGamificationEngine(gameId, ti.getItinerary().getUserId(), ti.getItinerary());
-				i++;
-				logger.info("Resent " + i + "/" + result.size());
-				Thread.sleep(1000);
-			} catch (Exception e) {
-				logger.error("Failed to resend gamification data for: " + ti.getId());
-			}
-			
-		}
-	}	
+//	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
+//	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
+//		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+//		int i = 0;
+//		for (TrackedInstance ti: result) {
+//			try {
+//				logger.info("Sending for player " + ti.getItinerary().getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
+//				sendIntineraryDataToGamificationEngine(gameId, ti.getItinerary().getUserId(), ti.getItinerary());
+//				i++;
+//				logger.info("Resent " + i + "/" + result.size());
+//				Thread.sleep(1000);
+//			} catch (Exception e) {
+//				logger.error("Failed to resend gamification data for: " + ti.getId());
+//			}
+//			
+//		}
+//	}	
 	
 	
 	@RequestMapping("/console")
