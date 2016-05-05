@@ -254,7 +254,7 @@ public class GamificationController extends SCController {
 				}
 
 				if (res.getItinerary() != null) {
-					if (res.getStarted() == false) {
+					if (!res.getStarted() && !res.getComplete()) {
 						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
 					}
 
