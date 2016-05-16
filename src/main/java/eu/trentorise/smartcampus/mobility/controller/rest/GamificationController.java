@@ -136,6 +136,8 @@ public class GamificationController extends SCController {
 
 			Collections.sort(geolocationsEvent.getLocation());
 			
+			long now = System.currentTimeMillis();
+			
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
 					String locationTravelId = null;
@@ -154,6 +156,12 @@ public class GamificationController extends SCController {
 //							continue;
 //						}
 					}
+					
+					// discard event older than 2 days
+					if (now - 2*24*3600*1000 > location.getTimestamp().getTime()) {
+						continue;
+					}
+					
 					
 					Coords coords = location.getCoords();
 					Device device = geolocationsEvent.getDevice();
