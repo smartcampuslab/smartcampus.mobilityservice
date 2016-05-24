@@ -99,4 +99,9 @@ public class ScriptedPlanningPolicy implements PlanningPolicy {
 		return scripts.getDraft();
 	}	
 	
+	@Override
+	public PolicyType getPolicyType() {
+		return PolicyType.scripted;
+	}	
+	
 }

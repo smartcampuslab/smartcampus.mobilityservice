@@ -61,4 +61,9 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 		return false;
 	}
 
+	@Override
+	public PolicyType getPolicyType() {
+		return PolicyType.hardcoded;
+	}
+
 }

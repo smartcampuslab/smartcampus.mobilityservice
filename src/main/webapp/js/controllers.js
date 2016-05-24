@@ -1,7 +1,7 @@
 var plannerControllers = angular.module('plannerControllers', [])
 
-.controller('HomeCtrl', ['$scope', '$http', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing', 'taxi',
-  function($scope, $http, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing, taxi) {
+.controller('HomeCtrl', ['$scope', '$http', '$filter', '$routeParams', '$rootScope', '$modal', '$location', 'geocoder', 'planner', 'formatter', 'parking', 'bikesharing', 'taxi',
+  function($scope, $http, $filter, $routeParams, $rootScope, $modal, $location, geocoder, planner, formatter, parking, bikesharing, taxi) {
 
 	// current user position, defaults to Trento
 	$scope.myposition = $rootScope.CENTER;
@@ -11,9 +11,8 @@ var plannerControllers = angular.module('plannerControllers', [])
     $scope.fromMarker = null;
     $scope.toMarker = null;
     $scope.mode = 'fastest';
-    $scope.policy = 'Dummy';
-    $scope.policyDescr = 'Nessuna'
     $scope.policyform = { 'name' : 'Dummy', 'description' : 'Nessuna'};
+    $scope.currentPolicy = { name: 'Dummy', description: 'Nessuna', editable: false, draft : false};
     $scope.wheelchair = false;
     
     $scope.useCoordinates = false;
@@ -24,6 +23,20 @@ var plannerControllers = angular.module('plannerControllers', [])
 	$scope.legElems = [];
 	$scope.planned = false;
 	$scope.loadingInstance = null;
+	
+	
+//	CAR(0,11),BICYCLE(16,0),TRANSIT(0,2),SHAREDBIKE(16,0),SHAREDBIKE_WITHOUT_STATION(16,0),GONDOLA(0,2),
+//	CARWITHPARKING(0,11),SHAREDCAR(0,4),SHAREDCAR_WITHOUT_STATION(0,4),BUS(0,2),TRAIN(0,2),WALK(12,0),SHUTTLE(0,2),
+//	PARK_AND_RIDE(0,4);	
+	
+	$scope.ttypes = [null, "BICYCLE", "SHAREDBIKE", "BUS", "TRAIN", "TRANSIT", "WALK", "CAR", "CARWITHPARKING", "PARK_AND_RIDE"];
+	$scope.rtypes = [null, "fastest", "healthy", "leastWalking", "leastChanges", "greenest", "safest"];
+	$scope.stypes = [null, "fastest", "healthy", "leastWalking", "leastChanges", "greenest", "safest", "fastestAndCheapest"];
+	$scope.smartplannerParameters = ["maxWalkDistance", "maxTotalWalkDistance", "extraTransport", "maxChanges"];
+	$scope.parametrics = [];
+	$scope.parametric = {};
+	
+	$scope.compileform = { "create" : [], "modify" : [], "evaluate" : [], "filter" : { "keep" : 2, "sortType" : "fastest" , "formulas" : []}, "groups" : []};
 	
 	$scope.init = function($http) {
 		$http.get($rootScope.controllerBase + ($rootScope.publishedOnly?'?draft=false':'')).success(function(data) {	
@@ -248,7 +261,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			$scope.mode,
     			$scope.mydate,
     			$scope.mytime,
-    			$scope.policy,
+    			$scope.currentPolicy.name,
     			$scope.wheelchair
     			)
     	.success(function(data){
@@ -338,7 +351,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			$scope.mode,
     			$scope.mydate,
     			$scope.mytime,
-    			$scope.policy,
+    			$scope.currentPolicy.name,
     			$scope.wheelchair);
     	$('#reqbutton').popover('destroy');
     	if (!$scope.popoverShown) {
@@ -358,7 +371,7 @@ var plannerControllers = angular.module('plannerControllers', [])
     			$scope.mode,
     			$scope.mydate,
     			$scope.mytime,
-    			$scope.policy,
+    			$scope.currentPolicy.name,
     			$scope.wheelchair);
     	var dataTxt = JSON.stringify(data);
     	window.open("mailto:"+MAIL+"?subject=Web Planner: segnalazione problemi&body="+dataTxt);
@@ -471,48 +484,53 @@ var plannerControllers = angular.module('plannerControllers', [])
     };
     
     
-	$scope.resetPolicy = function() {
-		$scope.policyform = {};
-		$scope.policyeditable = true;
-		$scope.updatePolicy = false;
-	}
+    ////////////////
+    
+//    $scope.resetPolicy = function() {
+//		$scope.message = "";
+//		$scope.error = "";  	
+//		$scope.policyform = { elements : []};
+//		$scope.parametrics = {};
+//		$scope.updatePolicy = false;
+//		$scope.currentPolicy = { policyType : 'compiled', editable: true, enabled : true};
+////		$('#compiledmodal').modal('show');
+//	}	    
+    
+    
+    
+//    $scope.resetPolicy = function($type) {
+//		$scope.message = "";
+//		$scope.error = "";  	
+//		$scope.policyform = { elements : []};
+//		$scope.parametrics = {};
+//		$scope.updatePolicy = false;
+//		$scope.currentPolicy = { policyType : $type, editable: true, enabled : true};
+////		$('#multimodal').modal('show');
+//	}			
 	
-	$scope.setPolicy = function($policy, $editable) {
-		$scope.policy = $policy.name;
-		$scope.policyDescr = $policy.description;
-		$scope.policyeditable = $editable;
-		if (!$editable) {
-			$scope.policyform = {};
-			$scope.policyform.name = $policy.name;
-			$scope.policyform.description = $description;
-		}
-		$('#policyIds-dropdown').attr('data-original-title', $policy.description);
-	}    
+	
+   
     
-	$scope.readPolicies = function(draft) {
-		$http.get($rootScope.controllerBase + "?draft=" + draft).success(function(data) {	
-			$scope.policyIds = data;
-		}); 
-	}    
-    
-    $scope.readPolicy = function() {
-		$scope.message = "";
-		$scope.error = "";    	
-    	$http.get($rootScope.controllerBase + $scope.policy, {
-			headers : {
-				'Content-Type' : "application/json",
-				'Accept' : "application/json"
-			}
-		}).success(function(data) {
-			$scope.policyform = data;
-			$scope.policyeditable = true;
-			$scope.updatePolicy = true;
-		}).error(function(data) {
-			$scope.policyeditable = false;
-		});
-    }
 
-    $scope.savePolicy = function() {
+    
+//    $scope.readPolicy = function() {
+//		$scope.message = "";
+//		$scope.error = "";  
+//    	$http.get($rootScope.controllerBase + "/" + $scope.currentPolicy.policyType + "/" + $scope.currentPolicy.name, {
+//			headers : {
+//				'Content-Type' : "application/json",
+//				'Accept' : "application/json"
+//			}
+//		}).success(function(data) {
+//			$scope.policyform = data;
+//			$scope.updatePolicy = true;
+//			console.log(JSON.stringify($scope.policyform, null, 2));
+//		}).error(function(data) {
+//		});
+//    }
+
+    /*
+    $scope.saveScriptedPolicy = function() {
 	if ($scope.policyform) {
 		$http({
 			'method' : ($scope.updatePolicy ? 'PUT' : 'POST'),
@@ -531,49 +549,281 @@ var plannerControllers = angular.module('plannerControllers', [])
 				'Accept' : "application/json"
 			}
 		}).success(function(data, status, headers, config) {
-			$scope.message = headers("msg");
+			$scope.message = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("msg");
 			$scope.error = "";
 			$http.get($rootScope.controllerBase).success(function(data) {
 				$scope.policyIds = data;
 			});
 		}).error(function(data, status, headers, config) {
 			$scope.message = "";
-			$scope.error = headers("error_msg");
+			$scope.error = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("error_msg");
 		});
 	}
 }
     
+	$scope.addNewParametric = function($type) {
+//		console.log(JSON.stringify($scope.policyform, null, 2));
+		$scope.policyform.elements.push({"type" : $type});
+	}
 
-	    $scope.deletePolicy = function() {
-		if (confirm('Sei sicuro di voler eliminare la politica "' + $scope.policyDescr + ' (' + $scope.policy + ')"?')) {
-
-			$scope.message = "";
-			$scope.error = "";
+	$scope.copyParametric = function($parametric) {
+		var index = $scope.policyform.elements.indexOf($parametric);
+		$scope.policyform.elements.splice(index + 1, 0, JSON.parse(JSON.stringify($parametric)));
+//		$scope.policyform.elements.push(JSON.parse(JSON.stringify($parametric)));
+		$scope.$apply();
+	}	
+	
+	
+	$scope.removeParametric = function($parametric) {
+		$scope.policyform.elements = $scope.policyform.elements.filter(function($elem) {
+			return $elem !== $parametric;
+		});
+	}
+    
+	///////////////
+	
+	$scope.saveParametricPolicy = function() {
+		console.log(JSON.stringify($scope.policyform, null, 2));
 			$http({
-				'method' : 'DELETE',
-				'url' : $rootScope.controllerBase + $scope.policy,
-			}).success(function(data) {
-				$scope.policy = 'Dummy';
-				$scope.policyDescr = 'Nessuna'
-				$scope.policyform = {
-					'name' : 'Dummy',
-					'description' : 'Nessuna'
-				};
+//				'method' : ($scope.updatePolicy ? 'PUT' : 'POST'),
+				'method' : 'POST',
+				'url' : $rootScope.controllerBase + "/parametric",
+				'data' : {
+					'name' : $scope.policyform.name,
+					'description' : $scope.policyform.description,
+					'elements' : $scope.policyform.elements.filter(function($elem) {
+						return $elem.type !== "group"}),
+					'groups' : $scope.policyform.elements.filter(function($elem) {
+							return $elem.type == "group"}),						
+					'draft' : $scope.policyform.draft
+				},
+				'headers' : {
+					'Content-Type' : "application/json",
+					'Accept' : "application/json"
+				}
+			}).success(function(data, status, headers, config) {
+				$scope.message = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("msg");
+				$scope.error = "";
 				$http.get($rootScope.controllerBase).success(function(data) {
 					$scope.policyIds = data;
 				});
-			}).error(function(data) {
-				X
+			}).error(function(data, status, headers, config) {
+				$scope.message = "";
+				$scope.error = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("error_msg");
 			});
+	}	
+	*/
+	
+	
+	///////////////
+	
+    $scope.resetPolicy = function() {
+		$scope.message = "";
+		$scope.error = "";  	
+		$scope.compileform = {"name" : null, "description" : null, "create" : [], "modify" : [], "evaluate" : [], "filter" : { "keep" : 2, "sortType" : "fastest" , "formulas" : []}, "groups" : []};
+		$scope.updatePolicy = false;
+	}	  	
+    
+	$scope.readPolicies = function(draft) {
+		$http.get($rootScope.controllerBase + "?draft=" + draft).success(function(data) {	
+			$scope.policyIds = data;
+		}); 
+	}        
+	
+    $scope.readPolicy = function() {
+		$scope.message = "";
+		$scope.error = "";  
+    	$http.get($rootScope.controllerBase + "/compiled/" + $scope.currentPolicy.name, {
+			headers : {
+				'Content-Type' : "application/json",
+				'Accept' : "application/json"
+			}
+		}).success(function(data) {
+			$scope.compileform = data;
+			$scope.updatePolicy = true;
+			console.log(JSON.stringify($scope.compileform, null, 2));
+		}).error(function(data) {
+		});
+    }	
+	
+	$scope.setPolicy = function($policy) {
+		$scope.currentPolicy = $policy;
+		if (!$policy.editable) {
+			$scope.compileform = $policy;
 		}
-	} 
-    
-    
+		$('#policyIds-dropdown').attr('data-original-title', $policy.name);
+	} 	
+	
+	$scope.addCreate = function() {
+		$scope.compileform.create.push({"action" : { "promoted" : true}});
+	}
+	
+	$scope.addModify = function() {
+		$scope.compileform.modify.push({"action" : { "promoted" : true}});
+	}	
+	
+	$scope.addEvaluate = function() {
+		$scope.compileform.evaluate.push({"action" : { "promoted" : true}});
+	}		
+	
+	$scope.addFilterFormula = function() {
+		$scope.compileform.filter.formulas.push("promoted && ");
+		$scope.compileform.filter.enabled.push(true);
+	}		
+	
+	$scope.addGroup = function() {
+		$scope.compileform.groups.push({});
+	}		
+	
+	
+	$scope.removeCreate = function($create) {
+		$scope.compileform.create = $scope.compileform.create.filter(function($elem) {
+			return $elem !== $create;
+		});
+	}
+	
+	$scope.removeModify = function($modify) {
+		$scope.compileform.modify = $scope.compileform.modify.filter(function($elem) {
+			return $elem !== $modify;
+		});
+	}	
+	
+	$scope.removeEvaluate = function($evaluate) {
+		$scope.compileform.evaluate = $scope.compileform.evaluate.filter(function($elem) {
+			return $elem !== $evaluate;
+		});
+	}	
+	
+	$scope.removeFilterFormula = function($formula) {
+		$scope.compileform.filter.formulas = $scope.compileform.filter.formulas.filter(function($elem) {
+			return $elem !== $formula;
+		});
+	}		
+	
+//	$scope.toggleComment = function($index) {
+//		if ($scope.compileform.filter.formulas[$index].startsWith("//")) {
+//			$scope.compileform.filter.formulas[$index] = $scope.compileform.filter.formulas[$index].replace("//", "").trim();
+//		} else {
+//			$scope.compileform.filter.formulas[$index] = "// " + $scope.compileform.filter.formulas[$index];
+//		}
+//	}
+	
+	$scope.toggleFormula = function($index) {
+		console.log($scope.compileform.filter.enabled[$index]);
+		$scope.compileform.filter.enabled[$index] = !$scope.compileform.filter.enabled[$index];
+		console.log($scope.compileform.filter.enabled[$index]);
+	}	
+	
+	$scope.removeGroup = function($group) {
+		$scope.compileform.group = $scope.compileform.group.filter(function($elem) {
+			return $elem !== $group;
+		});
+	}	
+	
+	$scope.getGroupNames = function() {
+		res = [null];
+		for (i = 0; i < $scope.compileform.groups.length; i++) {
+			res.push($scope.compileform.groups[i].name);
+		}
+		return res;
+	}	
+	
+	
+	$scope.saveCompiledPolicy = function() {
+		console.log(JSON.stringify($scope.compileform, null, 2));
+			$http({
+				'method' : 'POST',
+				'url' : $rootScope.controllerBase + "/compiled",
+				'data' : $scope.compileform,
+				'headers' : {
+					'Content-Type' : "application/json",
+					'Accept' : "application/json"
+				}
+			}).success(function(data, status, headers, config) {
+				$scope.message = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("msg");
+				$scope.compileform = data;
+				$scope.error = "";
+				$http.get($rootScope.controllerBase).success(function(data) {
+					$scope.policyIds = data;
+				});
+				$scope.$apply();
+			}).error(function(data, status, headers, config) {
+				$scope.message = "";
+				$scope.error = $filter('date')(new Date(), "hh:mm:ss") + ": " + headers("error_msg");
+			});
+	}		
+	
+	$scope.deletePolicy = function() {
+		bootbox.confirm('Sei sicuro di voler eliminare la politica <strong>' + $scope.currentPolicy.name + ' (' + $scope.currentPolicy.description + ')</strong>?', function(result) {
+			if (result) {
+				$scope.message = "";
+				$scope.error = "";
+				$http({
+					'method' : 'DELETE',
+					'url' : $rootScope.controllerBase + "/compiled/" + $scope.currentPolicy.name,
+				}).success(function(data) {
+					$scope.policyform = {
+						'name' : 'Dummy',
+						'description' : 'Nessuna'
+					};
+					$scope.currentPolicy = { name: 'Dummy', description: 'Nessuna', editable : false, draft : false};
+					$http.get($rootScope.controllerBase).success(function(data) {
+						$scope.policyIds = data;
+					});
+				}).error(function(data) {
+				});
+			}
+		});
+	}	
+	
+	
+	//////////////
     
     
     $(document).ready(function(){
-    	$('#policyIds-dropdown').tooltip({placement: 'left', title: $scope.policyDescr, html: true});   
+    	$('#policyIds-dropdown').tooltip({placement: 'left', title: $scope.currentPolicy.name, html: true});
+    	
+    	var hash = window.location.hash;
+        var link = $('a');
+        $('.nav-tabs > li > a').click(function (e) {
+        	console.log("???");
+        	alert( "Handler for .click() called." );        	
+          e.preventDefault();
+          hash = link.attr("href");
+          window.location = hash;
+        });    	
+    	
+    	
+/*    	$('.nav-tabs li a').click(function (e) {
+			alert( "Handler for .click() called." ); 
+    	    e.preventDefault();
+    	    $(this).tab('show');
+    	    $('.tab-content > .tab-pane.active').jScrollPane();
+    	}); */   	
+    	
+    	
+/*    	if (location.hash !== '') {
+    	    $('.nav-tabs a[href="' + location.hash.replace('tab_','') + '"]').tab('show');
+    	} else {
+    	    $('.nav-tabs a:first').tab('show');
+    	}
+
+    	$('.nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    	      window.location.hash = 'tab_'+  e.target.hash.substr(1) ; 
+    	      return false;
+    	});   */ 	
+    	
+/*    	$('.nav-tabs a').click(function (e) {
+    	      e.preventDefault();
+    	      $(this).tab('show');
+    	    });   */ 	
+/*        $('#a').click(function (a) {
+        	alert( "Handler for .click() called." );
+      	  
+      	  $(this).tab('show');
+      	});*/
     }); 
+   
     
 }]);
 

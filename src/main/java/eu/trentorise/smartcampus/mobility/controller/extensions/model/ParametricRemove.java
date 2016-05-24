@@ -1,5 +1,6 @@
 package eu.trentorise.smartcampus.mobility.controller.extensions.model;
 
+
 public class ParametricRemove {
 
 	private int maxEndtimeFromMaxTime;

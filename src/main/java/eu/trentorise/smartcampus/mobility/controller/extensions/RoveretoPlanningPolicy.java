@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 
@@ -33,34 +34,38 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		List<TType> types = Arrays.asList(journeyRequest.getTransportTypes());
 		Set<TType> allTypes = Sets.newHashSet(types);
 		
-		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1);
-		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1);
-		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2);
+		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, SortType.convertType(journeyRequest.getRouteType()));
+		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1, SortType.convertType(journeyRequest.getRouteType()));
+		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2, SortType.convertType(journeyRequest.getRouteType()));
 		
 		for (PlanningRequest pr: originalPlanningRequests) {
 			TType type = pr.getType(); 
 			
 			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
 				if (!allTypes.contains(TType.PARK_AND_RIDE)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.PARK_AND_RIDE, null, null, true, prg1a);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.PARK_AND_RIDE, null, null, true, prg1a);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.PARK_AND_RIDE, null, null, null, null, true, prg1a);
 					result.add(npr);
 					allTypes.add(TType.PARK_AND_RIDE);
 				}	
 				
 				if (!allTypes.contains(TType.WALK)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, null);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, null);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, null, null, true, null);
 					result.add(npr);
 					allTypes.add(TType.WALK);
 				}	
 				
 				if (!allTypes.contains(TType.TRANSIT)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRANSIT, null, null, true, prg1b);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRANSIT, null, null, true, prg1b);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRANSIT, null, null, null, null, true, prg1b);
 					result.add(npr);
 					allTypes.add(TType.TRANSIT);
 				}
 				
 				if (!allTypes.contains(TType.SHAREDBIKE)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg1b);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg1b);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, null, true, prg1b);
 					result.add(npr);
 					allTypes.add(TType.SHAREDBIKE);
 				}					
@@ -70,19 +75,22 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 			
 			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 				if (!allTypes.contains(TType.TRAIN)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null, true, prg2);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null, true, prg2);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null ,null, null, true, prg2);
 					result.add(npr);
 					allTypes.add(TType.TRAIN);
 				}	
 				
 				if (!allTypes.contains(TType.SHAREDBIKE)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg2);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg2);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, null, true, prg2);
 					result.add(npr);
 					allTypes.add(TType.SHAREDBIKE);
 				}					
 				
 				if (!allTypes.contains(TType.WALK)) {
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, prg2);
+//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, prg2);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, null, null, true, prg2);
 					result.add(npr);
 					allTypes.add(TType.WALK);
 				}					
@@ -210,6 +218,11 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 	@Override
 	public Boolean getDraft() {
 		return false;
+	}	
+	
+	@Override
+	public PolicyType getPolicyType() {
+		return PolicyType.hardcoded;
 	}	
 	
 }

@@ -17,8 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ScriptedPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.request.ParametricPolicyRequest;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -38,6 +39,7 @@ public class DomainStorage {
 	private static final String SAVED = "savedtrips";
 	private static final String PARAMETRIC_POLICY = "parametricPolicies";
 	private static final String SCRIPTED_POLICY = "scriptedPolicies";
+	private static final String COMPILED_POLICY = "compiledPolicies";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -69,12 +71,15 @@ public class DomainStorage {
 		if (cls == SavedTrip.class) {
 			return SAVED;
 		}	
-		if (cls == ParametricPolicy.class) {
+		if (cls == ParametricPolicyRequest.class) {
 			return PARAMETRIC_POLICY;
 		}
 		if (cls == ScriptedPolicy.class) {
 			return SCRIPTED_POLICY;
-		}				
+		}		
+		if (cls == CompilablePolicyData.class) {
+			return COMPILED_POLICY;
+		}			
 		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
 	
@@ -205,19 +210,47 @@ public class DomainStorage {
 		template.save(savedTrip, SAVED);
 	}
 	
-	public void savePolicy(ParametricPolicy policy) {
+	public void savePolicy(CompilablePolicyData policy) {
 		Query query = new Query(new Criteria("name").is(policy.getName()));
-		ParametricPolicy policiesDB = searchDomainObject(query, ParametricPolicy.class);
+		CompilablePolicyData policiesDB = searchDomainObject(query, CompilablePolicyData.class);
+		if (policiesDB == null) {
+			template.save(policy, COMPILED_POLICY);
+		} else {
+			Update update = new Update();
+			update.set("description", policy.getDescription());
+			update.set("create", policy.getCreate());
+			update.set("modify", policy.getModify());
+			update.set("extract", policy.getExtract());
+			update.set("evaluate", policy.getEvaluate());
+			update.set("filter", policy.getFilter());
+			update.set("generateCode", policy.getGenerateCode());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());
+			update.set("modifiedGenerate", policy.isModifiedGenerate());
+			update.set("modifiedEvaluate", policy.isModifiedEvaluate());
+			update.set("modifiedExtract", policy.isModifiedExtract());
+			update.set("modifiedFilter", policy.isModifiedFilter());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());			
+			update.set("groups", policy.getGroups());
+			update.set("draft", policy.getDraft());
+			template.updateFirst(query, update, COMPILED_POLICY);
+		}
+	}		
+	
+	public void savePolicy(ParametricPolicyRequest policy) {
+		Query query = new Query(new Criteria("name").is(policy.getName()));
+		ParametricPolicyRequest policiesDB = searchDomainObject(query, ParametricPolicyRequest.class);
 		if (policiesDB == null) {
 			template.save(policy, PARAMETRIC_POLICY);
 		} else {
 			Update update = new Update();
 			update.set("description", policy.getDescription());
-			update.set("evaluate", policy.getEvaluate());
-			update.set("generate", policy.getGenerate());
+			update.set("elements", policy.getElements());
 			update.set("groups", policy.getGroups());
-			update.set("modify", policy.getModify());
-			update.set("remove", policy.getRemove());
+			update.set("draft", policy.getDraft());
 			template.updateFirst(query, update, PARAMETRIC_POLICY);
 		}
 	}	

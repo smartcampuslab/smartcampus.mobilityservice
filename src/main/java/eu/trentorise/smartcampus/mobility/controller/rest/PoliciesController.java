@@ -1,7 +1,5 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -9,13 +7,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.MultipleCompilationErrorsException;
-import org.codehaus.groovy.control.messages.Message;
-import org.codehaus.groovy.tools.Compiler;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,9 +22,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.ScriptedPlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ScriptedPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.VelocityCompiler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerService;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 
@@ -43,6 +36,50 @@ public class PoliciesController {
 	
 	@Autowired
 	private SmartPlannerService plannerService;
+	
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/compiled")
+	public @ResponseBody CompilablePolicyData saveCompiledPolicy(@RequestBody CompilablePolicyData policy, HttpServletResponse response) throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		System.out.println(mapper.writeValueAsString(policy));
+		if (policy.getName() == null || policy.getDescription() == null) {
+			response.addHeader("error_msg", "\"Nome\" e \"Descrizione\" sono obbligatori.");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		} else {
+			try {
+				VelocityCompiler velo = new VelocityCompiler();
+				velo.compile(policy);
+				velo.check(policy);
+				domainStorage.savePolicy(policy);
+				response.addHeader("msg", "Politica salvata.");
+			} catch (Exception e) {
+				response.addHeader("error_msg", e.getMessage());
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
+		}
+		return policy;
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/compiled/{name}")
+	public @ResponseBody CompilablePolicyData getCompiledPolicy(@PathVariable String name, HttpServletResponse response) throws Exception {
+		Map <String, Object> query = Maps.newTreeMap();
+		query.put("name", name);
+		CompilablePolicyData result = domainStorage.searchDomainObject(query, CompilablePolicyData.class);
+		if (result == null) {
+			response.addHeader("error_msg", "Politica non trovata.");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		return result;
+	}	
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/compiled/{name}")
+	public @ResponseBody void deleteCompiledPolicy(@PathVariable String name, HttpServletResponse response) throws Exception {
+		Criteria criteria = new Criteria("name").is(name);
+		domainStorage.deleteDomainObject(criteria, CompilablePolicyData.class);
+	}	
+	
+	///////////////
+	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/")
 	public @ResponseBody List<Map> list(@RequestParam(required=false) Boolean draft, HttpServletResponse response) throws Exception {
@@ -62,15 +99,18 @@ public class PoliciesController {
 			policyMap.put("name", policy.getName());
 			policyMap.put("description", policy.getDescription());
 			policyMap.put("draft", policy.getDraft());
+			policyMap.put("editable", true);
+			policyMap.put("policyType", policy.getPolicyType());
 			result.add(policyMap);
 //			map.put(policy.getName(), policyMap);
 		}
 		return result;
 	}
 
+	/*
 	// TODO: only "scripted" now
-	@RequestMapping(method = RequestMethod.GET, value = "/{name}")
-	public @ResponseBody ScriptedPolicy list(@PathVariable String name, HttpServletResponse response) throws Exception {
+	@RequestMapping(method = RequestMethod.GET, value = "/scripted/{name}")
+	public @ResponseBody ScriptedPolicy listScripted(@PathVariable String name, HttpServletResponse response) throws Exception {
 		Map <String, Object> query = Maps.newTreeMap();
 		query.put("name", name);
 		ScriptedPolicy result = domainStorage.searchDomainObject(query, ScriptedPolicy.class);
@@ -81,7 +121,22 @@ public class PoliciesController {
 		return result;
 	}	
 	
-	@RequestMapping(method = RequestMethod.DELETE, value = "/{name}")
+	// TODO: only "scripted" now
+	@RequestMapping(method = RequestMethod.GET, value = "/parametric/{name}")
+	public @ResponseBody ParametricPolicyRequest listParametric(@PathVariable String name, HttpServletResponse response) throws Exception {
+		Map <String, Object> query = Maps.newTreeMap();
+		query.put("name", name);
+		ParametricPolicyRequest result = domainStorage.searchDomainObject(query, ParametricPolicyRequest.class);
+		if (result == null) {
+			response.addHeader("error_msg", "Politica non trovata.");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		return result;
+	}		
+	
+	
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/scripted/{name}")
 	public @ResponseBody void delete(@PathVariable String name, HttpServletResponse response) throws Exception {
 		Criteria criteria = new Criteria("name").is(name);
 		domainStorage.deleteDomainObject(criteria, ScriptedPolicy.class);
@@ -89,14 +144,22 @@ public class PoliciesController {
 	
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/parametric")
-	public @ResponseBody void savePolicy(@RequestBody ParametricPolicy policy, HttpServletResponse response) throws Exception {
-		if (policy.getName() == null) {
-			response.addHeader("error_msg", "\"Nome\" è obbligatorio.");
+	public @ResponseBody void savePolicy(@RequestBody ParametricPolicyRequest policy, HttpServletResponse response) throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		System.out.println(mapper.writeValueAsString(policy));
+		if (policy.getName() == null || policy.getDescription() == null) {
+			response.addHeader("error_msg", "\"Nome\" e \"Descrizione\" sono obbligatori.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
+		try {
 		domainStorage.savePolicy(policy);
 		
+		response.addHeader("msg", "Politica salvata.");
+		} catch (Exception e) {
+			response.addHeader("error_msg", e.getMessage());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 //	@RequestMapping(method = RequestMethod.PUT, value = "/scripted", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -113,8 +176,8 @@ public class PoliciesController {
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/scripted", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public @ResponseBody void saveScripted(@RequestBody ScriptedPolicy policy, HttpServletResponse response) throws Exception {
-		if (policy.getName() == null) {
-			response.addHeader("error_msg", "\"Nome\" è obbligatorio.");
+		if (policy.getName() == null || policy.getDescription() == null) {
+			response.addHeader("error_msg", "\"Nome\" e \"Descrizione\" sono obbligatori.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}		
@@ -149,32 +212,36 @@ public class PoliciesController {
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/scripted", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public @ResponseBody void updateScripted(@RequestBody ScriptedPolicy policy, HttpServletResponse response) throws Exception {
-		if (policy.getName() == null) {
-			response.addHeader("error_msg", "\"Nome\" è obbligatorio.");
+		if (policy.getName() == null || policy.getDescription() == null) {
+			response.addHeader("error_msg", "\"Nome\" e \"Descrizione\" sono obbligatori.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}		
 		
-//		try {
-//		CompilerConfiguration conf = CompilerConfiguration.DEFAULT;
-//		Compiler compiler = new Compiler(conf);
-//		
-//		compiler.compile("1", ScriptedPlanningPolicy.IMPORTS + policy.getGeneratePlanRequests());
-//		compiler.compile("2", ScriptedPlanningPolicy.IMPORTS + policy.getEvaluatePlanResults());
-//		compiler.compile("3", ScriptedPlanningPolicy.IMPORTS + policy.getExtractItinerariesFromPlanResults());
-//		compiler.compile("4", ScriptedPlanningPolicy.IMPORTS + policy.getFilterAndSortItineraries());
+		try {
+		CompilerConfiguration conf = CompilerConfiguration.DEFAULT;
+		Compiler compiler = new Compiler(conf);
+		
+		compiler.compile("1", ScriptedPlanningPolicy.IMPORTS + policy.getGeneratePlanRequests());
+		compiler.compile("2", ScriptedPlanningPolicy.IMPORTS + policy.getEvaluatePlanResults());
+		compiler.compile("3", ScriptedPlanningPolicy.IMPORTS + policy.getExtractItinerariesFromPlanResults());
+		compiler.compile("4", ScriptedPlanningPolicy.IMPORTS + policy.getFilterAndSortItineraries());
 		
 		domainStorage.savePolicy(policy, true);
 		response.addHeader("msg", "Politica salvata.");
 		
-//		plannerService.addPolicy(policy);
-//		} catch (MultipleCompilationErrorsException e) {
-//			for (Object o : e.getErrorCollector().getErrors()) {
-//				Message msg = (Message)o;
-//				msg.write(response.getWriter());
-//			}
-//		}
+		} catch (MultipleCompilationErrorsException e) {
+			for (Object o : e.getErrorCollector().getErrors()) {
+				Message msg = (Message)o;
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw, true);
+				msg.write(pw);
+				response.addHeader("error_msg", sw.getBuffer().toString());
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			}
+		}
 	}		
+	*/
 	
 	@RequestMapping("/console")
 	public String vewConsole() {

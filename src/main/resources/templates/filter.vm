@@ -1,0 +1,51 @@
+#include ("imports.vm")
+#macro(null $check)
+#if(!$check)null#else${check}#end
+#end
+#foreach($pe in $pf.getFormulas())
+			 
+// condition filter ${foreach.count}
+boolean evaluate_f${foreach.count}(startime, endtime, duration, distance, minTime, maxTime, minDuration, maxDuration, minDistance, maxDistance, promoted) {
+	return $pe;
+};
+#end
+
+##List filterAndSortItineraries(journeyRequest, itineraries) {
+	def result = Lists.newArrayList(itineraries);
+	def comparator = ItinerarySorter.comparatorBySortType($helper.toString($pf.getSortType()));
+	
+	def an = PlanningPolicyHelper.analyzeItineraries(itineraries, false);
+		
+	def toRemove = [];
+		
+	for (it in itineraries) {
+		if (!it.isPromoted()) {
+			continue;
+		}
+		
+		def distance = 0.0;
+		for (leg in it.getLeg()) {
+			distance += leg.getLength();
+		}		
+		
+#foreach($pe in $pf.getFormulas())
+#set( $arraycount = ${foreach.count} - 1 )
+#if ($pf.getEnabled().get($arraycount))		
+		if (evaluate_f${foreach.count}((double)it.startime, (double)it.endtime, (double)it.duration, (double)distance, (double)an.minTime, (double)an.maxTime, (double)an.minDuration, (double)an.maxDuration, (double)an.minDistance, (double)an.maxDistance, it.promoted)) {
+			toRemove.add(it);
+			continue;
+		}
+#end		
+#end			
+	}
+	
+	result.removeAll(toRemove);
+	
+	result = PlanningPolicyHelper.keepPromotedDuplicated(result);
+	
+	result = PlanningPolicyHelper.keepBestPromoted(result, comparator, $pf.getKeep());
+	
+	ItinerarySorter.sortDisjoined(result, comparator);
+	return result;	
+##}
+

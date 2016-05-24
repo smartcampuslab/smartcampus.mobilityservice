@@ -1,0 +1,84 @@
+<div id="scriptedModal" class="modal fade" role="dialog" data-backdrop="static">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title">{{actionMsg}} politica</h3>
+			</div>
+			<div class="modal-body">
+				<form id="policy-form" ng-submit="saveScriptedPolicy()">
+					<div class="form-group">
+						<label> *Nome </label><input class="form-control" type="text" required
+							ng-model="policyform.name" name="name" ng-readonly="!currentPolicy.editable" />
+					</div>		
+					<div class="form-group">					
+						<label> Descrizione </label><input class="form-control" required
+							type="text" ng-model="policyform.description" name="description" ng-readonly="!currentPolicy.editable" />
+					</div>
+					<div class="form-group">
+						<label> <i>generatePlanRequests()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5"  required
+							ng-model="policyform.generatePlanRequests" ng-trim="false"
+							name="generatePlanRequests" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>evaluatePlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required
+							ng-model="policyform.evaluatePlanResults" ng-trim="false"
+							name="evaluatePlanResults" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>extractItinerariesFromPlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required
+							ng-model="policyform.extractItinerariesFromPlanResults" ng-trim="false"
+							name="extractItinerariesFromPlanResults" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>filterAndSortItineraries()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required 
+							ng-model="policyform.filterAndSortItineraries" ng-trim="false"
+							name="filterAndSortItineraries" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<input type="checkbox"  
+							ng-model="policyform.draft"
+							name="draft" ng-readonly="!policyeditable" ng-readonly="!currentPolicy.editable">
+						</input>
+						<label> <i> DRAFT</i>
+						</label>						
+					</div>
+
+
+					<ul class="nav nav-pills">
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-primary navbar-btn" ng-click="submit">
+									Salva</button>
+							</div>
+						</li>
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-primary navbar-btn" data-dismiss="modal"">
+									Chiudi</button>
+							</div>
+						</li>
+					</ul>
+
+					<div>
+						<span ng-bind="message" class="notification-ok"></span>
+						<span ng-bind="error" class="notification-error"></span>
+						<span>&nbsp;</span>
+					</div>					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+

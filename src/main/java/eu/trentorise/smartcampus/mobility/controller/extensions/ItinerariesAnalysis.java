@@ -11,4 +11,6 @@ public class ItinerariesAnalysis {
 	public double minDistance = Double.MAX_VALUE;
 	public double maxDistance = 0;
 	
+	// changes
+	
 }

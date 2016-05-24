@@ -1,3 +1,5 @@
+
+
 <div class="row">
 	<div class="col-md-8 col-md-offset-3">
     <h2>Smart Planner</h2>
@@ -215,27 +217,22 @@
 					<div class="container-fluid">
 						<ul class="nav navbar-nav navbar-left">
 							<li>
-							
 							<button class="btn btn-default navbar-btn" id="policyIds-dropdown"
 									data-toggle="dropdown" aria-haspopup="true"
 									aria-expanded="false"">
-									{{ policyDescr }}<span class="caret"></span>
+									{{ currentPolicy.description }}<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu policyIds-dropdown">
-									<li class="list-group-item"
-										ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', draft : false} , false)">
+									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', editable: false, draft : false, policyType : 'hardcoded'} , false)">
 										<a><strong>Nessuna</strong></a></li>
-									<li class="list-group-item"
-										ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', draft: false}, false)">
+									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', editable: false, draft: false, policyType : 'hardcoded'}, false)">
 										<a><strong>Park and Ride</strong></a></li>
-									<li class="list-group-item"
-										ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', draft: false} , false)">
+									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', editable: false, draft: false, policyType : 'hardcoded'} , false)">
 										<a><strong>Bike Sharing</strong></a></li>
-								
-									<li class="list-group-item"
-										ng-repeat="policy in policyIds"
-										ng-click="setPolicy(policy, true)">
-										<a><em ng-if="policy.draft">*{{ policy.description }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
+									<li role="separator" class="divider"></li>
+									<li ng-repeat="policy in policyIds"
+										ng-click="setPolicy(policy, true, policyType)">
+										<a><em ng-if="policy.draft">*{{ policy.description + "_" + policy.policyType }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
 								</ul></li>
 							</ul>								
 							
@@ -251,17 +248,20 @@
 				<h3 class="panel-title">Gestione politiche sostenibili</h3>
 			</div>
 			<div class="panel-body">
-				<button class="btn btn-primary navbar-btn" ng-click="resetPolicy(); actionMsg='Crea'" data-toggle="modal" style="width:250px"
-					data-target="#policyModal">
+				<button class="btn btn-default navbar-btn" ng-click="resetPolicy(); actionMsg='Crea'" style="width:250px" data-toggle="modal" data-target="#compiledmodal">
 					Crea nuova politica
 				</button>
-				<button class="btn btn-primary navbar-btn" ng-click="readPolicy(); actionMsg='Modifica'" data-toggle="modal" style="width:250px" ng-disabled="!policyeditable"
-					data-target="#policyModal">
+				<button class="btn btn-default navbar-btn" ng-click="readPolicy(); actionMsg='Modifica'" style="width:250px" data-toggle="modal"  ng-disabled="!currentPolicy.editable"
+					data-target="#compiledmodal">
 					Modifica la politica corrente
 				</button>	
-				<button class="btn btn-primary navbar-btn" ng-click="deletePolicy()" actionMsg='Elimina'" data-toggle="modal" style="width:250px" ng-disabled="!policyeditable">
+				<button class="btn btn-warning navbar-btn" ng-click="deletePolicy()" actionMsg='Elimina'" style="width:250px" data-toggle="modal" ng-disabled="!currentPolicy.editable">
 					Elimina la politica corrente
+				</button>		
+				<button class="btn btn-danger navbar-btn" ng-click="resetPolicy('parametric'); actionMsg='Crea'" style="width:250px" data-toggle="modal" data-target="#multimodal">
+					Crea nuova parametric
 				</button>				
+						
 			</div>
 		</div>
 	</div>
@@ -396,75 +396,7 @@
   </div>
  </div>
 
-
-<div id="policyModal" class="modal fade" role="dialog">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3 class="modal-title">{{actionMsg}} politica</h3>
-			</div>
-			<div class="modal-body">
-				<form id="policy-form" ng-submit="savePolicy()">
-					<div class="form-group">
-						<label> *Nome </label><input class="form-control" type="text" required
-							ng-model="policyform.name" name="name" ng-readonly="!policyeditable" />
-					</div>		
-					<div class="form-group">					
-						<label> Descrizione </label><input class="form-control" required
-							type="text" ng-model="policyform.description" name="description" ng-readonly="!policyeditable" />
-					</div>
-					<div class="form-group">
-						<label> <i>generatePlanRequests()</i>
-						</label>
-						<textarea class="form-control" type="text" rows="6"  required
-							ng-model="policyform.generatePlanRequests" ng-trim="false"
-							name="generatePlanRequests" ng-readonly="!policyeditable" />
-						</textarea>
-					</div>
-					<div class="form-group">
-						<label> <i>evaluatePlanResults()</i>
-						</label>
-						<textarea class="form-control" type="text" rows="6" required
-							ng-model="policyform.evaluatePlanResults" ng-trim="false"
-							name="evaluatePlanResults" ng-readonly="!policyeditable" />
-						</textarea>
-					</div>
-					<div class="form-group">
-						<label> <i>extractItinerariesFromPlanResults()</i>
-						</label>
-						<textarea class="form-control" type="text" rows="6" required
-							ng-model="policyform.extractItinerariesFromPlanResults" ng-trim="false"
-							name="extractItinerariesFromPlanResults" ng-readonly="!policyeditable" />
-						</textarea>
-					</div>
-					<div class="form-group">
-						<label> <i>filterAndSortItineraries()</i>
-						</label>
-						<textarea class="form-control" type="text" rows="6" required 
-							ng-model="policyform.filterAndSortItineraries" ng-trim="false"
-							name="filterAndSortItineraries" ng-readonly="!policyeditable" />
-						</textarea>
-					</div>
-					<div class="form-group">
-						<input type="checkbox"  
-							ng-model="policyform.draft"
-							name="draft" ng-readonly="!policyeditable" >
-						</input>
-						<label> <i> DRAFT</i>
-						</label>						
-					</div>					
-					<div class=" form-group">
-						<button class="btn btn-primary" ng-click="submit">
-						Salva
-						</button>
-					</div>
-					<div>
-						<span ng-bind="message" class="notification-ok"></span>
-						<span ng-bind="error" class="notification-error"></span>
-						<span>&nbsp;</span>
-					</div>					
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
+<!-- <div ng-include="'../templates/parametricmodal.html'"></div>
+<div ng-include="'../templates/scriptedmodal.html'"></div> -->
+<div ng-include="'../templates/compiledmodal.html'"></div>
+<div ng-include="'../templates/modal.html'"></div>

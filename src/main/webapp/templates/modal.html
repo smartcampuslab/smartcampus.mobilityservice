@@ -1,0 +1,472 @@
+<div id="multimodal" class="modal fade" role="dialog" data-backdrop="static">
+<div id="parametricModal" ng-if="currentPolicy.policyType == 'parametric'">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title">{{actionMsg}} politica</h3>
+			</div>
+			<div class="modal-body">
+				<ul class="list-group">
+					<form id="policy-form"  >
+					<label>Nome</label><input class="form-control" type="text"
+									ng-model="policyform.name" name="parametricName" required /> 
+					<label>Descrizione</label><input class="form-control" type="text"
+									ng-model="policyform.description" name="parametricDescription" required /> 		
+									<br/>							
+						<li class="list-group-item" ng-repeat="parametric in policyform.elements.concat(policyform.groups) track by $index" >
+								<nav class="navbar nav-pills">
+									<div class="container-fluid">
+										<ul class="nav navbar-sm navbar-left">
+
+											<h4>
+												<span ng-if="parametric.type == 'generate'"
+													class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+												<span ng-if="parametric.type == 'modify'"
+													class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+												<span ng-if="parametric.type == 'evaluate'"
+													class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+												<span ng-if="parametric.type == 'filter'"
+													class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+												<span ng-if="parametric.type == 'group'"
+													class="glyphicon glyphicon-th" aria-hidden="true"></span>
+												<strike ng-if="!parametric.enabled" >Parametric-{{ parametric.type }}</strike>
+												<span ng-if="parametric.enabled">Parametric-{{ parametric.type }}</span>
+											</h4>
+											<!-- <em>{{ parametric }}</em> -->
+										</ul>
+										<ul class="nav navbar-sm navbar-right">
+											<button class="btn btn-default navbar-btn"
+												ng-show="parametric.enabled && parametric.type != 'group'" ng-click="parametric.enabled = false;">
+												<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+											</button>
+											<button class="btn btn-default navbar-btn"
+												ng-show="!parametric.enabled" ng-click="parametric.enabled = true;">
+												<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+											</button>											
+											<!-- 	
+											<button class="btn btn-danger navbar-btn"
+												ng-click="parametric = {'type' : parametric.type}">
+												<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+											</button> -->
+											<button class="btn btn-danger navbar-btn"
+												ng-click="copyParametric(parametric)">
+												<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+											</button>											
+											<button class="btn btn-danger navbar-btn"
+												ng-click="removeParametric(parametric)">
+												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+											</button>
+										</ul>
+										</div>
+								</nav>
+
+
+								<div class="form-group" ng-if="parametric.type == 'generate'" >
+								<label>Condizione:</label><br/>
+								<label>Formula</label><input class="form-control" type="text"
+									ng-model="parametric.condition.formula" name="condition" required /> 
+								<br/><label>Valori:</label><br/>	
+								<input
+									type="checkbox" ng-model="parametric.action.inherit" name="inherit">
+								<label><em>Eredita proprietà [TODO]</em></label> </input> 
+								<input
+									type="checkbox" ng-model="parametric.action.promoted" name="promoted">									
+								<label>Sostenibile </label> </input>
+								<input
+									type="checkbox" ng-model="parametric.action.wheelchair" name="wheelchair">									
+								<label>Accessibile </label> </input> <br />																	
+
+								<ul class="nav nav-pills role="tablist">
+
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo TType</label>
+											<button class="btn btn-default navbar-btn "
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newTType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="ttype in ttypes"
+													ng-click="parametric.action.newTType = ttype"><a><strong>{{
+															ttype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<a style="padding:10px"></a>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo RType</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newRType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="rtype in rtypes"
+													ng-click="parametric.action.newRType = rtype"><a><strong>{{
+															rtype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Numero di richieste</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newItineraryNumber }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="num in [null,1,2,3,4,5]"
+													ng-click="parametric.action.newItineraryNumber = num"><a><strong>{{
+															num }}</strong></a></li>
+											</ul>
+										</div>
+									</li>	
+									
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Gruppo</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.planningResultGroupName }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="groupName in getGroupNames()"
+													ng-click="parametric.action.planningResultGroupName = groupName"><a><strong>{{
+															groupName }}</strong></a></li>
+											</ul>
+										</div>
+									</li>									
+																	
+								</ul>
+							</div>
+
+							<div class="form-group" ng-if="parametric.type == 'modify'">
+								<label>Condizione:</label><br/>
+								<label>Formula</label><input class="form-control" type="text"
+									ng-model="parametric.condition.formula" name="condition" required /> 								
+<!-- 								<input
+									type="checkbox" ng-model="parametric.condition.promoted" name="promoted">									
+								<label>Sostenibile </label> </input> -->
+								<br/><label>Valori:</label><br/>
+								<div ng-repeat="smartplannerParameter in smartplannerParameters">
+									<label>{{ smartplannerParameter }}</label>
+									<input class="form-control" type="text"
+										ng-model="parametric.action.smartplannerParameters[smartplannerParameter]" name="name" />									
+								</div>
+								
+								<ul class="nav nav-pills role="tablist">
+
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo TType</label>
+											<button class="btn btn-default navbar-btn "
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newTType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="ttype in ttypes"
+													ng-click="parametric.action.newTType = ttype"><a><strong>{{
+															ttype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<a style="padding:10px"></a>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo RType</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newRType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="rtype in rtypes"
+													ng-click="parametric.action.newRType = rtype"><a><strong>{{
+															rtype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Numero di richieste</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newItineraryNumber }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="num in [null,1,2,3,4,5]"
+													ng-click="parametric.action.newItineraryNumber = num"><a><strong>{{
+															num }}</strong></a></li>
+											</ul>
+										</div>
+									</li>	
+									
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Gruppo</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.planningResultGroupName }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="groupName in getGroupNames()"
+													ng-click="parametric.action.planningResultGroupName = groupName"><a><strong>{{
+															groupName }}</strong></a></li>
+											</ul>
+										</div>
+									</li>										
+									
+									
+									</ul>
+																	
+								
+								
+								
+							</div>
+							
+							<div class="form-group" ng-if="parametric.type == 'evaluate'">
+							<label>Condizione:</label><br/>
+								<label>Formula</label><input class="form-control" type="text"
+									ng-model="parametric.condition.formula" name="condition" required />
+							<br/><label>Valori:</label><br/>
+								<div ng-repeat="smartplannerParameter in smartplannerParameters">
+									<label>{{ smartplannerParameter }}</label>
+									<input class="form-control" type="text"
+										ng-model="parametric.action.smartplannerParameters[smartplannerParameter]" name="name" />									
+								</div>
+								
+								<ul class="nav nav-pills role="tablist">
+
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo TType</label>
+											<button class="btn btn-default navbar-btn "
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newTType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="ttype in ttypes"
+													ng-click="parametric.action.newTType = ttype"><a><strong>{{
+															ttype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<a style="padding:10px"></a>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Nuovo RType</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newRType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="rtype in rtypes"
+													ng-click="parametric.action.newRType = rtype"><a><strong>{{
+															rtype }}</strong></a></li>
+											</ul>
+										</div>
+									</li>
+									<li role="presentation">
+										<div class="dropdown">
+											<label>Numero di richieste</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.action.newItineraryNumber }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="num in [null,1,2,3,4,5]"
+													ng-click="parametric.action.newItineraryNumber = num"><a><strong>{{
+															num }}</strong></a></li>
+											</ul>
+										</div>
+									</li>	
+									</ul>
+																	 									
+							<input
+									type="checkbox" ng-model="parametric.action.unrecoverable" name="unrecoverable">									
+								<label>Irrecuperabile </label> </input> <br />																	
+							</div>	
+							
+							<div class="form-group" ng-if="parametric.type == 'filter'">
+								<label> Formula </label><input class="form-control" type="text"
+									ng-model="parametric.condition.formula" name="formula" />
+							</div>							
+													
+							<div class="form-group" ng-if="parametric.type == 'group'">
+								<label> Nome </label><input class="form-control" type="text"
+									ng-model="parametric.name" name="name" />
+									<div class="dropdown">
+											<label>Numero di risultati</label>
+											<button class="btn btn-default navbar-btn"
+												data-toggle="dropdown" aria-haspopup="true"
+												aria-expanded="false"">
+												{{ parametric.maxEntries }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="num in [1,2,3,4,5]"
+													ng-click="parametric.maxEntries = num"><a><strong>{{
+															num }}</strong></a></li>
+											</ul>
+										</div>									
+							</div>								
+							
+							
+						</li>
+						
+						<ul class="nav nav-pills">
+							<li>
+								<div class=" form-group">
+									<button class="btn btn-primary navbar-btn" ng-click="saveParametricPolicy()">
+										Salva</button>
+								</div>
+							</li>
+							<li>
+								<div class=" form-group">
+									<button class="btn btn-primary navbar-btn" data-dismiss="modal"">
+										Chiudi</button>
+								</div>
+							</li>
+						</ul>
+	
+						<div>
+							<!-- <span ng-bind="message" class="notification-ok"></span> -->
+							<span class="notification-ok">{{ message }}</span>
+							<span ng-bind="error" class="notification-error"></span>
+							<span>&nbsp;</span>
+						</div>						
+						
+					</form>
+				</ul>
+
+				<nav class="navbar navbar-default">
+					<div class="container-fluid">
+						<ul class="nav navbar-sm navbar-right">
+
+
+							<button class="btn btn-default navbar-btn" ng-click="addNewParametric('generate')">
+								<span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+							</button>
+							<button class="btn btn-default navbar-btn" ng-click="addNewParametric('modify')">
+								<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+							</button>
+							<button class="btn btn-default navbar-btn" ng-click="addNewParametric('evaluate')">
+								<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+							</button>
+							<button class="btn btn-default navbar-btn" ng-click="addNewParametric('filter')">
+								<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+							</button>
+							<a style="padding:10px"></a>
+							<button class="btn btn-default navbar-btn" ng-click="addNewParametric('group')">
+								<span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+							</button>			
+							<ui></ui>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<div id="scriptedModal" ng-if="currentPolicy.policyType == 'scripted'">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title">{{actionMsg}} politica</h3>
+			</div>
+			<div class="modal-body">
+				<form id="policy-form" >
+					<div class="form-group">
+						<label> *Nome </label><input class="form-control" type="text" required
+							ng-model="policyform.name" name="name" ng-readonly="!currentPolicy.editable" />
+					</div>		
+					<div class="form-group">					
+						<label> Descrizione </label><input class="form-control" required
+							type="text" ng-model="policyform.description" name="description" ng-readonly="!currentPolicy.editable" />
+					</div>
+					<div class="form-group">
+						<label> <i>generatePlanRequests()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5"  required
+							ng-model="policyform.generatePlanRequests" ng-trim="false"
+							name="generatePlanRequests" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>evaluatePlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required
+							ng-model="policyform.evaluatePlanResults" ng-trim="false"
+							name="evaluatePlanResults" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>extractItinerariesFromPlanResults()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required
+							ng-model="policyform.extractItinerariesFromPlanResults" ng-trim="false"
+							name="extractItinerariesFromPlanResults" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<label> <i>filterAndSortItineraries()</i>
+						</label>
+						<textarea class="form-control" type="text" rows="5" required 
+							ng-model="policyform.filterAndSortItineraries" ng-trim="false"
+							name="filterAndSortItineraries" ng-readonly="!currentPolicy.editable" />
+						</textarea>
+					</div>
+					<div class="form-group">
+						<input type="checkbox"  
+							ng-model="policyform.draft"
+							name="draft" ng-readonly="!policyeditable" ng-readonly="!currentPolicy.editable">
+						</input>
+						<label> <i> DRAFT</i>
+						</label>						
+					</div>
+
+
+					<ul class="nav nav-pills">
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-primary navbar-btn" ng-click="saveScriptedPolicy()">
+									Salva</button>
+							</div>
+						</li>
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-primary navbar-btn" data-dismiss="modal"">
+									Chiudi</button>
+							</div>
+						</li>
+					</ul>
+
+					<div>
+						<span ng-bind="message" class="notification-ok"></span>
+						<span ng-bind="error" class="notification-error"></span>
+						<span>&nbsp;</span>
+					</div>					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+	
+	
+	
+	
+	
+</div> 

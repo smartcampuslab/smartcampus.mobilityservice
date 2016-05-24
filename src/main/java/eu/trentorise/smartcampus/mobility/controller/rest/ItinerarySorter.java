@@ -27,11 +27,53 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.google.common.collect.Lists;
+
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
+
 public class ItinerarySorter {
 
+	public static void sortDisjoined(List<Itinerary> itineraries, Comparator<Itinerary> comparator) {
+		List<Itinerary> promoted = Lists.newArrayList();
+		List<Itinerary> notPromoted = Lists.newArrayList();
+		for (Itinerary it: itineraries) {
+			if (it.isPromoted()) {
+				promoted.add(it);
+			} else {
+				notPromoted.add(it);
+			}
+		}
+		Collections.sort(promoted, comparator);
+		Collections.sort(notPromoted, comparator);
+		itineraries.clear();
+		itineraries.addAll(promoted);
+		itineraries.addAll(notPromoted);
+	}	
+	
 	public static void sort(List<Itinerary> itineraries, Comparator<Itinerary> comparator) {
 		Collections.sort(itineraries, comparator);
 	}
+	
+	public static Comparator<Itinerary> comparatorBySortType(SortType criterion) {
+		if (criterion != null) {
+			switch (criterion) {
+			case fastest:
+				return fastestComparator();
+			case greenest:
+				return greenComparator();
+			case healthy:
+				return healthyrComparator();
+			case leastChanges:
+				return leastChangesComparator();
+			case leastWalking:
+				return lessWalkingComparator();
+			case fastestAndCheapest:
+				return fastestAndCheapestComparator();
+			}
+		}
+		
+		return dummyComparator();
+	}	
 	
 	public static Comparator<Itinerary> comparatorByRouteType(RType criterion) {
 		if (criterion != null) {
@@ -133,7 +175,7 @@ public class ItinerarySorter {
 		};
 	}		
 	
-	public static Comparator<Itinerary> fasterAndCheaperComparator() {
+	public static Comparator<Itinerary> fastestAndCheapestComparator() {
 		return new Comparator<Itinerary>() {
 			@Override
 			public int compare(Itinerary o1, Itinerary o2) {

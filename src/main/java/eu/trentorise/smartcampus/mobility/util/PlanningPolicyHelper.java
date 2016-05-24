@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -65,7 +66,7 @@ public class PlanningPolicyHelper {
 //		pr.setGroup(group);
 //	}	
 	
-	public static PlanningRequest buildDefaultDerivedRequest(SingleJourney request, PlanningRequest originalPlanningRequest, TType ttype,  RType rtype, Integer itineraryNumber, boolean promoted, PlanningResultGroup group) {
+	public static PlanningRequest buildDefaultDerivedRequest(SingleJourney request, PlanningRequest originalPlanningRequest, TType ttype,  RType rtype, Integer itineraryNumber,  Map<SmartplannerParameter, Object> smartplannerParameters, Boolean wheelchair, Boolean promoted, PlanningResultGroup group) {
 		PlanningRequest pr = new PlanningRequest();
 		pr.setParentRequest(pr);
 		if (rtype != null) {
@@ -78,10 +79,21 @@ public class PlanningPolicyHelper {
 		} else {
 			pr.setItineraryNumber(request.getResultsNumber() != 0 ? request.getResultsNumber() : MIN_ITN_N);
 		}
-		pr.setWheelChair(originalPlanningRequest.isWheelChair());
+//		pr.setWheelChair(originalPlanningRequest.isWheelChair());
+		if (wheelchair != null) {
+			pr.setWheelChair(wheelchair);
+		} else {
+			pr.setWheelChair(originalPlanningRequest.isWheelChair());	
+		}
 		pr.setOriginalRequest(request);
 		pr.setDerived(true);
-		pr.setPromoted(promoted);	
+		
+		if (promoted != null) {
+			pr.setPromoted(promoted);
+		}
+		if (smartplannerParameters != null) {
+			pr.setSmartplannerParameters(new TreeMap(smartplannerParameters));
+		}
 		
 		pr.setType(ttype);
 		pr.setGroup(group);
@@ -102,7 +114,9 @@ public class PlanningPolicyHelper {
 				.getOriginalRequest().getDepartureTime(), pr.getType(), pr.getRouteType(), pr.getItineraryNumber(), pr.isWheelChair());
 		for (SmartplannerParameter key : pr.getSmartplannerParameters().keySet()) {
 			Object value = pr.getSmartplannerParameters().get(key);
-			req += "&" + key + "=" + value;
+			if (value != null && !value.toString().isEmpty()) {
+				req += "&" + key + "=" + value;
+			}
 		}
 		pr.setRequest(req);
 
@@ -124,6 +138,28 @@ public class PlanningPolicyHelper {
 		
 		return remaining;
 	}
+	
+	
+	public static List<Itinerary> filterByGroups(List<PlanningRequest> planRequests) {
+		Map<PlanningResultGroup, Collection<Itinerary>> groupMap = PlanningPolicyHelper.collectByValue(planRequests);
+		
+		List<Itinerary> remaining = Lists.newArrayList();
+		for (PlanningResultGroup prg : groupMap.keySet()) {
+			List<Itinerary> origIts = Lists.newArrayList(groupMap.get(prg));
+			Comparator<Itinerary> comparator = ItinerarySorter.comparatorBySortType(prg.getSortType());
+			ItinerarySorter.sort(origIts, comparator);
+			if (prg.getMaxEntries() != null) {
+				
+				origIts = origIts.subList(0, Math.min(prg.getMaxEntries(), origIts.size()));
+				groupMap.put(prg, origIts);
+			}
+			remaining.addAll(origIts);
+		}
+		
+		return remaining;
+	}	
+	
+	
 	
 	private static Map<PlanningResultGroup, Collection<Itinerary>> collectByValue(List<PlanningRequest> planRequests) {
 		Multimap<PlanningResultGroup, PlanningRequest> prgMap = ArrayListMultimap.create();

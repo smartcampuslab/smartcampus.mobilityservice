@@ -65,14 +65,11 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.ParametricPlanni
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.ScriptedPlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricEvaluate;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricGenerate;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricModify;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ParametricRemove;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.ScriptedPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.model.StorablePolicy;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
@@ -167,14 +164,18 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		 if (draft != null) {
 			 criteria.and("draft").is(draft);
 		 }
-		List<ParametricPolicy> parametric = storage.searchDomainObjects(criteria, ParametricPolicy.class);
-		for (ParametricPolicy policy: parametric) {
-			result.put(policy.getName(), new ParametricPlanningPolicy(policy));
-		}
-		List<ScriptedPolicy> scripted = storage.searchDomainObjects(criteria, ScriptedPolicy.class);
-		for (ScriptedPolicy policy: scripted) {
-			result.put(policy.getName(), new ScriptedPlanningPolicy(policy));
-		}
+//		List<ParametricPolicyRequest> parametric = storage.searchDomainObjects(criteria, ParametricPolicyRequest.class);
+//		for (ParametricPolicyRequest policy: parametric) {
+//			result.put(policy.getName(), new ParametricPlanningPolicy(policy));
+//		}
+//		List<ScriptedPolicy> scripted = storage.searchDomainObjects(criteria, ScriptedPolicy.class);
+//		for (ScriptedPolicy policy: scripted) {
+//			result.put(policy.getName(), new ScriptedPlanningPolicy(policy));
+//		}
+		List<CompilablePolicyData> compilable = storage.searchDomainObjects(criteria, CompilablePolicyData.class);
+		for (CompilablePolicyData policy: compilable) {
+			result.put(policy.getName(), new CompilablePolicy(policy));
+		}		
 		return result;
 	}
 	
@@ -411,23 +412,23 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	public synchronized List<Itinerary> newPlan(SingleJourney journeyRequest, String policyId) throws Exception {
-		{
-		ParametricPolicy pp = new ParametricPolicy();
-		ParametricGenerate pg = new ParametricGenerate();
-		ParametricModify pm = new ParametricModify();
-		ParametricRemove pr = new ParametricRemove();
-		ParametricEvaluate pe = new ParametricEvaluate();
-		PlanningResultGroup prg = new PlanningResultGroup();
-		pp.getGenerate().add(pg);
-		pp.getModify().add(pm);
-		pp.getEvaluate().add(pe);
-		pp.setRemove(pr);
-		pp.getGroups().add(prg);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT);
-		System.out.println(mapper.writeValueAsString(pp));
-		}
+//		{
+//		ParametricPolicy pp = new ParametricPolicy();
+//		ParametricGenerate pg = new ParametricGenerate();
+//		ParametricModify pm = new ParametricModify();
+//		ParametricRemove pr = new ParametricRemove();
+//		ParametricEvaluate pe = new ParametricEvaluate();
+//		PlanningResultGroup prg = new PlanningResultGroup();
+//		pp.getGenerate().add(pg);
+//		pp.getModify().add(pm);
+//		pp.getEvaluate().add(pe);
+//		pp.setRemove(pr);
+//		pp.getGroups().add(prg);
+//		
+//		ObjectMapper mapper = new ObjectMapper();
+//		mapper.enable(org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT);
+//		System.out.println(mapper.writeValueAsString(pp));
+//		}
 		
 		
 		// TODO: final only? draft?
@@ -457,14 +458,15 @@ public class SmartPlannerService implements SmartPlannerHelper {
 					itinerary.setPromoted(pr.isPromoted());
 				}
 			}
-			
-			successfulPlanRequests.addAll(planningPolicy.evaluatePlanResults(planRequests));
 
+			List<PlanningRequest> evaluated = planningPolicy.evaluatePlanResults(planRequests);
+			successfulPlanRequests.addAll(evaluated);
+			
 			iteration++;
 			for (PlanningRequest pr: planRequests) {
 				pr.setIteration(iteration);
 			}
-			
+			System.out.println("IT: " + iteration);
 		} while (!planRequests.isEmpty() && iteration < 2);
 
 		List<Itinerary> itineraries = planningPolicy.extractItinerariesFromPlanResults(journeyRequest, successfulPlanRequests);
@@ -602,7 +604,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		@Override
 		public PlanningRequest call() throws Exception {
 			try {
-				System.out.println("TRY: " + request.getIteration() + " / " + request.getType());
+//				System.out.println("TRY: " + request.getIteration() + " / " + request.getType());
 				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
 				request.setPlan(plan);
 			} catch (Exception e) {
