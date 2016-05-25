@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,7 +91,7 @@ public class ParametricPlanningPolicy implements PlanningPolicy {
 					prg = PlanningResultGroup.FAKE_GROUP;
 				}
 				
-				PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, pg.getAction().getNewTType(), pg.getAction().getNewRType(), pg.getAction().getNewItineraryNumber(), pg.getAction().getWheelchair(), pg.getAction().getPromoted(), prg);
+				PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, pg.getAction().getNewTType(), pg.getAction().getNewRType(), pg.getAction().getNewItineraryNumber(), new TreeMap<PlanningRequest.SmartplannerParameter, Object>(), pg.getAction().getWheelchair(), pg.getAction().getPromoted(), prg);
 				result.add(npr);
 				if (pg.getAction().getNewTType() != null) {
 					allTypes.add(pg.getAction().getNewTType());
