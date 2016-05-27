@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
@@ -88,6 +90,8 @@ public class GamificationController extends SCController {
 	
 	private Connection connection;
 	
+	private Set<String> publishQueue = Sets.newConcurrentHashSet();
+
 	private static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
@@ -262,9 +266,10 @@ public class GamificationController extends SCController {
 					res.getGeolocationEvents().add(geoloc);
 				}
 
+				boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getStarted() && !res.getComplete()) {
-						sendIntineraryDataToGamificationEngine(gameId, userId, res.getItinerary());
+						canSave = sendIntineraryDataToGamificationEngine(gameId, userId, travelId + "_" + day, res.getItinerary());
 					}
 
 					res.setComplete(true);
@@ -337,9 +342,11 @@ public class GamificationController extends SCController {
 			}
 			res2.setItinerary(res);
 			
+			boolean canSave = true;
 			if (!res2.getStarted() && !res2.getComplete()) {
-				sendIntineraryDataToGamificationEngine(gameId, userId, res);
+				canSave = sendIntineraryDataToGamificationEngine(gameId, userId, itineraryId + "_" + day, res);
 			}
+			
 			if (device != null) {
 				res2.setDeviceInfo(device);
 			}
@@ -482,14 +489,19 @@ public class GamificationController extends SCController {
 		return ((o != null)?o.toString().replace("\"", "\"\""):"");
 	}	
 	
-	private void sendIntineraryDataToGamificationEngine(String gameId, String playerId, ItineraryObject itinerary) throws Exception {
+	private synchronized boolean sendIntineraryDataToGamificationEngine(String gameId, String playerId, String publishKey, ItineraryObject itinerary) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
 //		Criteria criteria = new Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());
 //		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
 //		
 //		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
 		
+		if (publishQueue.contains(publishKey)) {
+			return false;
+		}
+		publishQueue.add(publishKey);
 		gamificationHelper.saveItinerary(itinerary, gameId, playerId);
+		return true;
 	}
 
 	@Override
