@@ -88,8 +88,9 @@ public class GamificationController extends SCController {
 	
 	private Connection connection;
 	
-	private SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
-	private SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
+	private static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
+	private static SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
+	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
 
 	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
@@ -332,6 +333,7 @@ public class GamificationController extends SCController {
 				res2.setClientId(itineraryId);
 				res2.setDay(day);
 				res2.setUserId(userId);
+				res2.setTime(timeSdf.format(date));
 			}
 			res2.setItinerary(res);
 			
