@@ -153,7 +153,7 @@ public class GamificationController extends SCController {
 						// now the plugin supports correctly the extras for each location.
 						// locations with empty idTrip are possible only upon initialization/synchronization.
 						// we skip them here
-						logger.info("location without idTrip, user: "+userId);
+//						logger.info("location without idTrip, user: "+userId);
 						continue;
 //						if (lastTravelId != null) {
 //							locationTravelId = lastTravelId;
