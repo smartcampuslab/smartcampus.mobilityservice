@@ -9,7 +9,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -28,9 +27,9 @@ import eu.trentorise.smartcampus.mobility.model.Announcements;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.AnnouncementsHelper;
-import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 
 @Controller
 @RequestMapping(value = "/web/notification")
@@ -45,15 +44,12 @@ public class NotificationController {
 	@Autowired
 	private AnnouncementsHelper announcementsHelper;	
 	
-	private static final String OTP  = "/smart-planner/rest/";
-	
-	@Autowired
-	@Value("${otp.url}")
-	private String otpURL;	
-	
 	@Autowired
 	private AppSetup appSetup;	
-	
+
+	@Autowired
+	private SmartPlannerHelper smartPlannerHelper;	
+
 	@RequestMapping(method = RequestMethod.GET)
 	public String notify(HttpSession session) {
 		return "notification";
@@ -111,10 +107,11 @@ public class NotificationController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/announcements/routesIds/{agencyId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public @ResponseBody String getAppIds(@PathVariable String agencyId, HttpServletResponse response) throws Exception {
-		String routes = HTTPConnector.doGet(otpURL + OTP + "getroutes/" + agencyId, null, MediaType.APPLICATION_JSON_VALUE, null, "UTF-8");
+//		String routes = HTTPConnector.doGet(otpURL + OTP + "getroutes/" + agencyId, null, MediaType.APPLICATION_JSON_VALUE, null, "UTF-8");
 //		ObjectMapper mapper = new ObjectMapper();
 //		Map routesMap = mapper.convertValue(routes, Map.class);
-		return routes;
+//		return routes;
+		return smartPlannerHelper.routes(agencyId);
 	}	
 	
 	
