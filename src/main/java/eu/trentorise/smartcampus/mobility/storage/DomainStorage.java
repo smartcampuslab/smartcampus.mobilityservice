@@ -1,5 +1,7 @@
 package eu.trentorise.smartcampus.mobility.storage;
 
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.PlanObject;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -261,6 +264,15 @@ public class DomainStorage {
 		template.dropCollection(DATA);
 		template.dropCollection(NEWS);
 		template.dropCollection(GEOLOCATIONS);
+	}
+
+	/**
+	 * @param journeyRequest
+	 * @param userId
+	 * @param appName
+	 */
+	public void savePlanRequest(SingleJourney journeyRequest, String userId, String appName) {
+		template.save(new PlanObject(journeyRequest, userId, appName));
 	}
 	
 }

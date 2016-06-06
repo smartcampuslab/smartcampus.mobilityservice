@@ -46,6 +46,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,10 +103,12 @@ public class JourneyPlannerController extends SCController {
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
 	public @ResponseBody
-	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false) String policyId) throws InvocationException {
+	List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false) String policyId, @RequestHeader(required=false,value="UserID") String userId, @RequestHeader(required=false,value="AppName") String appName) throws InvocationException {
 		try {
-			String userId = getUserId();
-			statLogger.log(journeyRequest, userId);
+			domainStorage.savePlanRequest(journeyRequest, userId, appName);
+			
+			String userFromToken = getUserId();
+			statLogger.log(journeyRequest, userFromToken);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
