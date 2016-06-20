@@ -176,7 +176,7 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 		
 		result = PlanningPolicyHelper.keepBestPromoted(result, comparator, 2);
 		
-		ItinerarySorter.sort(result, comparator);
+		ItinerarySorter.sortDisjoined(result, comparator);
 		return result;
 	}
 

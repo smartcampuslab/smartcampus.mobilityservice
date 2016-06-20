@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 import com.mongodb.BasicDBObject;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.ScriptedPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.request.ParametricPolicyRequest;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -37,8 +35,6 @@ public class DomainStorage {
 	private static final String GEOLOCATIONS = "geolocations";
 	private static final String TRACKED = "trackedInstances";
 	private static final String SAVED = "savedtrips";
-	private static final String PARAMETRIC_POLICY = "parametricPolicies";
-	private static final String SCRIPTED_POLICY = "scriptedPolicies";
 	private static final String COMPILED_POLICY = "compiledPolicies";
 	
 	@Autowired
@@ -71,12 +67,6 @@ public class DomainStorage {
 		if (cls == SavedTrip.class) {
 			return SAVED;
 		}	
-		if (cls == ParametricPolicyRequest.class) {
-			return PARAMETRIC_POLICY;
-		}
-		if (cls == ScriptedPolicy.class) {
-			return SCRIPTED_POLICY;
-		}		
 		if (cls == CompilablePolicyData.class) {
 			return COMPILED_POLICY;
 		}			
@@ -238,42 +228,6 @@ public class DomainStorage {
 			update.set("draft", policy.getDraft());
 			template.updateFirst(query, update, COMPILED_POLICY);
 		}
-	}		
-	
-	public void savePolicy(ParametricPolicyRequest policy) {
-		Query query = new Query(new Criteria("name").is(policy.getName()));
-		ParametricPolicyRequest policiesDB = searchDomainObject(query, ParametricPolicyRequest.class);
-		if (policiesDB == null) {
-			template.save(policy, PARAMETRIC_POLICY);
-		} else {
-			Update update = new Update();
-			update.set("description", policy.getDescription());
-			update.set("elements", policy.getElements());
-			update.set("groups", policy.getGroups());
-			update.set("draft", policy.getDraft());
-			template.updateFirst(query, update, PARAMETRIC_POLICY);
-		}
-	}	
-	
-	public boolean savePolicy(ScriptedPolicy policy, boolean canUpdate) {
-		Query query = new Query(new Criteria("name").is(policy.getName()));
-		ScriptedPolicy policiesDB = searchDomainObject(query, ScriptedPolicy.class);
-		if (policiesDB == null) {
-			template.save(policy, SCRIPTED_POLICY);
-		} else if (canUpdate) {
-			Update update = new Update();
-			update.set("description", policy.getDescription());
-			update.set("generatePlanRequests", policy.getGeneratePlanRequests());
-			update.set("evaluatePlanResults", policy.getEvaluatePlanResults());
-			update.set("extractItinerariesFromPlanResults", policy.getExtractItinerariesFromPlanResults());
-			update.set("filterAndSortItineraries", policy.getFilterAndSortItineraries());
-			update.set("draft", policy.getDraft());
-			template.updateFirst(query, update, SCRIPTED_POLICY);
-		} else {
-			return false;
-		}
-		
-		return true;
 	}		
 	
 	public Geolocation getLastGeolocationByUserId(String userId) {

@@ -42,7 +42,7 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 	public List<Itinerary> filterAndSortItineraries(SingleJourney journeyRequest, List<Itinerary> itineraries) {
 		List<Itinerary> result = Lists.newArrayList(itineraries);
 		Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(journeyRequest.getRouteType());
-		ItinerarySorter.sort(result, comparator);
+		ItinerarySorter.sortDisjoined(result, comparator);
 		return result;
 	}
 

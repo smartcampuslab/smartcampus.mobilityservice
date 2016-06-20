@@ -160,7 +160,7 @@ public class PlanningRequest {
 	
 	@Override
 	public String toString() {
-		return type.toString();
+		return (promoted ? "!" : "") + type.toString();
 	}
 	
 	

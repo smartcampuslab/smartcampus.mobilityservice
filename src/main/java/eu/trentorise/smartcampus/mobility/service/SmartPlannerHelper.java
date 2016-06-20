@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.model.StorablePolicy;
 
 
 /**
@@ -39,8 +38,7 @@ public interface SmartPlannerHelper {
 
 	RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception;
 	RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney) throws Exception;
-	List<Itinerary> newPlan(SingleJourney journeyRequest, String policyId) throws Exception;
-	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, boolean retried, String policyId) throws Exception;
+	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, String policyId) throws Exception;
 	
 	String parkingsByAgency(String agencyId) throws Exception;
 	String bikeSharingByAgency(String agencyId) throws Exception;
@@ -64,6 +62,5 @@ public interface SmartPlannerHelper {
 	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
 	String getAllTaxiStations() throws Exception;
 	
-	public void addPolicy(StorablePolicy policy);
 	public Map<String, PlanningPolicy> getPolicies(Boolean draft);
 }
