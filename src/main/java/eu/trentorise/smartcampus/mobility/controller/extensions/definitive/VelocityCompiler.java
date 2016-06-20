@@ -62,12 +62,35 @@ public class VelocityCompiler {
 		
 		if (!policy.isModifiedFilter()) {
 			String result = compileFilter(policy.getFilter());
-			System.out.println(result);
+//			System.out.println(result);
 
 			policy.setFilterCode(result);
 		}			
 		
 	}
+	
+	public void compile(CompilablePolicyData policy, boolean generate, boolean evaluate, boolean extract, boolean filter) throws Exception {
+		if (generate) {
+			String result = compileGenerate(policy.getCreate(), policy.getModify(), policy.getGroups());
+			policy.setGenerateCode(result);
+		}
+		
+		if (evaluate) {
+			String result = compileEvaluate(policy.getEvaluate());
+			policy.setEvaluateCode(result);
+		}
+		
+		if (extract) {
+			String result = compileExtract(policy.getExtract());
+			policy.setExtractCode(result);
+		}		
+		
+		if (filter) {
+			String result = compileFilter(policy.getFilter());
+			policy.setFilterCode(result);
+		}			
+		
+	}	
 	
 	public void check(CompilablePolicyData policy) {
 		CompilerConfiguration conf = CompilerConfiguration.DEFAULT;

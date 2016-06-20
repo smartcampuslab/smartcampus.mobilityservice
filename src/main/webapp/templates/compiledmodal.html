@@ -1,841 +1,823 @@
-<div id="compiledmodal" class="modal fade" role="dialog">
+<div id="compiledmodal" class="modal fade" role="dialog" data-backdrop="static">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
-				<div class="nav navbar-default">
-					<ul class="nav navbar-nav  navbar-left">
+				<div class="nav ">
+					<ul class="nav navbar-left">
 						<h2 class="modal-title">{{actionMsg}} politica</h2>
 					</ul>
 					<ul class="nav nav-pills navbar-right">
 						<li>
 							<div class=" form-group">
-								<button class="btn btn-primary navbar-btn"
-									ng-click="saveCompiledPolicy()">Salva</button>
+								<button class="btn btn-info navbar-btn" ng-click="saveCompiledPolicy()">Salva</button>
 							</div>
 						</li>
 						<li>
 							<div class=" form-group">
-								<button class="btn btn-primary navbar-btn" data-dismiss="modal">
-									Chiudi</button>
+								<button class="btn btn-default navbar-btn" ng-click="clearEdit()">Cancella</button>
+							</div>
+						</li>
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-default navbar-btn" ng-click="closeEdit()">Chiudi</button>
 							</div>
 						</li>
 					</ul>
-
 				</div>
 				<div>
-					<span ng-bind="message" class="notification-ok"></span> <span
-						ng-bind="error" class="notification-error"></span> <span>&nbsp;</span>
+					<span ng-bind="message" class="notification-ok"></span> <span ng-bind="error" class="notification-error"></span> <span>&nbsp;</span>
 				</div>
 			</div>
 			<div class="modal-body">
 				<div class="tabbable">
-					<ul class="nav nav-tabs" id="policytabs">
-
-						<!-- <li role="presentation" class="active"><a href="#descriptiontab" aria-controls="description" role="tab" data-toggle="tab">*Generale</a></li> -->
-
-
+					<ul class="nav nav-tabs nav-justified">
 						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#descriptiontab">Generale</button>
+							<button class="btn navbar-btn" data-toggle="tab" data-target="#descriptiontab" style="width: 95%;" ng-click="resetStyles(true, false, false, false)"
+								ng-style="definitionstyle"
+							>DESCRIZIONE</button>
 						</li>
 						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#createtab"
-								ng-disabled="compileform.modifiedGenerate">
-								Crea <span class="badge">{{ compileform.create.length }}</span>
-							</button>
+							<button class="btn navbar-btn" data-toggle="tab" data-target="#preparationtab" style="width: 95%;" ng-click="resetStyles(false, true, false, false)"
+								ng-style="preparationstyle"
+							>PREPARAZIONE</button>
 						</li>
 						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#modifytab"
-								ng-disabled="compileform.modifiedGenerate">
-								Modifica <span class="badge">{{ compileform.modify.length
-									}}</span>
-							</button>
+							<button class="btn navbar-btn" data-toggle="tab" data-target="#evaluatetab" style="width: 95%;" ng-click="resetStyles(false, false, true, false)"
+								ng-style="evaluationstyle"
+							>VALUTAZIONE</button>
 						</li>
 						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#evaluatetab"
-								ng-disabled="compileform.modifiedEvaluate">
-								Valuta <span class="badge">{{ compileform.evaluate.length
-									}}</span>
-							</button>
-						</li>
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#filtertab"
-								ng-disabled="compileform.modifiedFilter">
-								Filtri <span class="badge">{{
-									compileform.filter.formulas.length }}</span>
-							</button>
-						</li>
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#groupstab">
-								Gruppi <span class="badge">{{ compileform.groups.length
-									}}</span>
-							</button>
-						</li>
-
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#generatecodetab">
-								Genera <span class="badge">{{
-									compileform.generateCode.length }}</span>
-							</button>
-						</li>
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#evaluatecodetab">
-								Valuta <span class="badge">{{
-									compileform.evaluateCode.length }}</span>
-							</button>
-						</li>
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#extractcodetab">
-								Estrai <span class="badge">{{
-									compileform.extractCode.length }}</span>
-							</button>
-						</li>
-						<li>
-							<button class="btn btn-default navbar-btn" data-toggle="tab"
-								data-target="#filtercodetab">
-								Filtra <span class="badge">{{
-									compileform.filterCode.length }}</span>
-							</button>
+							<button class="btn navbar-btn" data-toggle="tab" data-target="#extractiontab" style="width: 95%;" ng-click="resetStyles(false, false, false, true)"
+								ng-style="extractionstyle"
+							>ESTRAZIONE</button>
 						</li>
 					</ul>
-
-
 					<div class="tab-content">
-						<!-- <ng-form id="masterform"> -->
-
-						<div id="generatecodetab" class="tab-pane">
-							<h3>Genera (codice)</h3>
-							<form id="createcode-form">
-								<textarea class="form-control" type="text" rows="30"
-									ng-model="compileform.generateCode" ng-trim="false"
-									name="generateCode"
-									ng-readonly="!currentPolicy.editable || !compileform.modifiedGenerate" />
-								</textarea>
-							</form>
-						</div>
-
-						<div id="evaluatecodetab" class="tab-pane">
-							<h3>Valuta (codice)</h3>
-							<form id="evaluatecode-form">
-								<textarea class="form-control" type="text" rows="30"
-									ng-model="compileform.evaluateCode" ng-trim="false"
-									name="evaluateCode"
-									ng-readonly="!currentPolicy.editable || !compileform.modifiedEvaluate" />
-								</textarea>
-							</form>
-						</div>
-						<div id="extractcodetab" class="tab-pane">
-							<h3>Estrai (codice)</h3>
-							<form id="extractcode-form">
-								<textarea class="form-control" type="text" rows="30"
-									ng-model="compileform.extractCode" ng-trim="false"
-									name="extractCode"
-									ng-readonly="!currentPolicy.editable || !compileform.modifiedExtract" />
-								</textarea>
-							</form>
-						</div>
-						<div id="filtercodetab" class="tab-pane">
-							<h3>Genera (codice)</h3>
-							<form id="filtercode-form">
-								<textarea class="form-control" type="text" rows="30"
-									ng-model="compileform.filterCode" ng-trim="false"
-									name="filterCode"
-									ng-readonly="!currentPolicy.editable || !compileform.modifiedFilter" />
-								</textarea>
-							</form>
-						</div>
-
-
-
-
 						<div id="descriptiontab" class="tab-pane">
-							<h3>Generale</h3>
 							<form id="description-form">
-								<label>*Nome</label><input class="form-control" type="text"
-									ng-model="compileform.name" name="policyname" required /> <label>*Descrizione</label><input
-									class="form-control" type="text"
-									ng-model="compileform.description" name="policydescription"
-									required /><br /> <input type="checkbox"
-									ng-model="compileform.modifiedGenerate" name="modifiedGenerate">
-								<label>Edita "Genera"</label> <input type="checkbox"
-									ng-model="compileform.modifiedEvaluate" name="modifiedEvaluate">
-								<label>Edita "Valuta"</label> <input type="checkbox"
-									ng-model="compileform.modifiedExtract" name="modifiedExtract">
-								<label>Edita "Estrai"</label> <input type="checkbox"
-									ng-model="compileform.modifiedFilter" name="modifiedFilter">
-								<label>Edita "Filtra"</label> <br /> <input type="checkbox"
-									ng-model="compileform.draft" name="modifiedFilter"> <label>Bozza</label>
+								<br /> &nbsp; <br /> <label>*Nome</label><input class="form-control" type="text" ng-model="compileform.name" /> <label>*Descrizione</label><input
+									class="form-control" type="text" ng-model="compileform.description"
+								/> <br /> &nbsp; <input type="checkbox" ng-model="compileform.draft"> <label>Salva politica come <strong>bozza</strong>, per limitarne
+									la visualizzazione all’interno della console amministratore
+								</label>
 							</form>
 						</div>
-
-						<div id="createtab" class="tab-pane">
-							<h3>Crea</h3>
-
-							<div>
-								<ul class="list-group">
-									<form id="create-form">
-										<li class="list-group-item"
-											ng-repeat="create in compileform.create track by $index">
-
-											<ul class="nav navbar-sm navbar-right">
-												<button class="btn btn-default navbar-btn"
-													ng-show="create.enabled" ng-click="create.enabled = false;">
-													<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-												</button>
-												<button class="btn btn-default navbar-btn"
-													ng-show="!create.enabled" ng-click="create.enabled = true;">
-													<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-												</button>
-												<!-- 												<button class="btn btn-danger navbar-btn"
-													ng-click="copyParametric(parametric)">
-													<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-												</button>	 -->
-												<button class="btn btn-danger navbar-btn"
-													ng-click="removeCreate(create)">
-													<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-												</button>
-											</ul>
-											<div class="form-group">
-												<h4>Condizione:</h4>
-												<br /> <label>Formula</label><input class="form-control"
-													type="text" ng-model="create.condition.formula"
-													name="createformula" required /> <br />
-												<h4>Parametri richiesta aggiuntiva:</h4>
-												<br /> <input type="checkbox"
-													ng-model="create.action.promoted" name="promoted">
-												<label>Sostenibile </label> </input> <input type="checkbox"
-													ng-model="create.action.wheelchair" name="wheelchair">
-												<label>Accessibile </label> </input> <br />
-
-
-												<!-- <ul class="nav nav-pills" > -->
-
-													<label>
-														<div class="dropdown">
-															Nuovo TType
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ create.action.newTType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="create.action.newTType = ttype"><a><strong>{{
-																			ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-													<a style="padding: 10px"></a>
-													<label>
-														<div class="dropdown">
-															Nuovo RType
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ create.action.newRType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="rtype in rtypes"
-																	ng-click="create.action.newRType = rtype"><a><strong>{{
-																			rtype }}</strong></a>
-															</ul>
-														</div>
-													</label>
-													<label>
-														<div class="dropdown">
-															Numero di richieste
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ create.action.newItineraryNumber }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="num in [null,1,2,3,4,5]"
-																	ng-click="create.action.newItineraryNumber = num"><a><strong>{{
-																			num }}</strong></a>
-															</ul>
-														</div>
-													</label>
-
-													<label>
-														<div class="dropdown">
-															Gruppo
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ create.action.planningResultGroupName }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="groupName in getGroupNames()"
-																	ng-click="create.action.planningResultGroupName = groupName"><a><strong>{{
-																			groupName }}</strong></a>
-															</ul>
-														</div>
-														</label>
-														<br/>
-													
-															<label>MaxWalkDistance<input 
-																type="text" class="form-control"
-																ng-model="create.action.maxWalkDistance"
-																name="maxWalkDistance" size="8" />
-																</label>
-														
-													<label>MaxTotalWalkDistance<input
-														class="form-control" type="text"
-														ng-model="create.action.maxTotalWalkDistance"
-														name="maxTotalWalkDistance" size="8"/>
-														</label>
-													<label>MaxChanges<input
-														class="form-control" type="text"
-														ng-model="create.action.maxChanges"
-														name="maxChanges" size="2" />
-														</label>
-													<label>
-														<div class="dropdown">
-															ExtraTransport
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{
-																create.action.extraTransport
-																}}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="create.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-											</div>
-										</li>
-										</form>
+						<div id="preparationtab" class="tab-pane">
+							<div class="tabbable">
+								<ul class="nav nav-tabs nav-justified" id="policytabs">
+									<li><a data-toggle="tab" data-target="#createtab" style="width: 100%;" ng-click="resetPrepstyles(true, false)" ng-style="createstyle">CREA</a></li>
+									<li><a data-toggle="tab" data-target="#modifytab" style="width: 100%;" ng-click="resetPrepstyles(false, true)" ng-style="modifystyle">MODIFICA</a></li>
 								</ul>
 							</div>
-							
-						
-
-						<nav class="navbar navbar-default">
-							<div class="container-fluid">
-								<ul class="nav navbar-sm navbar-right">
-									<button class="btn btn-default navbar-btn"
-										ng-click="addCreate()">
-										<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-									</button>
-								</ul>
-							</div>
-						</nav>
-
-					</div>
-
-
-					<div id="modifytab" class="tab-pane">
-						<h3>Modifica</h3>
-						<div>
-							<ul class="list-group">
-								<form id="modify-form">
-									<li class="list-group-item"
-										ng-repeat="modify in compileform.modify track by $index">
-										<ul class="nav navbar-sm navbar-right">
-											<button class="btn btn-default navbar-btn"
-												ng-show="modify.enabled" ng-click="modify.enabled = false;">
-												<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-											</button>
-											<button class="btn btn-default navbar-btn"
-												ng-show="!modify.enabled" ng-click="modify.enabled = true;">
-												<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-											</button>
-											<!-- 												<button class="btn btn-danger navbar-btn"
-													ng-click="copyParametric(parametric)">
-													<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-												</button>	 -->
-											<button class="btn btn-danger navbar-btn"
-												ng-click="removeModify(modify)">
-												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-											</button>
+							<div class="tab-content">
+								<div id="createtab" class="tab-pane">
+									<div class="nav">
+										<ul class="nav nav-pills navbar-right">
+											<li>
+												<button class="btn btn-info navbar-btn" ng-show="!preparationcodeshow" ng-click="addCreate()">Nuova Regola</button>
+											</li>
+											<li>
+												<button class="btn btn-default navbar-btn" ng-show="!preparationcodeshow" ng-click="preparationcodeshow = true">Vedi codice</button>
+											</li>
+											<li role="presentation">
+												<button class="btn btn-default navbar-btn" ng-show="preparationcodeshow && !compileform.modifiedGenerate" ng-click="preparationcodeshow = false">Chiudi
+													codice</button>
+											</li>
+											<li ng-show="preparationcodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+													ng-model="compileform.modifiedGenerate" name="modifiedGenerate" class="navbar-btn btn-sm"
+													ng-click="resetCode(compileform.modifiedGenerate, true, false, false)"
+												> Modifica codice</label></li>
+											<!-- Chiudi codice -->
 										</ul>
-
-										<div class="form-group">
-											<h4>Condizione:</h4>
-											<br /> <label>Formula</label><input class="form-control"
-												type="text" ng-model="modify.condition.formula"
-												name="modifyformula" required /> <br />
-											<h4>Nuovi parametri richiesta esistente:</h4>
-											<br /> <input type="checkbox"
-												ng-model="modify.action.promoted" name="promoted"> <label>Sostenibile
-											</label> </input> <input type="checkbox" ng-model="modify.action.wheelchair"
-												name="wheelchair"> <label>Accessibile </label> </input> <br />
-
-											<!-- <ul class="nav nav-pills" > -->
-
-													<label>
-														<div class="dropdown">
-															Nuovo TType
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ modify.action.newTType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="modify.action.newTType = ttype"><a><strong>{{
-																			ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-													<a style="padding: 10px"></a>
-													<label>
-														<div class="dropdown">
-															Nuovo RType
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ modify.action.newRType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="rtype in rtypes"
-																	ng-click="modify.action.newRType = rtype"><a><strong>{{
-																			rtype }}</strong></a>
-															</ul>
-														</div>
-													</label>
-													<label>
-														<div class="dropdown">
-															Numero di richieste
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ modify.action.newItineraryNumber }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="num in [null,1,2,3,4,5]"
-																	ng-click="modify.action.newItineraryNumber = num"><a><strong>{{
-																			num }}</strong></a>
-															</ul>
-														</div>
-													</label>
-
-													<label>
-														<div class="dropdown">
-															Gruppo
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ modify.action.planningResultGroupName }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="groupName in getGroupNames()"
-																	ng-click="modify.action.planningResultGroupName = groupName"><a><strong>{{
-																			groupName }}</strong></a>
-															</ul>
-														</div>
-														</label>
-														<br/>
-													
-															<label>MaxWalkDistance<input 
-																type="text" class="form-control"
-																ng-model="modify.action.maxWalkDistance"
-																name="maxWalkDistance" size="8" />
-																</label>
-														
-													<label>MaxTotalWalkDistance<input
-														class="form-control" type="text"
-														ng-model="modify.action.maxTotalWalkDistance"
-														name="maxTotalWalkDistance" size="8"/>
-														</label>
-													<label>MaxChanges<input
-														class="form-control" type="text"
-														ng-model="modify.action.maxChanges"
-														name="maxChanges" size="2" />
-														</label>
-													<label>
-														<div class="dropdown">
-															ExtraTransport
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{
-																modify.action.extraTransport
-																}}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="modify.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-											</div>
-										</li>
-										</form>
-							</ul>
-						</div>
-
-						<nav class="navbar navbar-default">
-							<div class="container-fluid">
-								<ul class="nav navbar-sm navbar-right">
-									<button class="btn btn-default navbar-btn"
-										ng-click="addModify()">
-										<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-									</button>
-								</ul>
-							</div>
-						</nav>
-
-					</div>
-
-
-
-					<div id="evaluatetab" class="tab-pane">
-						<h3>Valuta</h3>
-						<div>
-							<ul class="list-group">
-								<form id="evaluate-form">
-									<li class="list-group-item"
-										ng-repeat="evaluate in compileform.evaluate track by $index">
-										<ul class="nav navbar-sm navbar-right">
-											<button class="btn btn-default navbar-btn"
-												ng-show="evaluate.enabled" ng-click="evaluate.enabled = false;">
-												<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-											</button>
-											<button class="btn btn-default navbar-btn"
-												ng-show="!evaluate.enabled" ng-click="evaluate.enabled = true;">
-												<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-											</button>
-											<!-- 												<button class="btn btn-danger navbar-btn"
-													ng-click="copyParametric(parametric)">
-													<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-												</button>	 -->
-											<button class="btn btn-danger navbar-btn"
-												ng-click="removeEvaluate(evaluate)">
-												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-											</button>
-										</ul>
-
-										<div class="form-group">
-											<h4>Condizione:</h4>
-											<br /> <label>Formula</label><input class="form-control"
-												type="text" ng-model="evaluate.condition.formula"
-												name="evaluateformula" required /> <br />
-											<h4>Nuovi parametri richiesta esistente:</h4>
-											<br /> <input type="checkbox"
-												ng-model="evaluate.action.promoted" name="promoted"> <label>Sostenibile
-											</label> </input> <input type="checkbox" ng-model="evaluate.action.wheelchair"
-												name="wheelchair"> <label>Accessibile </label> </input> <br />
-
-											<!-- <ul class="nav nav-pills" > -->
-
-													<label>
-														<div class="dropdown">
-															Nuovo TType
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ evaluate.action.newTType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="evaluate.action.newTType = ttype"><a><strong>{{
-																			ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-													<a style="padding: 10px"></a>
-													<label>
-														<div class="dropdown">
-															Nuovo RType
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ evaluate.action.newRType }}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="rtype in rtypes"
-																	ng-click="evaluate.action.newRType = rtype"><a><strong>{{
-																			rtype }}</strong></a>
-															</ul>
-														</div>
-													</label>
-													<label>
-														<div class="dropdown">
-															Numero di richieste
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ evaluate.action.newItineraryNumber }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="num in [null,1,2,3,4,5]"
-																	ng-click="evaluate.action.newItineraryNumber = num"><a><strong>{{
-																			num }}</strong></a>
-															</ul>
-														</div>
-													</label>
-
-													<label>
-														<div class="dropdown">
-															Gruppo
-															<button class="btn btn-default navbar-btn"
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{ evaluate.action.planningResultGroupName }}<span
-																	class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="groupName in getGroupNames()"
-																	ng-click="evaluate.action.planningResultGroupName = groupName"><a><strong>{{
-																			groupName }}</strong></a>
-															</ul>
-														</div>
-														</label>
-														<br/>
-													
-															<label>MaxWalkDistance<input 
-																type="text" class="form-control"
-																ng-model="evaluate.action.maxWalkDistance"
-																name="maxWalkDistance" size="8" />
-																</label>
-														
-													<label>MaxTotalWalkDistance<input
-														class="form-control" type="text"
-														ng-model="evaluate.action.maxTotalWalkDistance"
-														name="maxTotalWalkDistance" size="8"/>
-														</label>
-													<label>MaxChanges<input
-														class="form-control" type="text"
-														ng-model="evaluate.action.maxChanges"
-														name="maxChanges" size="2" />
-														</label>
-													<label>
-														<div class="dropdown">
-															ExtraTransport
-															<button class="btn btn-default navbar-btn "
-																data-toggle="dropdown" aria-haspopup="true"
-																aria-expanded="false">
-																{{
-																evaluate.action.extraTransport
-																}}<span class="caret"></span>
-															</button>
-															<ul class="dropdown-menu">
-																<li ng-repeat="ttype in ttypes"
-																	ng-click="evaluate.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
-															</ul>
-														</div>
-														</label>
-													
-											</div>
-										</li>
-										</form>
-							</ul>
-						</div>
-
-						<nav class="navbar navbar-default">
-							<div class="container-fluid">
-								<ul class="nav navbar-sm navbar-right">
-									<button class="btn btn-default navbar-btn"
-										ng-click="addEvaluate()">
-										<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-									</button>
-								</ul>
-							</div>
-						</nav>
-
-					</div>
-
-
-
-
-
-					<!--  -->
-
-
-					<div id="filtertab" class="tab-pane">
-						<h3>Filtri</h3>
-
-							<div>
-								<form id="filter-form">
-									<label>Formule:</label>
-									<li class="list-group-item"
-										ng-repeat="formula in compileform.filter.formulas track by $index">
-
-										<div class="input-group col-xs-11">
-											<div class="container-fluid">
-												<span class="input-group-btn"> <input
-													class="form-control" type="text"
-													ng-model="compileform.filter.formulas[$index]"
-													name="filterformula" />
-													<button class="btn btn-default"
-														ng-show="compileform.filter.enabled[$index]"
-														ng-click="toggleFormula($index)">
-														<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-													</button>
-													<button class="btn btn-default"
-														ng-show="!compileform.filter.enabled[$index]"
-														ng-click="toggleFormula($index)">
-														<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-													</button>
-
-													<button class="btn btn-default"
-														type="button" ng-click="removeFilterFormula(formula)">
-														<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+									</div>
+									<div class="accordion" id="createaccordion" ng-show="!preparationcodeshow">
+										<div class="accordion-group panel" ng-repeat="create in compileform.create track by $index">
+											<div class="panel panel-default">
+												<div class="well">
+													<ul class=" nav nav-pillsnavbar-left">
+														<li><label data-toggle="collapse" data-parent="#createaccordion" data-target="#createcollapse{{$index}}">{{create.name}}???</label></li>
+													</ul>
+													<ul class="nav nav-pills navbar-right">
+														<button class="btn btn-danger navbar-btn" ng-show="create.enabled" ng-click="create.enabled = false;">
+															<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 														</button>
-												</span>
-
-
-												<!-- 													<button class="btn btn-danger navbar-btn"
-														ng-click="removeFilterFormula(formula)">
-														<span class="glyphicon glyphicon-remove"
-															aria-hidden="true"></span>
-													</button>	 -->
+														<button class="btn btn-success navbar-btn" ng-show="!create.enabled" ng-click="create.enabled = true;">
+															<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+														</button>
+														<button class="btn btn-danger navbar-btn" ng-click="removeCreate(create)">
+															<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+														</button>
+													</ul>
+												</div>
+											</div>
+											<hr />
+											<div id="createcollapse{{$index}}" class="panel-collapse collapse in">
+												<div>
+													<h4>
+														<strong>Nome</strong>
+													</h4>
+													<input type="text" class="form-control" ng-model="create.name" />
+													<hr />
+													<h4>
+														<strong>Condizione</strong>
+													</h4>
+													<input type="text" class="form-control" ng-model="create.condition.formula" />
+													<hr />
+													<div>
+														<div>
+															<h4>
+																<strong>Nuova richiesta</strong>
+															</h4>
+															<ul class="nav nav-tabs nav-justified">
+																<div>
+																	<input type="checkbox" ng-model="create.action.wheelchair" name="wheelchair"> <label>Itinerari accessibili</label>
+																</div>
+																<li>
+																	<div class="dropdown">
+																		<label>TType (Mezzo di trasporto):</label>
+																		<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																			{{ create.action.newTType }}<span class="caret"></span>
+																		</button>
+																		<ul class="dropdown-menu ">
+																			<li ng-repeat="ttype in ttypes" ng-click="create.action.newTType = ttype"><a><strong>{{ ttype }}</strong></a>
+																		</ul>
+																	</div>
+																</li>
+																<li>
+																	<div class="dropdown">
+																		<label>RType (Tipo di itinerario):</label>
+																		<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																			{{ create.action.newRType }}<span class="caret"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li ng-repeat="rtype in rtypes" ng-click="create.action.newRType = rtype"><a><strong>{{ rtype }}</strong></a>
+																		</ul>
+																	</div>
+																</li>
+															</ul>
+														</div>
+														<div class="dropdown">
+															<label>Numero di risultati</label>
+															<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																{{ create.action.newItineraryNumber }}<span class="caret"></span>
+															</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="num in [null,1,2,3,4,5]" ng-click="create.action.newItineraryNumber = num"><a><strong>{{ num }}</strong></a>
+															</ul>
+														</div>
+														<div>
+															<form class="form-horizontal">
+																<div class="form-group">
+																	<label class="col-sm-3 control-label">MaxWalkDistance</label>
+																	<div class="col-sm-4">
+																		<input type="text" class="form-control" ng-model="create.action.maxWalkDistance" name="maxWalkDistance" size="8" />
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label class="col-sm-3 control-label">MaxTotalWalkDistance</label>
+																	<div class="col-sm-4">
+																		<input type="text" class="form-control" ng-model="create.action.maxTotalWalkDistance" name="maxTotalWalkDistance" size="8" />
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label class="col-sm-3 control-label">MaxChanges</label>
+																	<div class="col-sm-4">
+																		<input type="text" class="form-control" ng-model="create.action.maxChanges" name="maxChanges" size="8" />
+																	</div>
+																</div>
+															</form>
+														</div>
+														<div>
+															<label>
+																<div class="dropdown">
+																	ExtraTransport
+																	<button class="btn btn-default navbar-btn " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																		{{ create.action.extraTransport }}<span class="caret"></span>
+																	</button>
+																	<ul class="dropdown-menu">
+																		<li ng-repeat="ttype in ttypes" ng-click="create.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
+																	</ul>
+																</div>
+															</label>
+														</div>
+														<div>
+															<hr />
+															<div>
+																<h4>
+																	<strong>Gestione risultati</strong>
+																</h4>
+															</div>
+															<div>
+																<ul class="nav nav-tabs nav-justified">
+																	<li><input class="form-group" type="checkbox" ng-model="create.action.promoted" name="promoted"> <label>Itinerari
+																			sostenibili</label></li>
+																	<li><label><div class="dropdown">
+																				Associa gruppo:
+																				<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																					{{ create.action.planningResultGroupName }}<span class="caret"></span>
+																				</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="groupName in getGroupNames()" ng-click="create.action.planningResultGroupName = groupName"><a><strong>{{
+																								groupName }}</strong></a></li>
+																				</ul>
+																			</div></label>
+																		<button class="btn btn-danger navbar-btn">
+																			<span class="glyphicon glyphicon-plus" aria-hidden="true" data-toggle="modal" data-target="#newgroupdmodal" ng-click="newGroup();" />
+																		</button> <span ng-init="initTooltips()" class="glyphicon glyphicon-question-sign group-tooltip" aria-hidden="true"></span></li>
+																</ul>
+															</div>
+														</div>
+													</div>
+												</div>
 											</div>
 										</div>
-									</li>
-
-
-
-									<div class="dropdown">
-										<label>Ordina per</label>
-										<button class="btn btn-default navbar-btn"
-											data-toggle="dropdown" aria-haspopup="true"
-											aria-expanded="false">
-											{{ compileform.filter.sortType }}<span class="caret"></span>
-										</button>
-										<ul class="dropdown-menu">
-											<li ng-repeat="stype in stypes"
-												ng-click="compileform.filter.sortType = stype"><a><strong>{{
-														stype }}</strong></a></li>
+									</div>
+								</div>
+								</li>
+								</form>
+								</ul>
+								<div id="modifytab" class="tab-pane">
+									<div class="nav">
+										<ul class="nav nav-pills navbar-right">
+											<li>
+												<button class="btn btn-info navbar-btn" ng-show="!preparationcodeshow" ng-click="addModify()">Nuova Regola</button>
+											</li>
+											<li>
+												<button class="btn btn-default navbar-btn" ng-show="!preparationcodeshow" ng-click="preparationcodeshow = true">Vedi codice</button>
+											</li>
+											<li role="presentation">
+												<button class="btn btn-default navbar-btn" ng-show="preparationcodeshow && !compileform.modifiedGenerate" ng-click="preparationcodeshow = false">Chiudi
+													codice</button>
+											</li>
+											<li ng-show="preparationcodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+													ng-model="compileform.modifiedGenerate" name="modifiedGenerate" class="navbar-btn btn-sm"
+													ng-click="resetCode(compileform.modifiedGenerate, true, false, false)"
+												> Modifica codice</label></li>
+											<!-- Chiudi codice -->
 										</ul>
 									</div>
-
-									<div class="dropdown">
-										<label>Numero di risultati da mantenere</label>
-										<button class="btn btn-default navbar-btn"
-											data-toggle="dropdown" aria-haspopup="true"
-											aria-expanded="false">
-											{{ compileform.filter.keep }}<span class="caret"></span>
-										</button>
-										<ul class="dropdown-menu">
-											<li ng-repeat="num in [1,2,3,4,5]"
-												ng-click="compileform.filter.keep = num"><a><strong>{{
-														num }}</strong></a></li>
+									<div ng-show="!preparationcodeshow">
+										<ul class="list-group">
+											<div class="form-group">
+												<li class="list-group-item" ng-repeat="modify in compileform.modify track by $index">
+													<div class="nav">
+														<ul class="nav nav-pills navbar-left">
+															<div>
+																<p>
+																<h4>
+																	<strong>Condizione</strong>
+																</h4>
+																</p>
+															</div>
+														</ul>
+														<ul class="nav nav-pills navbar-right">
+															<button class="btn btn-danger navbar-btn" ng-show="modify.enabled" ng-click="modify.enabled = false;">
+																<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+															</button>
+															<button class="btn btn-success navbar-btn" ng-show="!modify.enabled" ng-click="modify.enabled = true;">
+																<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+															</button>
+															<button class="btn btn-danger navbar-btn" ng-click="removeModify(modify)">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+															</button>
+														</ul>
+													</div> <label>Formula</label>
+													<div>
+														<form class="form-horizontal">
+															<div class="form-group col-sm-12">
+																<input class="form-control " type="text" ng-model="modify.condition.formula">
+															</div>
+															<span class=" glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+														</form>
+													</div> <br />
+													<hr />
+													<p>
+													<h4>
+														<strong>Nuova richiesta</strong>
+													</h4>
+													</p>
+													<ul class="nav nav-pills">
+														<div>
+															<input type="checkbox" ng-model="modify.action.wheelchair" name="wheelchair"> <label>Itinerari accessibili</label>
+														</div>
+														<li>
+															<div class="dropdown">
+																<label>TType (Mezzo di trasporto):</label>
+																<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																	{{ modify.action.newTType }}<span class="caret"></span>
+																</button>
+																<ul class="dropdown-menu ">
+																	<li ng-repeat="ttype in ttypes" ng-click="modify.action.newTType = ttype"><a><strong>{{ ttype }}</strong></a>
+																</ul>
+															</div>
+														</li>
+														<li>
+															<div class="dropdown">
+																<label>RType (Tipo di itinerario):</label>
+																<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																	{{ modify.action.newRType }}<span class="caret"></span>
+																</button>
+																<ul class="dropdown-menu">
+																	<li ng-repeat="rtype in rtypes" ng-click="modify.action.newRType = rtype"><a><strong>{{ rtype }}</strong></a>
+																</ul>
+															</div>
+														</li>
+													</ul>
+													<div class="dropdown">
+														<label>Numero di risultati</label>
+														<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+															{{ modify.action.newItineraryNumber }}<span class="caret"></span>
+														</button>
+														<ul class="dropdown-menu">
+															<li ng-repeat="num in [null,1,2,3,4,5]" ng-click="modify.action.newItineraryNumber = num"><a><strong>{{ num }}</strong></a>
+														</ul>
+													</div>
+													<div>
+														<form class="form-horizontal">
+															<div class="form-group">
+																<label class="col-sm-3 control-label">MaxWalkDistance</label>
+																<div class="col-sm-4">
+																	<input type="text" class="form-control" ng-model="modify.action.maxWalkDistance" name="maxWalkDistance" size="8" />
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-sm-3 control-label">MaxTotalWalkDistance</label>
+																<div class="col-sm-4">
+																	<input type="text" class="form-control" ng-model="modify.action.maxTotalWalkDistance" name="maxTotalWalkDistance" size="8" />
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-sm-3 control-label">MaxChanges</label>
+																<div class="col-sm-4">
+																	<input type="text" class="form-control" ng-model="modify.action.maxChanges" name="maxChanges" size="8" />
+																</div>
+															</div>
+														</form>
+													</div>
+													<div>
+														<label>
+															<div class="dropdown">
+																ExtraTransport
+																<button class="btn btn-default navbar-btn " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																	{{ modify.action.extraTransport }}<span class="caret"></span>
+																</button>
+																<ul class="dropdown-menu">
+																	<li ng-repeat="ttype in ttypes" ng-click="modify.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
+																</ul>
+															</div>
+														</label>
+													</div>
+													<div>
+														<hr />
+														<div>
+															<label>Gestione risultati</label>
+														</div>
+														<div>
+															<ul class="nav nav-tabs nav-justified">
+																<li><input class="form-group" type="checkbox" ng-model="modify.action.promoted" name="promoted"> <label>Itinerari
+																		sostenibili</label></li>
+																<li><label><div class="dropdown">
+																			Associa gruppo:
+																			<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																				{{ modify.action.planningResultGroupName }}<span class="caret"></span>
+																			</button>
+																			<ul class="dropdown-menu">
+																				<li ng-repeat="groupName in getGroupNames()" ng-click="modify.action.planningResultGroupName = groupName"><a><strong>{{
+																							groupName }}</strong></a></li>
+																			</ul>
+																			<span class=" glyphicon glyphicon-question-sign" aria-hidden="true" />
+																		</div></label></li>
+															</ul>
+														</div>
+													</div>
+												</li>
+											</div>
 										</ul>
 									</div>
-
-
-									<nav class="navbar navbar-default">
-										<div class="container-fluid">
-											<ul class="nav navbar-sm navbar-right">
-												<button class="btn btn-danger navbar-btn"
-													ng-click="addFilterFormula()">
-													<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-												</button>
-											</ul>
-										</div>
-									</nav>
-
-
-
-
-
+								</div>
+								</li>
+								</form>
+								</ul>
+							</div>
+							<div ng-show="preparationcodeshow">
+								<h3>Preparazione (codice)???</h3>
+								<form id="generatecode-form">
+									<textarea class="form-control" type="text" rows="30" ng-model="tmpForm.generateCode" ng-trim="false" name="generateCode"
+										ng-readonly="!compileform.modifiedGenerate"
+									/>
+									</textarea>
 								</form>
 							</div>
 						</div>
-
-
-
-
-					<!--  -->
-					<div id="groupstab" class="tab-pane">
-						<h3>Gruppi</h3>
-						<div>
-							<ul class="list-group">
-								<form id="group-form">
-									<li class="list-group-item"
-										ng-repeat="group in compileform.groups track by $index">
-
-										<ul class="nav navbar-sm navbar-right">
-											<button class="btn btn-default navbar-btn"
-												ng-show="group.enabled" ng-click="group.enabled = false;">
-												<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-											</button>
-											<button class="btn btn-default navbar-btn"
-												ng-show="!group.enabled" ng-click="group.enabled = true;">
-												<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-											</button>
-											<!-- 												<button class="btn btn-danger navbar-btn"
-													ng-click="copyParametric(parametric)">
-													<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-												</button>	 -->
-											<button class="btn btn-danger navbar-btn"
-												ng-click="removeGroup(group)">
-												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-											</button>
-										</ul>
-
+						<div id="evaluatetab" class="tab-pane">
+							<div>
+								<div class="nav">
+									<ul class="nav nav-pills navbar-right">
+										<li>
+											<button class="btn btn-info navbar-btn" ng-show="!evaluatecodeshow" ng-click="addEvaluate()">Nuova Regola</button>
+										</li>
+										<li>
+											<button class="btn btn-default navbar-btn" ng-show="!evaluatecodeshow" ng-click="evaluatecodeshow = true">Vedi codice</button>
+										</li>
+										<li role="presentation">
+											<button class="btn btn-default navbar-btn" ng-show="evaluatecodeshow && !compileform.modifiedEvaluate" ng-click="evaluatecodeshow = false">Chiudi
+												codice</button>
+										</li>
+										<li ng-show="evaluatecodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+												ng-model="compileform.modifiedEvaluate" name="modifiedEvaluate" class="navbar-btn btn-sm"
+												ng-click="resetCode(compileform.modifiedEvaluate, false, true, false)"
+											> Modifica codice</label></li>
+										<!-- Chiudi codice -->
+									</ul>
+								</div>
+								<div ng-show="!evaluatecodeshow">
+									<ul class="list-group">
 										<div class="form-group">
-											<label> Nome </label> <input class="form-control" type="text"
-												ng-model="group.name" name="name" />
-											<div class="dropdown">
-												<label>Numero di risultati</label>
-												<button class="btn btn-default navbar-btn"
-													data-toggle="dropdown" aria-haspopup="true"
-													aria-expanded="false">
-													{{ group.maxEntries }}<span class="caret"></span>
-												</button>
-												<ul class="dropdown-menu">
-													<li ng-repeat="num in [1,2,3,4,5]"
-														ng-click="group.maxEntries = num"><a><strong>{{
-																num }}</strong></a></li>
+											<li class="list-group-item" ng-repeat="evaluate in compileform.evaluate track by $index">
+												<div class="nav">
+													<ul class="nav nav-pills navbar-left">
+														<div>
+															<p>
+															<h4>
+																<strong>Condizione</strong>
+															</h4>
+															</p>
+														</div>
+													</ul>
+													<ul class="nav nav-pills navbar-right">
+														<button class="btn btn-danger navbar-btn" ng-show="evaluate.enabled" ng-click="evaluate.enabled = false;">
+															<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+														</button>
+														<button class="btn btn-success navbar-btn" ng-show="!evaluate.enabled" ng-click="evaluate.enabled = true;">
+															<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+														</button>
+														<button class="btn btn-danger navbar-btn" ng-click="removeEvaluate(evaluate)">
+															<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+														</button>
+													</ul>
+												</div> <label>Formula</label>
+												<div>
+													<form class="form-horizontal">
+														<div class="form-group col-sm-12">
+															<input class="form-control " type="text" ng-model="evaluate.condition.formula">
+														</div>
+														<span class=" glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+													</form>
+												</div> <br />
+												<hr />
+												<p>
+												<h4>
+													<strong>Nuova richiesta</strong>
+												</h4>
+												</p>
+												<ul class="nav nav-pills">
+													<div>
+														<input type="checkbox" ng-model="evaluate.action.wheelchair" name="wheelchair"> <label>Itinerari accessibili</label>
+													</div>
+													<li>
+														<div class="dropdown">
+															<label>TType (Mezzo di trasporto):</label>
+															<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																{{ evaluate.action.newTType }}<span class="caret"></span>
+															</button>
+															<ul class="dropdown-menu ">
+																<li ng-repeat="ttype in ttypes" ng-click="evaluate.action.newTType = ttype"><a><strong>{{ ttype }}</strong></a>
+															</ul>
+														</div>
+													</li>
+													<li>
+														<div class="dropdown">
+															<label>RType (Tipo di itinerario):</label>
+															<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																{{ evaluate.action.newRType }}<span class="caret"></span>
+															</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="rtype in rtypes" ng-click="evaluate.action.newRType = rtype"><a><strong>{{ rtype }}</strong></a>
+															</ul>
+														</div>
+													</li>
 												</ul>
-											</div>
-
-											<div class="dropdown">
-												<label>Ordina per</label>
-												<button class="btn btn-default navbar-btn"
-													data-toggle="dropdown" aria-haspopup="true"
-													aria-expanded="false">
-													{{ group.sortType }}<span class="caret"></span>
-												</button>
-												<ul class="dropdown-menu">
-													<li ng-repeat="stype in stypes"
-														ng-click="group.sortType = stype"><a><strong>{{
-																stype }}</strong></a></li>
-												</ul>
-											</div>
+												<div class="dropdown">
+													<label>Numero di risultati</label>
+													<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+														{{ evaluate.action.newItineraryNumber }}<span class="caret"></span>
+													</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="num in [null,1,2,3,4,5]" ng-click="evaluate.action.newItineraryNumber = num"><a><strong>{{ num }}</strong></a>
+													</ul>
+												</div>
+												<div>
+													<form class="form-horizontal">
+														<div class="form-group">
+															<label class="col-sm-3 control-label">MaxWalkDistance</label>
+															<div class="col-sm-4">
+																<input type="text" class="form-control" ng-model="evaluate.action.maxWalkDistance" name="maxWalkDistance" size="8" />
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="col-sm-3 control-label">MaxTotalWalkDistance</label>
+															<div class="col-sm-4">
+																<input type="text" class="form-control" ng-model="evaluate.action.maxTotalWalkDistance" name="maxTotalWalkDistance" size="8" />
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="col-sm-3 control-label">MaxChanges</label>
+															<div class="col-sm-4">
+																<input type="text" class="form-control" ng-model="evaluate.action.maxChanges" name="maxChanges" size="8" />
+															</div>
+														</div>
+													</form>
+												</div>
+												<div>
+													<label>
+														<div class="dropdown">
+															ExtraTransport
+															<button class="btn btn-default navbar-btn " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																{{ evaluate.action.extraTransport }}<span class="caret"></span>
+															</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="ttype in ttypes" ng-click="evaluate.action.extraTransport = ttype"><a><strong>{{ ttype }}</strong></a>
+															</ul>
+														</div>
+													</label>
+												</div>
+												<div>
+													<hr />
+													<div>
+														<label>Gestione risultati</label>
+													</div>
+													<div>
+														<ul class="nav nav-tabs nav-justified">
+															<li><input class="form-group" type="checkbox" ng-model="evaluate.action.promoted" name="promoted"> <label>Itinerari
+																	sostenibili</label></li>
+															<li><label><div class="dropdown">
+																		Associa gruppo:
+																		<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																			{{ evaluate.action.planningResultGroupName }}<span class="caret"></span>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li ng-repeat="groupName in getGroupNames()" ng-click="evaluate.action.planningResultGroupName = groupName"><a><strong>{{
+																						groupName }}</strong></a></li>
+																		</ul>
+																		<span class=" glyphicon glyphicon-question-sign" aria-hidden="true" />
+																	</div></label></li>
+														</ul>
+													</div>
+												</div>
+											</li>
 										</div>
+									</ul>
+								</div>
+							</div>
+							</li>
+							</form>
+							</ul>
+							<div ng-show="evaluatecodeshow">
+								<h3>Valutazione (codice)???</h3>
+								<form id="generatecode-form">
+									<textarea class="form-control" type="text" rows="30" ng-model="tmpForm.evaluateCode" ng-trim="false" name="evaluateCode"
+										ng-readonly="!compileform.modifiedEvaluate"
+									/>
+									</textarea>
+								</form>
+							</div>
 						</div>
-
-						<nav class="navbar navbar-default">
-							<div class="container-fluid">
-								<ul class="nav navbar-sm navbar-right">
-									<button class="btn btn-default navbar-btn"
-										ng-click="addGroup()">
-										<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-									</button>
+						<div id="extractiontab" class="tab-pane">
+							<div class="tabbable">
+								<ul class="nav nav-tabs nav-justified ">
+									<li>
+										<button class="btn navbar-btn" data-toggle="tab" data-target="#groupstab" style="width: 100%;" ng-click="resetExtrstyles(true, false)"
+											ng-style="groupstyle"
+										>GRUPPI</button>
+									</li>
+									<li>
+										<button class="btn navbar-btn" data-toggle="tab" data-target="#filterstab" style="width: 100%;" ng-click="resetExtrstyles(false, true)"
+											ng-style="filterstyle"
+										>FILTRI</button>
+									</li>
 								</ul>
 							</div>
-						</nav>
-						<!-- </ng-form> -->
+							<div class="tab-content">
+								<div id="groupstab" class="tab-pane">
+									<div class="nav">
+										<ul class="nav nav-pills navbar-right">
+											<li>
+												<button class="btn btn-info navbar-btn" ng-click="addEmptyGroup()">Nuovo gruppo</button>
+											</li>
+										</ul>
+									</div>
+									<div>
+										<ul class="list-group">
+											<form id="group-form">
+												<li class="list-group-item" ng-repeat="group in compileform.groups track by $index">
+													<div>
+														<div class="nav">
+															<ul class="nav nav-pills navbar-left">
+																<div>
+																	<p>
+																	<h4>
+																		<strong>*Nome</strong>
+																	</h4>
+																	</p>
+																</div>
+															</ul>
+															<ul class="nav nav-pills navbar-right">
+																<!-- <button class="btn btn-default navbar-btn"
+																ng-show="group.enabled"
+																ng-click="group.enabled = false;">
+																<span class="glyphicon glyphicon-stop"
+																	aria-hidden="true"></span>
+															</button>
+															<button class="btn btn-success navbar-btn"
+																ng-show="!group.enabled"
+																ng-click="group.enabled = true;">
+																<span class="glyphicon glyphicon-play"
+																	aria-hidden="true"></span>
+															</button> -->
+																<button class="btn btn-danger navbar-btn" ng-click="removeGroup(group)">
+																	<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+																</button>
+															</ul>
+														</div>
+														<input class="form-control" type="text" ng-model="group.name" name="name" />
+														<ul class="nav nav-pills ">
+															<li role="presentation">
+																<div class="dropdown" style="width: 400px">
+																	<label>Numero di risultati</label>
+																	<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																		{{ group.maxEntries }}<span class="caret"></span>
+																	</button>
+																	<ul class="dropdown-menu">
+																		<li ng-repeat="num in [1,2,3,4,5]" ng-click="group.maxEntries = num"><a><strong>{{ num }}</strong></a></li>
+																	</ul>
+																</div>
+															</li>
+															<li role="presentation">
+																<div class="dropdown" style="width: 200px">
+																	<label>Ordina per</label>
+																	<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																		{{ group.sortType }}<span class="caret"></span>
+																	</button>
+																	<ul class="dropdown-menu">
+																		<li ng-repeat="stype in stypes" ng-click="group.sortType = stype"><a><strong>{{ stype }}</strong></a></li>
+																	</ul>
+																</div>
+															</li>
+														</ul>
+													</div>
+												</li>
+											</form>
+										</ul>
+									</div>
+								</div>
+								<div id="filterstab" class="tab-pane">
+									<div class="nav">
+										<ul class="nav nav-pills navbar-right">
+											<li>
+												<button class="btn btn-info navbar-btn" ng-show="!extractioncodeshow" ng-click="addFilterFormula()">Nuovo filtro</button>
+											</li>
+											<li>
+												<button class="btn btn-default navbar-btn" ng-show="!extractioncodeshow" ng-click="extractioncodeshow = true">Vedi codice</button>
+											</li>
+											<li role="presentation">
+												<button class="btn btn-default navbar-btn" ng-show="extractioncodeshow && !compileform.modifiedFilter" ng-click="extractioncodeshow = false">Chiudi
+													codice</button>
+											</li>
+											<li ng-show="extractioncodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+													ng-model="compileform.modifiedFilter" name="modifiedExtraction" class="navbar-btn btn-sm"
+													ng-click="resetCode(compileform.modifiedFilter, false, false, true)"
+												> Modifica codice</label></li>
+											<!-- Chiudi codice -->
+										</ul>
+									</div>
+									<div ng-show="!extractioncodeshow">
+										<ul class="nav nav-tabs nav-justified">
+											<li>
+												<div class="dropdown">
+													<label>Ordina per</label>
+													<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+														{{ compileform.filter.sortType }}<span class="caret"></span>
+													</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="stype in stypes" ng-click="compileform.filter.sortType = stype"><a><strong>{{ stype }}</strong></a></li>
+													</ul>
+												</div>
+											</li>
+											<li>
+												<div class="dropdown">
+													<label>Numero di risultati da mantenere</label>
+													<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+														{{ compileform.filter.keep }}<span class="caret"></span>
+													</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="num in [1,2,3,4,5]" ng-click="compileform.filter.keep = num"><a><strong>{{ num }}</strong></a></li>
+													</ul>
+												</div>
+											</li>
+											<ul class="list-group">
+												<form id="group-form">
+													<li class="list-group-item" ng-repeat="formula in compileform.filter.formulas track by $index">
+														<div class="input-group col-xs-11">
+															<div class="container-fluid">
+																<span class="input-group-btn"> <input class="form-control" type="text" ng-model="compileform.filter.formulas[$index]"
+																	name="filterformula"
+																/>
+																	<button class="btn btn-danger" ng-show="compileform.filter.enabled[$index]" ng-click="toggleFormula($index)">
+																		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+																	</button>
+																	<button class="btn btn-success" ng-show="!compileform.filter.enabled[$index]" ng-click="toggleFormula($index)">
+																		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+																	</button>
+																	<button class="btn btn-danger" type="button" ng-click="removeFilterFormula($index)">
+																		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+																	</button>
+																</span>
+															</div>
+														</div>
+													</li>
+												</form>
+											</ul>
+									</div>
+									<div ng-show="extractioncodeshow">
+										<h3>Estrazione (codice)???</h3>
+										<form id="extractcode-form">
+											<textarea class="form-control" type="text" rows="30" ng-model="tmpForm.filterCode" ng-trim="false" name="filterCode"
+												ng-readonly="!compileform.modifiedFilter"
+											/>
+											</textarea>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-
-
 				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+</div>
+</div>
+<div id="newgroupdmodal" class="modal fade" role="dialog" style="z-index: 100000;">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="nav ">
+					<ul class="nav navbar-left">
+						<h2 class="modal-title">Crea gruppo</h2>
+					</ul>
+				</div>
+			</div>
+			<div class="modal-body">
+				<div class="nav">
+					<ul class="nav nav-pills navbar-left">
+						<div>
+							<p>
+							<h4>
+								<strong>*Nome</strong>
+							</h4>
+							</p>
+						</div>
+					</ul>
+					<ul class="nav nav-pills navbar-right">
+						<li>
+							<div class=" form-group">
+								<button class="btn btn-info navbar-btn" data-dismiss="modal" ng-click="addGroup(group)">Salva</button>
+							</div>
+						</li>
+						<li>
+							<div class="form-group">
+								<button class="btn btn-default navbar-btn" data-dismiss="modal">Chiudi</button>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<input class="form-control" type="text" ng-model="group.name" name="name" />
+				<ul class="nav nav-pills ">
+					<li role="presentation">
+						<div class="dropdown" style="width: 400px">
+							<label>Numero di risultati:</label>
+							<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{ group.maxEntries }}<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li ng-repeat="num in [1,2,3,4,5]" ng-click="group.maxEntries = num"><a><strong>{{ num }}</strong></a></li>
+							</ul>
+						</div>
+					</li>
+					<li role="presentation">
+						<div class="dropdown" style="width: 200px">
+							<label>Ordina per</label>
+							<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{ group.sortType }}<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li ng-repeat="stype in stypes" ng-click="group.sortType = stype"><a><strong>{{ stype }}</strong></a></li>
+							</ul>
+						</div>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</div>
