@@ -61,6 +61,17 @@
 
   <http xmlns="http://www.springframework.org/schema/security" pattern="/gamification/r353nd/**" security="none"/>
   
+	<http xmlns="http://www.springframework.org/schema/security" pattern="/policies/console/**" auto-config="true" use-expressions="true">
+		<anonymous enabled="false" />
+        <security:intercept-url  pattern="/policies/console/**" access="isFullyAuthenticated()" />
+		<security:form-login login-page="/web/login" authentication-success-handler-ref="loginSuccessHandler" login-processing-url="/web/j_spring_security_check"  />
+		<security:logout logout-success-url="/policies/console" logout-url="/web/notification/j_spring_security_logout" />
+	</http>    
+  
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/policies/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/policies/parametric/**" security="none"/>
+  <http xmlns="http://www.springframework.org/schema/security" pattern="/policies/scripted/**" security="none"/>
+  
   
 <!-- 	<http xmlns="http://www.springframework.org/schema/security" pattern="/web/**" auto-config="true" use-expressions="true">
 		<anonymous enabled="false" />
@@ -81,7 +92,11 @@
         <security:intercept-url  pattern="/gamification/console/**" access="isFullyAuthenticated()" />
 		<security:form-login login-page="/web/login" authentication-success-handler-ref="loginSuccessHandler" login-processing-url="/web/j_spring_security_check"  />
 		<security:logout logout-success-url="/gamification/console" logout-url="/web/notification/j_spring_security_logout" />
-	</http>   	
+	</http>   
+	
+ 	
+	
+		
 	
 	<http create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		 xmlns="http://www.springframework.org/schema/security" authentication-manager-ref="authenticationManager">

@@ -1,0 +1,120 @@
+#include ("imports.vm")
+#macro(null $check)
+#if(!$check)null#else${check}#end
+#end
+#foreach($pe in $pecs)
+
+// condition generate ${foreach.count}
+boolean evaluate_c${foreach.count}(ttype, rtype, from, to, promoted, iteration, wheelchair, resultNumber) {
+#if ($pe.getCondition().getFormula())
+	return $pe.getCondition().getFormula();
+#else
+	return true;
+#end
+};
+#end		
+
+#foreach($pe in $pems)
+	
+// condition modify ${foreach.count}
+boolean evaluate_m${foreach.count}(ttype, rtype, from, to, promoted, iteration, wheelchair, resultNumber) {
+#if ($pe.getCondition().getFormula())
+	return $pe.getCondition().getFormula();
+#else
+	return true;
+#end
+};
+#end
+
+
+##List generatePlanRequests(journeyRequest) {
+	def prgMap = new TreeMap<String, PlanningResultGroup>();
+#foreach($prg in $prgs)
+#if ($prg.getSortType())
+	prgMap.put("${prg.getName()}", new PlanningResultGroup("${prg.getName()}", $prg.getMaxEntries(), $helper.toString($prg.getSortType())));
+#else
+	prgMap.put("${prg.getName()}", new PlanningResultGroup("${prg.getName()}", $prg.getMaxEntries(), journeyRequest.getRouteType()));
+#end
+#end	
+	
+	def prg = null;
+	def result = new ArrayList<PlanningRequest>();
+	
+	def originalPlanningRequests = PlanningPolicyHelper.generateOriginalPlanRequests(journeyRequest);
+	
+	originalPlanningRequests.each( {
+		def pv = new PlanningVariables(it);
+		prg = PlanningResultGroup.FAKE_GROUP;
+#foreach($pe in $pecs)
+		 
+#if ($pe.enabled)		 
+		if (evaluate_c${foreach.count}(pv.ttype, pv.rtype, pv.from, pv.to, pv.promoted, pv.iteration, pv.wheelchair, pv.resultNumber)) {
+			def spp = it.getSmartplannerParameters();
+#if ($pe.getAction().getMaxTotalWalkDistance())
+			spp.put(SmartplannerParameter.maxTotalWalkDistance, $pe.getAction().getMaxTotalWalkDistance());
+#end
+#if ($pe.getAction().getMaxWalkDistance())
+			spp.put(SmartplannerParameter.maxWalkDistance, $pe.getAction().getMaxWalkDistance());
+#end
+#if ($pe.getAction().getExtraTransport())
+			spp.put(SmartplannerParameter.extraTransport, $helper.toString($pe.getAction().getExtraTransport()));
+#end
+#if ($pe.getAction().getMaxChanges())
+			spp.put(SmartplannerParameter.maxChanges, $pe.getAction().getMaxChanges());
+#end
+#if ($pe.getAction().getPlanningResultGroupName())
+			prg = prgMap.get("$pe.getAction().getPlanningResultGroupName()");
+#end
+			def npr = PlanningPolicyHelper.buildDefaultDerivedRequest(it.getOriginalRequest(), it, #null($helper.toString($pe.getAction().getNewTType())), #null($helper.toString($pe.getAction().getNewRType())), #null($pe.getAction().getNewItineraryNumber()), spp, #null($pe.getAction().getWheelchair()), #null($pe.getAction().getPromoted()), prg);
+			result.add(npr);
+		}
+#end
+#end
+	});	
+	result.addAll(originalPlanningRequests);
+	
+	result.each( {
+		def pv = new PlanningVariables(it);
+#foreach($pe in $pems)
+	
+#if ($pe.enabled)	
+		if (evaluate_m${foreach.count}(pv.ttype, pv.rtype, pv.from, pv.to, pv.promoted, pv.iteration, pv.wheelchair, pv.resultNumber)) {
+			def spp = it.getSmartplannerParameters();
+#if ($pe.getAction().getMaxTotalWalkDistance())
+			spp.put(SmartplannerParameter.maxTotalWalkDistance, $pe.getAction().getMaxTotalWalkDistance());
+#end
+#if ($pe.getAction().getMaxWalkDistance())
+			spp.put(SmartplannerParameter.maxWalkDistance, $pe.getAction().getMaxWalkDistance());
+#end
+#if ($pe.getAction().getExtraTransport())
+			spp.put(SmartplannerParameter.extraTransport, $helper.toString($pe.getAction().getExtraTransport()));
+#end
+#if ($pe.getAction().getMaxChanges())
+			spp.put(SmartplannerParameter.maxChanges, $pe.getAction().getMaxChanges());
+#end
+#if ($pe.getAction().getPlanningResultGroupName())
+			prg = prgMap.get("$pe.getAction().getPlanningResultGroupName()");
+			it.setGroup(prg);
+#end
+#if ($pe.getAction().getNewTType())
+			it.setType($helper.toString($pe.getAction().getNewTType()));
+#end
+#if ($pe.getAction().getNewRType())
+			it.setRouteType($helper.toString($pe.getAction().getNewRType()));
+#end	
+#if ($pe.getAction().getNewItineraryNumber())
+			it.setItineraryNumber($pe.getAction().getNewItineraryNumber());
+#end
+#if ($pe.getAction().getWheelchair())
+			it.setWheelChair($pe.getAction().getWheelchair());
+#end
+		}
+#end
+#end
+	});
+	
+	PlanningPolicyHelper.buildSmartplannerRequests(result);
+	
+	return result;
+##}
+

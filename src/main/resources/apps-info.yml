@@ -1,13 +1,13 @@
 apps:
   - appId: trento
-    password: pwd
-    messagingAppId : mobility.trento 
-    gcmSenderApiKey : GCM_SENDER_API_KEY
-    gcmSenderId : GCM_SENDER_ID
+    password: trento
+    messagingAppId : mobility.trento
+    gcmSenderApiKey : AIzaSyBHSJtG-oZuPsTbRhr3txRyKv5Lbhq1gRI
+    gcmSenderId : 907144379538
     agencyIds : [5,6,10,12]
   - appId: rovereto
-    password: pwd
+    password: rovereto
     messagingAppId : mobility.rovereto
-    gcmSenderApiKey : GCM_SENDER_API_KEY
-    gcmSenderId : GCM_SENDER_ID    
-    agencyIds : [5,6,10,16,17] 
+    gcmSenderApiKey : AIzaSyBHSJtG-oZuPsTbRhr3txRyKv5Lbhq1gRI
+    gcmSenderId : 907144379538
+    agencyIds : [5,6,10,16,17]    

@@ -111,13 +111,14 @@ public class JourneyPlannerController extends SCController {
 			statLogger.log(journeyRequest, userFromToken);
 			logger.info("-"+userId  + "~AppConsume~plan");
 
-			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, 0, policyId);
+			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, policyId);
 			for (Itinerary itinerary: results) {
 				gamificationHelper.computeEstimatedGameScore(itinerary, false);
 			}
 			return results;
 		} catch (Exception e) {
 			e.printStackTrace();
+			response.addHeader("error_msg", e.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return null;

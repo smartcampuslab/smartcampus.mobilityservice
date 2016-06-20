@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
-import eu.trentorise.smartcampus.mobility.gamification.model.PlanObject;
+import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -37,6 +37,7 @@ public class DomainStorage {
 	private static final String GEOLOCATIONS = "geolocations";
 	private static final String TRACKED = "trackedInstances";
 	private static final String SAVED = "savedtrips";
+	private static final String COMPILED_POLICY = "compiledPolicies";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -67,6 +68,9 @@ public class DomainStorage {
 		}	
 		if (cls == SavedTrip.class) {
 			return SAVED;
+		}	
+		if (cls == CompilablePolicyData.class) {
+			return COMPILED_POLICY;
 		}			
 		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
@@ -198,6 +202,36 @@ public class DomainStorage {
 		template.save(savedTrip, SAVED);
 	}
 	
+	public void savePolicy(CompilablePolicyData policy) {
+		Query query = new Query(new Criteria("name").is(policy.getName()));
+		CompilablePolicyData policiesDB = searchDomainObject(query, CompilablePolicyData.class);
+		if (policiesDB == null) {
+			template.save(policy, COMPILED_POLICY);
+		} else {
+			Update update = new Update();
+			update.set("description", policy.getDescription());
+			update.set("create", policy.getCreate());
+			update.set("modify", policy.getModify());
+			update.set("extract", policy.getExtract());
+			update.set("evaluate", policy.getEvaluate());
+			update.set("filter", policy.getFilter());
+			update.set("generateCode", policy.getGenerateCode());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());
+			update.set("modifiedGenerate", policy.isModifiedGenerate());
+			update.set("modifiedEvaluate", policy.isModifiedEvaluate());
+			update.set("modifiedExtract", policy.isModifiedExtract());
+			update.set("modifiedFilter", policy.isModifiedFilter());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());			
+			update.set("groups", policy.getGroups());
+			update.set("draft", policy.getDraft());
+			template.updateFirst(query, update, COMPILED_POLICY);
+		}
+	}		
+	
 	public Geolocation getLastGeolocationByUserId(String userId) {
 		Criteria criteria = new Criteria("userId").is(userId);
 		Query query = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
@@ -242,6 +276,12 @@ public class DomainStorage {
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
+	public <T> void deleteDomainObject(Criteria criteria, Class<T> clz) {
+		Query query = new Query(criteria);
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		template.remove(query, getClassCollection(clz));
+	}	
+		
 	
 	
 //	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {

@@ -31,6 +31,7 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
@@ -111,9 +113,9 @@ public class TestConfig {
 			@Override
 			public RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney)	throws Exception { return null; }
 			@Override
-			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId)throws Exception { return null; }
-			@Override
 			public RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception { return null; }
+			@Override
+			public List<Itinerary> planSingleJourney(SingleJourney journeyRequest, String policyId) throws Exception { return null; }			
 			@Override
 			public String parkingsByAgency(String agencyId) throws Exception { return null; }
 			@Override
@@ -142,6 +144,12 @@ public class TestConfig {
 				// TODO Auto-generated method stub
 				return null;
 			}
+			@Override
+			public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
 		};
 	}
 }

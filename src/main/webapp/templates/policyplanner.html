@@ -1,3 +1,5 @@
+
+
 <div class="row">
 	<div class="col-md-8 col-md-offset-3">
     <h2>Smart Planner</h2>
@@ -22,7 +24,7 @@
 								class="input-group-btn">
 								<button ng-click="fromCurrent(fromMarker)"
 									class="btn btn-default" type="button">
-									<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>
+									<span class="glyphicon glyphicon-screenshot" aria-hidden="true" ></span>
 								</button>
 							</span>
 						</div>
@@ -101,7 +103,7 @@
 						<div class="col-md-6">
 							<div class="radio">
 								<label><input type="radio" ng-model="mode" name="mode"
-									id="modeF" value="fastest" checked>Più veloce</label>
+									id="modeF" value="fastest" checked>Più  veloce</label>
 							</div>
 							<div class="radio">
 								<label><input type="radio" ng-model="mode" name="mode"
@@ -215,23 +217,22 @@
 					<div class="container-fluid">
 						<ul class="nav navbar-nav navbar-left">
 							<li>
-							
 							<button class="btn btn-default navbar-btn" id="policyIds-dropdown"
 									data-toggle="dropdown" aria-haspopup="true"
 									aria-expanded="false"">
 									{{ currentPolicy.description }}<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu policyIds-dropdown">
-									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', draft : false} , false)">
+									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', editable: false, draft : false, policyType : 'hardcoded'} , false)">
 										<a><strong>Nessuna</strong></a></li>
-									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', draft: false}, false)">
+									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', editable: false, draft: false, policyType : 'hardcoded'}, false)">
 										<a><strong>Park and Ride</strong></a></li>
-									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', draft: false} , false)">
+									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', editable: false, draft: false, policyType : 'hardcoded'} , false)">
 										<a><strong>Bike Sharing</strong></a></li>
 									<li role="separator" class="divider"></li>
 									<li ng-repeat="policy in policyIds"
-										ng-click="setPolicy(policy, true)">
-										<a><em ng-if="policy.draft">*{{ policy.description }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
+										ng-click="setPolicy(policy, true, policyType)">
+										<a><em ng-if="policy.draft">*{{ policy.description + "_" + policy.policyType }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
 								</ul></li>
 							</ul>								
 							
@@ -240,6 +241,31 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Gestione politiche sostenibili</h3>
+			</div>
+			<div class="panel-body">
+				<button class="btn btn-default navbar-btn" ng-click="resetPolicy(); actionMsg='Crea'" style="width:250px" data-toggle="modal" data-target="#compiledmodal">
+					Crea nuova politica
+				</button>
+				<button class="btn btn-default navbar-btn" ng-click="readPolicy(); actionMsg='Modifica'" style="width:250px" data-toggle="modal"  ng-disabled="!currentPolicy.editable"
+					data-target="#compiledmodal">
+					Modifica la politica corrente
+				</button>	
+				<button class="btn btn-warning navbar-btn" ng-click="deletePolicy()" actionMsg='Elimina'" style="width:250px" data-toggle="modal" ng-disabled="!currentPolicy.editable">
+					Elimina la politica corrente
+				</button>		
+				<button class="btn btn-danger navbar-btn" ng-click="resetPolicy('parametric'); actionMsg='Crea'" style="width:250px" data-toggle="modal" data-target="#multimodal">
+					Crea nuova parametric
+				</button>				
+						
+			</div>
+		</div>
+	</div>
+
 
 </div>
 	<div class="row">
@@ -254,16 +280,16 @@
 <!--             </div> -->
 <!--             <div class="col-md-10"> -->
 <!--               <div class="tt thumbnail col-md-2"> -->
-<!-- 					      <img src="img/ic_mt_bus.png" > -->
+<!-- 					      <img src="../img/ic_mt_bus.png" > -->
 <!-- 					      <div class="text-center"><div>aaa</div><div>eee</div></div> -->
 <!-- 					    </div> -->
             
 <!--               <div class="col-md-3 text-center"> -->
-<!--                   <img ng-src="img/ic_mt_bus.png"/> -->
+<!--                   <img ng-src="../img/ic_mt_bus.png"/> -->
 <!--                   <span>note</span> -->
 <!--               </div> -->
 <!--               <div class="col-md-2  text-center"> -->
-<!--                   <img ng-src="img/ic_mt_car.png"/> -->
+<!--                   <img ng-src="../img/ic_mt_car.png"/> -->
 <!--                   <span>note</span> -->
 <!--               </div> -->
 <!--             </div> -->
@@ -322,7 +348,7 @@
         <!-- START -->
         <div class="row leg">
           <div class="col-md-1 start-leg">
-            <img src="img/ic_point_outline.png">
+            <img src="../img/ic_point_outline.png">
           </div>
           <div class="col-md-2">{{toTime(currentItinerary.startime)}}</div>
           <div class="col-md-9">{{requestedFrom}}</div>
@@ -330,7 +356,7 @@
         <!-- ROW -->
         <div class="row leg" ng-repeat="step in currentItinerary.steps">
           <div class="col-md-1">
-            <img src="img/ic_point.png">
+            <img src="../img/ic_point.png">
           </div>
           <div class="col-md-2">{{toTime(step.startime)}}</div>
           <div class="col-md-7 inter-leg">
@@ -338,10 +364,10 @@
             <p ng-if="step.from != null">{{step.fromLabel}}<strong>{{step.from}}</strong></p>
             <p ng-if="step.to != null">{{step.toLabel}}<strong>{{step.to}}</strong></p>
             <p ng-if="step.parking && step.parking.cost">
-               <img src="img/ic_price_parking.png"/>{{step.parking.cost}}
+               <img src="../img/ic_price_parking.png"/>{{step.parking.cost}}
             </p>
             <p ng-if="step.parking && step.parking.time">
-               <img src="img/ic_look_for_parking.png"/>{{step.parking.time}}
+               <img src="../img/ic_look_for_parking.png"/>{{step.parking.time}}
             </p>
           </div>
           <div class="col-md-2">
@@ -358,7 +384,7 @@
         </div>
         <!-- END -->
         <div class="row leg">
-          <div class="col-md-1 end-leg"><img src="img/ic_point_outline.png"></div>
+          <div class="col-md-1 end-leg"><img src="../img/ic_point_outline.png"></div>
           <div class="col-md-2">{{toTime(currentItinerary.endtime)}}</div>
           <div class="col-md-9">{{requestedTo}}</div>
         </div>
@@ -370,4 +396,7 @@
   </div>
  </div>
 
-
+<!-- <div ng-include="'../templates/parametricmodal.html'"></div>
+<div ng-include="'../templates/scriptedmodal.html'"></div> -->
+<div ng-include="'../templates/compiledmodal.html'"></div>
+<div ng-include="'../templates/modal.html'"></div>

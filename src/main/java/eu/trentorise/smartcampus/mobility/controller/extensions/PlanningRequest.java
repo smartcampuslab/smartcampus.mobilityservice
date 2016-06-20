@@ -6,24 +6,44 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
-public class PlanRequest {
+public class PlanningRequest {
 
+	public enum SmartplannerParameter  {
+		maxWalkDistance, maxTotalWalkDistance, extraTransport, maxChanges;
+	}
+	
 	private TType type;
 	private RType routeType;
 	private String request;
 	private String plan;
-	private Double value;
+	private PlanningResultGroup group;
 	private List<Itinerary> itinerary;
 	private SingleJourney originalRequest;
 	private int itineraryNumber;
 	private Boolean retryOnEmpty = false;
 	private boolean wheelChair = false;
 	
-	public PlanRequest() {
+	private boolean promoted = false;
+	private boolean derived = false;
+	
+	private PlanningRequest parentRequest;
+	
+	private Map<SmartplannerParameter, Object> smartplannerParameters;
+	
+	private int iteration;
+	
+	public PlanningRequest() {
 		itinerary = Lists.newArrayList();
+		smartplannerParameters = Maps.newTreeMap();
+	}
+	
+	public void setSmartplannerParameter(SmartplannerParameter property, Object value) {
+		smartplannerParameters.put(property, value);
 	}
 	
 	public TType getType() {
@@ -52,11 +72,12 @@ public class PlanRequest {
 		this.plan = plan;
 	}
 
-	public Double getValue() {
-		return value;
+	public PlanningResultGroup getGroup() {
+		return group;
 	}
-	public void setValue(Double value) {
-		this.value = value;
+
+	public void setGroup(PlanningResultGroup group) {
+		this.group = group;
 	}
 
 	public List<Itinerary> getItinerary() {
@@ -97,9 +118,49 @@ public class PlanRequest {
 		this.wheelChair = wheelChair;
 	}
 
+	public boolean isPromoted() {
+		return promoted;
+	}
+
+	public void setPromoted(boolean promoted) {
+		this.promoted = promoted;
+	}
+
+	public boolean isDerived() {
+		return derived;
+	}
+
+	public void setDerived(boolean derived) {
+		this.derived = derived;
+	}
+
+	public Map<SmartplannerParameter, Object> getSmartplannerParameters() {
+		return smartplannerParameters;
+	}
+
+	public void setSmartplannerParameters(Map<SmartplannerParameter, Object> smartplannerParameters) {
+		this.smartplannerParameters = smartplannerParameters;
+	}
+
+	public PlanningRequest getParentRequest() {
+		return parentRequest;
+	}
+
+	public void setParentRequest(PlanningRequest parentRequest) {
+		this.parentRequest = parentRequest;
+	}
+
+	public int getIteration() {
+		return iteration;
+	}
+
+	public void setIteration(int iteration) {
+		this.iteration = iteration;
+	}
+	
 	@Override
 	public String toString() {
-		return type.toString() + ": " + value;
+		return (promoted ? "!" : "") + type.toString();
 	}
 	
 	

@@ -59,42 +59,16 @@
 		<property name="listener" ref="serviceEventProcessor" />
 	</bean>
 
-	<util:map id = "enrichersMap">
+	<util:map id = "basicPoliciesMap">
 		<entry key="Dummy">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher" />
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
 		</entry>
 		<entry key="Trento">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher" />
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
 		</entry>
 		<entry key="Rovereto">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoGreenItineraryRequestEnricher" />
-		</entry>
-		<entry key="default">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher" />
-		</entry>		
-	</util:map>
-	
-	<util:map id = "convertersMap">
-		<entry key="Dummy">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="Trento">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="Rovereto">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="default">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
-		</entry>		
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
+		</entry>				
 	</util:map>	
 
 
@@ -132,4 +106,6 @@
 
 	<bean id="executorService" class="java.util.concurrent.Executors"
 		factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
+		
+		
 </beans>

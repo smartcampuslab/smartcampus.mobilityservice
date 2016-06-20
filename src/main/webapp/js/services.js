@@ -214,7 +214,7 @@ services.factory('formatter', ['parking', '$rootScope',
     		res.place = parkingPlace != null ? parkingPlace.description : leg.to.stopId.id;
     	}
     	if (res.type) {
-    		res.img = 'img/'+getImageName(res.type)+'.png';
+    		res.img = $rootScope.imgBase + 'img/'+getImageName(res.type)+'.png';
     		return res;
     	}
     };
@@ -230,7 +230,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			console.log('UNDEFINED: '+it.leg[i].transport.type);
     			elem.img  = getImageName('BUS');
     		}
-    		elem.img = 'img/'+elem.img+'.png';
+    		elem.img = $rootScope.imgBase + 'img/'+elem.img+'.png';
     		
     		if (t == 'BUS' || t == 'TRAIN') {
     			elem.note = [it.leg[i].transport.routeShortName];
@@ -326,7 +326,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			console.log('UNDEFINED: '+plan.leg[i].transport.type);
     			step.mean.img  = getImageName('BUS');
     		}
-    		step.mean.img = 'img/'+step.mean.img +'.png';
+    		step.mean.img = $rootScope.imgBase + 'img/'+step.mean.img +'.png';
 
     		var parkingStep = null;
     		if (t == 'CAR') {

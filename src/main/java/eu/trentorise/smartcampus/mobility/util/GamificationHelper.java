@@ -181,7 +181,7 @@ public class GamificationHelper {
 					if (leg.getTo().getStopId() != null && "BIKE_SHARING_TOBIKE_ROVERETO".equals(leg.getTo().getStopId().getAgencyId())) {
 						bikeSharing = true;
 						endBikesharingName = leg.getTo().getStopId().getId();
-					}						
+					}					
 				} else if (leg.getTransport().getType().equals(TType.WALK)) {
 					walkDist += leg.getLength() / 1000;
 				} else if (leg.getTransport().getType().equals(TType.TRAIN)) {
