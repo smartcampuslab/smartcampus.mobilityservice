@@ -29,7 +29,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.Lists;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 
 public class ItinerarySorter {
 

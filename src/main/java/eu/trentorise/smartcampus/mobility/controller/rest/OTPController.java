@@ -20,6 +20,7 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.io.ByteStreams;
 
 import eu.trentorise.smartcampus.mobility.model.Timetable;
 import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingHandler;
@@ -364,6 +367,42 @@ public class OTPController extends SCController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiAgencyContacts/")
+	public @ResponseBody void getTaxiAgencyContacts(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws InvocationException {
+		try {
+
+			String contacts = smartPlannerHelper.getTaxiAgencyContacts();
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(contacts);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+		
+  	@RequestMapping(method = RequestMethod.GET, value = "/gtfs/{agencyId}", produces = "application/zip")
+  	public @ResponseBody
+  	void getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId) {
+  		try {
+  			response.setContentType("application/zip");
+			response.setHeader("Content-Disposition", "attachment; filename=\"gtfs_" + agencyId + ".zip\""); 
+			
+			InputStream is = smartPlannerHelper.gtfs(agencyId);
+			
+			ByteStreams.copy(is, response.getOutputStream());
+  		} catch (ConnectorException e0) {
+  			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}   	
+	
+	
+	
 	
 	@Override
 	protected String getUserId() {

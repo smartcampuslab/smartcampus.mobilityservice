@@ -19,7 +19,8 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.gamification.model.PlanObject;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;

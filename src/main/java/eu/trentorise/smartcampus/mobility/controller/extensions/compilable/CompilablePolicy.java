@@ -1,4 +1,4 @@
-package eu.trentorise.smartcampus.mobility.controller.extensions.definitive;
+package eu.trentorise.smartcampus.mobility.controller.extensions.compilable;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;

@@ -4,7 +4,7 @@ import it.sayservice.platform.smartplanner.data.message.RType;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PlanningResultGroup {

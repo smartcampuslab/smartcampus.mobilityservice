@@ -42,6 +42,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ws.rs.core.MediaType;
 
@@ -59,8 +60,8 @@ import com.google.common.collect.Maps;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -72,10 +73,15 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 @Component
 public class SmartPlannerService implements SmartPlannerHelper {
 
+	@Autowired
+	@Value("${smartplanner.router}")
+	private String smartplannerRouter;		
+	
 	private static final String DUMMY = "Dummy";
 	private static final String DEFAULT = "default";
-	private static final String SMARTPLANNER = "/smart-planner/api-webapp/planner/";
-	private static final String OTP  = "/smart-planner/rest/";
+	
+	private String SMARTPLANNER;
+	private String OTP;
 
 	private static final String PLAN = "plan";
 	private static final String RECURRENT = "recurrentJourney";
@@ -100,6 +106,12 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	private DomainStorage storage;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SmartPlannerService.class);
+	
+	@PostConstruct
+	public void init() {
+		SMARTPLANNER = "/smart-planner/" + smartplannerRouter + "/rest/";
+		OTP  = "/smart-planner/" + smartplannerRouter + "/rest/";
+	}
 	
 	@Override
 	public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
@@ -440,6 +452,24 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		return response;
 
 	}
+	
+	
+	@Override
+	public String getTaxiAgencyContacts() throws Exception {
+
+		String response = null;
+
+		response = performGET(SMARTPLANNER + "taxi/contacts",	null);
+
+		return response;
+
+	}	
+	
+	@Override
+	public InputStream gtfs(String agencyId) throws Exception {
+		return HTTPConnector.doStreamGet(otpURL + SMARTPLANNER + "gtfs/" + agencyId, null, "application/zip", null);
+	}	
+	
 
 	
 }

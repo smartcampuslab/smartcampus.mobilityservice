@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 

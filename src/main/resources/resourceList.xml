@@ -22,6 +22,8 @@
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/getTaxiStation" method="GET" />
 	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/getTaxiAgencyContacts" method="GET" />		
+	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/geostops/{agencyId}" method="GET" />
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/gettimetable/{agencyId}/{routeId}/{stopId:.*}" method="GET" />
@@ -52,6 +54,8 @@
 		pathPattern="/routesDB/{appId}" method="GET" />
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/versions" method="GET" />
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/gtfs/{agencyId}" method="GET" />		
 
 	<!-- planning -->
 	<resourceMapping uri="mobilityservice.plan"

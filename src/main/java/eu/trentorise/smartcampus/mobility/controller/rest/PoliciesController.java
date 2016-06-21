@@ -25,8 +25,8 @@ import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.CompilablePolicyData;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.VelocityCompiler;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.VelocityCompiler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerService;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 

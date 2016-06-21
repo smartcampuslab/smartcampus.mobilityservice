@@ -20,6 +20,6 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.PlanningVariables;
-import eu.trentorise.smartcampus.mobility.controller.extensions.definitive.SortType;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.PlanningVariables;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 
