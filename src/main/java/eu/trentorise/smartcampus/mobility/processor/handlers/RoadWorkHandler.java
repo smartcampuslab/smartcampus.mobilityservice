@@ -18,6 +18,7 @@ package eu.trentorise.smartcampus.mobility.processor.handlers;
 
 import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.client.ServiceBusClient;
+import it.sayservice.platform.smartplanner.data.message.EffectType;
 import it.sayservice.platform.smartplanner.data.message.RoadElement;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoadType;
@@ -91,7 +92,8 @@ public class RoadWorkHandler implements ServiceHandler {
 					ar.setAgencyId("COMUNE_DI_ROVERETO");
 					ar.setCreatorType(CreatorType.SERVICE);
 					ar.setDescription(t.getOgetto());
-					ar.setEffect(via.hasTipologia() && !via.getTipologia().isEmpty() ? via.getTipologia() : t.getTipologia());
+//					ar.setEffect(via.hasTipologia() && !via.getTipologia().isEmpty() ? via.getTipologia() : t.getTipologia());
+					ar.setEffect(EffectType.UNKNOWN_EFFECT);
 					ar.setFrom(sdf.parse(t.getDal()).getTime());
 					ar.setTo(sdf.parse(t.getAl()).getTime());
 					ar.setId(t.getId()+"_"+via.getCodiceVia());
