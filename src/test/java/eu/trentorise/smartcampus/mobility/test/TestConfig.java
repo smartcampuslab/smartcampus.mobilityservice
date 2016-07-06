@@ -149,6 +149,15 @@ public class TestConfig {
 				// TODO Auto-generated method stub
 				return null;
 			}
+			@Override
+			public String getTaxiAgencyContacts() throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public InputStream gtfs(String agencyId) throws Exception {
+				return null;
+			}
 
 		};
 	}
