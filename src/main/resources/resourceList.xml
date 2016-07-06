@@ -72,8 +72,10 @@
 		pathPattern="/recurrent" method="GET" />
 	<resourceMapping uri="mobilityservice.user.itinerary.read"
 		pathPattern="/recurrent/{itineraryId}" method="GET" />
+	<resourceMapping uri="mobilityservice.user.itinerary.read"
+		pathPattern="/monitorroute" method="GET" />		
 
-	<!-- user data read -->
+	<!-- user data write -->
 	<resourceMapping uri="mobilityservice.user.itinerary.write"
 		pathPattern="/itinerary" method="POST" />
 	<resourceMapping uri="mobilityservice.user.itinerary.write"
@@ -88,6 +90,8 @@
 		pathPattern="/recurrent/replan/{itineraryId}" />
 	<resourceMapping uri="mobilityservice.user.itinerary.write"
 		pathPattern="/recurrent/{itineraryId}/monitor/{monitor}" />
+	<resourceMapping uri="mobilityservice.user.itinerary.write"
+		pathPattern="/monitorroute" method="POST,PUT,DELETE" />		
 
 	<!-- user alert -->
 	<resourceMapping uri="mobilityservice.user.alert"
