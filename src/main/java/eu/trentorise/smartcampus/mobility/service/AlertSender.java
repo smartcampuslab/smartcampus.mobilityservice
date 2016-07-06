@@ -7,8 +7,11 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,6 +35,7 @@ import eu.trentorise.smartcampus.mobility.processor.alerts.ParkingChecker;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
+import eu.trentorise.smartcampus.mobility.storage.RouteMonitoringObject;
 
 @Component
 public class AlertSender {
@@ -57,7 +61,10 @@ public class AlertSender {
 	 */
 	public void publishTrains(List<GenericTrain> trains) {
 		List<AlertDelay> allDelays = filterSentDelays(trains);
+		
 		List<AlertWrapper> userDelays = findDelayAlertsForUsers(allDelays);
+//		userDelays.addAll( 
+		findDelayAlertsForMonitoredRoutes(allDelays); // currently not sending alerts
 		publishDelayAlerts(allDelays, userDelays);
 	}
 	/**
@@ -227,6 +234,85 @@ public class AlertSender {
 		}
 		return result;
 	}
+	
+	private List<AlertWrapper> findDelayAlertsForMonitoredRoutes(List<AlertDelay> alerts) {
+		List<AlertWrapper> result = Lists.newArrayList();
+		
+		for (AlertDelay alert: alerts) {
+			
+			List<RouteMonitoringObject> monitoring = findRouteMonitoring(alert);
+			for (RouteMonitoringObject rm: monitoring) {
+				AlertWrapper wrapper = new AlertWrapper();
+				
+				wrapper.setAlert(alert);
+				wrapper.setUserId(rm.getUserId());
+				wrapper.setAppId(rm.getAppId());
+				wrapper.setClientId(rm.getClientId());
+				wrapper.setName(buildMonitoringText(alert, rm));
+				
+				result.add(wrapper);
+			}
+		}
+		
+		return result;
+	}
+	
+	//TODO fill with real info (mapping agencyId...)
+	private String buildMonitoringText(AlertDelay alert, RouteMonitoringObject rm) {
+		return "Ritardo per " + ((AlertDelay) alert).getTransport().getRouteShortName();
+	}
+	
+	private List<RouteMonitoringObject> findRouteMonitoring(AlertDelay alert) {
+		long now = System.currentTimeMillis();
+		Date nowDate = new Date(now);
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(nowDate);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		String nowHour = sdf.format(nowDate);
+		
+		Criteria criteria = new Criteria("agencyId").is(alert.getTransport().getAgencyId()).and("routeId").is(alert.getTransport().getRouteId());
+		
+		List<RouteMonitoringObject> res1 = domainStorage.searchDomainObjects(criteria, RouteMonitoringObject.class);
+		List<RouteMonitoringObject> res2 = Lists.newArrayList();
+		
+		for (RouteMonitoringObject rm: res1) {
+			if (rm.getRecurrency() == null) {
+				continue;
+			}
+			if (rm.getRecurrency().getFromDate() != null) {
+				if (rm.getRecurrency().getFromDate() > now) {
+					continue;
+				}
+			}
+			if (rm.getRecurrency().getToDate() != null) {
+				if (rm.getRecurrency().getToDate() < now) {
+					continue;
+				}
+			}	
+			if (rm.getRecurrency().getFromHour() != null) {
+				if (rm.getRecurrency().getFromHour().compareTo(nowHour) > 0) {
+					continue;
+				}
+			}
+			if (rm.getRecurrency().getToHour() != null) {
+				if (rm.getRecurrency().getToHour().compareTo(nowHour) < 0) {
+					continue;
+				}
+			}			
+			if (rm.getRecurrency().getDaysOfWeek() != null && !rm.getRecurrency().getDaysOfWeek().isEmpty()) {
+				if (!rm.getRecurrency().getDaysOfWeek().contains(cal.get(Calendar.DAY_OF_WEEK))) {
+					continue;
+				}
+			}
+			
+			res2.add(rm);
+		}
+		
+		return res2;
+	}		
+	
+	
 	
 	private void publishDelayAlerts(List<AlertDelay> allAlerts, List<AlertWrapper> userAlerts) {
 		logger.debug("PUBLISHING DELAY: {} / {}", allAlerts.size(), userAlerts.size());
