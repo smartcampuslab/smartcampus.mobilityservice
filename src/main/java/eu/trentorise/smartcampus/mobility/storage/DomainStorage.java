@@ -25,6 +25,7 @@ import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
+import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -39,6 +40,7 @@ public class DomainStorage {
 	private static final String TRACKED = "trackedInstances";
 	private static final String SAVED = "savedtrips";
 	private static final String COMPILED_POLICY = "compiledPolicies";
+	private static final String MONITORING = "routesMonitoring";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -72,6 +74,9 @@ public class DomainStorage {
 		}	
 		if (cls == CompilablePolicyData.class) {
 			return COMPILED_POLICY;
+		}		
+		if (cls == RouteMonitoringObject.class || cls == RouteMonitoring.class) {
+			return MONITORING;
 		}			
 		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
@@ -232,6 +237,20 @@ public class DomainStorage {
 			template.updateFirst(query, update, COMPILED_POLICY);
 		}
 	}		
+	
+	public void saveRouteMonitoring(RouteMonitoringObject rmo) {
+		Query query = new Query(new Criteria("clientId").is(rmo.getClientId()));
+		RouteMonitoringObject monitoringDB = searchDomainObject(query, RouteMonitoringObject.class);
+		if (monitoringDB == null) {
+			template.save(rmo, MONITORING);
+		} else {
+			Update update = new Update();
+			update.set("agencyId", rmo.getAgencyId());
+			update.set("routeId", rmo.getRouteId());
+			update.set("recurrency", rmo.getRecurrency());
+			template.updateFirst(query, update, MONITORING);
+		}
+	}	
 	
 	public Geolocation getLastGeolocationByUserId(String userId) {
 		Criteria criteria = new Criteria("userId").is(userId);
