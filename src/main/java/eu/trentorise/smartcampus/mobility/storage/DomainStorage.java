@@ -252,6 +252,12 @@ public class DomainStorage {
 		}
 	}	
 	
+	public void deleteRouteMonitoring(String clientdId) {
+		BasicDBObject query = new BasicDBObject();
+		query.put("clientId", clientdId);
+		template.getCollection(MONITORING).remove(query);
+	}	
+	
 	public Geolocation getLastGeolocationByUserId(String userId) {
 		Criteria criteria = new Criteria("userId").is(userId);
 		Query query = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
