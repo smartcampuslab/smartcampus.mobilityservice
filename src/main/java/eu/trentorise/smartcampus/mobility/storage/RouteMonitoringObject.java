@@ -11,13 +11,12 @@ public class RouteMonitoringObject extends RouteMonitoring {
 
 	private String userId;
 	
-	private String appId;
-
 	public RouteMonitoringObject() {
 	}
 	
 	public RouteMonitoringObject(RouteMonitoring rm) {
 		this.clientId = rm.getClientId();
+		this.appId = rm.getAgencyId();
 		this.agencyId = rm.getAgencyId();
 		this.routeId = rm.getRouteId();
 		this.recurrency = rm.getRecurrency();
@@ -39,12 +38,5 @@ public class RouteMonitoringObject extends RouteMonitoring {
 		this.userId = userId;
 	}
 
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
 
 }

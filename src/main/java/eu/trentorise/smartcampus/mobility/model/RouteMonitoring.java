@@ -8,6 +8,8 @@ public class RouteMonitoring {
 	protected String agencyId;
 	protected String routeId;
 	
+	protected String appId;
+	
 	protected ItineraryRecurrency recurrency;
 
 	public String getClientId() {
@@ -32,6 +34,14 @@ public class RouteMonitoring {
 
 	public void setRouteId(String routeId) {
 		this.routeId = routeId;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 	public ItineraryRecurrency getRecurrency() {
