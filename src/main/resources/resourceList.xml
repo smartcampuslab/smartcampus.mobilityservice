@@ -91,7 +91,10 @@
 	<resourceMapping uri="mobilityservice.user.itinerary.write"
 		pathPattern="/recurrent/{itineraryId}/monitor/{monitor}" />
 	<resourceMapping uri="mobilityservice.user.itinerary.write"
-		pathPattern="/monitorroute" method="POST,PUT,DELETE" />		
+		pathPattern="/monitorroute" method="POST" />
+	<resourceMapping uri="mobilityservice.user.itinerary.write"
+		pathPattern="/monitorroute/{clientId}" method=",PUT,DELETE" />		
+		
 
 	<!-- user alert -->
 	<resourceMapping uri="mobilityservice.user.alert"
