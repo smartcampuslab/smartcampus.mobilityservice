@@ -695,14 +695,20 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute")
-	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req) throws InvocationException {
+	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute/{clientId}")
+	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId) throws InvocationException {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}
+			
+			String objectClientId = req.getClientId();
+			if (!clientId.equals(objectClientId)) {
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				return null;
+			}			
 			
 			Map<String, Object> pars = new TreeMap<String, Object>();
 			pars.put("clientId", req.getClientId());			
@@ -756,6 +762,41 @@ public class JourneyPlannerController extends SCController {
 			return null;
 		}
 	}	
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/monitorroute/{clientId}")
+	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId) throws InvocationException {
+		try {
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return null;
+			}
+
+			Map<String, Object> pars = new TreeMap<String, Object>();
+			pars.put("clientId", clientId);
+			RouteMonitoringObject res = domainStorage.searchDomainObject(pars, RouteMonitoringObject.class);
+
+			if (res == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return false;
+			}
+
+			if (!userId.equals(res.getUserId())) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return null;
+			}
+
+			domainStorage.deleteRouteMonitoring(clientId);
+
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+		return false;
+	}	
+	
+	
 	
 	private List<RouteMonitoring> checkTime(String userId) {
 		long now = System.currentTimeMillis();
