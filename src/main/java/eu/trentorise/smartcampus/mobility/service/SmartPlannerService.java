@@ -142,6 +142,9 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		if (policy == null) {
 			Map<String, PlanningPolicy> stored = getStoredPolicies(draft);
 			
+			if (stored == null) {
+				return policiesMap.get(DUMMY);
+			}
 			policy = stored.get(policyId);
 			if (policy == null) {
 				return policiesMap.get(DUMMY);
