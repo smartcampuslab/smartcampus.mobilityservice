@@ -19,6 +19,8 @@ public class TrackedInstance {
 	private String userId;
 	
 	private ItineraryObject itinerary;
+	private String freeTrackingTransport;
+	
 	private Set<Geolocation> geolocationEvents;
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
@@ -142,6 +144,20 @@ public class TrackedInstance {
 	 */
 	public void setTime(String time) {
 		this.time = time;
+	}
+
+	/**
+	 * @return the freeTrackingTransport
+	 */
+	public String getFreeTrackingTransport() {
+		return freeTrackingTransport;
+	}
+
+	/**
+	 * @param freeTrackingTransport the freeTrackingTransport to set
+	 */
+	public void setFreeTrackingTransport(String freeTrackingTransport) {
+		this.freeTrackingTransport = freeTrackingTransport;
 	}
 	
 	

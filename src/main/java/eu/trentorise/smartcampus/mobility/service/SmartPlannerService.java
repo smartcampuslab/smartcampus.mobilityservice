@@ -54,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -137,6 +138,9 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	
 	private PlanningPolicy getPlanningPolicy(String policyId, Boolean draft) {
+		if (!StringUtils.hasText(policyId)) {
+			return policiesMap.containsKey(DEFAULT) ? policiesMap.get(DEFAULT) : policiesMap.get(DUMMY);
+		}
 		PlanningPolicy policy = policiesMap.get(policyId);
 		
 		if (policy == null) {

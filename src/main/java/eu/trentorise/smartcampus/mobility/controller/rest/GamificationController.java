@@ -26,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -131,13 +132,8 @@ public class GamificationController extends SCController {
 
 			logger.info("UserId: " + userId);
 
-//			Geolocation lastGeolocation = storage.getLastGeolocationByUserId(userId);
-			String lastTravelId = null;
-//			if (lastGeolocation != null) {
-//				lastTravelId = lastGeolocation.getTravelId();
-//			}
-
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
+			Map<String, String> freeTracks = new HashMap<String, String>();
 
 			Collections.sort(geolocationsEvent.getLocation());
 			
@@ -146,9 +142,10 @@ public class GamificationController extends SCController {
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
 					String locationTravelId = null;
+					Long locationTs = null;
 					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
 						locationTravelId = (String) location.getExtras().get("idTrip");
-						lastTravelId = locationTravelId;
+						locationTs = location.getExtras().get("start") != null ? Long.parseLong(""+location.getExtras().get("start")) : null;
 					} else {
 						// now the plugin supports correctly the extras for each location.
 						// locations with empty idTrip are possible only upon initialization/synchronization.
@@ -160,6 +157,10 @@ public class GamificationController extends SCController {
 //						} else {
 //							continue;
 //						}
+					}
+					
+					if (locationTs == null) {
+						locationTs = location.getTimestamp().getTime();
 					}
 					
 					// discard event older than 2 days
@@ -176,8 +177,6 @@ public class GamificationController extends SCController {
 					Geolocation geolocation = new Geolocation();
 
 					geolocation.setUserId(userId);
-
-
 
 					geolocation.setTravelId(locationTravelId);
 
@@ -226,9 +225,13 @@ public class GamificationController extends SCController {
 
 					geolocation.setGeofence(location.getGeofence());
 
-					String day = shortSdf.format(geolocation.getRecorded_at());
-					geolocationsByItinerary.put(geolocation.getTravelId() + "@" + day, geolocation);
-
+					String day = shortSdf.format(new Date(locationTs));
+					String key = geolocation.getTravelId() + "@" + day;
+					geolocationsByItinerary.put(key, geolocation);
+					if (StringUtils.hasText((String)location.getExtras().get("transportType"))) {
+						freeTracks.put(key, (String)location.getExtras().get("transportType"));
+					}
+					
 					storage.saveGeolocation(geolocation);
 				}
 			}
@@ -260,6 +263,9 @@ public class GamificationController extends SCController {
 					} else {
 						res.setItinerary(res2);
 					}
+					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
+						res.setFreeTrackingTransport(freeTracks.get(key));
+					}
 				}
 
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
@@ -276,8 +282,13 @@ public class GamificationController extends SCController {
 					ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
 					res.setValidationResult(vr);
 					res.setValid(vr.getValid());
+				} else if (res.getFreeTrackingTransport() != null) {
+					if (!res.getComplete()) {
+						canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents());
+					}
+					res.setComplete(true);
 				}
-
+				
 				storage.saveTrackedInstance(res);
 				
 				logger.info("Saved geolocation events");
@@ -303,6 +314,43 @@ public class GamificationController extends SCController {
 		
 		return storage.searchDomainObjects(mongoQuery, Geolocation.class);
 	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
+	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+		logger.info("Starting free tracking for gamification, device = "+device);
+		try {
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
+
+			Map<String, Object> pars = new TreeMap<String, Object>();
+
+			pars.put("clientId", itineraryId);
+			Date date = new Date(System.currentTimeMillis());
+			String day = shortSdf.format(date);
+			TrackedInstance res2 = storage.searchDomainObject(pars, TrackedInstance.class);
+			if (res2 == null) {
+				res2 = new TrackedInstance();
+				res2.setClientId(itineraryId);
+				res2.setDay(day);
+				res2.setUserId(userId);
+				res2.setTime(timeSdf.format(date));
+			}
+			
+			if (device != null) {
+				res2.setDeviceInfo(device);
+			}
+			res2.setStarted(true);
+			res2.setFreeTrackingTransport(transport);
+			storage.saveTrackedInstance(res2);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}	
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
 	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, HttpServletResponse response) throws Exception {
@@ -489,6 +537,16 @@ public class GamificationController extends SCController {
 		return ((o != null)?o.toString().replace("\"", "\"\""):"");
 	}	
 	
+	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String gameId, String playerId, String travelId, Set<Geolocation> geolocationEvents) {
+		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
+		if (publishQueue.contains(travelId)) {
+			return false;
+		}
+		publishQueue.add(travelId);
+		gamificationHelper.saveFreeTracking(travelId, gameId, playerId, geolocationEvents);
+		return false;
+	}
+
 	private synchronized boolean sendIntineraryDataToGamificationEngine(String gameId, String playerId, String publishKey, ItineraryObject itinerary) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
 //		Criteria criteria = new Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());

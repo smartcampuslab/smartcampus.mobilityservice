@@ -467,4 +467,15 @@ public class GamificationHelper {
 			RemoteConnector.postJSON("http://localhost:8900", "/execute", JsonUtils.toJSON(m), null);
 		}
 	}
+
+	/**
+	 * @param travelId
+	 * @param gameId
+	 * @param playerId
+	 * @param geolocationEvents
+	 */
+	public void saveFreeTracking(String travelId, String gameId, String playerId, Set<Geolocation> geolocationEvents) {
+		// TODO Auto-generated method stub
+		
+	}
 }
