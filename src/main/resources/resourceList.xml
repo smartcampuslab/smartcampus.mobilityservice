@@ -116,7 +116,9 @@
 	<!-- gamification -->
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/gamification/journey/{itineraryId}" />
-	<resourceMapping uri="mobilityservice.data"
+  <resourceMapping uri="mobilityservice.data"
+    pathPattern="/gamification/freetracking/{transport}/{itineraryId}" />
+		<resourceMapping uri="mobilityservice.data"
 		pathPattern="/gamification/r353nd" />		
 
 	<!-- planning policies -->
