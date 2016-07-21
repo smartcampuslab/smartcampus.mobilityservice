@@ -23,8 +23,12 @@ import it.sayservice.platform.smartplanner.data.message.TType;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -474,8 +478,53 @@ public class GamificationHelper {
 	 * @param playerId
 	 * @param geolocationEvents
 	 */
-	public void saveFreeTracking(String travelId, String gameId, String playerId, Set<Geolocation> geolocationEvents) {
-		// TODO Auto-generated method stub
+	public void saveFreeTracking(final String travelId, final String gameId, final String playerId, final Set<Geolocation> geolocationEvents, final String ttype) {
+		if (gamificationUrl == null) return;
+		if (System.currentTimeMillis() < startGameDate) return;
 		
+		executorService.execute(new Runnable() {
+			@Override
+			public void run() {
+				saveFreetracking(travelId, gameId, playerId, geolocationEvents, ttype);
+			}
+
+		});
+	}
+	private void saveFreetracking(String travelId, String gameId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
+		if (geolocationEvents == null || geolocationEvents.size() == 0) return;
+		double distance = 0;
+		List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents); 
+		Collections.sort(points, new Comparator<Geolocation>() {
+
+			@Override
+			public int compare(Geolocation o1, Geolocation o2) {
+				return (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+			}
+			
+		});
+		for (int i = 1; i < points.size(); i++) {
+			distance += harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i-1).getLatitude(), points.get(i-1).getLongitude());
+		}
+		try {
+			Map<String,Object> data = new HashMap<String, Object>();
+			if ("walk".equals(ttype)) {
+				data.put("walkDistance", distance);
+			}
+			if ("bike".equals(ttype)) {
+				data.put("bikeDistance", distance);
+			}
+			ExecutionDataDTO ed = new ExecutionDataDTO();
+			ed.setGameId(gameId);
+			ed.setPlayerId(playerId);
+			ed.setActionId(SAVE_ITINERARY);			
+			ed.setData(data);
+			
+			String content = JsonUtils.toJSON(ed);
+			
+			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY +") = " + data);
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
+		} catch (Exception e) {
+			logger.error("Error sending gamification action: " + e.getMessage());
+		}
 	}
 }

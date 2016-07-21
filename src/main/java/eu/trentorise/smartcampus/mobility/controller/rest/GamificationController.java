@@ -293,7 +293,7 @@ public class GamificationController extends SCController {
 					res.setValid(vr.getValid());
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
-						canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents());
+						canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 					}
 					res.setComplete(true);
 				}
@@ -557,13 +557,13 @@ public class GamificationController extends SCController {
 		return ((o != null)?o.toString().replace("\"", "\"\""):"");
 	}	
 	
-	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String gameId, String playerId, String travelId, Set<Geolocation> geolocationEvents) {
+	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String gameId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
 		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
 			return false;
 		}
 		publishQueue.add(travelId);
-		gamificationHelper.saveFreeTracking(travelId, gameId, playerId, geolocationEvents);
+		gamificationHelper.saveFreeTracking(travelId, gameId, playerId, geolocationEvents, ttype);
 		return false;
 	}
 
