@@ -7,98 +7,186 @@
 <div class="row">
 	<div class="col-md-3">
 		<div class="panel panel-default">
-		  <div class="panel-heading">
-        <h3 class="panel-title">Pianifica un viaggio</h3>
-		  </div>
-		  <div class="panel-body">
-		    <form>
-				  <div class="form-group">
-				    <label for="from">Da</label>
-				    <div class="input-group">
-				    <input type="text" class="form-control" ng-disabled="!useCoordinates" ng-change="changeAddress(fromMarker)" id="from" ng-model="fromMarker.address" placeholder="Da...">
-            <span class="input-group-btn">
-              <button ng-click="fromCurrent(fromMarker)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
-            </span>
-				    </div>
-				  </div>
-          <div class="form-group">
-            <label for="to">A</label>
-            <div class="input-group">
-            <input type="text" class="form-control" id="to" ng-disabled="!useCoordinates" ng-change="changeAddress(toMarker)" ng-model="toMarker.address" placeholder="A...">
-            <span class="input-group-btn">
-              <button ng-click="toCurrent()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
-            </span>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="checkbox"><label><input type="checkbox" ng-click="changeAddressModality()">Inserisci direttamente le coordinate</label></div>
-            </div>
-          </div>
-          
-          <div class="row">
-			        <div class="col-md-6">
-			            <p class="input-group" style="margin-top:34px;">
-			              <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="mydate" is-open="opened" ng-required="true" close-text="Close" />
-			              <span class="input-group-btn">
-			                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-			              </span>
-			            </p>
-			        </div>
-              <div class="col-md-6">
-                <timepicker ng-model="mytime" ng-change="changed()" hour-step="1" minute-step="15" show-meridian="false"></timepicker>              
-              </div>
-			    </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.WALK">A piedi</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.BIKE">In bicicletta</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDBIKE">Con Bike Sharing</label></div>
-		          <div class="checkbox"><label><input type="checkbox" ng-model="means.TRANSIT">Con mezzi pubblici</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.CAR">In automobile</label></div>
-              <div class="checkbox"><label><input type="checkbox" ng-model="means.SHAREDCAR">Con Car Sharing</label></div>
-            </div>
-            <div class="col-md-6">
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeF" value="fastest" checked>Più veloce</label></div>            
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLC" value="leastChanges">Con meno cambi</label></div>            
-              <div class="radio"><label><input type="radio" ng-model="mode" name="mode" id="modeLW" value="leastWalking">Camminando meno</label></div>            
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-	          <button type="button" class="btn btn-default" ng-click="reset()">Cancella</button>
-	          <button type="submit" class="btn btn-primary" ng-click="plan()">Invia</button>
+			<div class="panel-heading">
+				<h3 class="panel-title">Pianifica un viaggio</h3>
+			</div>
+			<div class="panel-body">
+				<form>
+					<div class="form-group">
+						<label for="from">Da</label>
+						<div class="input-group">
+							<input type="text" class="form-control"
+								ng-disabled="!useCoordinates"
+								ng-change="changeAddress(fromMarker)" id="from"
+								ng-model="fromMarker.address" placeholder="Da..."> <span
+								class="input-group-btn">
+								<button ng-click="fromCurrent(fromMarker)"
+									class="btn btn-default" type="button">
+									<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>
+								</button>
+							</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="to">A</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="to"
+								ng-disabled="!useCoordinates"
+								ng-change="changeAddress(toMarker)" ng-model="toMarker.address"
+								placeholder="A..."> <span class="input-group-btn">
+								<button ng-click="toCurrent()" class="btn btn-default"
+									type="button">
+									<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>
+								</button>
+							</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="checkbox">
+								<label><input type="checkbox"
+									ng-click="changeAddressModality()">Inserisci
+									direttamente le coordinate</label>
+							</div>
+						</div>
+					</div>
 
-            <button type="button" id="reqbutton" class="btn btn-info pull-right" ng-disabled="!fromMarker || !toMarker" ng-click="request()">?</button>
-            <button type="button" id="repbutton" class="btn btn-info pull-right" ng-disabled="!fromMarker || !toMarker" ng-click="report()"><i class="glyphicon glyphicon-envelope"></i></button>
+					<div class="row">
+						<div class="col-md-6">
+							<p class="input-group" style="margin-top: 34px;">
+								<input type="text" class="form-control"
+									datepicker-popup="dd/MM/yyyy" ng-model="mydate"
+									is-open="opened" ng-required="true" close-text="Close" /> <span
+									class="input-group-btn">
+									<button type="button" class="btn btn-default"
+										ng-click="open($event)">
+										<i class="glyphicon glyphicon-calendar"></i>
+									</button>
+								</span>
+							</p>
+						</div>
+						<div class="col-md-6">
+							<timepicker ng-model="mytime" ng-change="changed()" hour-step="1"
+								minute-step="15" show-meridian="false"></timepicker>
+						</div>
+					</div>
 
-            </div>
-          </div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="means.WALK">A
+									piedi</label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="means.BIKE">In
+									bicicletta</label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox"
+									ng-model="means.SHAREDBIKE">Con Bike Sharing</label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="means.TRANSIT">Con
+									mezzi pubblici</label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="means.CAR">In
+									automobile</label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="means.SHAREDCAR">Con
+									Car Sharing</label>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="radio">
+								<label><input type="radio" ng-model="mode" name="mode"
+									id="modeF" value="fastest" checked>Più veloce</label>
+							</div>
+							<div class="radio">
+								<label><input type="radio" ng-model="mode" name="mode"
+									id="modeLC" value="leastChanges">Con meno cambi</label>
+							</div>
+							<div class="radio">
+								<label><input type="radio" ng-model="mode" name="mode"
+									id="modeLW" value="leastWalking">Camminando meno</label>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="checkbox">
+								<label><input type="checkbox" ng-model="wheelchair">Accessibile</label>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<button type="button" class="btn btn-default" ng-click="reset()">Cancella</button>
+							<button type="submit" class="btn btn-primary" ng-click="plan()">Invia</button>
+
+							<button type="button" id="reqbutton"
+								class="btn btn-info pull-right"
+								ng-disabled="!fromMarker || !toMarker" ng-click="request()">?</button>
+							<button type="button" id="repbutton"
+								class="btn btn-info pull-right"
+								ng-disabled="!fromMarker || !toMarker" ng-click="report()">
+								<i class="glyphicon glyphicon-envelope"></i>
+							</button>
+
+						</div>
+					</div>
 				</form>
-		  </div>
+			</div>
 		</div>
 	</div>
 	<div class="col-md-7">
-	  <div id="map"></div>
+		<div id="map"></div>
+		<nav class="navbar navbar-default">
+			<ul class="nav navbar-nav navbar-left">
+				<li class="dropdown"><a class="dropdown-toggle"
+					data-toggle="dropdown" role="button" aria-haspopup="true"
+					aria-expanded="false">Centra su...<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li ng-click="centerItinerary()"><a>Viaggio corrente</a></li>
+						<li ng-click="centerUser()"><a>Mia posizione</a></li>
+						<li role="separator" class="divider"></li>
+						<li ng-click="recenter(45.889901, 11.040521)"><a>Rovereto</a></li>
+						<li ng-click="recenter(46.069015, 11.128830)"><a>Trento</a></li>
+					</ul></li>
+
+			</ul>
+		</nav>
 	</div>
-  <div class="col-md-2">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Punti di interesse</h3>
-      </div>
-      <div class="panel-body">
-         <div class="row">
-           <div class="col-md-12">
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Parcheggi</label></div>
-             <div class="checkbox"><label><input type="checkbox" ng-click="toggleLayer('BIKESHARING')" ng-model="layers.BIKESHARING.show">Bike sharing</label></div>
-           </div>
-         </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-2">
+	<div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Punti di interesse</h3>
+			</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('PARKING')" ng-model="layers.PARKING.show">Parcheggi</label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('BIKESHARING')"
+								ng-model="layers.BIKESHARING.show">Bike sharing</label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox"
+								ng-click="toggleLayer('TAXI')" ng-model="layers.TAXI.show">Taxi</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--   <div class="col-md-2">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Politiche sostenibili</h3>
@@ -106,6 +194,8 @@
       <div class="panel-body">
          <div class="row">
            <div class="col-md-6">
+           <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN2" value="_Trento">Park and Ride custom</label></div>
+           <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyRV2" value="_Rovereto">Bike Sharing custom</label></div>
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN" value="Trento">Park and Ride</label></div>            
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyROV" value="Rovereto">Bike Sharing</label></div>            
 		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyDUMMY" value="Dummy" checked>Nessuna</label></div>            
@@ -113,11 +203,46 @@
          </div> 
       </div>
     </div>
-  </div>   
-  
-	
+  </div> -->
+
+	<div class="col-md-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Politiche sostenibili</h3>
+			</div>
+			<div class="panel-body">
+				<nav class="navbar navbar-default">
+					<div class="container-fluid">
+						<ul class="nav navbar-nav navbar-left">
+							<li>
+							
+							<button class="btn btn-default navbar-btn" id="policyIds-dropdown"
+									data-toggle="dropdown" aria-haspopup="true"
+									aria-expanded="false"">
+									{{ currentPolicy.description }}<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu policyIds-dropdown">
+									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', draft : false} , false)">
+										<a><strong>Nessuna</strong></a></li>
+									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', draft: false}, false)">
+										<a><strong>Park and Ride</strong></a></li>
+									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', draft: false} , false)">
+										<a><strong>Bike Sharing</strong></a></li>
+									<li role="separator" class="divider"></li>
+									<li ng-repeat="policy in policyIds"
+										ng-click="setPolicy(policy, true)">
+										<a><em ng-if="policy.draft">*{{ policy.description }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
+								</ul></li>
+							</ul>								
+							
+					</div>
+				</nav>
+			</div>
+		</div>
+	</div>
+
 </div>
-<div class="row">
+	<div class="row">
   <div class="col-md-3">
 <!--           <div> -->
 <!--           <a href="" ng-click="showPlan(plan)"> -->
@@ -160,7 +285,9 @@
               <div class="row">
                 <div class="col-md-12 text-right">
                 <small class="text-muted text-center">{{plan.length}}km</small>
+                <small class="text-muted text-center">/ {{toTime(plan.endtime - plan.startime - 60 * 60 * 1000)}} h</small>
                 <small class="text-muted text-center" ng-if="plan.price > 0">/ {{plan.price}} EUR</small>
+                <small class="text-muted text-center" ng-if="plan.customData['estimatedScore'] > 0">/ {{plan.customData["estimatedScore"]}} points</small>
                 </div>
               </div>
 		          <div class="row">
@@ -242,4 +369,5 @@
     </div>
   </div>
  </div>
+
 

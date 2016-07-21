@@ -17,17 +17,12 @@
 	</parent>
 
 	<dependencies>
-    <dependency>
-      <groupId>eu.trentorise.smartcampus</groupId>
-      <artifactId>communicator.client</artifactId>
-      <version>2.2</version>
-      <type>jar</type>
-    </dependency>
-		<dependency>
-			<groupId>eu.trentorise.smartcampus</groupId>
-			<artifactId>syncstorage.web</artifactId>
-			<version>1.1</version>
-		</dependency>
+	    <dependency>
+	      <groupId>eu.trentorise.smartcampus</groupId>
+	      <artifactId>communicator.client</artifactId>
+	      <version>2.2</version>
+	      <type>jar</type>
+	    </dependency>
 
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
@@ -73,7 +68,7 @@
 		<dependency>
 			<groupId>it.sayservice.platform.smartplanner</groupId>
 			<artifactId>smartplanner-beans</artifactId>
-			<version>1.1.8</version>
+			<version>1.1.12</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -103,6 +98,51 @@
 			<artifactId>aac.client</artifactId>
 			<version>1.2</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.rometools</groupId>
+			<artifactId>rome</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-mongodb</artifactId>
+			<version>1.1.1.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbutils</groupId>
+			<artifactId>commons-dbutils</artifactId>
+			<version>1.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.trentorise.smartcampus</groupId>
+			<artifactId>profileservice.client</artifactId>
+			<version>2.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.2.4</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>2.4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -125,7 +165,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>bologna.mobility</finalName>
+		<finalName>core.mobility</finalName>
 	</build>
 
 	<repositories>

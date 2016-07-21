@@ -236,3 +236,38 @@ body {
 	color : Red;
 	font-weight : bold;
 }
+
+.btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+    outline: 0;
+}
+
+
+/* tab color */
+.nav-tabs>li>a {
+  color:#000000;
+}
+
+/* active tab color */
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+  color: #000000;
+  border: 1px solid #888888;
+  background-color: #FFFFFF;
+}
+
+/* hover tab color */
+.nav-tabs>li>a:hover {
+  border-color: #DDDDDD;
+  border: 1px solid #DDDDDD;
+  background-color: #FFFFFF;
+}
+
+.bootbox {
+  position:absolute;
+  top:33% !important;
+}
+
+/*
+.tab-pane {
+	border:solid 1px #888888;
+}
+*/

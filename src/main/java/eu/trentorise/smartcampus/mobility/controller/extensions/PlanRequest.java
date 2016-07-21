@@ -15,11 +15,12 @@ public class PlanRequest {
 	private RType routeType;
 	private String request;
 	private String plan;
-	private Integer value;
+	private Double value;
 	private List<Itinerary> itinerary;
 	private SingleJourney originalRequest;
 	private int itineraryNumber;
-	private boolean retryOnFail = false;
+	private Boolean retryOnEmpty = false;
+	private boolean wheelChair = false;
 	
 	public PlanRequest() {
 		itinerary = Lists.newArrayList();
@@ -51,10 +52,10 @@ public class PlanRequest {
 		this.plan = plan;
 	}
 
-	public Integer getValue() {
+	public Double getValue() {
 		return value;
 	}
-	public void setValue(Integer value) {
+	public void setValue(Double value) {
 		this.value = value;
 	}
 
@@ -80,17 +81,25 @@ public class PlanRequest {
 		this.itineraryNumber = itineraryNumber;
 	}
 
-	public boolean isRetryOnFail() {
-		return retryOnFail;
+	public Boolean getRetryOnEmpty() {
+		return retryOnEmpty;
 	}
 
-	public void setRetryOnFail(boolean retryOnFail) {
-		this.retryOnFail = retryOnFail;
+	public void setRetryOnEmpty(Boolean retryOnFail) {
+		this.retryOnEmpty = retryOnFail;
+	}
+	
+	public boolean isWheelChair() {
+		return wheelChair;
+	}
+
+	public void setWheelChair(boolean wheelChair) {
+		this.wheelChair = wheelChair;
 	}
 
 	@Override
 	public String toString() {
-		return type.toString();
+		return type.toString() + ": " + value;
 	}
 	
 	

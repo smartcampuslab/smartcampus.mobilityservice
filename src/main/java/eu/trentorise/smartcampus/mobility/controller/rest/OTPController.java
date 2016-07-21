@@ -19,7 +19,7 @@ import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -37,8 +37,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.io.ByteStreams;
+
 import eu.trentorise.smartcampus.mobility.model.Timetable;
-import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingHandler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -52,8 +53,6 @@ public class OTPController extends SCController {
 
 	@Autowired
 	private SmartPlannerHelper smartPlannerHelper;
-	@Autowired
-	private BikeSharingHandler bikeSharingCache;
 
 	@Autowired
 	private AuthServices services;
@@ -284,17 +283,6 @@ public class OTPController extends SCController {
 			}
 		}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/bikesharing/{comune}")
-	public @ResponseBody
-	void bikeSharingByComune(HttpServletResponse response, @PathVariable String comune) throws InvocationException {
-		response.setContentType("application/json; charset=utf-8");
-		try {
-			response.getWriter().write(JsonUtils.toJSON(bikeSharingCache.getStations(comune)));
-		} catch (IOException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
-
 	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
 		public @ResponseBody
 		void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws InvocationException {
@@ -334,6 +322,73 @@ public class OTPController extends SCController {
 			}
 		}	
 
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/{latitude}/{longitude}/{radius}")
+	public @ResponseBody void getTaxiStations(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session, @PathVariable double latitude, @PathVariable double longitude,
+			@PathVariable double radius) throws InvocationException {
+		try {
+
+			String stops = smartPlannerHelper.getTaxiStations(latitude, longitude, radius);
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(stops);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/")
+	public @ResponseBody void getAllTaxiStations(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws InvocationException {
+		try {
+
+			String stops = smartPlannerHelper.getAllTaxiStations();
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(stops);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiAgencyContacts/")
+	public @ResponseBody void getTaxiAgencyContacts(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws InvocationException {
+		try {
+
+			String contacts = smartPlannerHelper.getTaxiAgencyContacts();
+
+			response.setContentType("application/json; charset=utf-8");
+			response.getWriter().write(contacts);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+		
+  	@RequestMapping(method = RequestMethod.GET, value = "/gtfs/{agencyId}", produces = "application/zip")
+  	public @ResponseBody
+  	void getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId) {
+  		try {
+  			response.setContentType("application/zip");
+			response.setHeader("Content-Disposition", "attachment; filename=\"gtfs_" + agencyId + ".zip\""); 
+			
+			InputStream is = smartPlannerHelper.gtfs(agencyId);
+			
+			ByteStreams.copy(is, response.getOutputStream());
+  		} catch (ConnectorException e0) {
+  			response.setStatus(e0.getCode());
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}   	
+	
+	
+	
+	
 	@Override
 	protected String getUserId() {
 		try {

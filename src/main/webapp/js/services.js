@@ -92,6 +92,42 @@ services.factory('bikesharing', ['$http',
      }
    ]);
 
+
+services.factory('taxi', ['$http',
+     function ($http) {
+         var taxi = function() {
+             var url = TAXI + 'getTaxiStation/';
+             return $http.get(url);
+         };
+         
+         var taxiMap = {};
+             
+         return {
+                 init: function() {
+               		taxi().success(function(data) {
+               			taxiMap = {};
+               			data.forEach(function(p){
+               				taxiMap[p.stationId.id] = p;
+               			});
+               		});  
+                 },
+                 getAll: function() {
+                	var res = [];
+                		for (var p in taxiMap) {
+                			var e = taxiMap[p];
+                  			res.push({title:e.stationId.id, description: '', position:e.location, type:'taxi'});
+                		}
+                	return res;
+                 },
+                 getTaxi : function(id) {
+                	 return taxiMap[id];   
+                 }
+        };
+     }
+   ]);
+
+
+
 services.factory('formatter', ['parking', '$rootScope',
   function (parking, $rootScope) {
     var getDateStr = function(date) {
@@ -178,7 +214,7 @@ services.factory('formatter', ['parking', '$rootScope',
     		res.place = parkingPlace != null ? parkingPlace.description : leg.to.stopId.id;
     	}
     	if (res.type) {
-    		res.img = 'img/'+getImageName(res.type)+'.png';
+    		res.img = $rootScope.imgBase + 'img/'+getImageName(res.type)+'.png';
     		return res;
     	}
     };
@@ -194,7 +230,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			console.log('UNDEFINED: '+it.leg[i].transport.type);
     			elem.img  = getImageName('BUS');
     		}
-    		elem.img = 'img/'+elem.img+'.png';
+    		elem.img = $rootScope.imgBase + 'img/'+elem.img+'.png';
     		
     		if (t == 'BUS' || t == 'TRAIN') {
     			elem.note = [it.leg[i].transport.routeShortName];
@@ -220,14 +256,22 @@ services.factory('formatter', ['parking', '$rootScope',
     	return means;
     };
     
-    var elemColors = ['#FF0000','#FF6600', '#6633FF', '#99FF00', '#339900'];
+//  var elemColors = ['#FF0000','#FF6600', '#6633FF', '#99FF00', '#339900'];
+    var elemColors = {
+    		'WALK'		: '#8cc04c',
+    		'BICYCLE'	: '#922d66',
+    		'CAR'		: '#757575',
+    		'BUS'		: '#eb8919',
+    		'TRAIN'		: '#cd251c',
+    		'TRANSIT'	: '#016a6a'
+    };        
     
     var extractMapElements = function(leg, idx, map) {
 		var res = [];
     	var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
     	var line = new google.maps.Polyline({
 		    path: path,
-		    strokeColor: idx >= elemColors.length ? elemColors[idx % elemColors.length]: elemColors[idx],
+		    strokeColor: leg.transport.agencyId == '17' ? "#00588e" : elemColors[leg.transport.type],
 		    strokeOpacity: 0.8,
 		    strokeWeight: 2,
 		    map: map
@@ -282,7 +326,7 @@ services.factory('formatter', ['parking', '$rootScope',
     			console.log('UNDEFINED: '+plan.leg[i].transport.type);
     			step.mean.img  = getImageName('BUS');
     		}
-    		step.mean.img = 'img/'+step.mean.img +'.png';
+    		step.mean.img = $rootScope.imgBase + 'img/'+step.mean.img +'.png';
 
     		var parkingStep = null;
     		if (t == 'CAR') {
@@ -312,7 +356,7 @@ services.factory('formatter', ['parking', '$rootScope',
     };
     
     var getLength = function(it) {
-    	if (!it.leg && it.length) {
+    	if (!it.leg && it.length != null) {
     		return (it.length / 1000).toFixed(2);
     	}
     	var l = 0;
@@ -367,7 +411,7 @@ services.factory('formatter', ['parking', '$rootScope',
 services.factory('planner', ['$http', 'formatter',
 	  function ($http, formatter) {
 	      
-	      var getRequest = function(from, to, means, mode, date, time, policy) {
+	      var getRequest = function(from, to, means, mode, date, time, policy, wheelchair) {
 	          var data = {
 	  	        	from: {lat:""+from.lat(),lon: ""+from.lng()},
 	  	        	to: {lat: ""+to.lat(),lon: ""+to.lng()},
@@ -375,14 +419,15 @@ services.factory('planner', ['$http', 'formatter',
 	  	        	resultsNumber: 3,
 	  	        	date: formatter.getDateStr(date),
 	  	        	departureTime: formatter.getTimeStrMeridian(time),
-	  	        	transportTypes: means.split(',')
+	  	        	transportTypes: means.split(','),
+	  	        	wheelchair : wheelchair
 	  	          };
 	          return data;
 	      }; 
 	      
-	      var plan = function(from, to, means, mode, date, time, policy) {
+	      var plan = function(from, to, means, mode, date, time, policy, wheelchair) {
 	          var url = PLANNER + '/plansinglejourney?policyId=' + policy;
-	          var data = getRequest(from, to, means, mode, date, time, policy);
+	          var data = getRequest(from, to, means, mode, date, time, policy, wheelchair);
 	          return $http.post(url,data);
           };
           

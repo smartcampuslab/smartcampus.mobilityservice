@@ -29,6 +29,7 @@ public class BasicItinerary {
 	protected Position originalFrom;
 	protected Position originalTo;
 	protected String name;
+	protected ItineraryRecurrency recurrency;
 
 	public String getClientId() {
 		return clientId;
@@ -85,5 +86,14 @@ public class BasicItinerary {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public ItineraryRecurrency getRecurrency() {
+		return recurrency;
+	}
+
+	public void setRecurrency(ItineraryRecurrency recurrency) {
+		this.recurrency = recurrency;
+	}
+
 
 }

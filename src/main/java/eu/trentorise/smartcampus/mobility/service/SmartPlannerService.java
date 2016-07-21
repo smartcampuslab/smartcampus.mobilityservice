@@ -42,6 +42,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ws.rs.core.MediaType;
 
@@ -51,16 +52,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 
-import eu.trentorise.smartcampus.mobility.controller.extensions.ItineraryRequestEnricher;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanRequest;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PromotedJourneyRequestConverter;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -71,16 +74,22 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 @Component
 public class SmartPlannerService implements SmartPlannerHelper {
 
+	@Autowired
+	@Value("${smartplanner.router}")
+	private String smartplannerRouter;		
+	
+	private static final String DUMMY = "Dummy";
 	private static final String DEFAULT = "default";
-	private static final String SMARTPLANNER = "/smart-planner/api-webapp/planner/";
-	private static final String OTP  = "/smart-planner/rest/";
+	
+	private String SMARTPLANNER;
+	private String OTP;
 
 	private static final String PLAN = "plan";
 	private static final String RECURRENT = "recurrentJourney";
 
 
 	@Autowired
-	@Value("${otp.url.bologna}")
+	@Value("${otp.url}")
 	private String otpURL;	
 
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -88,35 +97,68 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
-	@Resource(name="enrichersMap")
-	private Map<String, ItineraryRequestEnricher> enrichersMap;
-	
-	@Resource(name="convertersMap")
-	private Map<String, PromotedJourneyRequestConverter> convertersMap;	
-	
+	@Resource(name="basicPoliciesMap")
+	private Map<String, PlanningPolicy> policiesMap;
 	
 	@Autowired
 	private ExecutorService executorService;
 	
+	@Autowired
+	private DomainStorage storage;
+	
 	private static final Logger logger = LoggerFactory.getLogger(SmartPlannerService.class);
-
-	private PromotedJourneyRequestConverter getPromotedJourneyRequestConverter(String policyId) {
-		PromotedJourneyRequestConverter promotedJourneyRequestConverter = convertersMap.get(policyId);
-		if (promotedJourneyRequestConverter == null) {
-			promotedJourneyRequestConverter = convertersMap.get(DEFAULT);
-		}
-		return promotedJourneyRequestConverter;
+	
+	@PostConstruct
+	public void init() {
+		SMARTPLANNER = "/smart-planner/" + smartplannerRouter + "/rest/";
+		OTP  = "/smart-planner/" + smartplannerRouter + "/rest/";
 	}
 	
-	private ItineraryRequestEnricher getItineraryRequestEnricher(String policyId) {
-		ItineraryRequestEnricher itineraryRequestEnricher = enrichersMap.get(policyId);
-		if (itineraryRequestEnricher == null) {
-			itineraryRequestEnricher = enrichersMap.get(DEFAULT);
+	@Override
+	public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
+		Map<String, PlanningPolicy> result = Maps.newHashMap(); 
+		//newHashMap(policiesMap);
+		result.putAll(getStoredPolicies(draft));
+		return result;
+	}
+	
+	private Map<String, PlanningPolicy> getStoredPolicies(Boolean draft) {
+		 Map<String, PlanningPolicy> result = Maps.newTreeMap();
+		 Criteria criteria = new Criteria();
+		 if (draft != null) {
+			 criteria.and("draft").is(draft);
+		 }
+
+		List<CompilablePolicyData> compilable = storage.searchDomainObjects(criteria, CompilablePolicyData.class);
+		for (CompilablePolicyData policy: compilable) {
+			result.put(policy.getName(), new CompilablePolicy(policy));
+		}		
+		return result;
+	}
+	
+	
+	private PlanningPolicy getPlanningPolicy(String policyId, Boolean draft) {
+		if (!StringUtils.hasText(policyId)) {
+			return policiesMap.containsKey(DEFAULT) ? policiesMap.get(DEFAULT) : policiesMap.get(DUMMY);
 		}
-		return itineraryRequestEnricher;
-	}	
-	
-	
+		PlanningPolicy policy = policiesMap.get(policyId);
+		
+		if (policy == null) {
+			Map<String, PlanningPolicy> stored = getStoredPolicies(draft);
+			
+			if (stored == null) {
+				return policiesMap.get(DUMMY);
+			}
+			policy = stored.get(policyId);
+			if (policy == null) {
+				return policiesMap.get(DUMMY);
+			}
+		}
+		
+		return policy; 
+
+	}
+
 	private String performGET(String request, String query) throws Exception {
 		return HTTPConnector.doGet(otpURL+request, query, MediaType.APPLICATION_JSON, null, "UTF-8");
 	}
@@ -285,127 +327,61 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	@Override
-	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception {
-		Map<String, Itinerary> itineraryCache = new TreeMap<String, Itinerary>();
+	public synchronized List<Itinerary> planSingleJourney(SingleJourney journeyRequest, String policyId) throws Exception {
+		// TODO: final only? draft?
+		PlanningPolicy planningPolicy = getPlanningPolicy(policyId, null);
 
-		PromotedJourneyRequestConverter promotedJourneyRequestConverter = getPromotedJourneyRequestConverter(policyId);
-		ItineraryRequestEnricher itineraryRequestEnricher = getItineraryRequestEnricher(policyId);
+		List<PlanningRequest> planRequests = planningPolicy.generatePlanRequests(journeyRequest);
+		List<PlanningRequest> successfulPlanRequests = Lists.newArrayList();
 		
-		promotedJourneyRequestConverter.modifyRequest(journeyRequest);
-		
-		List<PlanRequest> reqs = buildItineraryPlannerRequest(journeyRequest, true, itineraryRequestEnricher);
-		promotedJourneyRequestConverter.processRequests(reqs, iteration);
-		buildRequestString(reqs);
-		
-		Multimap<Integer, Itinerary> evalIts = ArrayListMultimap.create();
+		int iteration = 0;
+		do {
 
-		List<Itinerary> itineraries = new ArrayList<Itinerary>();
+			List<Future<PlanningRequest>> results = Lists.newArrayList();
 
-		List<Future<PlanRequest>> results = Lists.newArrayList();
-		Map<String, PlanRequest> reqMap = Maps.newTreeMap();
-		for (PlanRequest pr : reqs) {
-			reqMap.put(pr.getRequest(), pr);
-		}
-		
-		for (PlanRequest pr : reqMap.values()) {
-			CallableItineraryRequest callableReq = new CallableItineraryRequest();
-			callableReq.setRequest(pr);
-			Future<PlanRequest> future = executorService.submit(callableReq);
-			results.add(future);
-		}
-		
-		boolean retryOnFail = false;
-		for (Future<PlanRequest> plan: results) {
-			PlanRequest pr = plan.get();
-			if (pr.getPlan() == null) {
-				continue;
+			for (PlanningRequest pr : planRequests) {
+				CallablePlanningRequest callableReq = new CallablePlanningRequest();
+				callableReq.setRequest(pr);
+				Future<PlanningRequest> future = executorService.submit(callableReq);
+				results.add(future);
 			}
-			List<?> its = mapper.readValue(pr.getPlan(), List.class);
-			if (pr.isRetryOnFail() && its.isEmpty()) {
-				retryOnFail = true;
-			}
-			for (Object it : its) {
-				Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
-				pr.getItinerary().add(itinerary);
-				if (pr.getValue() != 0) {
-					itinerary.setPromoted(true);
-					evalIts.put(pr.getValue(), itinerary);
-				} else {
-					itineraries.add(itinerary);
+
+			for (Future<PlanningRequest> plan : results) {
+				PlanningRequest pr = plan.get();
+				List<?> its = mapper.readValue(pr.getPlan(), List.class);
+				for (Object it : its) {
+					Itinerary itinerary = mapper.convertValue(it, Itinerary.class);
+					pr.getItinerary().add(itinerary);
+					itinerary.setPromoted(pr.isPromoted());
 				}
-				itineraryCache.put(pr.getRequest(), itinerary);
 			}
-		}
-		
-		if (retryOnFail) {
-			int newIteration = itineraryRequestEnricher.checkFail(itineraries, iteration);
-			if (newIteration != 0) {
-				return planSingleJourney(journeyRequest, newIteration, policyId);
+
+			List<PlanningRequest> evaluated = planningPolicy.evaluatePlanResults(planRequests);
+			successfulPlanRequests.addAll(evaluated);
+			
+			iteration++;
+			for (PlanningRequest pr: planRequests) {
+				pr.setIteration(iteration);
 			}
-		}
+		} while (!planRequests.isEmpty() && iteration < 2);
+
+		List<Itinerary> itineraries = planningPolicy.extractItinerariesFromPlanResults(journeyRequest, successfulPlanRequests);
 		
-		List<Itinerary> evaluated = itineraryRequestEnricher.filterPromotedItineraties(evalIts, journeyRequest.getRouteType());
-		itineraries.addAll(evaluated);
-
-		itineraries = itineraryRequestEnricher.removeExtremeItineraties(itineraries, journeyRequest.getRouteType());
-
-		itineraryRequestEnricher.sort(itineraries, journeyRequest.getRouteType());
-
-		itineraryRequestEnricher.completeResponse(journeyRequest, reqs, itineraries);
+		List<Itinerary> sortedItineraries = planningPolicy.filterAndSortItineraries(journeyRequest, itineraries);
 		
-		promotedJourneyRequestConverter.promoteJourney(reqs);
-		
-		return itineraries;
-
+		return sortedItineraries; 
 	}
 	
-	private List<PlanRequest> buildItineraryPlannerRequest(SingleJourney request, boolean expand, ItineraryRequestEnricher itineraryRequestEnricher) {
-		List<PlanRequest> reqsList = Lists.newArrayList();
-		for (TType type : request.getTransportTypes()) {
-			int minitn = 1;
-			if (type.equals(TType.TRANSIT)) {
-				minitn = 3;
-			}
-			int itn = Math.max(request.getResultsNumber(), minitn);			
-			PlanRequest pr = new PlanRequest();
-			pr.setType(type);
-			pr.setRouteType(request.getRouteType());
-			pr.setValue(0);
-			pr.setItineraryNumber(itn);
-			reqsList.add(pr);
-			if (expand) {
-				reqsList.addAll(itineraryRequestEnricher.addPromotedItineraries(request, type, request.getRouteType()));
-			}
-		}
+	private class CallablePlanningRequest implements Callable<PlanningRequest> {
 		
-		for (PlanRequest req: reqsList) {
-			req.setOriginalRequest(request);
-		}
+		private PlanningRequest request;
 		
-		return reqsList;
-	}
-	
-	
-	private List<PlanRequest> buildRequestString(List<PlanRequest> reqsList) {
-		for (PlanRequest pr: reqsList) {
-			String req = String.format("from=%s,%s&to=%s,%s&date=%s&departureTime=%s&transportType=%s&routeType=%s&numOfItn=%s", pr.getOriginalRequest().getFrom().getLat(), pr.getOriginalRequest().getFrom().getLon(), pr.getOriginalRequest().getTo().getLat(), pr.getOriginalRequest().getTo().getLon(), pr.getOriginalRequest().getDate(), pr.getOriginalRequest().getDepartureTime(), pr.getType(), pr.getRouteType(), pr.getItineraryNumber());
-			pr.setRequest(req + ((pr.getRequest() != null)?pr.getRequest():""));
-		}
-		
-		return reqsList;
-	}	
-	
-
-	private class CallableItineraryRequest implements Callable<PlanRequest> {
-		
-		private PlanRequest request;
-		
-		public void setRequest(PlanRequest req) {
+		public void setRequest(PlanningRequest req) {
 			this.request = req;
 		}
 		
 		@Override
-		public PlanRequest call() throws Exception {
+		public PlanningRequest call() throws Exception {
 			try {
 				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
 				request.setPlan(plan);
@@ -415,7 +391,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			}
 			return request;
 		}
-	}
+	}	
 
 	@Override
 	public void sendAlert(Alert alert) throws Exception {
@@ -455,4 +431,52 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		return performGET(OTP + "versions", null);
 	}
 
+	@Override
+	public String getTaxiStations(double latitude, double longitude, double radius) throws Exception {
+
+		String response = null;
+		double defaultRadius = 500;
+		if (latitude > -1 && longitude > -1) {
+
+			if (radius > -1) {
+				defaultRadius = radius;
+			}
+
+			response = performGET(
+					SMARTPLANNER + "taxisNearPoint?lat=" + latitude + "&lon=" + longitude + "&radius=" + defaultRadius, null);
+		}
+		return response;
+
+	}
+
+	@Override
+	public String getAllTaxiStations() throws Exception {
+
+		String response = null;
+
+		response = performGET(SMARTPLANNER + "taxis",	null);
+
+		return response;
+
+	}
+	
+	
+	@Override
+	public String getTaxiAgencyContacts() throws Exception {
+
+		String response = null;
+
+		response = performGET(SMARTPLANNER + "taxi/contacts",	null);
+
+		return response;
+
+	}	
+	
+	@Override
+	public InputStream gtfs(String agencyId) throws Exception {
+		return HTTPConnector.doStreamGet(otpURL + SMARTPLANNER + "gtfs/" + agencyId, null, "application/zip", null);
+	}	
+	
+
+	
 }

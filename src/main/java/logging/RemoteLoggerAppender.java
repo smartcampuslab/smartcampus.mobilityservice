@@ -1,7 +1,6 @@
 package logging;
 
 import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.chainsaw.Main;
 import org.apache.log4j.spi.LoggingEvent;
 
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;

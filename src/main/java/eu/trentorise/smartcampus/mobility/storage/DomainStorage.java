@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +11,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.model.Announcement;
+import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -25,6 +28,12 @@ public class DomainStorage {
 	private static final String ITINERARY = "itinerary";
 	private static final String RECURRENT = "recurrent";
 	private static final String DATA = "data";
+	private static final String NEWS = "news";
+	private static final String GEOLOCATIONS = "geolocations";
+	private static final String TRACKED = "trackedInstances";
+	private static final String SAVED = "savedtrips";
+	private static final String COMPILED_POLICY = "compiledPolicies";
+	private static final String MONITORING = "routesMonitoring";
 	
 	@Autowired
 	@Qualifier("domainMongoTemplate")
@@ -35,10 +44,25 @@ public class DomainStorage {
 	}
 
 	private String getClassCollection(Class<?> cls) {
-		if (cls == ItineraryObject.class) return ITINERARY;
-		if (cls == RecurrentJourneyObject.class) return RECURRENT;
-		if (cls == AlertsSent.class) return DATA;
-		throw new IllegalArgumentException("Unknown class: "+cls.getName());
+		if (cls == ItineraryObject.class) {
+			return ITINERARY;
+		}
+		if (cls == RecurrentJourneyObject.class) {
+			return RECURRENT;
+		}
+		if (cls == AlertsSent.class) {
+			return DATA;
+		}
+		if (cls == Announcement.class) {
+			return NEWS;
+		}
+		if (cls == CompilablePolicyData.class) {
+			return COMPILED_POLICY;
+		}		
+		if (cls == RouteMonitoringObject.class || cls == RouteMonitoring.class) {
+			return MONITORING;
+		}			
+		throw new IllegalArgumentException("Unknown class: " + cls.getName());
 	}
 	
 	public void saveItinerary(ItineraryObject io) {
@@ -87,11 +111,77 @@ public class DomainStorage {
 		}
 	}
 	
+	public void saveNews(Announcement announcment) {
+		template.save(announcment, NEWS);
+	}
+
+	
+	public void savePolicy(CompilablePolicyData policy) {
+		Query query = new Query(new Criteria("name").is(policy.getName()));
+		CompilablePolicyData policiesDB = searchDomainObject(query, CompilablePolicyData.class);
+		if (policiesDB == null) {
+			template.save(policy, COMPILED_POLICY);
+		} else {
+			Update update = new Update();
+			update.set("description", policy.getDescription());
+			update.set("create", policy.getCreate());
+			update.set("modify", policy.getModify());
+			update.set("extract", policy.getExtract());
+			update.set("evaluate", policy.getEvaluate());
+			update.set("filter", policy.getFilter());
+			update.set("generateCode", policy.getGenerateCode());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());
+			update.set("modifiedGenerate", policy.isModifiedGenerate());
+			update.set("modifiedEvaluate", policy.isModifiedEvaluate());
+			update.set("modifiedExtract", policy.isModifiedExtract());
+			update.set("modifiedFilter", policy.isModifiedFilter());
+			update.set("evaluateCode", policy.getEvaluateCode());
+			update.set("extractCode", policy.getExtractCode());
+			update.set("filterCode", policy.getFilterCode());			
+			update.set("groups", policy.getGroups());
+			update.set("draft", policy.getDraft());
+			template.updateFirst(query, update, COMPILED_POLICY);
+		}
+	}		
+	
+	public void saveRouteMonitoring(RouteMonitoringObject rmo) {
+		Query query = new Query(new Criteria("clientId").is(rmo.getClientId()));
+		RouteMonitoringObject monitoringDB = searchDomainObject(query, RouteMonitoringObject.class);
+		if (monitoringDB == null) {
+			template.save(rmo, MONITORING);
+		} else {
+			Update update = new Update();
+			update.set("agencyId", rmo.getAgencyId());
+			update.set("routeId", rmo.getRouteId());
+			update.set("recurrency", rmo.getRecurrency());
+			template.updateFirst(query, update, MONITORING);
+		}
+	}	
+	
+	public void deleteRouteMonitoring(String clientdId) {
+		BasicDBObject query = new BasicDBObject();
+		query.put("clientId", clientdId);
+		template.getCollection(MONITORING).remove(query);
+	}	
+	
+	
 	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
 		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.find(query, clz, getClassCollection(clz));
 	}
+	
+	public <T> List<T> searchDomainObjects(Query query, Class<T> clz) {
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		return template.find(query, clz, getClassCollection(clz));
+	}	
+	
+	public <T> T searchDomainObject(Query query, Class<T> clz) {
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		return template.findOne(query, clz, getClassCollection(clz));
+	}	
 	
 	public <T> List<T> searchDomainObjects(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
@@ -115,6 +205,14 @@ public class DomainStorage {
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
+	public <T> void deleteDomainObject(Criteria criteria, Class<T> clz) {
+		Query query = new Query(criteria);
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		template.remove(query, getClassCollection(clz));
+	}	
+		
+	
+	
 //	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {
 //		Criteria criteria = new Criteria();
 //		for (String key : pars.keySet()) {
@@ -133,6 +231,9 @@ public class DomainStorage {
 		template.dropCollection(ITINERARY);
 		template.dropCollection(RECURRENT);
 		template.dropCollection(DATA);
+		template.dropCollection(NEWS);
+		template.dropCollection(GEOLOCATIONS);
 	}
+
 	
 }

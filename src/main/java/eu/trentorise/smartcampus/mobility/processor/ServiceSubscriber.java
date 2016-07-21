@@ -41,7 +41,7 @@ public class ServiceSubscriber {
 		return handlers;
 	}
 
-	@Autowired
+//	@Autowired
 	public void setHandlers(List<ServiceHandler> handlers) {
 		this.handlers = handlers;
 	}

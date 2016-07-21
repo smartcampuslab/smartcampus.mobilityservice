@@ -25,6 +25,9 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 
 
 /**
@@ -35,7 +38,7 @@ public interface SmartPlannerHelper {
 
 	RecurrentJourney planRecurrent(RecurrentJourneyParameters parameters) throws Exception;
 	RecurrentJourney replanRecurrent(RecurrentJourneyParameters parameters, RecurrentJourney oldJourney) throws Exception;
-	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, int iteration, String policyId) throws Exception;
+	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, String policyId) throws Exception;
 	
 	String parkingsByAgency(String agencyId) throws Exception;
 	String bikeSharingByAgency(String agencyId) throws Exception;
@@ -56,4 +59,10 @@ public interface SmartPlannerHelper {
 	InputStream routesDB(String appId) throws Exception;
 	InputStream extendedRoutesDB(String appId) throws Exception;
 	String getVersions() throws Exception;
+	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
+	String getAllTaxiStations() throws Exception;
+	
+	Map<String, PlanningPolicy> getPolicies(Boolean draft);
+	String getTaxiAgencyContacts() throws Exception;
+	InputStream gtfs(String agencyId) throws Exception;
 }

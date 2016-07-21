@@ -42,59 +42,17 @@
 	<bean
 		class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
 
-	<!-- JMS Configuration -->
-<!-- 	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-		<property name="brokerURL" value="${smartcampus.vas.web.activeMQ.brokerURL}" />
-	</bean>
 
-	<bean id="serviceEventProcessor"
-		class="eu.trentorise.smartcampus.mobility.processor.ServiceEventProcessorImpl" />
-
-	<bean id="serviceBusClient" class="it.sayservice.platform.client.jms.JMSServiceBusClient"
-		scope="singleton" destroy-method="destroy">
-		<constructor-arg>
-			<ref bean="connectionFactory" />
-		</constructor-arg>
-		<property name="clientId" value="vas_mobility_subscriber" />
-		<property name="listener" ref="serviceEventProcessor" />
-	</bean> -->
-
-	<util:map id = "enrichersMap">
+	<util:map id = "basicPoliciesMap">
 		<entry key="Dummy">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyItineraryRequestEnricher" />
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
 		</entry>
 		<entry key="Trento">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher" />
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
 		</entry>
 		<entry key="Rovereto">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoGreenItineraryRequestEnricher" />
-		</entry>
-		<entry key="default">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoGreenItineraryRequestEnricher" />
-		</entry>		
-	</util:map>
-	
-	<util:map id = "convertersMap">
-		<entry key="Dummy">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="Trento">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="Rovereto">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPromotedJourneyRequestConverter" />
-		</entry>
-		<entry key="default">
-			<bean
-				class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPromotedJourneyRequestConverter" />
-		</entry>		
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
+		</entry>				
 	</util:map>	
 
 
@@ -121,7 +79,17 @@
 			</bean>
 		</property>
 	</bean>
+	
+	<mvc:resources mapping="/web/img/**" location="/img/" />
+	<mvc:resources mapping="/web/css/**" location="/css/" />
+	<mvc:resources mapping="/web/lib/**" location="/lib/" />
+	<mvc:resources mapping="/web/js/**" location="/js/" />
+	<mvc:resources mapping="/web/fonts/**" location="/fonts/" />
+	<mvc:resources mapping="/web/templates/**" location="/templates/" />
+	<mvc:default-servlet-handler />	
 
 	<bean id="executorService" class="java.util.concurrent.Executors"
 		factory-method="newCachedThreadPool" destroy-method="shutdownNow" />
+		
+		
 </beans>
