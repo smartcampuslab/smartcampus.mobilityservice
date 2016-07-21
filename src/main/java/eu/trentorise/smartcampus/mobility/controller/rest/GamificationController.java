@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,6 +97,7 @@ public class GamificationController extends SCController {
 	private static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
+	private static SimpleDateFormat fullSdf = new SimpleDateFormat("YYYY/MM/dd HH:mm");
 
 	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
@@ -134,6 +136,8 @@ public class GamificationController extends SCController {
 
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 			Map<String, String> freeTracks = new HashMap<String, String>();
+			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
+			
 
 			Collections.sort(geolocationsEvent.getLocation());
 			
@@ -231,6 +235,7 @@ public class GamificationController extends SCController {
 					if (StringUtils.hasText((String)location.getExtras().get("transportType"))) {
 						freeTracks.put(key, (String)location.getExtras().get("transportType"));
 					}
+					freeTrackStarts.put(key, locationTs);
 					
 					storage.saveGeolocation(geolocation);
 				}
@@ -262,9 +267,13 @@ public class GamificationController extends SCController {
 						}
 					} else {
 						res.setItinerary(res2);
+						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next()));
 					}
 					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
 						res.setFreeTrackingTransport(freeTracks.get(key));
+						if (freeTrackStarts.containsKey(key)) {
+							res.setTime(timeSdf.format(new Date(freeTrackStarts.get(key))));
+						}
 					}
 				}
 
@@ -449,7 +458,7 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping("/console/itinerary")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryList() {
+	public @ResponseBody List<ItineraryDescriptor> getItineraryList() throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
 		List<TrackedInstance> instances = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), TrackedInstance.class);
@@ -469,10 +478,21 @@ public class GamificationController extends SCController {
 						}
 					}
 					descr.setTripId(o.getClientId());
-					descr.setStartTime(o.getItinerary().getData().getStartime());
-					descr.setEndTime(o.getItinerary().getData().getEndtime());
-					descr.setTripName(o.getItinerary().getName());
-					descr.setRecurrency(o.getItinerary().getRecurrency());
+					if (o.getItinerary() != null) {
+						descr.setStartTime(o.getItinerary().getData().getStartime());
+						descr.setEndTime(o.getItinerary().getData().getEndtime());
+						descr.setTripName(o.getItinerary().getName());
+						descr.setRecurrency(o.getItinerary().getRecurrency());
+					} else {
+						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+						descr.setTripName(o.getId());
+						if (o.getDay() != null && o.getTime() != null) {
+							String dt = o.getDay() +" "+o.getTime();
+							descr.setStartTime(fullSdf.parse(dt).getTime());
+						} else if (o.getDay() != null) {
+							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+						}
+					}
 					descr.setInstances(new ArrayList<TrackedInstance>());
 					map.put(o.getClientId(), descr);
 					list.add(descr);

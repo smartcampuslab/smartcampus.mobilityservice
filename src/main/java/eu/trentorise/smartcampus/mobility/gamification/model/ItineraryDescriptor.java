@@ -35,6 +35,8 @@ public class ItineraryDescriptor {
 	private long endTime;
 	private ItineraryRecurrency recurrency;
 	
+	private String freeTrackingTransport;
+	
 	private List<TrackedInstance> instances;
 
 	/**
@@ -133,6 +135,20 @@ public class ItineraryDescriptor {
 	 */
 	public void setInstances(List<TrackedInstance> instances) {
 		this.instances = instances;
+	}
+
+	/**
+	 * @return the freeTrackingTransport
+	 */
+	public String getFreeTrackingTransport() {
+		return freeTrackingTransport;
+	}
+
+	/**
+	 * @param freeTrackingTransport the freeTrackingTransport to set
+	 */
+	public void setFreeTrackingTransport(String freeTrackingTransport) {
+		this.freeTrackingTransport = freeTrackingTransport;
 	}
 	
 	
