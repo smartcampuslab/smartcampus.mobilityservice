@@ -17,7 +17,7 @@
     <script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular/angular-route.min.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp&key=  AIzaSyBmKVWmFzh2JHT7q1MLmQRQ7jC4AhkRBDs"></script>
     <script src="lib/sprintf.min.js"></script>
 
     <script src="js/props.js"></script>

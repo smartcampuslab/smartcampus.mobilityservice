@@ -151,9 +151,6 @@
 					<ul class="dropdown-menu">
 						<li ng-click="centerItinerary()"><a>Viaggio corrente</a></li>
 						<li ng-click="centerUser()"><a>Mia posizione</a></li>
-						<li role="separator" class="divider"></li>
-						<li ng-click="recenter(45.889901, 11.040521)"><a>Rovereto</a></li>
-						<li ng-click="recenter(46.069015, 11.128830)"><a>Trento</a></li>
 					</ul></li>
 
 			</ul>
@@ -186,25 +183,6 @@
 		</div>
 	</div>
 
-	<!--   <div class="col-md-2">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Politiche sostenibili</h3>
-      </div>
-      <div class="panel-body">
-         <div class="row">
-           <div class="col-md-6">
-           <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN2" value="_Trento">Park and Ride custom</label></div>
-           <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyRV2" value="_Rovereto">Bike Sharing custom</label></div>
-		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyTN" value="Trento">Park and Ride</label></div>            
-		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyROV" value="Rovereto">Bike Sharing</label></div>            
-		     <div class="radio"><label><input type="radio" ng-model="policy" name="policy" id="policyDUMMY" value="Dummy" checked>Nessuna</label></div>            
-		   </div>    
-         </div> 
-      </div>
-    </div>
-  </div> -->
-
 	<div class="col-md-2">
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -224,10 +202,6 @@
 								<ul class="dropdown-menu policyIds-dropdown">
 									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', draft : false} , false)">
 										<a><strong>Nessuna</strong></a></li>
-									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', draft: false}, false)">
-										<a><strong>Park and Ride</strong></a></li>
-									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', draft: false} , false)">
-										<a><strong>Bike Sharing</strong></a></li>
 									<li role="separator" class="divider"></li>
 									<li ng-repeat="policy in policyIds"
 										ng-click="setPolicy(policy, true)">

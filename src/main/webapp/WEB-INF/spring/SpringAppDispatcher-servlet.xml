@@ -47,12 +47,6 @@
 		<entry key="Dummy">
 			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
 		</entry>
-		<entry key="Trento">
-			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
-		</entry>
-		<entry key="Rovereto">
-			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
-		</entry>				
 	</util:map>	
 
 
