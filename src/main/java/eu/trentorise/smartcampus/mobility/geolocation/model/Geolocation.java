@@ -34,7 +34,18 @@ public class Geolocation {
 
 	double[] geocoding;
 
-    public String getUserId() {
+	public Geolocation() {
+	}
+	
+    public Geolocation(Double latitude, Double longitude) {
+		super();
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+
+
+	public String getUserId() {
 		return userId;
 	}
 

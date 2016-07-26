@@ -198,7 +198,8 @@ public class DomainStorage {
 			}
 			if (tracked.getValidationResult() != null) {
 				update.set("validationResult", tracked.getValidationResult());
-			}			
+			}	
+			update.set("estimatedScore", tracked.getEstimatedScore());
 			
 			template.updateFirst(query, update, TRACKED);
 		}
@@ -298,7 +299,6 @@ public class DomainStorage {
 		}
 
 		Query query = new Query(criteria);
-
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
@@ -308,6 +308,12 @@ public class DomainStorage {
 		template.remove(query, getClassCollection(clz));
 	}	
 		
+	public <T> long count(Criteria criteria, Class<T> clz) {
+		Query query = new Query(criteria);
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		long result = template.count(query, getClassCollection(clz));
+		return result;
+	}		
 	
 	
 //	public <T> T searchDomainObjectFixForSpring(Map<String, Object> pars, Class<T> clz) {

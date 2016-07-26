@@ -36,12 +36,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
+import eu.trentorise.smartcampus.mobility.gamification.model.UserDescriptor;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Coords;
@@ -293,7 +295,14 @@ public class GamificationController extends SCController {
 					res.setValid(vr.getValid());
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
-						canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
+						ValidationResult vr = gamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
+						if (vr!= null && vr.getValid().booleanValue()) {
+							canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
+							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
+							if (trackingData.containsKey("estimatedScore")) {
+								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+							}
+						}
 					}
 					res.setComplete(true);
 				}
@@ -421,10 +430,19 @@ public class GamificationController extends SCController {
 		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
 		for (TrackedInstance ti: result) {
 			try {
+				if (ti.getItinerary() != null) {
 				ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
 				ti.setValidationResult(vr);
 				ti.setValid(vr.getValid());
 				storage.saveTrackedInstance(ti);
+				} else {
+					ValidationResult vr = GamificationHelper.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
+					ti.setValidationResult(vr);
+					if (vr != null) {
+						ti.setValid(vr.getValid());
+					}
+					storage.saveTrackedInstance(ti);
+				}
 			} catch (Exception e) {
 				logger.error("Failed to validate tracked itinerary: " + ti.getId());
 				e.printStackTrace();
@@ -463,7 +481,59 @@ public class GamificationController extends SCController {
 		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
 		List<TrackedInstance> instances = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), TrackedInstance.class);
 		if (instances != null) {
+			for (TrackedInstance o: instances) {
+				ItineraryDescriptor descr = map.get(o.getClientId());
+				if (map.get(o.getClientId()) == null) {
+					descr = new ItineraryDescriptor();
+					if (o.getUserId() != null) {
+						descr.setUserId(o.getUserId());
+					} else {
+						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+						if (itinerary != null) {
+							descr.setUserId(itinerary.getUserId());
+						} else {
+							continue;
+						}
+					}
+					descr.setTripId(o.getClientId());
+					if (o.getItinerary() != null) {
+						descr.setStartTime(o.getItinerary().getData().getStartime());
+						descr.setEndTime(o.getItinerary().getData().getEndtime());
+						descr.setTripName(o.getItinerary().getName());
+						descr.setRecurrency(o.getItinerary().getRecurrency());
+					} else {
+						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+						descr.setTripName(o.getClientId());
+						if (o.getDay() != null && o.getTime() != null) {
+							String dt = o.getDay() +" "+o.getTime();
+							descr.setStartTime(fullSdf.parse(dt).getTime());
+						} else if (o.getDay() != null) {
+							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+						}
+					}
+					descr.setInstances(new ArrayList<TrackedInstance>());
+					map.put(o.getClientId(), descr);
+					list.add(descr);
+				}
+				descr.getInstances().add(o);
+			}
+		}
+		return list;
+	}
+	
+	@RequestMapping("/console/useritinerary/{userId}")
+	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId) throws ParseException {
+		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
+		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
+		Criteria criteria = new Criteria("userId").is(userId);
+		List<TrackedInstance> instances = storage.searchDomainObjects(criteria, TrackedInstance.class);
+		if (instances != null) {
 			for (TrackedInstance o : instances) {
+				Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(o.getGeolocationEvents(), o.getFreeTrackingTransport());
+				if (trackingData.containsKey("estimatedScore")) {
+					o.setEstimatedScore((Long)trackingData.get("estimatedScore"));
+				}				
+				
 				ItineraryDescriptor descr = map.get(o.getClientId());
 				if (map.get(o.getClientId()) == null) {
 					descr = new ItineraryDescriptor();
@@ -492,6 +562,7 @@ public class GamificationController extends SCController {
 						} else if (o.getDay() != null) {
 							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
 						}
+						
 					}
 					descr.setInstances(new ArrayList<TrackedInstance>());
 					map.put(o.getClientId(), descr);
@@ -501,7 +572,39 @@ public class GamificationController extends SCController {
 			}
 		}
 		return list;
+	}	
+	
+	
+	@RequestMapping("/console/users")
+	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers() {
+		List<UserDescriptor> users = Lists.newArrayList();
+		Set<String> ids = Sets.newHashSet();
+		
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		List<TrackedInstance> tis = storage.searchDomainObjects(pars, TrackedInstance.class);
+		for (TrackedInstance ti: tis) {
+			String userId = ti.getUserId(); 
+			if (userId != null && !ids.contains(userId)) {
+				ids.add(ti.getUserId());
+				UserDescriptor ud = new UserDescriptor();
+				ud.setUserId(userId);
+				
+				Criteria criteria = new Criteria("userId").is(userId);
+				int total = (int)storage.count(criteria, TrackedInstance.class);
+				ud.setTotal(total);
+				
+				
+				criteria = criteria.and("valid").is(true);
+				int valid = (int)storage.count(criteria, TrackedInstance.class);
+				ud.setValid(valid);		
+				
+				users.add(ud);
+			}
+		}
+		
+		return users;
 	}
+	
 
 	@RequestMapping("/console/itinerary/{instanceId}")
 	public @ResponseBody TrackedInstance getItineraryData( @PathVariable String instanceId) {

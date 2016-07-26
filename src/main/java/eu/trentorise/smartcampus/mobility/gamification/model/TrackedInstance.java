@@ -33,6 +33,8 @@ public class TrackedInstance {
 	private String day;
 	
 	private ValidationResult validationResult;
+	
+	private Long estimatedScore;
 
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
@@ -159,6 +161,16 @@ public class TrackedInstance {
 	public void setFreeTrackingTransport(String freeTrackingTransport) {
 		this.freeTrackingTransport = freeTrackingTransport;
 	}
+
+	public Long getEstimatedScore() {
+		return estimatedScore;
+	}
+
+	public void setEstimatedScore(Long estimatedScore) {
+		this.estimatedScore = estimatedScore;
+	}
+
+
 	
 	
 

@@ -16,6 +16,13 @@ public class ValidationResult {
 	
 	private Boolean valid;
 
+	public void reset() {
+		matchedLocations = true;
+		matchedActivities = true;
+		tooFast = false;
+		valid = true;
+	}
+	
 	public int getGeoLocationsN() {
 		return geoLocationsN;
 	}
