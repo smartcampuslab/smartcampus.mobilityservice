@@ -53,6 +53,12 @@
       .instance-row.invalid {
         background-color: lightpink;
       }
+      .instance-row.untracked-valid {
+        background-color: lightblue;
+      }
+      .instance-row.untracked-invalid {
+        background-color: #DB7093;
+      }              
       .selected {
         border: 2px solid blue;
       }
@@ -91,19 +97,24 @@
           </div>  
           <div ng-if="selectedUser == user">
             <div ng-repeat="itinerary in userMap[user]"  class="itinerary-row">
-              <h5  ng-click="selectItinerary(itinerary)">{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
+              <h5  ng-click="selectItinerary(itinerary)">
+              {{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
               {{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
               <div>
                 <div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)"  class="instance-row" ng-class="{'selected':selectedInstance == instance, 'valid': instance.valid, 'invalid': !instance.valid}">
                    <div class="row">
-                    <div class="col-md-6">date: {{instance.day ? instance.day : '--'}}
+                    <div class="col-md-6">
+                    <span ng-show="instance.itinerary == null" class="glyphicon glyphicon-tree-deciduous" title="Free tracking" data-toggle="tooltip"></span>
+                    date: {{instance.day ? instance.day : '--'}}
+                    <span >
                     	<span ng-show="instance.validationResult.geoLocationsN <= 2" class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"></span>
                     	<!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
                     	<span ng-show="!instance.validationResult.matchedLocations" class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"></span>
                     	<span ng-show="!instance.validationResult.matchedActivities" class="glyphicon glyphicon-plane" title="Mismatched activities" data-toggle="tooltip"></span>
                     	<span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
+                    	</span>
                     </div>
-                    <div class="col-md-6 pull-right">game points: {{instance.itinerary.data.customData.estimatedScore}}</div>
+                    <div class="col-md-6 pull-right">game points: {{instance.itinerary ? instance.itinerary.data.customData.estimatedScore : instance.estimatedScore}}</div>
                    </div>                   
                 </div>
               </div>
@@ -128,14 +139,14 @@
             <p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
           </div>
           <div class="col-md-4">
-            <h3><span style="color:blue;">Tracked</span> (valid: <span style="{{selectedInstance.valid ? 'color: green' : 'color:red'}}">{{selectedInstance.valid}}</span>)</h3>
+            <h3><span style="color:blue;">Tracked</span> (valid: <span style="{{selectedInstance.itinerary ? (selectedInstance.valid ? 'color: green' : 'color:red') : (selectedInstance.valid ? 'color: blue': 'color: plum')}}">{{selectedInstance.valid}}</span>)</h3>
             <p>{{selectedInstance.geolocationEvents[0].recorded_at|date:'HH:mm'}} - {{selectedInstance.geolocationEvents[selectedInstance.geolocationEvents.length-1].recorded_at|date:'HH:mm'}}</p>
             <hr/>
              <p ng-repeat="evt in selectedInstance.legs"><b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span ng-if="evt.recorded_till != null"> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)</p>
 <!--               <p ng-repeat="evt in selectedInstance.geolocationEvents">{{evt.activity_type ? evt.activity_type : '--'}} ({{evt.recorded_at|date:'HH:mm:ss'}})</p> -->
            </div>
-          <div class="col-md-4">
-            <h3 style="{{selectedInstance.valid ? 'color: green' : 'color:red'}}">Validation</h3>
+          <div ng-show="selectedInstance.itinerary" class="col-md-4">
+            <h3 style="{{selectedInstance.itinerary ? (selectedInstance.valid ? 'color: green' : 'color:red') : (selectedInstance.valid ? 'color: blue': 'color: plum')}}">Validation</h3>
             <pre>{{selectedInstance.validationResult | json}}</pre>
           </div>           
         </div>
