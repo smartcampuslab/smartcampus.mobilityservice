@@ -86,7 +86,11 @@
      
       <div class="col-md-3">
       <div class="panel panel-default">
-      <div class="panel-heading "><button class="btn btn-primary btn-sm" ng-click="revalidate()">Re-validate</button></div>
+      <div class="panel-heading "><button class="btn btn-primary btn-sm" ng-click="revalidate()">Re-validate</button>
+      <label class="navbar-btn"  style="float:right;">
+      <input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths" class="navbar-btn btn-sm">
+      Fix paths</label>
+      </div>
       
       <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
       <div class="panel-body panel-collapse">

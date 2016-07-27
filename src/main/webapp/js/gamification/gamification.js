@@ -7,6 +7,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.selectedItinerary = null;
 	$scope.selectedInstance = null;
 	$scope.layers = [];
+	$scope.fixpaths = false;
 
 	var load = function() {
 
@@ -86,6 +87,12 @@ notification.controller('GameCtrl', function($scope, $http) {
 		});
 	}
 
+	$scope.reselectInstance = function() {
+		if ($scope.selectedInstance != null) {
+			$scope.selectInstance($scope.selectedInstance);
+		}
+	}
+	
 	$scope.selectInstance = function(instance) {
 		$scope.selectedInstance = instance;
 
@@ -104,7 +111,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 		instance.geolocationEvents.forEach(function(e) {
 			var p = {
 				lat : e.latitude,
-				lng : e.longitude
+				lng : e.longitude,
+				acc: e.accuracy
 			};
 			coordinates.push(p);
 			bounds.extend(new google.maps.LatLng(p.lat, p.lng));
@@ -128,8 +136,13 @@ notification.controller('GameCtrl', function($scope, $http) {
 		// coordinates.splice(coordinates.length-1,1);
 		$scope.map.fitBounds(bounds);
 
+		if ($scope.fixpaths) {
+			coordinates = transform(coordinates);
+		}		
+		
 		newMarker(coordinates[0], 'ic_start');
 		newMarker(coordinates[coordinates.length - 1], 'ic_stop');
+
 
 		var path = new google.maps.Polyline({
 			path : coordinates,
@@ -142,18 +155,20 @@ notification.controller('GameCtrl', function($scope, $http) {
 		path.setMap($scope.map);
 
 		// $SHOW PLANNED DATA
-		instance.itinerary.data.leg.forEach(function(leg) {
-			var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
-			var line = new google.maps.Polyline({
-				path : path,
-				strokeColor : 'green',
-				strokeOpacity : 0.8,
-				strokeWeight : 2,
-				map : $scope.map
+		if (instance.itinerary != null) {
+			instance.itinerary.data.leg.forEach(function(leg) {
+				var path = google.maps.geometry.encoding.decodePath(leg.legGeometery.points);
+				var line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'green',
+					strokeOpacity : 0.8,
+					strokeWeight : 2,
+					map : $scope.map
+				});
+				newMarker(path[0], 'step');
+				$scope.layers.push(line);
 			});
-			newMarker(path[0], 'step');
-			$scope.layers.push(line);
-		});
+		}
 	}
 
 	var newMarker = function(pos, icon) {
@@ -169,6 +184,88 @@ notification.controller('GameCtrl', function($scope, $http) {
 		$scope.layers.push(m);
 		return m;
 	};
+	
+	
+    if (typeof (Number.prototype.toRad) === "undefined") {
+        Number.prototype.toRad = function () {
+            return this * Math.PI / 180;
+        }
+    }
+	
+	function dist(p1, p2) {
+        var pt1 = [p1.lat, p1.lng];
+        var pt2 = [p2.lat, p2.lng];
+    
+        var d = false;
+        if (pt1 && pt1[0] && pt1[1] && pt2 && pt2[0] && pt2[1]) {
+            var lat1 = Number(pt1[0]);
+            var lon1 = Number(pt1[1]);
+            var lat2 = Number(pt2[0]);
+            var lon2 = Number(pt2[1]);
+
+            var R = 6371; // km
+            //var R = 3958.76; // miles
+            var dLat = (lat2 - lat1).toRad();
+            var dLon = (lon2 - lon1).toRad();
+            var lat1 = lat1.toRad();
+            var lat2 = lat2.toRad();
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            d = R * c;
+        } else {
+            console.log('cannot calculate distance!');
+        }
+        return d;
+  }
+  
+  function transform(array) {
+    var res = [];
+    for (var i = 1; i < array.length; i++) {
+      transformPair(array[i-1], array[i], res, dist);
+    }
+    return res;
+  }
+  
+  function compute(v1, a1, v2, a2, d) {
+    if ((a1 + a2)/1000 > d) {
+      var v = a1 > a2 ? (v2 - (v2-v1)*a2/a1) : (v1+ (v2-v1)*a1/a2);
+      return [v,v];   
+    }
+    return [v1 + (v2-v1)*a1/d/1000, v2 - (v2-v1)*a2/d/1000];
+  }
+  
+  function computeLats(p1, p2, d) {
+    if (p1.lat > p2.lat) {
+      var res = computeLats(p2,p1, d);
+      return [res[1],res[0]];
+    }
+    return compute(p1.lat, p1.acc, p2.lat, p2.acc, d);
+  }
+  function computeLngs(p1, p2, d) {
+    if (p1.lng > p2.lng) {
+      var res = computeLngs(p2, p1, d);
+      return [res[1],res[0]];
+    }
+    return compute(p1.lng, p1.acc, p2.lng, p2.acc, d);
+  }
+  
+  function transformPair(p1, p2, res, distFunc) {
+    var d = distFunc(p1,p2);
+	if (d != 0) {
+		var lats = computeLats(p1,p2,d);
+		var lngs = computeLngs(p1,p2,d);
+		res.push({lat: lats[0], lng: lngs[0]});
+		res.push({lat: lats[1], lng: lngs[1]});
+	}
+  }	
+	
+	
+	
+	
+	
+	
+	
 
 	$scope.initMap = function() {
 		document.getElementById("left-scrollable").style.height = (window.innerHeight - 185) + "px";
