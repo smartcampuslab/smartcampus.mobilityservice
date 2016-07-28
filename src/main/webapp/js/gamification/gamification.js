@@ -255,8 +255,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 	if (d != 0) {
 		var lats = computeLats(p1,p2,d);
 		var lngs = computeLngs(p1,p2,d);
-		res.push({lat: lats[0], lng: lngs[0]});
-		res.push({lat: lats[1], lng: lngs[1]});
+		res.push({lat: lats[0], lng: lngs[0], acc: (p1.acc + p2.acc) / 2});
+		res.push({lat: lats[1], lng: lngs[1], acc: (p1.acc + p2.acc) / 2});
 	}
   }	
 	
