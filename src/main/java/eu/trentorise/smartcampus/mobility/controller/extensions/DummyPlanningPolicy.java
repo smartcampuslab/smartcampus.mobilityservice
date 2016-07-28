@@ -48,12 +48,12 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public String getName() {
-		return "Dummy";
+		return "Nessuna";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Nessuna";
+		return "Dummy";
 	}
 
 	@Override

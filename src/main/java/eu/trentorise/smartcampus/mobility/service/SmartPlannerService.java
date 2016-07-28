@@ -54,7 +54,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -78,7 +77,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	@Value("${smartplanner.router}")
 	private String smartplannerRouter;		
 	
-	private static final String DUMMY = "Dummy";
+	private static final String DUMMY = "Nessuna";
 	private static final String DEFAULT = "default";
 	
 	private String SMARTPLANNER;
@@ -138,17 +137,11 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	
 	private PlanningPolicy getPlanningPolicy(String policyId, Boolean draft) {
-		if (!StringUtils.hasText(policyId)) {
-			return policiesMap.containsKey(DEFAULT) ? policiesMap.get(DEFAULT) : policiesMap.get(DUMMY);
-		}
 		PlanningPolicy policy = policiesMap.get(policyId);
 		
 		if (policy == null) {
 			Map<String, PlanningPolicy> stored = getStoredPolicies(draft);
 			
-			if (stored == null) {
-				return policiesMap.get(DUMMY);
-			}
 			policy = stored.get(policyId);
 			if (policy == null) {
 				return policiesMap.get(DUMMY);

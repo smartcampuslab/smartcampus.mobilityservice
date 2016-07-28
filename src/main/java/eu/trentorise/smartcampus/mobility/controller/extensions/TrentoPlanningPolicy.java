@@ -182,12 +182,12 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public String getName() {
-		return "Trento";
+		return "Park and Ride";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Park and Ride";
+		return "Trento";
 	}
 
 	@Override

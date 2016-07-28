@@ -207,12 +207,12 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public String getName() {
-		return "Rovereto";
+		return "Bike Sharing";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Bike Sharing";
+		return "Rovereto";
 	}	
 	
 	@Override
