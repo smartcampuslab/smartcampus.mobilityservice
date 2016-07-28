@@ -22,6 +22,8 @@ var plannerControllers = angular.module('plannerControllers', [])
 					$scope.myposition = $rootScope.CENTER;
 
 					var rootScope = $rootScope;
+					
+					$scope.tooltipsdata = {};
 
 					$scope.mytime = new Date();
 					$scope.mydate = new Date();
@@ -101,6 +103,15 @@ var plannerControllers = angular.module('plannerControllers', [])
 						background : '#FFFFFF'
 					};
 
+					$scope.groupstyle = {
+							color : '#5BC0DE',
+							background : '#FFFFFF'
+						};
+						$scope.filterstyle = {
+							color : '#5BC0DE',
+							background : '#FFFFFF'
+						};					
+					
 					$scope.init = function($http) {
 						$http.get($rootScope.controllerBase + ($rootScope.publishedOnly ? '?draft=false' : '')).success(function(data) {
 							$scope.policyIds = data;
@@ -317,27 +328,23 @@ var plannerControllers = angular.module('plannerControllers', [])
 						if ($gro) {
 							$scope.groupstyle = {
 								background : '#5BC0DE',
-								color : '#FFFFFF',
-								height : '100%'
+								color : '#FFFFFF'
 							};
 						} else {
 							$scope.groupstyle = {
-								background : '#5BC0DE',
-								color : '#FFFFFF',
-								height : '90%'
+								color : '#5BC0DE',
+								background : '#FFFFFF'
 							};
 						}
 						if ($fil) {
 							$scope.filterstyle = {
 								background : '#5BC0DE',
-								color : '#FFFFFF',
-								height : '100%'
+								color : '#FFFFFF'
 							};
 						} else {
 							$scope.filterstyle = {
-								background : '#5BC0DE',
-								color : '#FFFFFF',
-								height : '90%'
+								color : '#5BC0DE',
+								background : '#FFFFFF'
 							};
 						}
 					}
@@ -711,6 +718,8 @@ var plannerControllers = angular.module('plannerControllers', [])
 //						$scope.showpreparation = false;
 
 						$scope.compilePolicy(true, true, true, true);
+						
+						$scope.initTooltips();
 					}
 
 					$scope.resetCode = function($check, $prep, $eval, $extr) {
@@ -762,6 +771,8 @@ var plannerControllers = angular.module('plannerControllers', [])
 							console.log(JSON.stringify($scope.compileform, null, 2));
 						}).error(function(data) {
 						});
+						
+						$scope.initTooltips();
 					}
 
 					$scope.setPolicy = function($policy) {
@@ -773,7 +784,9 @@ var plannerControllers = angular.module('plannerControllers', [])
 					}
 
 					$scope.addCreate = function() {
+						$('.collapse').collapse("hide");
 						$scope.compileform.create.push({
+							"name" : "Nuova regola 'CREA' (" + ($scope.compileform.create.length + 1) + ")", 
 							"enabled" : true,
 							"action" : {
 								"promoted" : true
@@ -782,7 +795,9 @@ var plannerControllers = angular.module('plannerControllers', [])
 					}
 
 					$scope.addModify = function() {
+						$('.collapse').collapse("hide");
 						$scope.compileform.modify.push({
+							'name' : "Nuova regola 'MODIFICA' (" + ($scope.compileform.modify.length + 1) + ")",
 							"enabled" : true,
 							"action" : {
 								"promoted" : true
@@ -791,7 +806,9 @@ var plannerControllers = angular.module('plannerControllers', [])
 					}
 
 					$scope.addEvaluate = function() {
+						$('.collapse').collapse("hide");
 						$scope.compileform.evaluate.push({
+							'name' : "Nuova regola 'VALUTAZIONE' (" + ($scope.compileform.evaluate.length + 1) + ")",
 							"enabled" : true,
 							"action" : {
 								"promoted" : true
@@ -976,19 +993,42 @@ var plannerControllers = angular.module('plannerControllers', [])
 
 					// ////////////
 
-					$scope.initTooltips = function($elem) {
-						$('.group-tooltip').tooltip({
-							title : "Gruppi!!!",
-							placement : "right"
-						});
+					$scope.initTooltips = function() {
+//						$('.group-tooltip').tooltip({
+//							title : "Gruppi!!!",
+//							placement : "right"
+//						});
+//						console.log($scope.tooltipsdata);
+						var keys = Object.keys($scope.tooltipsdata)
+						for (var i = 0; i < keys.length; i++) {
+							console.log(">" + keys[i] + " = " + $scope.tooltipsdata[keys[i]].text);
+							$('.' + keys[i]).tooltip({
+								title : "<div align=\"left\"><p>" + $scope.tooltipsdata[keys[i]].text + "</p><p><a href=\"" + $scope.tooltipsdata[keys[i]].url + "\" target=\"_blank\">Documentazione</a></p></div>",
+								placement : "auto",
+								html : true,
+								trigger : "click"
+							});
+							$('.' + keys[i]).html("?");
+						}						
 					}
 
 					$(document).ready(function() {
+						$http.get("../data/tooltips.json").success(function(data) {
+							$scope.tooltipsdata = data;
+						}).error(function(data, status, headers, config) {
+						});						
+						
 						$('#policyIds-dropdown').tooltip({
 							placement : 'left',
-							title : $scope.currentPolicy.name,
+							title : $scope.currentPolicy.description,
 							html : true
 						});
 					});
+					
+					$(document).on('hidden.bs.modal', '.modal', function () {
+					    $('.modal:visible').length && $(document.body).addClass('modal-open');
+					});					
+					
+					
 
 				} ]);

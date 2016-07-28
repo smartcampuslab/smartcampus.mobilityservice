@@ -266,6 +266,10 @@ body {
   top:33% !important;
 }
 
+.tooltip-wide + .tooltip > .tooltip-inner {
+    width: 320px;
+}
+
 /*
 .tab-pane {
 	border:solid 1px #888888;

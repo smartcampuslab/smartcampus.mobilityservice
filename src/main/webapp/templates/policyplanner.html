@@ -220,19 +220,19 @@
 							<button class="btn btn-default navbar-btn" id="policyIds-dropdown"
 									data-toggle="dropdown" aria-haspopup="true"
 									aria-expanded="false"">
-									{{ currentPolicy.description }}<span class="caret"></span>
+									{{ currentPolicy.name }}<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu policyIds-dropdown">
-									<li ng-click="setPolicy({ name: 'Dummy', description: 'Nessuna', editable: false, draft : false, policyType : 'hardcoded'} , false)">
+									<li ng-click="setPolicy({ description : 'Dummy', name : 'Nessuna', editable: false, draft : false, policyType : 'hardcoded'} , false)">
 										<a><strong>Nessuna</strong></a></li>
-									<li ng-click="setPolicy({ name : 'Trento', description : 'Park and Ride', editable: false, draft: false, policyType : 'hardcoded'}, false)">
+									<li ng-click="setPolicy({ description : 'Trento', name : 'Park and Ride', editable: false, draft: false, policyType : 'hardcoded'}, false)">
 										<a><strong>Park and Ride</strong></a></li>
-									<li ng-click="setPolicy({ name :'Rovereto', description: 'Bike Sharing', editable: false, draft: false, policyType : 'hardcoded'} , false)">
+									<li ng-click="setPolicy({ description :'Rovereto', name : 'Bike Sharing', editable: false, draft: false, policyType : 'hardcoded'} , false)">
 										<a><strong>Bike Sharing</strong></a></li>
 									<li role="separator" class="divider"></li>
 									<li ng-repeat="policy in policyIds"
 										ng-click="setPolicy(policy, true, policyType)">
-										<a><em ng-if="policy.draft">*{{ policy.description + "_" + policy.policyType }}</em><span ng-if="!policy.draft">{{ policy.description }}</span></a></li>
+										<a><em ng-if="policy.draft">*{{ policy.name }}</em><span ng-if="!policy.draft">{{ policy.name }}</span></a></li>
 								</ul></li>
 							</ul>								
 							
@@ -399,4 +399,4 @@
 <!-- <div ng-include="'../templates/parametricmodal.html'"></div>
 <div ng-include="'../templates/scriptedmodal.html'"></div> -->
 <div ng-include="'../templates/compiledmodal.html'"></div>
-<div ng-include="'../templates/modal.html'"></div>
+<!-- <div ng-include="'../templates/modal.html'"></div> -->

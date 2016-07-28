@@ -1,0 +1,212 @@
+<div>
+	<div>
+		<div class="nav">
+			<ul class="nav nav-pills navbar-right">
+				<li>
+					<button class="btn btn-info navbar-btn" ng-show="!evaluatecodeshow" ng-click="addEvaluate()">Nuova Regola</button>
+				</li>
+				<li>
+					<button class="btn btn-default navbar-btn" ng-show="!evaluatecodeshow && advancedforms" ng-click="evaluatecodeshow = true">Vedi codice</button>
+				</li>
+				<li role="presentation">
+					<button class="btn btn-default navbar-btn" ng-show="evaluatecodeshow && !compileform.modifiedEvaluate" ng-click="evaluatecodeshow = false">Chiudi
+						codice</button>
+				</li>
+				<li ng-show="evaluatecodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+						ng-model="compileform.modifiedEvaluate" name="modifiedEvaluate" class="navbar-btn btn-sm"
+						ng-click="resetCode(compileform.modifiedEvaluate, true, false, false)"
+					> Modifica codice</label></li>
+				<!-- Chiudi codice -->
+			</ul>
+		</div>
+		<div class="accordion" id="evaluateaccordion" ng-show="!evaluatecodeshow">
+			<div class="accordion-group " ng-repeat="evaluate in compileform.evaluate track by $index">
+				<div>
+					<ul class="nav " style="background-color: #E6E6E6;">
+						<li>
+							<ul class=" nav nav-pills navbar-left">
+								<li>
+									<div>
+										<button class="btn btn-default navbar-btn" style="background-color: #E6E6E6; border: 0px;" data-toggle="collapse" data-parent="#evaluateaccordion"
+											data-target="#evaluatecollapse{{$index}}"
+										>
+											<strong>{{evaluate.name}}</strong>
+										</button>
+									</div>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<ul class="nav nav-pills navbar-right">
+								<li>
+									<button class="btn btn-danger navbar-btn" ng-show="evaluate.enabled" ng-click="evaluate.enabled = false;">
+										<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+									</button>
+								</li>
+								<li>
+									<button class="btn btn-success navbar-btn" ng-show="!evaluate.enabled" ng-click="evaluate.enabled = true;">
+										<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+									</button>
+								</li>
+								<li>
+									<button class="btn btn-danger navbar-btn" ng-click="removeEvaluate($index)">
+										<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+									</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<hr />
+				<div id="evaluatecollapse{{$index}}" class="panel-collapse collapse in">
+					<div>
+						<h4>
+							<div ng-init="initTooltips()" class="list-group-item" style="border: 0px;">
+								<!-- <span class="badge" data-toggle="modal" data-target="#helpmodal">1</span><strong>Nome</strong> -->
+								<span class="badge tooltip-wide tooltip-Nome"></span><strong>Nome</strong>
+							</div>
+						</h4>
+						<input type="text" class="form-control" ng-model="evaluate.name" />
+						<hr />
+						<h4>
+							<div class="list-group-item" style="border: 0px;">
+								<!-- <span class="badge" data-toggle="modal" data-target="#helpmodal">2</span><strong>Condizione</strong> -->
+								<span class="badge tooltip-wide tooltip-Condizione"></span><strong>Condizione</strong>
+							</div>
+						</h4>
+						<input type="text" class="form-control" ng-model="evaluate.condition.formula" />
+						<hr />
+						<div>
+							<div>
+								<h4>
+									<strong>Nuova richiesta</strong>
+								</h4>
+								<ul class="nav nav-tabs nav-justified">
+									<div>
+										<input type="checkbox" ng-model="evaluate.action.wheelchair" name="wheelchair"> <label>Itinerari accessibili <span
+											class="badge tooltip-wide tooltip-Accessibili"
+										></span>
+										</label>
+									</div>
+									<li>
+										<div class="dropdown">
+											<label>Mezzo di trasporto (TType):</label>
+											<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												{{ evaluate.action.newTType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu ">
+												<li ng-repeat="ttype in ttypes" ng-click="evaluate.action.newTType = ttype"><a><strong>{{ ttype }}</strong></a>
+											</ul>
+											<span class="badge tooltip-wide tooltip-Ttype"></span>
+										</div>
+									</li>
+									<li>
+										<div class="dropdown">
+											<label>Tipo di itinerario (RType):</label>
+											<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												{{ evaluate.action.newRType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="rtype in rtypes" ng-click="evaluate.action.newRType = rtype"><a><strong>{{ rtype }}</strong></a>
+											</ul>
+											<span class="badge tooltip-wide tooltip-Rtype"></span>
+										</div>
+									</li>
+								</ul>
+							</div>
+							<div class="dropdown">
+								<label>Numero di risultati</label>
+								<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									{{ evaluate.action.newItineraryNumber }}<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li ng-repeat="num in [null,1,2,3,4,5]" ng-click="evaluate.action.newItineraryNumber = num"><a><strong>{{ num }}</strong></a>
+								</ul>
+								<span class="badge tooltip-wide tooltip-NRisultati"></span>
+							</div>
+							<div>
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label class="col-sm-3 control-label">MaxWalkDistance</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control" ng-model="evaluate.action.maxWalkDistance" name="maxWalkDistance" size="8" />
+										</div>
+										<span class="badge tooltip-wide tooltip-MaxWalkDistance"></span>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">MaxTotalWalkDistance</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control" ng-model="evaluate.action.maxTotalWalkDistance" name="maxTotalWalkDistance" size="8" />
+										</div>
+										<span class="badge tooltip-wide tooltip-MaxTotalWalkDistance"></span>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">MaxChanges</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control" ng-model="evaluate.action.maxChanges" name="maxChanges" size="8" />
+										</div>
+										<span class="badge tooltip-wide tooltip-MaxChanges"></span>
+									</div>
+								</form>
+							</div>
+							<div>
+								<div class="dropdown">
+									<label>ExtraTransport:</label>
+									<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										{{ evaluate.action.extraTransport }}<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu">
+										<li ng-repeat="rtype in rtypes" ng-click="evaluate.action.newRType = rtype"><a><strong>{{ rtype }}</strong></a>
+									</ul>
+									<span class="badge tooltip-wide tooltip-Rtype"></span>
+								</div>
+								</label>
+							</div>
+							<div>
+								<hr />
+								<div>
+									<h4>
+										<strong>Gestione risultati</strong>
+									</h4>
+								</div>
+								<div>
+									<ul class="nav nav-tabs nav-justified">
+										<li><input class="form-group" type="checkbox" ng-model="evaluate.action.promoted" name="promoted"> <label>Itinerari sostenibili</label> <span
+											class="badge tooltip-wide tooltip-Sostenibili"
+										></span>
+										<li><label><div class="dropdown">
+													Associa gruppo:
+													<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+														{{ evaluate.action.planningResultGroupName }}<span class="caret"></span>
+													</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="groupName in getGroupNames()" ng-click="evaluate.action.planningResultGroupName = groupName"><a><strong>{{
+																	groupName }}</strong></a></li>
+													</ul>
+												</div></label>
+											<button class="btn btn-danger navbar-btn">
+												<span class="glyphicon glyphicon-plus" aria-hidden="true" data-toggle="modal" data-target="#newgroupdmodal" ng-click="newGroup();" />
+											</button> <span class="badge tooltip-wide tooltip-Gruppo"></span> <!-- <span ng-init="initTooltips()" class="glyphicon glyphicon-question-sign group-tooltip" aria-hidden="true"></span> -->
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</li>
+	</form>
+	</ul>
+	<div ng-show="evaluatecodeshow">
+		<h3>Valutazione (codice)???</h3>
+		<form id="generatecode-form">
+			<textarea class="form-control" type="text" rows="30" ng-model="tmpForm.evaluateCode" ng-trim="false" name="evaluateCode"
+				ng-readonly="!compileform.modifiedEvaluate"
+			/>
+			</textarea>
+		</form>
+	</div>
+</div>

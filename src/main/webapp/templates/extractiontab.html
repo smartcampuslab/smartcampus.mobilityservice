@@ -1,0 +1,161 @@
+<div >
+	<div class="tabbable">
+		<ul class="nav nav-tabs nav-justified" id="policytabs">
+			<li><a data-toggle="tab" data-target="#groupstab" style="width: 100%;" ng-click="resetExtrstyles(true,false)" ng-style="groupstyle">GRUPPI</a></li>
+			<li><a data-toggle="tab" data-target="#filterstab" style="width: 100%;" ng-click="resetExtrstyles(false,true)" ng-style="filterstyle">FILTRI</a></li>
+		</ul>		
+	</div>
+	<div class="tab-content">
+		<div id="groupstab" class="tab-pane">
+			<div class="nav">
+				<ul class="nav nav-pills navbar-right">
+					<li>
+						<button class="btn btn-info navbar-btn" ng-click="addEmptyGroup()">Nuovo gruppo</button>
+					</li>
+				</ul>
+			</div>
+			<div>
+				<ul class="list-group">
+					<form id="group-form">
+						<li class="list-group-item" ng-repeat="group in compileform.groups track by $index">
+							<div>
+								<div class="nav"  ng-init="initTooltips()">
+									<ul class="nav nav-pills navbar-left">
+										<div>
+											<p>
+											<h4>
+												<strong>*Nome</strong>
+												<span class="badge tooltip-wide tooltip-NomeGruppo"></span>
+											</h4>
+											</p>
+										</div>
+									</ul>
+									<ul class="nav nav-pills navbar-right">
+										<!-- <button class="btn btn-default navbar-btn"
+																ng-show="group.enabled"
+																ng-click="group.enabled = false;">
+																<span class="glyphicon glyphicon-stop"
+																	aria-hidden="true"></span>
+															</button>
+															<button class="btn btn-success navbar-btn"
+																ng-show="!group.enabled"
+																ng-click="group.enabled = true;">
+																<span class="glyphicon glyphicon-play"
+																	aria-hidden="true"></span>
+															</button> -->
+										<button class="btn btn-danger navbar-btn" ng-click="removeGroup(group)">
+											<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+										</button>
+									</ul>
+								</div>
+								<input class="form-control" type="text" ng-model="group.name" name="name" />
+								<ul class="nav nav-pills ">
+									<li role="presentation">
+										<div class="dropdown" style="width: 400px">
+											<label>Numero di risultati</label>
+											<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												{{ group.maxEntries }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="num in [1,2,3,4,5]" ng-click="group.maxEntries = num"><a><strong>{{ num }}</strong></a></li>
+											</ul>
+											<span class="badge tooltip-wide tooltip-NRisultatiGruppo">X</span>
+										</div>
+									</li>
+									<li role="presentation">
+										<div class="dropdown" style="width: 200px">
+											<label>Ordina per</label>
+											<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												{{ group.sortType }}<span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="stype in stypes" ng-click="group.sortType = stype"><a><strong>{{ stype }}</strong></a></li>
+											</ul>
+											<span class="badge tooltip-wide tooltip-OrdinaGruppo"></span>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</li>
+					</form>
+				</ul>
+			</div>
+		</div>
+		<div id="filterstab" class="tab-pane">
+			<div class="nav">
+				<ul class="nav nav-pills navbar-right">
+					<li>
+						<button class="btn btn-info navbar-btn" ng-show="!extractioncodeshow" ng-click="addFilterFormula()">Nuovo filtro</button>
+					</li>
+					<li>
+						<button class="btn btn-default navbar-btn" ng-show="!extractioncodeshow" ng-click="extractioncodeshow = true">Vedi codice</button>
+					</li>
+					<li role="presentation">
+						<button class="btn btn-default navbar-btn" ng-show="extractioncodeshow && !compileform.modifiedFilter" ng-click="extractioncodeshow = false">Chiudi
+							codice</button>
+					</li>
+					<li ng-show="extractioncodeshow" role="presentation" style="padding-left: 10px;"><label class="navbar-btn"><input type="checkbox"
+							ng-model="compileform.modifiedFilter" name="modifiedExtraction" class="navbar-btn btn-sm"
+							ng-click="resetCode(compileform.modifiedFilter, false, false, true)"
+						> Modifica codice</label></li>
+					<!-- Chiudi codice -->
+				</ul>
+			</div>
+			<div ng-show="!extractioncodeshow">
+				<ul class="nav nav-tabs nav-justified">
+					<li>
+						<div class="dropdown">
+							<label>Ordina per</label>
+							<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{ compileform.filter.sortType }}<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li ng-repeat="stype in stypes" ng-click="compileform.filter.sortType = stype"><a><strong>{{ stype }}</strong></a></li>
+							</ul>
+						</div>
+					</li>
+					<li>
+						<div class="dropdown">
+							<label>Numero di risultati da mantenere</label>
+							<button class="btn btn-default navbar-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{ compileform.filter.keep }}<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li ng-repeat="num in [1,2,3,4,5]" ng-click="compileform.filter.keep = num"><a><strong>{{ num }}</strong></a></li>
+							</ul>
+						</div>
+					</li>
+					<ul class="list-group">
+						<form id="group-form">
+							<li class="list-group-item" ng-repeat="formula in compileform.filter.formulas track by $index">
+								<div class="input-group col-xs-11">
+									<div class="container-fluid">
+										<span class="input-group-btn"> <input class="form-control" type="text" ng-model="compileform.filter.formulas[$index]" name="filterformula" />
+											<button class="btn btn-danger" ng-show="compileform.filter.enabled[$index]" ng-click="toggleFormula($index)">
+												<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+											</button>
+											<button class="btn btn-success" ng-show="!compileform.filter.enabled[$index]" ng-click="toggleFormula($index)">
+												<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+											</button>
+											<button class="btn btn-danger" type="button" ng-click="removeFilterFormula($index)">
+												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+											</button>
+										</span>
+									</div>
+								</div>
+							</li>
+						</form>
+					</ul>
+			</div>
+			<div ng-show="extractioncodeshow">
+				<h3>Estrazione (codice)???</h3>
+				<form id="extractcode-form">
+					<textarea class="form-control" type="text" rows="30" ng-model="tmpForm.filterCode" ng-trim="false" name="filterCode"
+						ng-readonly="!compileform.modifiedFilter"
+					/>
+					</textarea>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
