@@ -452,7 +452,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 						$scope.requestedTo = $scope.toMarker.address;
 
 						planner.plan($scope.fromMarker.getPosition(), $scope.toMarker.getPosition(), convertMeans(), $scope.mode, $scope.mydate, $scope.mytime,
-								$scope.currentPolicy.name, $scope.wheelchair).success(function(data) {
+								$scope.currentPolicy.description, $scope.wheelchair).success(function(data) {
 							$scope.planned = true;
 							if (data && data.length > 0) {
 								// data.sort(function(a,b) {

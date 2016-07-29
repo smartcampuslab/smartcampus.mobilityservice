@@ -60,7 +60,7 @@
 	</bean>
 
 	<util:map id = "basicPoliciesMap">
-		<entry key="Dummy">
+		<entry key="Nessuna">
 			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
 		</entry>
 		<entry key="Trento">

@@ -54,6 +54,10 @@ public class CompilablePolicyData {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	public String getPolicyId() {
+		return name;
+	}
 
 	public Boolean getDraft() {
 		return draft;

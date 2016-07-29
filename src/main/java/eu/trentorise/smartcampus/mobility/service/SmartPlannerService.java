@@ -130,7 +130,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		List<CompilablePolicyData> compilable = storage.searchDomainObjects(criteria, CompilablePolicyData.class);
 		for (CompilablePolicyData policy: compilable) {
-			result.put(policy.getName(), new CompilablePolicy(policy));
+			result.put(policy.getPolicyId(), new CompilablePolicy(policy));
 		}		
 		return result;
 	}
