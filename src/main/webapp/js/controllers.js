@@ -141,7 +141,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 						var mapOptions = null;
 						ll = $scope.myposition;
 						mapOptions = {
-							zoom : 15,
+							zoom : 14,
 							center : ll
 						}
 						$scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
@@ -553,7 +553,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 						var newCenter = new google.maps.LatLng(lat, lon);
 						$scope.map.setCenter(newCenter);
 						$scope.map.panTo(newCenter);
-						$scope.map.setZoom(15);
+						$scope.map.setZoom(14);
 					}
 
 					$scope.centerItinerary = function() {
@@ -576,7 +576,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 								};
 								$scope.map.setCenter(pos);
 								$scope.map.panTo(pos);
-								$scope.map.setZoom(15);
+								$scope.map.setZoom(14);
 							});
 						}
 					}
