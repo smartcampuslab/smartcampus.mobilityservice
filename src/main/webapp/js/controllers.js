@@ -32,11 +32,13 @@ var plannerControllers = angular.module('plannerControllers', [])
 					$scope.mode = 'fastest';
 					$scope.policyform = {
 						'name' : 'Dummy',
-						'description' : 'Nessuna'
+						'description' : 'Nessuna',
+						'id' : 'Dummy'
 					};
 					$scope.currentPolicy = {
 						name : 'Dummy',
 						description : 'Nessuna',
+						id: 'Dummy',
 						editable : false,
 						draft : false
 					};
@@ -452,7 +454,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 						$scope.requestedTo = $scope.toMarker.address;
 
 						planner.plan($scope.fromMarker.getPosition(), $scope.toMarker.getPosition(), convertMeans(), $scope.mode, $scope.mydate, $scope.mytime,
-								$scope.currentPolicy.description, $scope.wheelchair).success(function(data) {
+								$scope.currentPolicy.id, $scope.wheelchair).success(function(data) {
 							$scope.planned = true;
 							if (data && data.length > 0) {
 								// data.sort(function(a,b) {
