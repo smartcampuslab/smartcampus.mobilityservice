@@ -86,6 +86,7 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 			if (type.equals(TType.SHAREDBIKE) || type.equals(TType.SHAREDBIKE_WITHOUT_STATION) || type.equals(TType.SHAREDCAR) || type.equals(TType.SHAREDCAR_WITHOUT_STATION)
 					|| type.equals(TType.CARWITHPARKING) || type.equals(TType.PARK_AND_RIDE)) {		
 				pr.setSmartplannerParameter(SmartplannerParameter.maxTotalWalkDistance, 1250);
+				pr.setSmartplannerParameter(SmartplannerParameter.maxChanges, 2);
 			}
 			if (type.equals(TType.SHAREDBIKE) || type.equals(TType.SHAREDBIKE_WITHOUT_STATION) || type.equals(TType.BICYCLE)) {
 				pr.setRouteType(RType.safest);
