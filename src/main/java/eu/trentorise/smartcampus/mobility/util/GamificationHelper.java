@@ -180,13 +180,17 @@ public class GamificationHelper {
 					}
 				} else if (leg.getTransport().getType().equals(TType.BICYCLE)) {
 					bikeDist += leg.getLength() / 1000;
-					if (leg.getFrom().getStopId() != null && "BIKE_SHARING_TOBIKE_ROVERETO".equals(leg.getFrom().getStopId().getAgencyId())) {
+					if (leg.getFrom().getStopId() != null && leg.getFrom().getStopId().getAgencyId() != null) {
+						if (leg.getFrom().getStopId().getAgencyId().startsWith("BIKE_SHARING")) {
 						bikeSharing = true;
 						startBikesharingName = leg.getFrom().getStopId().getId();
 					}
-					if (leg.getTo().getStopId() != null && "BIKE_SHARING_TOBIKE_ROVERETO".equals(leg.getTo().getStopId().getAgencyId())) {
+					}
+					if (leg.getTo().getStopId() != null && leg.getTo().getStopId().getAgencyId() != null) {
+						if (leg.getTo().getStopId().getAgencyId().startsWith("BIKE_SHARING")) {
 						bikeSharing = true;
 						endBikesharingName = leg.getTo().getStopId().getId();
+						}
 					}
 				} else if (leg.getTransport().getType().equals(TType.WALK)) {
 					walkDist += leg.getLength() / 1000;
@@ -209,24 +213,37 @@ public class GamificationHelper {
 		}
 
 		Double score = 0.0;
-		score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10;
+		// score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10; Rovereto
+		score += (walkDist < 0.25 ? 0 : Math.min(3.5, walkDist)) * 10;
 		score += (bikeDist < 0.1 ? 0 : Math.min(7, bikeDist)) * 5;
 
-		double busTrainDist = busDist + trainDist;
-		if (busTrainDist > 0) {
-			score += (busTrainDist > 0 && busTrainDist < 1) ? 10 : ((busTrainDist > 1 && busTrainDist < 5) ? 15 : (busTrainDist >= 5 && busTrainDist < 10) ? 20
-					: (busTrainDist >= 10 && busTrainDist < 30) ? 30 : 40);
+		double busTrainTransitDist = busDist + trainDist;
+		if (busTrainTransitDist > 0) {
+			score += (busTrainTransitDist > 0 && busTrainTransitDist < 1) ? 10 : ((busTrainTransitDist > 1 && busTrainTransitDist < 5) ? 15 : (busTrainTransitDist >= 5 && busTrainTransitDist < 10) ? 20
+					: (busTrainTransitDist >= 10 && busTrainTransitDist < 30) ? 30 : 40);
+		}
+		
+		// Trento only
+		if (transitDist > 0) {
+			score += 25;
 		}
 
-		if ((busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0) && itinerary.isPromoted()) {
-			score *= 1.7;
-		} else {
-			if ((busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0)) {
-				score *= 1.5;
-			}
-			if (itinerary.isPromoted()) {
-				score *= 1.2;
-			}
+		boolean zeroImpact = (busDist + carDist + trainDist == 0 && walkDist + bikeDist > 0);
+//		Rovereto
+//		if (zeroImpact && itinerary.isPromoted()) {
+//			score *= 1.7;
+//		} else {
+//			if (zeroImpact) {
+//				score *= 1.5;
+//			}
+//			if (itinerary.isPromoted()) {
+//				score *= 1.2;
+//			}
+//		}
+		
+		 
+		if (zeroImpact) {
+			score *= 1.5;
 		}
 
 		if (bikeDist > 0) {
@@ -241,6 +258,9 @@ public class GamificationHelper {
 		if (trainDist > 0) {
 			data.put("trainDistance", trainDist);
 		}
+		if (transitDist > 0) {
+			data.put("transitDist", transitDist);
+		}		
 		if (carDist > 0) {
 			data.put("carDistance", carDist);
 		}
@@ -260,6 +280,7 @@ public class GamificationHelper {
 			data.put("p+r", pnr);
 		}
 		data.put("sustainable", itinerary.isPromoted());
+		data.put("zeroimpact", zeroImpact);
 		data.put("estimatedScore", Math.round(score));
 
 		return data;
