@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -54,6 +53,8 @@ import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
@@ -89,15 +90,18 @@ public class GamificationHelper {
 	@Value("${gamification.url}")
 	private String gamificationUrl;
 
-	@Autowired(required = false)
-	@Value("${gamification.startgame}")
-	private String gameStart;
+//	@Autowired(required = false)
+//	@Value("${gamification.startgame}")
+//	private String gameStart;
 
-	@Value("${gamification.user}")
-	private String user;
-
-	@Value("${gamification.password}")
-	private String password;
+//	@Value("${gamification.user}")
+//	private String user;
+//
+//	@Value("${gamification.password}")
+//	private String password;
+	
+	@Autowired
+	private AppSetup appSetup;		
 
 	@Autowired
 	private ExecutorService executorService;
@@ -106,20 +110,25 @@ public class GamificationHelper {
 
 	@PostConstruct
 	public void initConnector() {
-		if (StringUtils.hasText(gameStart)) {
-			try {
-				startGameDate = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
+//		if (StringUtils.hasText(gameStart)) {
+//			try {
+//				startGameDate = new SimpleDateFormat("dd/MM/yyyy").parse(gameStart).getTime();
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
-	public void saveItinerary(final BasicItinerary itinerary, final String gameId, final String userId) {
-		if (gamificationUrl == null)
+	public void saveItinerary(final BasicItinerary itinerary, final String gameId, final String userId) throws ParseException {
+		if (gamificationUrl == null) {
 			return;
-		if (System.currentTimeMillis() < startGameDate)
+		}
+		
+		AppInfo app = appSetup.findAppById(gameId);
+		
+		if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
 			return;
+		}
 
 		executorService.execute(new Runnable() {
 			@Override
@@ -141,9 +150,11 @@ public class GamificationHelper {
 			ed.setData(data);
 
 			String content = JsonUtils.toJSON(ed);
+			
+			AppInfo app = appSetup.findAppById(gameId);
 
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + data);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
 		}
@@ -683,9 +694,11 @@ public class GamificationHelper {
 			ed.setData(data);
 
 			String content = JsonUtils.toJSON(ed);
+			
+			AppInfo app = appSetup.findAppById(gameId);
 
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + data);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", user, password);
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());		
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
 		}

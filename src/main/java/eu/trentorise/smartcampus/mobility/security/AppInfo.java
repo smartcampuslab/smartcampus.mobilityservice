@@ -15,6 +15,9 @@ public class AppInfo implements Serializable {
     private String gcmSenderId;
     private List<String> agencyIds;
     private String gameId;
+    private String gameUser;
+    private String gamePassword;
+    private String gameStart;
 
 	public String getAppId() {
 		return appId;
@@ -70,6 +73,30 @@ public class AppInfo implements Serializable {
 
 	public void setGameId(String gameId) {
 		this.gameId = gameId;
+	}
+
+	public String getGameUser() {
+		return gameUser;
+	}
+
+	public void setGameUser(String gameUser) {
+		this.gameUser = gameUser;
+	}
+
+	public String getGamePassword() {
+		return gamePassword;
+	}
+
+	public void setGamePassword(String gamePassword) {
+		this.gamePassword = gamePassword;
+	}
+
+	public String getGameStart() {
+		return gameStart;
+	}
+
+	public void setGameStart(String gameStart) {
+		this.gameStart = gameStart;
 	}
 
 	@Override
