@@ -36,6 +36,8 @@ public class TrackedInstance {
 	
 	private Long estimatedScore;
 
+	private String appId;
+	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
 	}
@@ -168,6 +170,14 @@ public class TrackedInstance {
 
 	public void setEstimatedScore(Long estimatedScore) {
 		this.estimatedScore = estimatedScore;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String gameId) {
+		this.appId = gameId;
 	}
 
 
