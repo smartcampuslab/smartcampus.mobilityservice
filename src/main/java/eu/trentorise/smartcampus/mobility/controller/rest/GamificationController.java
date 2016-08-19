@@ -30,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,6 +53,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -77,13 +79,13 @@ public class GamificationController extends SCController {
 	@Value("${geolocations.db}")
 	private String geolocationsDB;	
 	
-	@Autowired
-	@Value("${gamification.gameId}")
-	private String gameId;	
 	
 	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;	
+	
+	@Autowired
+	private AppSetup appSetup;	
 	
 	private BasicProfileService basicProfileService;
 	
@@ -121,9 +123,10 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, HttpServletResponse response) throws Exception {
+	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		logger.info("Receiving geolocation events, token = "+token+", "+ geolocationsEvent.getLocation().size() +" events");
 		ObjectMapper mapper = new ObjectMapper();
+		
 //		logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
 			String userId = null;
@@ -135,6 +138,8 @@ public class GamificationController extends SCController {
 			}
 
 			logger.info("UserId: " + userId);
+			
+			String gameId = getGameId(appId);
 
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 			Map<String, String> freeTracks = new HashMap<String, String>();
@@ -307,6 +312,7 @@ public class GamificationController extends SCController {
 					res.setComplete(true);
 				}
 				
+				res.setAppId(gameId);
 				storage.saveTrackedInstance(res);
 				
 				logger.info("Saved geolocation events");
@@ -334,7 +340,7 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
-	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		logger.info("Starting free tracking for gamification, device = "+device);
 		try {
 			String userId = getUserId();
@@ -342,6 +348,8 @@ public class GamificationController extends SCController {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
+			
+			String gameId = getGameId(appId);
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
@@ -362,6 +370,7 @@ public class GamificationController extends SCController {
 			}
 			res2.setStarted(true);
 			res2.setFreeTrackingTransport(transport);
+			res2.setAppId(gameId);
 			storage.saveTrackedInstance(res2);
 			
 		} catch (Exception e) {
@@ -371,7 +380,7 @@ public class GamificationController extends SCController {
 	}	
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, HttpServletResponse response) throws Exception {
+	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		logger.info("Starting journey for gamification, device = "+device);
 		try {
 			String userId = getUserId();
@@ -380,6 +389,8 @@ public class GamificationController extends SCController {
 				return;
 			}
 
+			String gameId = getGameId(appId);
+			
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
 			pars.put("clientId", itineraryId);
@@ -417,6 +428,7 @@ public class GamificationController extends SCController {
 				res2.setDeviceInfo(device);
 			}
 			res2.setStarted(true);
+			res2.setAppId(gameId);
 			storage.saveTrackedInstance(res2);
 			
 		} catch (Exception e) {
@@ -684,6 +696,15 @@ public class GamificationController extends SCController {
 		gamificationHelper.saveItinerary(itinerary, gameId, playerId);
 		return true;
 	}
+	
+
+	public String getGameId(String appId) {
+		if (appId != null) {
+			String gameId = appSetup.findAppById(appId).getGameId();
+			return gameId;
+		}
+		return null;
+	}	
 
 	@Override
 	protected AuthServices getAuthServices() {
