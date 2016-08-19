@@ -175,15 +175,15 @@ public class DomainStorage {
 	
 	public void saveTrackedInstance(TrackedInstance tracked) {
 		Query query = new Query(new Criteria("clientId").is(tracked.getClientId()));
-		Geolocation geolocationDB = searchDomainObject(query, Geolocation.class);
-		if (geolocationDB == null) {
+		TrackedInstance trackedDB = searchDomainObject(query, TrackedInstance.class);
+		if (trackedDB == null) {
 			template.save(tracked, TRACKED);
 		} else {
 			Update update = new Update();
 			if (tracked.getItinerary() != null) {
 				update.set("itinerary", tracked.getItinerary());
 			}
-			if (tracked.getItinerary() != null) {
+			if (tracked.getGeolocationEvents() != null) {
 				update.set("getGeolocationEvents", tracked.getGeolocationEvents());
 			}
 
@@ -199,7 +199,10 @@ public class DomainStorage {
 			if (tracked.getValidationResult() != null) {
 				update.set("validationResult", tracked.getValidationResult());
 			}	
-			update.set("estimatedScore", tracked.getEstimatedScore());
+			if (tracked.getEstimatedScore() != null) {
+				update.set("estimatedScore", tracked.getEstimatedScore());
+			}
+			update.set("appId", tracked.getAppId());
 			
 			template.updateFirst(query, update, TRACKED);
 		}
