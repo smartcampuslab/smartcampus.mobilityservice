@@ -14,6 +14,7 @@ public class AppInfo implements Serializable {
     private String gcmSenderApiKey;
     private String gcmSenderId;
     private List<String> agencyIds;
+    private String gameId;
 
 	public String getAppId() {
 		return appId;
@@ -61,6 +62,14 @@ public class AppInfo implements Serializable {
 
 	public void setAgencyIds(List<String> agencyIds) {
 		this.agencyIds = agencyIds;
+	}
+	
+	public String getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(String gameId) {
+		this.gameId = gameId;
 	}
 
 	@Override

@@ -2,12 +2,14 @@ apps:
   - appId: trento
     password: trento
     messagingAppId : mobility.trento
-    gcmSenderApiKey : AIzaSyBHSJtG-oZuPsTbRhr3txRyKv5Lbhq1gRI
-    gcmSenderId : 907144379538
+    gcmSenderApiKey : 
+    gcmSenderId : 
     agencyIds : [5,6,10,12]
+    gameId : trento
   - appId: rovereto
     password: rovereto
     messagingAppId : mobility.rovereto
-    gcmSenderApiKey : AIzaSyBHSJtG-oZuPsTbRhr3txRyKv5Lbhq1gRI
-    gcmSenderId : 907144379538
-    agencyIds : [5,6,10,16,17]    
+    gcmSenderApiKey : 
+    gcmSenderId : 
+    agencyIds : [5,6,10,16,17]
+    gameId : rovereto    
