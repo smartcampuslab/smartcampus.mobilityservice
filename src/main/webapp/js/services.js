@@ -209,7 +209,9 @@ services.factory('formatter', ['parking', '$rootScope',
 			res.note.push(cost);
     		res.type = 'PARK';
     	}
-    	if (leg.to.stopId && leg.to.stopId.id) {
+    	if (leg.to.name) {
+    		res.place = leg.to.name;
+    	} else if (leg.to.stopId && leg.to.stopId.id) {
     		var parkingPlace = parking.getParking(leg.to.stopId.agencyId, leg.to.stopId.id);
     		res.place = parkingPlace != null ? parkingPlace.description : leg.to.stopId.id;
     	}
