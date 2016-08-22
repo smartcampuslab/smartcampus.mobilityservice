@@ -53,6 +53,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
@@ -140,6 +141,10 @@ public class GamificationController extends SCController {
 			logger.info("UserId: " + userId);
 			
 			String gameId = getGameId(appId);
+			if (gameId == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return "";
+			}			
 
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 			Map<String, String> freeTracks = new HashMap<String, String>();
@@ -350,6 +355,10 @@ public class GamificationController extends SCController {
 			}
 			
 			String gameId = getGameId(appId);
+			if (gameId == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
 
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
@@ -390,6 +399,10 @@ public class GamificationController extends SCController {
 			}
 
 			String gameId = getGameId(appId);
+			if (gameId == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}			
 			
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
@@ -698,9 +711,13 @@ public class GamificationController extends SCController {
 	}
 	
 
-	public String getGameId(String appId) {
+	private String getGameId(String appId) {
 		if (appId != null) {
-			String gameId = appSetup.findAppById(appId).getGameId();
+			AppInfo ai = appSetup.findAppById(appId);
+			if (ai == null) {
+				return null;
+			}
+			String gameId = ai.getGameId();
 			return gameId;
 		}
 		return null;
