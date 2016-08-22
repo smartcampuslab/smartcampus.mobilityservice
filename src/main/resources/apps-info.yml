@@ -5,17 +5,19 @@ apps:
     gcmSenderApiKey : 
     gcmSenderId : 
     agencyIds : [5,6,10,12]
-    gameId : 
+    gameId : trento
     gameUser : 
     gamePassword :
     gameStart : 
+    routesDB : trento
   - appId: rovereto
     password: rovereto
     messagingAppId : mobility.rovereto
     gcmSenderApiKey : 
     gcmSenderId : 
     agencyIds : [5,6,10,16,17]
-    gameId : 
+    gameId : rovereto
     gameUser : 
     gamePassword : 
     gameStart :    
+    routesDB : rovereto

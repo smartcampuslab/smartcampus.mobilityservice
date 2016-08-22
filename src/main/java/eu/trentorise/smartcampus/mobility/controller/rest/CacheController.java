@@ -38,13 +38,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.io.ByteStreams;
 
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 
 @Controller
 public class CacheController {
 	
 	@Autowired
-	private SmartPlannerHelper smartPlannerHelper;	
+	private SmartPlannerHelper smartPlannerHelper;
+	
+	@Autowired
+	private AppSetup appSetup;	
 
   	@RequestMapping(method = RequestMethod.POST, value = "/cachestatus")
   	public @ResponseBody
@@ -136,15 +141,21 @@ public class CacheController {
 		}
 	}  	
   	
-  	
+
   	@RequestMapping(method = RequestMethod.GET, value = "/routesDB/{appId}", produces = "application/zip")
   	public @ResponseBody
   	void getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String appId) {
   		try {
+  			String dbId = getRoutesDB(appId);
+			if (dbId == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}	
+  			
   			response.setContentType("application/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=\"routesdb.zip\""); 
 			
-			InputStream is = smartPlannerHelper.routesDB(appId);
+			InputStream is = smartPlannerHelper.routesDB(dbId);
 			
 			ByteStreams.copy(is, response.getOutputStream());
 
@@ -157,10 +168,16 @@ public class CacheController {
   	public @ResponseBody
   	void getExtendedRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String appId) {
   		try {
+  			String dbId = getRoutesDB(appId);
+			if (dbId == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}	  			
+  			
   			response.setContentType("application/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=\"routesdb.zip\""); 
 			
-			InputStream is = smartPlannerHelper.extendedRoutesDB(appId);
+			InputStream is = smartPlannerHelper.extendedRoutesDB(dbId);
 			
 			ByteStreams.copy(is, response.getOutputStream());
 
@@ -183,6 +200,18 @@ public class CacheController {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}
+	}  	
+  	
+	private String getRoutesDB(String appId) {
+		if (appId != null) {
+			AppInfo ai = appSetup.findAppById(appId);
+			if (ai == null) {
+				return null;
+			}
+			String dbId = ai.getRoutesDB();
+			return dbId;
+		}
+		return null;
 	}  	
 		
 }

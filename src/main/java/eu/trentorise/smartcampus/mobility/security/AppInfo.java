@@ -18,6 +18,7 @@ public class AppInfo implements Serializable {
     private String gameUser;
     private String gamePassword;
     private String gameStart;
+    private String routesDB;
 
 	public String getAppId() {
 		return appId;
@@ -97,6 +98,14 @@ public class AppInfo implements Serializable {
 
 	public void setGameStart(String gameStart) {
 		this.gameStart = gameStart;
+	}
+
+	public String getRoutesDB() {
+		return routesDB;
+	}
+
+	public void setRoutesDB(String routesDB) {
+		this.routesDB = routesDB;
 	}
 
 	@Override
