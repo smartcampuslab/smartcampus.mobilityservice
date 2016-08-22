@@ -386,7 +386,7 @@ public class OTPController extends SCController {
 		
   	@RequestMapping(method = RequestMethod.GET, value = "/gtfs/{agencyId}", produces = "application/zip")
   	public @ResponseBody
-  	void getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId) {
+  	void getGTFS(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId) {
   		try {
   			response.setContentType("application/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=\"gtfs_" + agencyId + ".zip\""); 
