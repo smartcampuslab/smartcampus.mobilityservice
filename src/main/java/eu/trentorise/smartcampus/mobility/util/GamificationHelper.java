@@ -666,10 +666,14 @@ public class GamificationHelper {
 	 * @param geolocationEvents
 	 */
 	public void saveFreeTracking(final String travelId, final String gameId, final String playerId, final Set<Geolocation> geolocationEvents, final String ttype) {
-		if (gamificationUrl == null)
+		if (gamificationUrl == null) {
+			logger.debug("No gamification URL, returning.");
 			return;
-		if (System.currentTimeMillis() < startGameDate)
+		}
+		if (System.currentTimeMillis() < startGameDate) {
+			logger.debug("Game not yet started, returning.");
 			return;
+		}
 
 		executorService.execute(new Runnable() {
 			@Override
@@ -683,6 +687,7 @@ public class GamificationHelper {
 	private void saveFreetracking(String travelId, String gameId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
 		if (data.isEmpty()) {
+			logger.debug("Data is empty, returning.");
 			return;
 		}
 

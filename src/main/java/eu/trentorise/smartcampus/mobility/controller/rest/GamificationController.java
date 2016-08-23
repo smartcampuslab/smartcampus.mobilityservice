@@ -315,6 +315,8 @@ public class GamificationController extends SCController {
 							if (trackingData.containsKey("estimatedScore")) {
 								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
 							}
+						} else {
+							logger.debug("Validation result null, not sending data to gamification");
 						}
 					}
 					res.setComplete(true);
@@ -705,8 +707,9 @@ public class GamificationController extends SCController {
 	}	
 	
 	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String gameId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
-		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
+		logger.debug("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
+			logger.debug("publishQueue contains travelId " + travelId + ", returning");
 			return false;
 		}
 		publishQueue.add(travelId);
