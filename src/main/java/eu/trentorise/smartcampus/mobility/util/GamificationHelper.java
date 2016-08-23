@@ -81,7 +81,7 @@ public class GamificationHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 
-	private static long startGameDate = Long.MAX_VALUE;
+//	private static long startGameDate = Long.MAX_VALUE;
 
 	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 	public static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN, EMPTY);
@@ -670,8 +670,15 @@ public class GamificationHelper {
 			logger.debug("No gamification URL, returning.");
 			return;
 		}
-		if (System.currentTimeMillis() < startGameDate) {
-			logger.debug("Game not yet started, returning.");
+		
+		AppInfo app = appSetup.findAppById(gameId);
+		
+		try {
+			if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
+				logger.debug("Game not yet started, returning.");
+				return;
+			}
+		} catch (ParseException e) {
 			return;
 		}
 
