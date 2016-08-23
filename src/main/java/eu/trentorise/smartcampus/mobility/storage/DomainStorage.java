@@ -183,8 +183,8 @@ public class DomainStorage {
 			if (tracked.getItinerary() != null) {
 				update.set("itinerary", tracked.getItinerary());
 			}
-			if (tracked.getGeolocationEvents() != null) {
-				update.set("getGeolocationEvents", tracked.getGeolocationEvents());
+			if (tracked.getGeolocationEvents() != null && !tracked.getGeolocationEvents().isEmpty()) {
+				update.set("geolocationEvents", tracked.getGeolocationEvents());
 			}
 
 			if (tracked.getStarted() != null) {
