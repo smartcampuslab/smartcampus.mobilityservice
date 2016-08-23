@@ -111,10 +111,10 @@
                     <span ng-show="instance.itinerary == null" class="glyphicon glyphicon-tree-deciduous" title="Free tracking" data-toggle="tooltip"></span>
                     date: {{instance.day ? instance.day : '--'}}
                     <span >
-                    	<span ng-show="instance.validationResult.geoLocationsN <= 2" class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"></span>
+                    	<span ng-show="instance.validationResult.geoLocationsN <= 2 && instance.itinerary" class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"></span>
                     	<!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
-                    	<span ng-show="!instance.validationResult.matchedLocations" class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"></span>
-                    	<span ng-show="!instance.validationResult.matchedActivities" class="glyphicon glyphicon-plane" title="Mismatched activities" data-toggle="tooltip"></span>
+                    	<span ng-show="!instance.validationResult.matchedLocations && instance.itinerary" class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"></span>
+                    	<span ng-show="!instance.validationResult.matchedActivities && instance.itinerary" class="glyphicon glyphicon-plane" title="Mismatched activities" data-toggle="tooltip"></span>
                     	<span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
                     	</span>
                     </div>
