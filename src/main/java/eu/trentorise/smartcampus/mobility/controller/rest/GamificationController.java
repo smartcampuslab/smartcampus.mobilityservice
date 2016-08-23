@@ -320,7 +320,7 @@ public class GamificationController extends SCController {
 					res.setComplete(true);
 				}
 				
-				res.setAppId(gameId);
+				res.setAppId(appId);
 				storage.saveTrackedInstance(res);
 				
 				logger.info("Saved geolocation events");
@@ -382,7 +382,7 @@ public class GamificationController extends SCController {
 			}
 			res2.setStarted(true);
 			res2.setFreeTrackingTransport(transport);
-			res2.setAppId(gameId);
+			res2.setAppId(appId);
 			storage.saveTrackedInstance(res2);
 			
 		} catch (Exception e) {
@@ -444,7 +444,7 @@ public class GamificationController extends SCController {
 				res2.setDeviceInfo(device);
 			}
 			res2.setStarted(true);
-			res2.setAppId(gameId);
+			res2.setAppId(appId);
 			storage.saveTrackedInstance(res2);
 			
 		} catch (Exception e) {
