@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +55,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Location;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
+import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
@@ -451,8 +454,10 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
-	public @ResponseBody void validate(HttpServletResponse response) throws Exception {
-		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
+	public @ResponseBody void validate(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("appId", appId);		
+		List<TrackedInstance> result = storage.searchDomainObjects(pars, TrackedInstance.class);
 		for (TrackedInstance ti: result) {
 			try {
 				if (ti.getItinerary() != null) {
@@ -499,12 +504,20 @@ public class GamificationController extends SCController {
 	public String vewConsole() {
 		return "viewconsole";
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+	public @ResponseBody String getAppId(HttpServletResponse response) throws Exception {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		return appId;
+	}		
 
 	@RequestMapping("/console/itinerary")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryList() throws ParseException {
+	public @ResponseBody List<ItineraryDescriptor> getItineraryList(@RequestHeader(required = true, value = "appId") String appId) throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
-		List<TrackedInstance> instances = storage.searchDomainObjects(Collections.<String,Object>emptyMap(), TrackedInstance.class);
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("appId", appId);		
+		List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
 		if (instances != null) {
 			for (TrackedInstance o: instances) {
 				ItineraryDescriptor descr = map.get(o.getClientId());
@@ -547,10 +560,10 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping("/console/useritinerary/{userId}")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId) throws ParseException {
+	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId) throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
-		Criteria criteria = new Criteria("userId").is(userId);
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 		List<TrackedInstance> instances = storage.searchDomainObjects(criteria, TrackedInstance.class);
 		if (instances != null) {
 			for (TrackedInstance o : instances) {
@@ -599,13 +612,19 @@ public class GamificationController extends SCController {
 		return list;
 	}	
 	
-	
 	@RequestMapping("/console/users")
-	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers() {
+	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId) {
+//		String gameId = getGameId(appId);
+//		if (gameId == null) {
+//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//			return new ArrayList<UserDescriptor>();
+//		}			
+		
 		List<UserDescriptor> users = Lists.newArrayList();
 		Set<String> ids = Sets.newHashSet();
 		
 		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("appId", appId);
 		List<TrackedInstance> tis = storage.searchDomainObjects(pars, TrackedInstance.class);
 		for (TrackedInstance ti: tis) {
 			String userId = ti.getUserId(); 
@@ -614,7 +633,7 @@ public class GamificationController extends SCController {
 				UserDescriptor ud = new UserDescriptor();
 				ud.setUserId(userId);
 				
-				Criteria criteria = new Criteria("userId").is(userId);
+				Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 				int total = (int)storage.count(criteria, TrackedInstance.class);
 				ud.setTotal(total);
 				

@@ -9,21 +9,31 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.layers = [];
 	$scope.fixpaths = false;
 
+//	$scope.init = function() {
+//		$http.get("console/appId").success(function(data) {	
+//			$scope.appId = data;
+//		});
+//	}
+//	
+//	$scope.init();
+	
 	var load = function() {
+		$http.get("console/appId").success(function(data) {	
+			$scope.appId = data;
+			$http.get("console/users", {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				var users = [];
+				$scope.userTotals = {};
+				data.data.forEach(function(descr) {
+					users.push(descr.userId);
+					$scope.userTotals[descr.userId] = {
+						"total" : descr.total,
+						"failed" : (descr.total - descr.valid)
+					};
+				});
 
-		$http.get("console/users").then(function(data) {
-			var users = [];
-			$scope.userTotals = {};
-			data.data.forEach(function(descr) {
-				users.push(descr.userId);
-				$scope.userTotals[descr.userId] = {
-					"total" : descr.total,
-					"failed" : (descr.total - descr.valid)
-				};
-			});
-
-			$scope.users = users;
-			$scope.userMap = {};
+				$scope.users = users;
+				$scope.userMap = {};
+			});			
 		});
 	}
 
@@ -36,7 +46,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 			$scope.selectedUser = user;
 
 			if (!$scope.userMap[user]) {
-				$http.get("console/useritinerary/" + user).then(function(data) {
+				$http.get("console/useritinerary/" + user, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 				});
 			}
@@ -82,7 +92,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	}
 
 	$scope.revalidate = function() {
-		$http.post("console/validate", {}).then(function(data) {
+		$http.post("console/validate", {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 		});
 	}
