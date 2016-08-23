@@ -299,7 +299,7 @@ public class GamificationController extends SCController {
 				boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getStarted() && !res.getComplete()) {
-						canSave = sendIntineraryDataToGamificationEngine(gameId, userId, travelId + "_" + day, res.getItinerary());
+						canSave = sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary());
 					}
 
 					res.setComplete(true);
@@ -310,7 +310,7 @@ public class GamificationController extends SCController {
 					if (!res.getComplete()) {
 						ValidationResult vr = gamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 						if (vr!= null && vr.getValid().booleanValue()) {
-							canSave = sendFreeTrackingDataToGamificationEngine(gameId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
+							canSave = sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {
 								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
@@ -439,7 +439,7 @@ public class GamificationController extends SCController {
 			
 			boolean canSave = true;
 			if (!res2.getStarted() && !res2.getComplete()) {
-				canSave = sendIntineraryDataToGamificationEngine(gameId, userId, itineraryId + "_" + day, res);
+				canSave = sendIntineraryDataToGamificationEngine(appId, userId, itineraryId + "_" + day, res);
 			}
 			
 			if (device != null) {
@@ -706,18 +706,18 @@ public class GamificationController extends SCController {
 		return ((o != null)?o.toString().replace("\"", "\"\""):"");
 	}	
 	
-	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String gameId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
+	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
 		logger.debug("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
 			logger.debug("publishQueue contains travelId " + travelId + ", returning");
 			return false;
 		}
 		publishQueue.add(travelId);
-		gamificationHelper.saveFreeTracking(travelId, gameId, playerId, geolocationEvents, ttype);
+		gamificationHelper.saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype);
 		return false;
 	}
 
-	private synchronized boolean sendIntineraryDataToGamificationEngine(String gameId, String playerId, String publishKey, ItineraryObject itinerary) throws Exception {
+	private synchronized boolean sendIntineraryDataToGamificationEngine(String appId, String playerId, String publishKey, ItineraryObject itinerary) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
 //		Criteria criteria = new Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());
 //		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
@@ -728,7 +728,7 @@ public class GamificationController extends SCController {
 			return false;
 		}
 		publishQueue.add(publishKey);
-		gamificationHelper.saveItinerary(itinerary, gameId, playerId);
+		gamificationHelper.saveItinerary(itinerary, appId, playerId);
 		return true;
 	}
 	

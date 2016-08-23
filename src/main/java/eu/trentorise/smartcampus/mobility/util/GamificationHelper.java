@@ -119,12 +119,12 @@ public class GamificationHelper {
 //		}
 	}
 
-	public void saveItinerary(final BasicItinerary itinerary, final String gameId, final String userId) throws ParseException {
+	public void saveItinerary(final BasicItinerary itinerary, final String appId, final String userId) throws ParseException {
 		if (gamificationUrl == null) {
 			return;
 		}
 		
-		AppInfo app = appSetup.findAppById(gameId);
+		AppInfo app = appSetup.findAppById(appId);
 		
 		if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
 			return;
@@ -133,26 +133,26 @@ public class GamificationHelper {
 		executorService.execute(new Runnable() {
 			@Override
 			public void run() {
-				saveTrip(itinerary, gameId, userId);
+				saveTrip(itinerary, appId, userId);
 			}
 		});
 	}
 
-	private void saveTrip(BasicItinerary itinerary, String gameId, String userId) {
+	private void saveTrip(BasicItinerary itinerary, String appId, String userId) {
 		try {
 			Map<String, Object> data = computeTripData(itinerary.getData(), true);
 			data.remove("estimatedScore");
 
+			AppInfo app = appSetup.findAppById(appId);
+			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
-			ed.setGameId(gameId);
+			ed.setGameId(app.getGameId());
 			ed.setPlayerId(userId);
 			ed.setActionId(SAVE_ITINERARY);
 			ed.setData(data);
 
 			String content = JsonUtils.toJSON(ed);
 			
-			AppInfo app = appSetup.findAppById(gameId);
-
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + data);
 			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());
 		} catch (Exception e) {
@@ -661,17 +661,17 @@ public class GamificationHelper {
 
 	/**
 	 * @param travelId
-	 * @param gameId
+	 * @param appId
 	 * @param playerId
 	 * @param geolocationEvents
 	 */
-	public void saveFreeTracking(final String travelId, final String gameId, final String playerId, final Set<Geolocation> geolocationEvents, final String ttype) {
+	public void saveFreeTracking(final String travelId, final String appId, final String playerId, final Set<Geolocation> geolocationEvents, final String ttype) {
 		if (gamificationUrl == null) {
 			logger.debug("No gamification URL, returning.");
 			return;
 		}
 		
-		AppInfo app = appSetup.findAppById(gameId);
+		AppInfo app = appSetup.findAppById(appId);
 		
 		try {
 			if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
@@ -685,30 +685,30 @@ public class GamificationHelper {
 		executorService.execute(new Runnable() {
 			@Override
 			public void run() {
-				saveFreetracking(travelId, gameId, playerId, geolocationEvents, ttype);
+				saveFreetracking(travelId, appId, playerId, geolocationEvents, ttype);
 			}
 
 		});
 	}
 
-	private void saveFreetracking(String travelId, String gameId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
+	private void saveFreetracking(String travelId, String appId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
 		if (data.isEmpty()) {
 			logger.debug("Data is empty, returning.");
 			return;
 		}
+		
+		AppInfo app = appSetup.findAppById(appId);
 
 		try {
 			ExecutionDataDTO ed = new ExecutionDataDTO();
-			ed.setGameId(gameId);
+			ed.setGameId(app.getGameId());
 			ed.setPlayerId(playerId);
 			ed.setActionId(SAVE_ITINERARY);
 			ed.setData(data);
 
 			String content = JsonUtils.toJSON(ed);
 			
-			AppInfo app = appSetup.findAppById(gameId);
-
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + data);
 			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());		
 		} catch (Exception e) {

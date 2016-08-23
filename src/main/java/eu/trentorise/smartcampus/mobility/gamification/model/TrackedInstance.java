@@ -176,8 +176,8 @@ public class TrackedInstance {
 		return appId;
 	}
 
-	public void setAppId(String gameId) {
-		this.appId = gameId;
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 
