@@ -24,7 +24,7 @@ import eu.trentorise.smartcampus.mobility.model.ItineraryRecurrency;
  * @author raman
  *
  */
-public class ItineraryDescriptor {
+public class ItineraryDescriptor implements Comparable<ItineraryDescriptor> {
 
 	private String userId;
 	private String tripId;
@@ -149,6 +149,12 @@ public class ItineraryDescriptor {
 	 */
 	public void setFreeTrackingTransport(String freeTrackingTransport) {
 		this.freeTrackingTransport = freeTrackingTransport;
+	}
+
+	@Override
+	public int compareTo(ItineraryDescriptor o) {
+		// TODO Auto-generated method stub
+		return (int)(startTime - o.startTime);
 	}
 	
 	

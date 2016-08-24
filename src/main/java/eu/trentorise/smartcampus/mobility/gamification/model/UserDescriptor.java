@@ -1,6 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamification.model;
 
-public class UserDescriptor {
+public class UserDescriptor implements Comparable<UserDescriptor> {
 
 	private String userId;
 	private int valid;
@@ -23,6 +23,14 @@ public class UserDescriptor {
 	}
 	public void setTotal(int total) {
 		this.total = total;
+	}
+	@Override
+	public int compareTo(UserDescriptor o) {
+		try {
+			return Integer.parseInt(userId) - (Integer.parseInt(o.userId));
+		} catch (Exception e) {
+			return 0;
+		}
 	}
 	
 	

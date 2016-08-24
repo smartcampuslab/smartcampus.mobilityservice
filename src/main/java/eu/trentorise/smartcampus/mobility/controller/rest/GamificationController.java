@@ -611,6 +611,10 @@ public class GamificationController extends SCController {
 				descr.getInstances().add(o);
 			}
 		}
+		
+		Collections.sort(list);
+		Collections.reverse(list);
+		
 		return list;
 	}	
 	
@@ -648,6 +652,7 @@ public class GamificationController extends SCController {
 			}
 		}
 		
+		Collections.sort(users);
 		return users;
 	}
 	
