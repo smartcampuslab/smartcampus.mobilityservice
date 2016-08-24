@@ -439,7 +439,8 @@ public class GamificationHelper {
 		ValidationResult vr = new ValidationResult();
 		vr.reset();
 
-		double speed = 0;
+		double averageSpeed = 0;
+		double maxSpeed = 0;
 
 		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
 		Collections.sort(points, new Comparator<Geolocation>() {
@@ -453,32 +454,38 @@ public class GamificationHelper {
 
 		if (points.size() >= 2) {
 			double distance = 0;
-			long time;
-			for (int i = 1; i < points.size(); i++) {
-				distance += harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-			}
-			time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
-			speed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
 
 			points = transform(points);
 
-			distance = 0;
 			for (int i = 1; i < points.size(); i++) {
-				distance += harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+				double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+				double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+				if (t > 0.0) {
+				double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
+				maxSpeed = Math.max(maxSpeed, s);
+				}
+				distance += d;
 			}
-			speed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
+			long time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+			averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
 		}
 
 		vr.setTooFast(false);
 		if ("walk".equals(ttype)) {
-			if (speed > 20) {
+			if (averageSpeed > 15) {
+				vr.setTooFast(true);
+			}
+			if (maxSpeed > 20) {
 				vr.setTooFast(true);
 			}
 		}
 		if ("bike".equals(ttype)) {
-			if (speed > 40) {
+			if (averageSpeed > 27) {
 				vr.setTooFast(true);
 			}
+			if (maxSpeed > 45) {
+				vr.setTooFast(true);
+			}			
 		}
 
 		vr.setGeoLocationsN(points.size());
@@ -491,6 +498,9 @@ public class GamificationHelper {
 		for (int i = 1; i < points.size(); i++) {
 			transformPair(points.get(i - 1), points.get(i), result);
 		}
+		
+		Collections.sort(result);
+		
 		return result;
 	}
 
@@ -501,8 +511,9 @@ public class GamificationHelper {
 		}
 		double[] lats = computeLats(p1, p2, distance);
 		double[] lngs = computeLngs(p1, p2, distance);
-		result.add(new Geolocation(lats[0], lngs[0]));
-		result.add(new Geolocation(lats[1], lngs[1]));
+		Date[] recordedAt = computeRecordedAt(p1, p2);
+		result.add(new Geolocation(lats[0], lngs[0], recordedAt[0]));
+		result.add(new Geolocation(lats[1], lngs[1], recordedAt[1]));
 	}
 
 	private static double[] compute(double v1, long a1, double v2, long a2, double distance) {
@@ -527,6 +538,18 @@ public class GamificationHelper {
 			return new double[] { res[1], res[0] };
 		}
 		return compute(p1.getLongitude(), p1.getAccuracy(), p2.getLongitude(), p2.getAccuracy(), distance);
+	}
+	
+	private static Date[] computeRecordedAt(Geolocation p1, Geolocation p2) {
+		Date[] res = new Date[2];
+		if (p1.getRecorded_at().compareTo(p2.getRecorded_at()) < 0) {
+			res[0] = p1.getRecorded_at();
+			res[1] = p2.getRecorded_at();
+		} else {
+			res[0] = p2.getRecorded_at();
+			res[1] = p1.getRecorded_at();
+		}
+		return res;
 	}
 
 	private static double harvesineDistance(Geolocation p1, Geolocation p2) {

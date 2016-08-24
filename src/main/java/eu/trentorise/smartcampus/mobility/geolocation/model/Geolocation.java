@@ -3,7 +3,7 @@ package eu.trentorise.smartcampus.mobility.geolocation.model;
 import java.util.Date;
 
 
-public class Geolocation {
+public class Geolocation implements Comparable<Geolocation> {
 
 	private String userId;
 	private String travelId;
@@ -37,10 +37,11 @@ public class Geolocation {
 	public Geolocation() {
 	}
 	
-    public Geolocation(Double latitude, Double longitude) {
+    public Geolocation(Double latitude, Double longitude, Date recorded_at) {
 		super();
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.recorded_at = recorded_at;
 	}
 
 
@@ -240,6 +241,11 @@ public class Geolocation {
     public String toString() {
     	return latitude + "," + longitude;
     }
+
+	@Override
+	public int compareTo(Geolocation o) {
+		return recorded_at.compareTo(o.recorded_at);
+	}
     
     
 }
