@@ -309,7 +309,9 @@ public class GamificationController extends SCController {
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
 						ValidationResult vr = gamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
-						if (vr!= null && vr.getValid().booleanValue()) {
+						res.setValidationResult(vr);
+						res.setValid(vr.getValid());
+						if (vr != null && vr.getValid().booleanValue()) {
 							canSave = sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {
