@@ -270,7 +270,7 @@ public class GamificationHelper {
 			data.put("trainDistance", trainDist);
 		}
 		if (transitDist > 0) {
-			data.put("transitDist", transitDist);
+			data.put("transitDistance", transitDist);
 		}		
 		if (carDist > 0) {
 			data.put("carDistance", carDist);
