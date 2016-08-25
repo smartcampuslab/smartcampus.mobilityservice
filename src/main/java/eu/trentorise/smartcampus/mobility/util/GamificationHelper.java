@@ -489,7 +489,7 @@ public class GamificationHelper {
 		}
 
 		vr.setGeoLocationsN(points.size());
-		vr.setValid(!vr.getTooFast());
+		vr.setValid(!vr.getTooFast() && points.size() >= 2);
 		return vr;
 	}
 
