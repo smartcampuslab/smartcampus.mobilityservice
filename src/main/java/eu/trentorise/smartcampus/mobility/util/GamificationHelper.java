@@ -226,7 +226,7 @@ public class GamificationHelper {
 		Double score = 0.0;
 		// score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10; Rovereto
 		score += (walkDist < 0.25 ? 0 : Math.min(3.5, walkDist)) * 10;
-		score += (bikeDist < 0.1 ? 0 : Math.min(7, bikeDist)) * 5;
+		score += Math.min(7, bikeDist) * 5;
 
 		double busTrainTransitDist = busDist + trainDist;
 		if (busTrainTransitDist > 0) {
@@ -769,7 +769,7 @@ public class GamificationHelper {
 			}
 			if ("bike".equals(ttype)) {
 				result.put("bikeDistance", distance);
-				score += (distance < 0.1 ? 0 : Math.min(7, distance)) * 5;
+				score += Math.min(7, distance) * 5;
 			}
 		}
 
