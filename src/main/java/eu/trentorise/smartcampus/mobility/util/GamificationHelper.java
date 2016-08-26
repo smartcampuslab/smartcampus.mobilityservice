@@ -716,6 +716,12 @@ public class GamificationHelper {
 
 	private void saveFreetracking(String travelId, String appId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
+		if ((Double)data.get("estimatedScore") == 0.0) {
+			logger.debug("EstimatedScore is 0, returning.");
+			return;
+		}
+		data.remove("estimatedScore");
+		
 		if (data.isEmpty()) {
 			logger.debug("Data is empty, returning.");
 			return;
@@ -759,7 +765,7 @@ public class GamificationHelper {
 
 			if ("walk".equals(ttype)) {
 				result.put("walkDistance", distance);
-				score = (distance < 0.1 ? 0 : Math.min(3.5, distance)) * 10;
+				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
 			}
 			if ("bike".equals(ttype)) {
 				result.put("bikeDistance", distance);
