@@ -139,6 +139,7 @@
           <div class="col-md-4">
             <h3 style="color:green;">Planned</h3>
             <p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
+            <p><b>Free tracking tranport:</b> {{selectedInstance.freeTrackingTransport}}</p>
             <hr/>
             <p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
           </div>
