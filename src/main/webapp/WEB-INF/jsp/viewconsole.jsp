@@ -163,6 +163,7 @@
                 <td>Accuracy</td>
                 <td>Activity</td>
                 <td>Activity Confidence</td>
+                <td>Coordinates</td>
                 <td>Is moving</td>
                 <td>Speed</td>
               </thead>
@@ -172,6 +173,7 @@
                   <td>{{evt.accuracy}}</td>
                   <td>{{evt.activity_type}}</td>
                   <td>{{evt.activity_confidence}}</td>
+                  <td>{{evt.geocoding[1] + "," + evt.geocoding[0]}}</td>
                   <td>{{evt.is_moving}}</td>
                   <td>{{evt.speed}}</td>
                 </tr>
