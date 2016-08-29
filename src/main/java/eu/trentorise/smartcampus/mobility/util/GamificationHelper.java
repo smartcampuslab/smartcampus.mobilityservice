@@ -505,7 +505,7 @@ public class GamificationHelper {
 			}
 		}
 		if ("bike".equals(ttype)) {
-			if (speed > 45) {
+			if (speed > 65) {
 				return true;
 			}
 		}
