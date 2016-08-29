@@ -456,26 +456,32 @@ public class GamificationHelper {
 		if (points.size() >= 2) {
 			double distance = 0;
 
+			logger.debug("Original track points: " + points.size());
+			
 			points = transform(points);
+			
+			logger.debug("Transformed track points: " + points.size());
 
 			int tooFastCount = 0;
-			for (int i = 1; i < points.size(); i++) {
-				double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-				double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
-				if (t > 0.0) {
-					double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
-					maxSpeed = Math.max(maxSpeed, s);
-					if (isMaximumTooFast(s, ttype)) {
-						tooFastCount++;
-						tooFastCountTotal = Math.max(tooFastCountTotal, tooFastCount);
-					} else {
-						tooFastCount = 0;
+			if (points.size() >= 2) {
+				for (int i = 1; i < points.size(); i++) {
+					double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+					double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+					if (t > 0.0) {
+						double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
+						maxSpeed = Math.max(maxSpeed, s);
+						if (isMaximumTooFast(s, ttype)) {
+							tooFastCount++;
+							tooFastCountTotal = Math.max(tooFastCountTotal, tooFastCount);
+						} else {
+							tooFastCount = 0;
+						}
 					}
+					distance += d;
 				}
-				distance += d;
+				long time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+				averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
 			}
-			long time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
-			averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
 		}
 
 		vr.setTooFast(false);
@@ -495,6 +501,9 @@ public class GamificationHelper {
 
 		vr.setGeoLocationsN(points.size());
 		vr.setValid(!vr.getTooFast() && points.size() >= 2);
+		
+		vr.setAverageSpeed(averageSpeed);
+		vr.setMaxSpeed(maxSpeed);
 		return vr;
 	}
 	
@@ -768,8 +777,8 @@ public class GamificationHelper {
 	public Map<String, Object> computeFreeTrackingData(Set<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> result = Maps.newTreeMap();
 		Double score = 0.0;
-		if (geolocationEvents != null & !geolocationEvents.isEmpty()) {
-			double distance = 0;
+		if (geolocationEvents != null & geolocationEvents.size() >= 2) {
+			double distance = 0; 
 			List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents);
 			Collections.sort(points, new Comparator<Geolocation>() {
 
