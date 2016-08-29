@@ -495,7 +495,7 @@ public class GamificationHelper {
 				vr.setTooFast(true);
 			}
 		}
-		if (tooFastCountTotal >= 3) {
+		if (tooFastCountTotal > 3) {
 			vr.setTooFast(true);
 		}
 
