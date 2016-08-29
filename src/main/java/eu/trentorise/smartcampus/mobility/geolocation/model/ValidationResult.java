@@ -15,6 +15,9 @@ public class ValidationResult {
 	private Boolean tooFast;
 	
 	private Boolean valid;
+	
+	private Double averageSpeed;
+	private Double maxSpeed;
 
 	public void reset() {
 		matchedLocations = true;
@@ -93,6 +96,22 @@ public class ValidationResult {
 
 	public void setMatchedActivities(Boolean matchedActivities) {
 		this.matchedActivities = matchedActivities;
+	}
+
+	public Double getAverageSpeed() {
+		return averageSpeed;
+	}
+
+	public void setAverageSpeed(Double averageSpeed) {
+		this.averageSpeed = averageSpeed;
+	}
+
+	public Double getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public void setMaxSpeed(Double maxSpeed) {
+		this.maxSpeed = maxSpeed;
 	}
 
 }
