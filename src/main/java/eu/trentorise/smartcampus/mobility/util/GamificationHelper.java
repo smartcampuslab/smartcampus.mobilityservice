@@ -452,17 +452,25 @@ public class GamificationHelper {
 
 		});
 
+		int tooFastCountTotal = 0;
 		if (points.size() >= 2) {
 			double distance = 0;
 
 			points = transform(points);
 
+			int tooFastCount = 0;
 			for (int i = 1; i < points.size(); i++) {
 				double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
 				double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
 				if (t > 0.0) {
-				double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
-				maxSpeed = Math.max(maxSpeed, s);
+					double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
+					maxSpeed = Math.max(maxSpeed, s);
+					if (isMaximumTooFast(s, ttype)) {
+						tooFastCount++;
+						tooFastCountTotal = Math.max(tooFastCountTotal, tooFastCount);
+					} else {
+						tooFastCount = 0;
+					}
 				}
 				distance += d;
 			}
@@ -475,22 +483,33 @@ public class GamificationHelper {
 			if (averageSpeed > 15) {
 				vr.setTooFast(true);
 			}
-			if (maxSpeed > 20) {
-				vr.setTooFast(true);
-			}
 		}
 		if ("bike".equals(ttype)) {
 			if (averageSpeed > 27) {
 				vr.setTooFast(true);
 			}
-			if (maxSpeed > 45) {
-				vr.setTooFast(true);
-			}			
+		}
+		if (tooFastCountTotal >= 3) {
+			vr.setTooFast(true);
 		}
 
 		vr.setGeoLocationsN(points.size());
 		vr.setValid(!vr.getTooFast() && points.size() >= 2);
 		return vr;
+	}
+	
+	private static boolean isMaximumTooFast(double speed, String ttype) {
+		if ("walk".equals(ttype)) {
+			if (speed > 20) {
+				return true;
+			}
+		}
+		if ("bike".equals(ttype)) {
+			if (speed > 45) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static List<Geolocation> transform(List<Geolocation> points) {
@@ -514,6 +533,7 @@ public class GamificationHelper {
 		Date[] recordedAt = computeRecordedAt(p1, p2);
 		result.add(new Geolocation(lats[0], lngs[0], recordedAt[0]));
 		result.add(new Geolocation(lats[1], lngs[1], recordedAt[1]));
+
 	}
 
 	private static double[] compute(double v1, long a1, double v2, long a2, double distance) {
@@ -716,7 +736,7 @@ public class GamificationHelper {
 
 	private void saveFreetracking(String travelId, String appId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
-		if ((Double)data.get("estimatedScore") == 0.0) {
+		if ((Long)data.get("estimatedScore") == 0) {
 			logger.debug("EstimatedScore is 0, returning.");
 			return;
 		}
