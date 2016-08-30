@@ -102,10 +102,10 @@ public class GamificationController extends SCController {
 	
 	private Set<String> publishQueue = Sets.newConcurrentHashSet();
 
-	private static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
-	private static SimpleDateFormat shortSdf = new SimpleDateFormat("YYYY/MM/dd");
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
-	private static SimpleDateFormat fullSdf = new SimpleDateFormat("YYYY/MM/dd HH:mm");
+	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
 	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
@@ -282,7 +282,7 @@ public class GamificationController extends SCController {
 						}
 					} else {
 						res.setItinerary(res2);
-						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next()));
+						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getCreated_at()));
 					}
 					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
 						res.setFreeTrackingTransport(freeTracks.get(key));
