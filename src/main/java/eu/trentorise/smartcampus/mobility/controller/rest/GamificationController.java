@@ -470,13 +470,18 @@ public class GamificationController extends SCController {
 				ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
 				ti.setValidationResult(vr);
 				ti.setValid(vr.getValid());
+				Map<String, Object> data = gamificationHelper.computeTripData(ti.getItinerary().getData(), false);
+				ti.setEstimatedScore((Long)data.get("estimatedScore"));
 				storage.saveTrackedInstance(ti);
+				
 				} else {
 					ValidationResult vr = GamificationHelper.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
 					ti.setValidationResult(vr);
 					if (vr != null) {
 						ti.setValid(vr.getValid());
 					}
+					Map<String, Object> data = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
+					ti.setEstimatedScore((Long)data.get("estimatedScore"));					
 					storage.saveTrackedInstance(ti);
 				}
 			} catch (Exception e) {
@@ -584,7 +589,7 @@ public class GamificationController extends SCController {
 					if (o.getUserId() != null) {
 						descr.setUserId(o.getUserId());
 					} else {
-						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String, Object> singletonMap("clientId", o.getClientId()), ItineraryObject.class);
 						if (itinerary != null) {
 							descr.setUserId(itinerary.getUserId());
 						} else {
@@ -601,7 +606,7 @@ public class GamificationController extends SCController {
 						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
 						descr.setTripName(o.getId());
 						if (o.getDay() != null && o.getTime() != null) {
-							String dt = o.getDay() +" "+o.getTime();
+							String dt = o.getDay() + " " + o.getTime();
 							descr.setStartTime(fullSdf.parse(dt).getTime());
 						} else if (o.getDay() != null) {
 							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
