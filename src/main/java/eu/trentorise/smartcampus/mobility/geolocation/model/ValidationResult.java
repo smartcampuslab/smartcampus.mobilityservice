@@ -18,6 +18,9 @@ public class ValidationResult {
 	
 	private Double averageSpeed;
 	private Double maxSpeed;
+	
+	private Double distance;
+	private Long time;
 
 	public void reset() {
 		matchedLocations = true;
@@ -112,6 +115,22 @@ public class ValidationResult {
 
 	public void setMaxSpeed(Double maxSpeed) {
 		this.maxSpeed = maxSpeed;
+	}
+
+	public Double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(Double distance) {
+		this.distance = distance;
+	}
+
+	public Long getTime() {
+		return time;
+	}
+
+	public void setTime(Long time) {
+		this.time = time;
 	}
 
 }
