@@ -8,6 +8,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.selectedInstance = null;
 	$scope.layers = [];
 	$scope.fixpaths = false;
+	$scope.eventsMarkers = new Map();
 
 //	$scope.init = function() {
 //		$http.get("console/appId").success(function(data) {	
@@ -104,6 +105,21 @@ notification.controller('GameCtrl', function($scope, $http) {
 		}
 	}
 	
+	$scope.newEventMarker = function(lat,lng) {
+		var pos = {'lat' : lat, 'lng' : lng};	
+		var s = lat + "_" + lng;
+		
+		if (!$scope.eventsMarkers.has(s)) {
+			var m = $scope.createMarkerObject(pos, 'step');
+			$scope.layers.push(m);
+			$scope.eventsMarkers.set(s,m);
+		} else {
+			var m = $scope.eventsMarkers.get(s);
+			m.setMap(null);
+			$scope.eventsMarkers.delete(s);
+		}
+	}
+	
 	$scope.selectInstance = function(instance) {
 		$scope.selectedInstance = instance;
 
@@ -183,6 +199,12 @@ notification.controller('GameCtrl', function($scope, $http) {
 	}
 
 	var newMarker = function(pos, icon) {
+		var m = $scope.createMarkerObject(pos, icon);
+		$scope.layers.push(m);
+		return m;
+	};
+	
+	$scope.createMarkerObject = function(pos, icon) {
 		var m = new google.maps.Marker({
 			position : pos,
 			icon : '../img/' + icon + '.png',
@@ -192,10 +214,8 @@ notification.controller('GameCtrl', function($scope, $http) {
 			labelAnchor : new google.maps.Point(3, 30),
 			labelClass : "labels"
 		});
-		$scope.layers.push(m);
 		return m;
-	};
-	
+	}
 	
     if (typeof (Number.prototype.toRad) === "undefined") {
         Number.prototype.toRad = function () {

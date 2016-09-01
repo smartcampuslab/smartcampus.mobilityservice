@@ -139,7 +139,7 @@
           <div class="col-md-4">
             <h3 style="color:green;">Planned</h3>
             <p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
-            <p><b>Free tracking tranport:</b> {{selectedInstance.freeTrackingTransport}}</p>
+            <p ng-show="selectedInstance.freeTrackingTransport"><b>Free tracking tranport:</b> {{selectedInstance.freeTrackingTransport}}</p>
             <hr/>
             <p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
           </div>
@@ -160,6 +160,7 @@
             <h3>Tracked events:</h3>
             <table>
               <thead>
+              	<td></td>
                 <td>When</td>
                 <td>Accuracy</td>
                 <td>Activity</td>
@@ -169,16 +170,23 @@
                 <td>Speed</td>
               </thead>
               <tbody>
-                <tr ng-repeat="evt in selectedInstance.geolocationEvents">
-                  <td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
-                  <td>{{evt.accuracy}}</td>
-                  <td>{{evt.activity_type}}</td>
-                  <td>{{evt.activity_confidence}}</td>
-                  <td>{{evt.geocoding[1] + "," + evt.geocoding[0]}}</td>
-                  <td>{{evt.is_moving}}</td>
-                  <td>{{evt.speed}}</td>
-                </tr>
-              </tbody>
+	             <!-- <tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"> -->
+				<tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="lineclick()" class="instance-row">
+					<div>
+						<!-- <td><span class="glyphicon glyphicon-map-marker" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"></span></td> -->
+						<td><label class="btn" ng-click="newEventMarker(evt.geocoding[1],evt.geocoding[0])">
+								<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+							</label></td>
+						<td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
+						<td>{{evt.accuracy}}</td>
+						<td>{{evt.activity_type}}</td>
+						<td>{{evt.activity_confidence}}</td>
+						<td>{{evt.geocoding[1] + "," + evt.geocoding[0]}}</td>
+						<td>{{evt.is_moving}}</td>
+						<td>{{evt.speed}}</td>
+					</div>
+				</tr>
+						</tbody>
             </table>
           </div>
         </div>
