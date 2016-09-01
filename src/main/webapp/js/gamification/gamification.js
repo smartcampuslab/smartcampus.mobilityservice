@@ -61,15 +61,16 @@ notification.controller('GameCtrl', function($scope, $http) {
 		resetLayers();
 		$scope.selectedInstance = null;
 		$scope.selectedItinerary = itinerary;
-		itinerary.instances.sort(function(a, b) {
-			if (!a.day && !b.day)
-				return 0;
-			if (!a.day)
-				return -1;
-			if (!b.day)
-				return 1;
-			return a.day.localeCompare(b.day);
-		});
+//		itinerary.instances.sort(function(a, b) {
+//			if (!a.day && !b.day)
+//				return 0;
+//			if (!a.day)
+//				return -1;
+//			if (!b.day)
+//				return 1;
+//			return a.day.localeCompare(b.day);
+//		});
+		
 		// if (itinerary.instances.length == 1) {
 		// $scope.selectInstance(itinerary.instances[0]);
 		// }
