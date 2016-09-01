@@ -499,6 +499,7 @@ public class GamificationHelper {
 		int tooFastCountTotal = 0;
 		double distance = 0;
 		long time = 0;
+		int origPointsSize = points.size();
 		if (points.size() >= 2) {
 			logger.debug("Original track points: " + points.size());
 			
@@ -512,8 +513,8 @@ public class GamificationHelper {
 					double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
 //					System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
 					
-					double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
-					if (t > 0.0) {
+					long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+					if (t > 0) {
 						double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
 						maxSpeed = Math.max(maxSpeed, s);
 						if (isMaximumTooFast(s, ttype)) {
@@ -546,7 +547,7 @@ public class GamificationHelper {
 		}
 
 		vr.setGeoLocationsN(points.size());
-		vr.setValid(!vr.getTooFast() && points.size() >= 2);
+		vr.setValid(!vr.getTooFast() && origPointsSize >= 2);
 		
 		vr.setAverageSpeed(averageSpeed);
 		vr.setMaxSpeed(maxSpeed);
@@ -588,8 +589,10 @@ public class GamificationHelper {
 		double[] lats = computeLats(p1, p2, distance);
 		double[] lngs = computeLngs(p1, p2, distance);
 		Date[] recordedAt = computeRecordedAt(p1, p2);
-		result.add(new Geolocation(lats[0], lngs[0], recordedAt[0]));
-		result.add(new Geolocation(lats[1], lngs[1], recordedAt[1]));
+		Geolocation p1n = new Geolocation(lats[0], lngs[0], p1.getRecorded_at());
+		Geolocation p2n = new Geolocation(lats[1], lngs[1], p2.getRecorded_at());
+		result.add(p1n);
+		result.add(p2n);			
 
 	}
 
