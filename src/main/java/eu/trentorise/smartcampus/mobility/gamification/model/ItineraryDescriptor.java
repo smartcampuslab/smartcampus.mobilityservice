@@ -153,8 +153,8 @@ public class ItineraryDescriptor implements Comparable<ItineraryDescriptor> {
 
 	@Override
 	public int compareTo(ItineraryDescriptor o) {
-		// TODO Auto-generated method stub
-		return (int)(startTime - o.startTime);
+		int d = (int)((startTime - o.startTime) / 1000);
+		return d;
 	}
 	
 	

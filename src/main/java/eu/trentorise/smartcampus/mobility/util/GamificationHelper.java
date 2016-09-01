@@ -160,7 +160,7 @@ public class GamificationHelper {
 		}
 	}
 
-	private Map<String, Object> computeTripData(Itinerary itinerary, boolean log) {
+	public Map<String, Object> computeTripData(Itinerary itinerary, boolean log) {
 		Map<String, Object> data = Maps.newTreeMap();
 
 		String parkName = null; // name of the parking
@@ -296,6 +296,50 @@ public class GamificationHelper {
 
 		return data;
 	}
+	
+	public Map<String, Object> computeFreeTrackingData(Set<Geolocation> geolocationEvents, String ttype) {
+		Map<String, Object> result = Maps.newTreeMap();
+		Double score = 0.0;
+		double distance = 0; 		
+		
+		if (geolocationEvents != null & geolocationEvents.size() >= 2) {
+
+			List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents);
+			
+			Collections.sort(points, new Comparator<Geolocation>() {
+
+				@Override
+				public int compare(Geolocation o1, Geolocation o2) {
+					return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+				}
+
+			});
+			
+			points = transform(points);
+			
+			for (int i = 1; i < points.size(); i++) {
+				double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+//				System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
+				distance += d; 
+			}
+
+			if ("walk".equals(ttype)) {
+				result.put("walkDistance", distance);
+				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
+			}
+			if ("bike".equals(ttype)) {
+				result.put("bikeDistance", distance);
+				score += Math.min(7, distance) * 5;
+			}
+			
+			// always zero impact
+			score *= 1.5;
+		}
+
+		result.put("estimatedScore", Math.round(score));
+		return result;
+	}	
+	
 
 	public void computeEstimatedGameScore(Itinerary itinerary, boolean log) {
 		Long score = (Long) (computeTripData(itinerary, log).get("estimatedScore"));
@@ -453,9 +497,9 @@ public class GamificationHelper {
 		});
 
 		int tooFastCountTotal = 0;
+		double distance = 0;
+		long time = 0;
 		if (points.size() >= 2) {
-			double distance = 0;
-
 			logger.debug("Original track points: " + points.size());
 			
 			points = transform(points);
@@ -466,6 +510,8 @@ public class GamificationHelper {
 			if (points.size() >= 2) {
 				for (int i = 1; i < points.size(); i++) {
 					double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+//					System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
+					
 					double t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
 					if (t > 0.0) {
 						double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
@@ -479,7 +525,7 @@ public class GamificationHelper {
 					}
 					distance += d;
 				}
-				long time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+				time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
 				averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
 			}
 		}
@@ -504,6 +550,8 @@ public class GamificationHelper {
 		
 		vr.setAverageSpeed(averageSpeed);
 		vr.setMaxSpeed(maxSpeed);
+		vr.setDistance(distance);
+		vr.setTime(time);
 		return vr;
 	}
 	
@@ -533,7 +581,7 @@ public class GamificationHelper {
 	}
 
 	private static void transformPair(Geolocation p1, Geolocation p2, List<Geolocation> result) {
-		double distance = 1000 * harvesineDistance(p1, p2);
+		double distance = harvesineDistance(p1, p2);
 		if (distance == 0) {
 			return;
 		}
@@ -545,12 +593,12 @@ public class GamificationHelper {
 
 	}
 
-	private static double[] compute(double v1, long a1, double v2, long a2, double distance) {
-		if ((a1 + a2) / 1000 > distance) {
+	private static double[] compute(double v1, double a1, double v2, double a2, double distance) {
+		if ((a1 + a2) / 1000.0 > distance) {
 			double v = a1 > a2 ? (v2 - (v2 - v1) * a2 / a1) : (v1 + (v2 - v1) * a1 / a2);
 			return new double[] { v, v };
 		}
-		return new double[] { v1 + (v2 - v1) * a1 / distance / 1000, v2 - (v2 - v1) * a2 / distance / 1000 };
+		return new double[] { v1 + (v2 - v1) * a1 / distance / 1000.0, v2 - (v2 - v1) * a2 / distance / 1000.0 };
 	}
 
 	private static double[] computeLats(Geolocation p1, Geolocation p2, double distance) {
@@ -558,7 +606,7 @@ public class GamificationHelper {
 			double[] res = computeLats(p2, p1, distance);
 			return new double[] { res[1], res[0] };
 		}
-		return compute(p1.getLatitude(), p1.getAccuracy(), p2.getLatitude(), p2.getAccuracy(), distance);
+		return compute(p1.getLatitude(), (double)p1.getAccuracy(), p2.getLatitude(), (double)p2.getAccuracy(), distance);
 	}
 
 	private static double[] computeLngs(Geolocation p1, Geolocation p2, double distance) {
@@ -566,7 +614,7 @@ public class GamificationHelper {
 			double[] res = computeLngs(p2, p1, distance);
 			return new double[] { res[1], res[0] };
 		}
-		return compute(p1.getLongitude(), p1.getAccuracy(), p2.getLongitude(), p2.getAccuracy(), distance);
+		return compute(p1.getLongitude(), (double)p1.getAccuracy(), p2.getLongitude(), (double)p2.getAccuracy(), distance);
 	}
 	
 	private static Date[] computeRecordedAt(Geolocation p1, Geolocation p2) {
@@ -774,36 +822,6 @@ public class GamificationHelper {
 		}
 	}
 
-	public Map<String, Object> computeFreeTrackingData(Set<Geolocation> geolocationEvents, String ttype) {
-		Map<String, Object> result = Maps.newTreeMap();
-		Double score = 0.0;
-		if (geolocationEvents != null & geolocationEvents.size() >= 2) {
-			double distance = 0; 
-			List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents);
-			Collections.sort(points, new Comparator<Geolocation>() {
-
-				@Override
-				public int compare(Geolocation o1, Geolocation o2) {
-					return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
-				}
-
-			});
-			for (int i = 1; i < points.size(); i++) {
-				distance += harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-			}
-
-			if ("walk".equals(ttype)) {
-				result.put("walkDistance", distance);
-				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
-			}
-			if ("bike".equals(ttype)) {
-				result.put("bikeDistance", distance);
-				score += Math.min(7, distance) * 5;
-			}
-		}
-
-		result.put("estimatedScore", Math.round(score));
-		return result;
-	}
+	
 
 }
