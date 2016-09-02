@@ -41,6 +41,9 @@ public class DummyPlanningPolicy implements PlanningPolicy {
 	@Override
 	public List<Itinerary> filterAndSortItineraries(SingleJourney journeyRequest, List<Itinerary> itineraries) {
 		List<Itinerary> result = Lists.newArrayList(itineraries);
+		
+		result = PlanningPolicyHelper.keepPromotedDuplicated(result);
+		
 		Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(journeyRequest.getRouteType());
 		ItinerarySorter.sortDisjoined(result, comparator);
 		return result;
