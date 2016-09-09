@@ -335,7 +335,7 @@ public class GamificationController extends SCController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return "";
+			return "{\"storeResult\":\"FAIL\"}";
 		}
 		return "{\"storeResult\":\"OK\"}";
 	}

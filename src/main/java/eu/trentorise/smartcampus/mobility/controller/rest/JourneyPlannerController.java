@@ -109,7 +109,7 @@ public class JourneyPlannerController extends SCController {
 
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
-	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false) String policyId,
+	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false, defaultValue="default") String policyId,
 			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName) throws InvocationException {
 		try {
 			domainStorage.savePlanRequest(journeyRequest, userId, appName);
