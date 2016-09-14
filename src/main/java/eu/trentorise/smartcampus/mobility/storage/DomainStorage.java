@@ -4,6 +4,7 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -291,6 +292,21 @@ public class DomainStorage {
 		}
 		
 		Query query = new Query(criteria);
+		
+		return template.find(query, clz, getClassCollection(clz));
+	}
+	public <T> List<T> searchDomainObjects(Map<String, Object> pars, Set<String> keys, Class<T> clz) {
+		Criteria criteria = new Criteria();
+		for (String key: pars.keySet()) {
+			criteria.and(key).is(pars.get(key));
+		}
+		
+		Query query = new Query(criteria);
+		if (keys != null){
+			for (String key : keys) {
+				query.fields().include(key);
+			}
+		}
 		
 		return template.find(query, clz, getClassCollection(clz));
 	}

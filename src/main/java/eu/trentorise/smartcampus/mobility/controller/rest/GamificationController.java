@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -635,34 +636,36 @@ public class GamificationController extends SCController {
 //			return new ArrayList<UserDescriptor>();
 //		}			
 		
-		List<UserDescriptor> users = Lists.newArrayList();
-		Set<String> ids = Sets.newHashSet();
+		Map<String,UserDescriptor> users = new HashMap<String, UserDescriptor>();
 		
-		Map<String, Object> pars = new TreeMap<String, Object>();
+		Map<String, Object> pars = new HashMap<String, Object>();
 		pars.put("appId", appId);
-		List<TrackedInstance> tis = storage.searchDomainObjects(pars, TrackedInstance.class);
+		Set<String> keys = new HashSet<String>();
+		keys.add("userId");
+		keys.add("valid");
+		List<TrackedInstance> tis = storage.searchDomainObjects(pars, keys, TrackedInstance.class);
 		for (TrackedInstance ti: tis) {
-			String userId = ti.getUserId(); 
-			if (userId != null && !ids.contains(userId)) {
-				ids.add(ti.getUserId());
-				UserDescriptor ud = new UserDescriptor();
+			String userId = ti.getUserId();
+			if (userId == null) {
+				continue;
+			}
+			UserDescriptor ud = users.get(userId);
+			if (ud == null) {
+				ud = new UserDescriptor();
 				ud.setUserId(userId);
-				
-				Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
-				int total = (int)storage.count(criteria, TrackedInstance.class);
-				ud.setTotal(total);
-				
-				
-				criteria = criteria.and("valid").is(true);
-				int valid = (int)storage.count(criteria, TrackedInstance.class);
-				ud.setValid(valid);		
-				
-				users.add(ud);
+				ud.setValid(0);
+				ud.setTotal(0);
+				users.put(userId, ud);
+			}
+			ud.setTotal(ud.getTotal()+1);
+			if (Boolean.TRUE.equals(ti.getValid())) {
+				ud.setValid(ud.getValid()+1);
 			}
 		}
-		
-		Collections.sort(users);
-		return users;
+
+		List<UserDescriptor> userList = new ArrayList<UserDescriptor>(users.values());
+		Collections.sort(userList);
+		return userList;
 	}
 	
 
