@@ -223,11 +223,11 @@
 									{{ currentPolicy.name }}<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu policyIds-dropdown">
-									<li ng-click="setPolicy({ description : 'Dummy', name : 'Nessuna', editable: false, draft : false, policyType : 'hardcoded'} , false)">
+									<li ng-click="setPolicy({ description : 'Dummy', name : 'Nessuna', id: 'Dummy', editable: false, draft : false, policyType : 'hardcoded'} , false)">
 										<a><strong>Nessuna</strong></a></li>
-									<li ng-click="setPolicy({ description : 'Trento', name : 'Park and Ride', editable: false, draft: false, policyType : 'hardcoded'}, false)">
+									<li ng-click="setPolicy({ description : 'Trento', name : 'Park and Ride', id: 'Trento', editable: false, draft: false, policyType : 'hardcoded'}, false)">
 										<a><strong>Park and Ride</strong></a></li>
-									<li ng-click="setPolicy({ description :'Rovereto', name : 'Bike Sharing', editable: false, draft: false, policyType : 'hardcoded'} , false)">
+									<li ng-click="setPolicy({ description :'Rovereto', name : 'Bike Sharing', id: 'Rovereto', editable: false, draft: false, policyType : 'hardcoded'} , false)">
 										<a><strong>Bike Sharing</strong></a></li>
 									<li role="separator" class="divider"></li>
 									<li ng-repeat="policy in policyIds"
