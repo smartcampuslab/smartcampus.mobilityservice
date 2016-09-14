@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -103,7 +102,6 @@ public class GamificationController extends SCController {
 	
 	private Set<String> publishQueue = Sets.newConcurrentHashSet();
 
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -238,10 +236,10 @@ public class GamificationController extends SCController {
 
 					}
 
-					Statement statement = connection.createStatement();
-					String s = buildInsert(geolocation);
-					statement.execute(s);
-					statement.close();
+//					Statement statement = connection.createStatement();
+//					String s = buildInsert(geolocation);
+//					statement.execute(s);
+//					statement.close();
 
 					geolocation.setGeofence(location.getGeofence());
 
@@ -253,7 +251,7 @@ public class GamificationController extends SCController {
 					}
 					freeTrackStarts.put(key, locationTs);
 					
-					storage.saveGeolocation(geolocation);
+//					storage.saveGeolocation(geolocation);
 				}
 			}
 
@@ -297,10 +295,11 @@ public class GamificationController extends SCController {
 					res.getGeolocationEvents().add(geoloc);
 				}
 
-				boolean canSave = true;
+//				boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getStarted() && !res.getComplete()) {
-						canSave = sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary());
+//						canSave = 
+						sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary());
 					}
 
 					res.setComplete(true);
@@ -309,13 +308,14 @@ public class GamificationController extends SCController {
 					res.setValid(vr.getValid());
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
-						ValidationResult vr = gamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
+						ValidationResult vr = GamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 						res.setValidationResult(vr);
 						if (vr != null) {
 							res.setValid(vr.getValid());
 						}
 						if (vr != null && vr.getValid().booleanValue()) {
-							canSave = sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
+//							canSave = 
+							sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {
 								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
@@ -442,9 +442,10 @@ public class GamificationController extends SCController {
 			}
 			res2.setItinerary(res);
 			
-			boolean canSave = true;
+//			boolean canSave = true;
 			if (!res2.getStarted() && !res2.getComplete()) {
-				canSave = sendIntineraryDataToGamificationEngine(appId, userId, itineraryId + "_" + day, res);
+//				canSave = 
+				sendIntineraryDataToGamificationEngine(appId, userId, itineraryId + "_" + day, res);
 			}
 			
 			if (device != null) {
@@ -677,52 +678,52 @@ public class GamificationController extends SCController {
 		return instance;
 	}
 	
-	private String buildInsert(Geolocation geolocation) {
-		String s = "INSERT INTO geolocations VALUES($next_id,";
-		s += convertToInsert(geolocation.getUuid()) + "," 
-				+ convertToInsert(geolocation.getDevice_id()) + "," 
-				+ convertToInsert(geolocation.getDevice_model()) + ","
-				+ convertToInsert(geolocation.getLatitude()) + ","
-				+ convertToInsert(geolocation.getLongitude()) + ","
-				+ convertToInsert(geolocation.getAccuracy()) + "," 
-				+ convertToInsert(geolocation.getAltitude()) + ","
-				+ convertToInsert(geolocation.getSpeed()) + ","
-				+ convertToInsert(geolocation.getHeading()) + ","
-				+ convertToInsert(geolocation.getActivity_type()) + ","
-				+ convertToInsert(geolocation.getActivity_confidence()) + ","
-				+ convertToInsert(geolocation.getBattery_level()) + ","
-				+ convertToInsert(geolocation.getBattery_is_charging()) + ","
-				+ convertToInsert(geolocation.getIs_moving()) + ","
-				+ convertToInsert(geolocation.getGeofence()) + ","
-				+ convertToInsert(geolocation.getRecorded_at()) + ","
-				+ convertToInsert(geolocation.getCreated_at()) + ","
-				+  convertToInsert(geolocation.getUserId()) + ","
-				+ convertToInsert(geolocation.getTravelId());
-		s += ")";
-		return s;
-	}
-	
-	private String convertToInsert(Object o) {
-		if (o instanceof String) {
-			return "\"" + escape(o) + "\"";
-		}
-		if (o instanceof Boolean) {
-			return ((Boolean)o).booleanValue() ? "1" : "0";
-		}
-		if (o instanceof Date) {
-			return "\"" + sdf.format((Date)o)+ "\"";
-		}
-		if (o != null) {
-			return o.toString();
-		} else {
-			return null;
-		}
-	}
-	
-	private String escape(Object o) {
-		return ((o != null)?o.toString().replace("\"", "\"\""):"");
-	}	
-	
+//	private String buildInsert(Geolocation geolocation) {
+//		String s = "INSERT INTO geolocations VALUES($next_id,";
+//		s += convertToInsert(geolocation.getUuid()) + "," 
+//				+ convertToInsert(geolocation.getDevice_id()) + "," 
+//				+ convertToInsert(geolocation.getDevice_model()) + ","
+//				+ convertToInsert(geolocation.getLatitude()) + ","
+//				+ convertToInsert(geolocation.getLongitude()) + ","
+//				+ convertToInsert(geolocation.getAccuracy()) + "," 
+//				+ convertToInsert(geolocation.getAltitude()) + ","
+//				+ convertToInsert(geolocation.getSpeed()) + ","
+//				+ convertToInsert(geolocation.getHeading()) + ","
+//				+ convertToInsert(geolocation.getActivity_type()) + ","
+//				+ convertToInsert(geolocation.getActivity_confidence()) + ","
+//				+ convertToInsert(geolocation.getBattery_level()) + ","
+//				+ convertToInsert(geolocation.getBattery_is_charging()) + ","
+//				+ convertToInsert(geolocation.getIs_moving()) + ","
+//				+ convertToInsert(geolocation.getGeofence()) + ","
+//				+ convertToInsert(geolocation.getRecorded_at()) + ","
+//				+ convertToInsert(geolocation.getCreated_at()) + ","
+//				+  convertToInsert(geolocation.getUserId()) + ","
+//				+ convertToInsert(geolocation.getTravelId());
+//		s += ")";
+//		return s;
+//	}
+//	
+//	private String convertToInsert(Object o) {
+//		if (o instanceof String) {
+//			return "\"" + escape(o) + "\"";
+//		}
+//		if (o instanceof Boolean) {
+//			return ((Boolean)o).booleanValue() ? "1" : "0";
+//		}
+//		if (o instanceof Date) {
+//			return "\"" + sdf.format((Date)o)+ "\"";
+//		}
+//		if (o != null) {
+//			return o.toString();
+//		} else {
+//			return null;
+//		}
+//	}
+//	
+//	private String escape(Object o) {
+//		return ((o != null)?o.toString().replace("\"", "\"\""):"");
+//	}	
+//	
 	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
 		logger.debug("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
