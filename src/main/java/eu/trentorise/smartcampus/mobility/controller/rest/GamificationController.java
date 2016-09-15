@@ -281,7 +281,7 @@ public class GamificationController extends SCController {
 						}
 					} else {
 						res.setItinerary(res2);
-						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getCreated_at()));
+						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getRecorded_at()));
 					}
 					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
 						res.setFreeTrackingTransport(freeTracks.get(key));
