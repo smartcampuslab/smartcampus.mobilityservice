@@ -633,7 +633,7 @@ public class GamificationHelper {
 	}
 
 	private static double harvesineDistance(Geolocation p1, Geolocation p2) {
-		return harvesineDistance(p1.getLatitude(), p1.getLongitude(), p1.getLatitude(), p2.getLongitude());
+		return harvesineDistance(p1.getLatitude(), p1.getLongitude(), p2.getLatitude(), p2.getLongitude());
 	}
 
 	private static double harvesineDistance(double lat1, double lon1, double lat2, double lon2) {
