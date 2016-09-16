@@ -21,6 +21,8 @@ public class ValidationResult {
 	
 	private Double distance;
 	private Long time;
+	private Long movingTime;
+	private Double averageMovingSpeed;
 
 	public void reset() {
 		matchedLocations = true;
@@ -131,6 +133,22 @@ public class ValidationResult {
 
 	public void setTime(Long time) {
 		this.time = time;
+	}
+
+	public Long getMovingTime() {
+		return movingTime;
+	}
+
+	public void setMovingTime(Long movingTime) {
+		this.movingTime = movingTime;
+	}
+
+	public Double getAverageMovingSpeed() {
+		return averageMovingSpeed;
+	}
+
+	public void setAverageMovingSpeed(Double averageMovingSpeed) {
+		this.averageMovingSpeed = averageMovingSpeed;
 	}
 
 }

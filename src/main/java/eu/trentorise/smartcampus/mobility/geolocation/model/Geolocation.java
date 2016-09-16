@@ -239,7 +239,7 @@ public class Geolocation implements Comparable<Geolocation> {
     
     @Override
     public String toString() {
-    	return latitude + "," + longitude;
+    	return latitude + "," + longitude; // + "," + recorded_at;
     }
 
 	@Override

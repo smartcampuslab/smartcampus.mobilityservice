@@ -73,19 +73,19 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>it.sayservice.platform</groupId>
 			<artifactId>service-engine-client</artifactId>
 			<version>1.4</version>
 			<type>jar</type>
-		</dependency>
+		</dependency> -->
 
 		<!-- JMS -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-core</artifactId>
 			<version>5.5.1</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
             <groupId>org.yaml</groupId>
@@ -143,6 +143,19 @@
 			<artifactId>velocity</artifactId>
 			<version>1.7</version>
 		</dependency>
+		<dependency>
+			<groupId>it.smartcommunitylab</groupId>
+			<artifactId>mobilityservice.services.trentino</artifactId>
+			<version>1.0</version>
+		</dependency>		
+		
+ 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.7</version>
+			<!-- <scope>test</scope> -->
+		</dependency>		
+		
 	</dependencies>
 
 	<build>

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.client.InvocationException;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
@@ -110,7 +109,7 @@ public class JourneyPlannerController extends SCController {
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
 	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false, defaultValue="default") String policyId,
-			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName) throws InvocationException {
+			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName)  {
 		try {
 			domainStorage.savePlanRequest(journeyRequest, userId, appName);
 
@@ -132,7 +131,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
-	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary) throws InvocationException {
+	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -187,7 +186,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -242,7 +241,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary")
-	public @ResponseBody List<ItineraryObject> getItineraries(HttpServletResponse response) throws InvocationException {
+	public @ResponseBody List<ItineraryObject> getItineraries(HttpServletResponse response)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -263,7 +262,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}")
-	public @ResponseBody BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -294,7 +293,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -330,7 +329,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}/monitor/{monitor}")
-	public @ResponseBody Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
+	public @ResponseBody Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -367,7 +366,7 @@ public class JourneyPlannerController extends SCController {
 	// RECURRENT
 
 	@RequestMapping(method = RequestMethod.POST, value = "/planrecurrent")
-	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters) throws InvocationException {
+	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters)  {
 		try {
 			return smartPlannerHelper.planRecurrent(parameters);
 		} catch (ConnectorException e0) {
@@ -381,7 +380,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent")
-	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent) throws InvocationException {
+	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -430,7 +429,7 @@ public class JourneyPlannerController extends SCController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent/replan/{itineraryId}")
 	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters, @PathVariable String itineraryId)
-			throws InvocationException {
+			 {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -465,7 +464,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/recurrent/{itineraryId}")
-	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -510,7 +509,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent")
-	public @ResponseBody List<RecurrentJourneyObject> getRecurrentJourneys(HttpServletResponse response) throws InvocationException {
+	public @ResponseBody List<RecurrentJourneyObject> getRecurrentJourneys(HttpServletResponse response)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -532,7 +531,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}")
-	public @ResponseBody RecurrentJourneyObject getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody RecurrentJourneyObject getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -564,7 +563,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/recurrent/{itineraryId}")
-	public @ResponseBody Boolean deleteRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean deleteRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -596,7 +595,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}/monitor/{monitor}")
-	public @ResponseBody Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
+	public @ResponseBody Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -632,7 +631,7 @@ public class JourneyPlannerController extends SCController {
 
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/alert/user")
-	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws InvocationException {
+	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody Map<String, Object> map)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -649,7 +648,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/alert/service")
-	public @ResponseBody void submitServiceAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws InvocationException {
+	public @ResponseBody void submitServiceAlert(HttpServletResponse response, @RequestBody Map<String, Object> map)  {
 		try {
 			submitAlert(map, null, getClientId());
 		} catch (Exception e) {
@@ -659,7 +658,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/monitorroute")
-	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req) throws InvocationException {
+	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -696,7 +695,7 @@ public class JourneyPlannerController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute/{clientId}")
-	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId) throws InvocationException {
+	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -736,7 +735,7 @@ public class JourneyPlannerController extends SCController {
 	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/monitorroute")
-	public @ResponseBody List<RouteMonitoring> getMonitorRoutes(HttpServletResponse response,  @RequestParam(required = false, value = "active") Boolean active) throws InvocationException {
+	public @ResponseBody List<RouteMonitoring> getMonitorRoutes(HttpServletResponse response,  @RequestParam(required = false, value = "active") Boolean active)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -764,7 +763,7 @@ public class JourneyPlannerController extends SCController {
 	}	
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/monitorroute/{clientId}")
-	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId) throws InvocationException {
+	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -851,7 +850,7 @@ public class JourneyPlannerController extends SCController {
 	
 	
 	
-	private void submitAlert(Map<String, Object> map, String userId, String clientId) throws InvocationException {
+	private void submitAlert(Map<String, Object> map, String userId, String clientId)  {
 		AlertType type = AlertType.getAlertType((String) map.get("type"));
 
 		Alert alert = null;

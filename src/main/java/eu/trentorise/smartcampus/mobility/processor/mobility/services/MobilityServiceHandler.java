@@ -14,23 +14,16 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package eu.trentorise.smartcampus.mobility.processor;
+package eu.trentorise.smartcampus.mobility.processor.mobility.services;
 
-import java.util.List;
-import java.util.Set;
-
-import com.google.protobuf.ByteString;
-
-import it.sayservice.platform.client.InvocationException;
-import it.sayservice.platform.client.ServiceBusClient;
+import it.smartcommunitylab.mobilityservice.services.MobilityServiceObjectsContainer;
 
 /**
  * @author raman
  *
  */
-public interface ServiceHandler {
+public interface MobilityServiceHandler {
 
-	public void subscribe(ServiceBusClient client) throws InvocationException;
-	public void process(String serviceId, String methodName, String subscriptionId, List<ByteString> data);
-	public Set<ServiceKey> handledServices();
+	public void process(MobilityServiceObjectsContainer data) throws Exception;
+
 }

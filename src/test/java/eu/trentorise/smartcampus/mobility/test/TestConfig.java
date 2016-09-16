@@ -26,6 +26,7 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 import java.io.InputStream;
@@ -157,6 +158,16 @@ public class TestConfig {
 			@Override
 			public InputStream gtfs(String agencyId) throws Exception {
 				return null;
+			}
+			@Override
+			public String bikeStations() throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public void addBikeSharingStations(List<BikeStation> stations) throws Exception {
+				// TODO Auto-generated method stub
+				
 			}
 
 		};

@@ -468,6 +468,10 @@ public class GamificationController extends SCController {
 		List<TrackedInstance> result = storage.searchDomainObjects(pars, TrackedInstance.class);
 		for (TrackedInstance ti: result) {
 			try {
+				if ("57d96188e4b0d6a427d8ac5f".equals(ti.getId())) {
+					System.out.print("");					
+				}				
+				
 				if (ti.getItinerary() != null) {
 				ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
 				ti.setValidationResult(vr);
@@ -475,6 +479,8 @@ public class GamificationController extends SCController {
 				Map<String, Object> data = gamificationHelper.computeTripData(ti.getItinerary().getData(), false);
 				ti.setEstimatedScore((Long)data.get("estimatedScore"));
 				storage.saveTrackedInstance(ti);
+				
+
 				
 				} else {
 					ValidationResult vr = GamificationHelper.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
