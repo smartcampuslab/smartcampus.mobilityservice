@@ -175,7 +175,10 @@ public class DomainStorage {
 	}
 	
 	public void saveTrackedInstance(TrackedInstance tracked) {
-		Query query = new Query(new Criteria("clientId").is(tracked.getClientId()).and("day").is(tracked.getDay()));
+		Query query = new Query(
+				new Criteria("clientId").is(tracked.getClientId())
+				.and("day").is(tracked.getDay())
+				.and("userId").is(tracked.getUserId()));
 		TrackedInstance trackedDB = searchDomainObject(query, TrackedInstance.class);
 		if (trackedDB == null) {
 			template.save(tracked, TRACKED);

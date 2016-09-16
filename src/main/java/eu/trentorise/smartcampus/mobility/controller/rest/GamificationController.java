@@ -264,6 +264,7 @@ public class GamificationController extends SCController {
 				Map<String, Object> pars = new TreeMap<String, Object>();
 				pars.put("clientId", travelId);
 				pars.put("day", day);
+				pars.put("userId", userId);
 				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
 				if (res == null) {
 					res = new TrackedInstance();
@@ -275,6 +276,7 @@ public class GamificationController extends SCController {
 					if (res2 == null) {
 						pars = new TreeMap<String, Object>();
 						pars.put("itinerary.clientId", travelId);
+						pars.put("itinerary.userId", travelId);
 						SavedTrip res3 = storage.searchDomainObject(pars, SavedTrip.class);
 						if (res3 != null) {
 							res.setItinerary(res3.getItinerary());
@@ -373,6 +375,7 @@ public class GamificationController extends SCController {
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
 			pars.put("clientId", itineraryId);
+			pars.put("userId", userId);
 			Date date = new Date(System.currentTimeMillis());
 			String day = shortSdf.format(date);
 			TrackedInstance res2 = storage.searchDomainObject(pars, TrackedInstance.class);
@@ -417,6 +420,7 @@ public class GamificationController extends SCController {
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
 			pars.put("clientId", itineraryId);
+			pars.put("userId", userId);
 			ItineraryObject res = storage.searchDomainObject(pars, ItineraryObject.class);
 			if (res != null && !userId.equals(res.getUserId())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
