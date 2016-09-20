@@ -579,11 +579,22 @@ public class GamificationController extends SCController {
 	}
 	
 	@RequestMapping("/console/useritinerary/{userId}")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId) throws ParseException {
+	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
+		
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
-		List<TrackedInstance> instances = storage.searchDomainObjects(criteria, TrackedInstance.class);
+		if (fromDate != null) {
+			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+		}
+		if (toDate != null) {
+			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+		}		
+		Query query = new Query(criteria);
+		
+		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);		
+		
+		
 		if (instances != null) {
 			for (TrackedInstance o : instances) {
 				Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(o.getGeolocationEvents(), o.getFreeTrackingTransport());
@@ -636,7 +647,7 @@ public class GamificationController extends SCController {
 	}	
 	
 	@RequestMapping("/console/users")
-	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId) {
+	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) {
 //		String gameId = getGameId(appId);
 //		if (gameId == null) {
 //			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -645,12 +656,20 @@ public class GamificationController extends SCController {
 		
 		Map<String,UserDescriptor> users = new HashMap<String, UserDescriptor>();
 		
-		Map<String, Object> pars = new HashMap<String, Object>();
-		pars.put("appId", appId);
 		Set<String> keys = new HashSet<String>();
 		keys.add("userId");
 		keys.add("valid");
-		List<TrackedInstance> tis = storage.searchDomainObjects(pars, keys, TrackedInstance.class);
+		
+		Criteria criteria = new Criteria("appId").is(appId);
+		if (fromDate != null) {
+			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+		}
+		if (toDate != null) {
+			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+		}		
+		Query query = new Query(criteria);
+		
+		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
 		for (TrackedInstance ti: tis) {
 			String userId = ti.getUserId();
 			if (userId == null) {
