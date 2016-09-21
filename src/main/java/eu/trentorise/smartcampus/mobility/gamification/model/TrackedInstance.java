@@ -38,6 +38,8 @@ public class TrackedInstance {
 
 	private String appId;
 	
+	private boolean approved;
+	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
 	}
@@ -178,6 +180,14 @@ public class TrackedInstance {
 
 	public void setAppId(String appId) {
 		this.appId = appId;
+	}
+
+	public boolean isApproved() {
+		return approved;
+	}
+
+	public void setApproved(boolean approved) {
+		this.approved = approved;
 	}
 
 

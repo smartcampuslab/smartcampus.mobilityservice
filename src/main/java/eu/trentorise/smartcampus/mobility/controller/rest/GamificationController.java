@@ -498,6 +498,17 @@ public class GamificationController extends SCController {
 		}
 	}
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/approved/{instanceId}")
+	public @ResponseBody TrackedInstance toggleApproval( @PathVariable String instanceId, @RequestParam(required = true) boolean value) {
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("id", instanceId);
+		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
+		instance.setApproved(value);
+		storage.saveTrackedInstance(instance);
+		return instance;
+	}		
+	
+	
 //	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
 //	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
 //		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);

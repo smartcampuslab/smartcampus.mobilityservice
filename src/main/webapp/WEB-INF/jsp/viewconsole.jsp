@@ -172,6 +172,11 @@ thead td {
 													</div>
 													<div class="col-md-5">game points: {{instance.itinerary ? instance.itinerary.data.customData.estimatedScore :
 														instance.estimatedScore}}</div>
+														
+													<div class="col-md-1 pull-right" style="margin-top:-6px;>
+													<span><label class="navbar-btn"><input type="checkbox" ng-checked="instance.approved" ng-click="toggleApproved(instance)" class="navbar-btn btn-sm" ></label></span>
+													</div>
+														
 												</div>
 											</div>
 										</div>

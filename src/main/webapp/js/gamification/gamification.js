@@ -97,6 +97,10 @@ notification.controller('GameCtrl', function($scope, $http) {
 		});
 	}
 	
+	$scope.toggleApproved = function(instance) {
+		$http.post("console/itinerary/approved/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}});
+	}		
+	
 	$scope.reload = function() {
 		load();
 	}	
