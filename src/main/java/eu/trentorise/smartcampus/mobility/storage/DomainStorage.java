@@ -314,6 +314,18 @@ public class DomainStorage {
 		return template.find(query, clz, getClassCollection(clz));
 	}
 	
+	public <T> List<T> searchDomainObjects(Query query, Set<String> keys, Class<T> clz) {
+		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
+		
+		if (keys != null){
+			for (String key : keys) {
+				query.fields().include(key);
+			}
+		}
+
+		return template.find(query, clz, getClassCollection(clz));
+	}		
+	
 	public <T> T searchDomainObject(Map<String, Object> pars, Class<T> clz) {
 		Criteria criteria = new Criteria();
 		for (String key : pars.keySet()) {

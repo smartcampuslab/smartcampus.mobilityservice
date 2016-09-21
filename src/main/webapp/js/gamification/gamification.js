@@ -1,4 +1,4 @@
-var notification = angular.module('gameconsole', [ 'ngScrollable' ]);
+var notification = angular.module('gameconsole', [ 'ui.bootstrap' ]);
 
 notification.controller('GameCtrl', function($scope, $http) {
 	$scope.users = [];
@@ -9,19 +9,17 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.layers = [];
 	$scope.fixpaths = false;
 	$scope.eventsMarkers = new Map();
+	$scope.fromDate = Date.today().previous().saturday();
+	$scope.toDate = Date.today().next().saturday().add(-1).minute();
+	$scope.openedFrom = false;
+	$scope.openedTo = false;
 
-//	$scope.init = function() {
-//		$http.get("console/appId").success(function(data) {	
-//			$scope.appId = data;
-//		});
-//	}
-//	
-//	$scope.init();
+
 	
 	var load = function() {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
-			$http.get("console/users", {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
 				data.data.forEach(function(descr) {
@@ -47,7 +45,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 			$scope.selectedUser = user;
 
 			if (!$scope.userMap[user]) {
-				$http.get("console/useritinerary/" + user, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 				});
 			}
@@ -98,6 +96,10 @@ notification.controller('GameCtrl', function($scope, $http) {
 			load();
 		});
 	}
+	
+	$scope.reload = function() {
+		load();
+	}	
 
 	$scope.reselectInstance = function() {
 		if ($scope.selectedInstance != null) {
@@ -292,15 +294,20 @@ notification.controller('GameCtrl', function($scope, $http) {
   }	
 	
 	
-	
-	
-	
-	
-	
+	$scope.toggleOpen = function($event, $from) {
+		$event.preventDefault();
+		$event.stopPropagation();
 
+		if ($from) {
+			$scope.openedFrom = !$scope.openedFrom;
+			$scope.openedTo = false;
+		} else {
+			$scope.openedTo = !$scope.openedTo;
+			$scope.openedFrom = false;
+		}
+	};	
+	
 	$scope.initMap = function() {
-		document.getElementById("left-scrollable").style.height = (window.innerHeight - 185) + "px";
-		document.getElementById("right-scrollable").style.height = (window.innerHeight / 2 - 60) + "px";
 		if (!document.getElementById('map'))
 			return;
 		var ll = null;
