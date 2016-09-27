@@ -337,7 +337,7 @@ public class GamificationController extends SCController {
 				res.setAppId(appId);
 				storage.saveTrackedInstance(res);
 				
-				logger.info("Saved geolocation events");
+				logger.info("Saved geolocation events: "+res.getId()+", "+res.getGeolocationEvents().size()+" events.");
 			}
 
 		} catch (Exception e) {
@@ -840,7 +840,7 @@ public class GamificationController extends SCController {
 //	}	
 //	
 	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
-		logger.debug("Send free tracking data for user " + playerId + ", trip " + travelId);
+		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
 			logger.debug("publishQueue contains travelId " + travelId + ", returning");
 			return false;
