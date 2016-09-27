@@ -88,21 +88,33 @@ thead td {
 							<table class="table-sm table-inverse">
 								<tr>
 									<td>
-										<table>
-											<tr>
-												<td><button class="btn btn-primary btn-sm" ng-click="revalidate()" style="margin-bottom:3px">Revalidate&nbsp;&nbsp;</button></td>
-											</tr>
-											<!-- <tr><td>&nbsp;</td></tr> -->
-											</tr>
-											<td><button class="btn btn-primary btn-sm" ng-click="reload()" style="margin-top:3px">Apply dates</button></td>
-											</tr>
-										</table>
+										<div class="panel panel-default">
+											<table>
+												<tr>
+													<td style="padding: 10px;">
+														<div class="col-md-2">
+															<!-- <button class="btn btn-primary btn-sm" ng-click="report()" style="margin-left: -15px; float: left">Report</button> -->
+															<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" target="_blank"
+																role="button" style="margin-left: -15px; float: left"
+															>Report</a>
+														</div>
+														<div class="col-md-2" style="float: right; margin-right: -40px;">
+															<button class="btn btn-danger btn-sm" ng-click="revalidate()" style="margin-left: -15px; float: left">Revalidate</button>
+														</div>
+														<div class="col-md-2" style="float: right;">
+															<button class="btn btn-danger btn-sm" ng-click="approveAll()" style="margin-left: -10px; float: left">Approve all</button>
+														</div>
+													</td>
+												</tr>
+											</table>
+										</div>
 									</td>
-									<td>
-										<table class="table-sm">
-											<tr>
-												<td>
-													<div class="col-md-12">
+								<tr>
+									<td><div class="panel panel-default" style="margin-top: -14px">
+											<table class="table-sm">
+												<tr>
+													<td style="padding: 10px;"><button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button></td>
+													<td>
 														<p class="input-group" style="margin-top: 12px;">
 															<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="fromDate" is-open="openedFrom" close-text="Close"
 																style="font-family: monospace; font-size: 13px; font-weight: bold"
@@ -112,34 +124,49 @@ thead td {
 																</button>
 															</span>
 														</p>
-													</div>
-												</td>
-												<td>
-													<div class="col-md-12">
+													</td>
+													<td>
 														<p class="input-group" style="margin-top: 12px;">
 															<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="toDate" is-open="openedTo" close-text="Close"
-																style="font-family: monospace; font-size: 13px; font-weight: bold	"
+																style="font-family: monospace; font-size: 13px; font-weight: bold"
 															/> <span class="input-group-btn">
 																<button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
 																	<i class="glyphicon glyphicon-calendar"></i>
 																</button>
 															</span>
 														</p>
-													</div>
+													</td>
+													<td style="padding: 10px;"><span><label class="navbar-btn"><input type="checkbox"
+																ng-click="excludeZeroPoints=!excludeZeroPoints;" name="fix-paths" class="navbar-btn btn-sm"
+															>No 0 pts</label></span></td>
+													<td><span><label class="navbar-btn"><input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly;" name="fix-paths"
+																class="navbar-btn btn-sm"
+															>To approve only</label></span></td>
+												</tr>
 												</td>
-											</tr>
-										</table>
-									</td>
-									<td><span><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths"
+												</tr>
+												<tr>
+													<td align="right">
+														<!-- 													<div class="input-group"  style="margin-right: 15px">
+														<label >Show&nbsp;</label> 
+														<select ng-model="filterApproved" ng-options="i.name for i in approvedList">
+															
+														</select>
+													</div> -->
+													</td>
+												</tr>
+											</table>
+										</div></td>
+									<!-- 						<td><span><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths"
 												class="navbar-btn btn-sm"
-											>&nbsp;Fix paths</label></span></td>
+											>&nbsp;Fix paths</label></span></td> -->
 								</tr>
 							</table>
 						</div>
 					</form>
 					<div id="left-scrollable" style="width: 100%; height: 100%;">
 						<div class="panel-body panel-collapse">
-							<div ng-repeat="user in users" class="user-row">
+							<div ng-repeat="user in users" class="panel panel-default user-row">
 								<div class="row">
 									<div class="col-md-6">
 										<a ng-click="selectUser(user)">{{user}} </a>
@@ -150,16 +177,23 @@ thead td {
 									</div>
 								</div>
 								<div ng-if="selectedUser == user">
-									<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
-										<h5 ng-click="selectItinerary(itinerary)">{{itinerary.tripName}} ({{itinerary.instances.length}})</h5>
-										{{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
+									<div ng-repeat="itinerary in userMap[user]" class="panel panel-default itinerary-row">
+										<h5 ng-click="selectItinerary(itinerary)">
+											<div class="col-md-6" style="margin-left:-15px;">
+												<b>Id: </b>{{itinerary.tripName}} ({{itinerary.instances.length}})
+											</div>
+											<div class="col-md-3" style="margin-left:15px;">
+												<b>Start time: </b>{{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
+											</div>
+										</h5>
+										<br />
 										<div>
 											<div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)" class="instance-row"
-												ng-class="{'selected':selectedInstance == instance, 'valid': instance.valid, 'invalid': !instance.valid}"
+												ng-class="{'selected':selectedInstance == instance, 'valid': getValidityStyle(instance), 'invalid': !getValidityStyle(instance)}"
 											>
 												<div class="row">
-													<div class="col-md-6">
-														<span ng-show="instance.itinerary == null" class="glyphicon glyphicon-tree-deciduous" title="Free tracking" data-toggle="tooltip"></span> date:
+													<div class="col-md-3">
+														<span ng-show="instance.itinerary == null" class="glyphicon glyphicon-tree-deciduous" title="Free tracking" data-toggle="tooltip"></span><b>Date:</b>
 														{{instance.day ? instance.day : '--'}} <span> <span ng-show="instance.validationResult.geoLocationsN <= 2 && instance.itinerary"
 															class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"
 														></span> <!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
@@ -170,13 +204,27 @@ thead td {
 														></span> <span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
 														</span>
 													</div>
-													<div class="col-md-5">game points: {{instance.itinerary ? instance.itinerary.data.customData.estimatedScore :
-														instance.estimatedScore}}</div>
-														
-													<div class="col-md-1 pull-right" style="margin-top:-6px;>
-													<span><label class="navbar-btn"><input type="checkbox" ng-checked="instance.approved" ng-click="toggleApproved(instance)" class="navbar-btn btn-sm" ></label></span>
+													<div class="col-md-3">
+														<b>Free tracking:</b> {{instance.itinerary == null}}
 													</div>
-														
+													<div class="col-md-3">
+														<b>Game points:</b> {{instance.itinerary ? instance.itinerary.data.customData.estimatedScore : instance.estimatedScore}}
+													</div>
+													<div style="float: right; margin-right: 30px">
+														<span ng-if="instance.groupId != 0" class="label label-primary">{{instance.groupId}}</span>
+													</div>
+												</div>
+												<div class="row">
+													<div class="col-md-3" style="margin-top: -6px; margin-left: 5px">
+														<span><label class="navbar-btn"><b>Switch validity&nbsp;</b><input ng-disabled="instance.approved" type="checkbox"
+																ng-checked="instance.switchValidity" ng-click="switchValidity(instance)" class="navbar-btn btn-sm"
+															></label> <!-- <label ng-show="instance.approved"><i>(Approved)</i></label> --></span>
+													</div>
+													<div class="col-md-3" ng-if="instance.switchValidity" style="margin-top: -6px; margin-left: 5px">
+														<span><label class="navbar-btn"><b>Approved&nbsp;</b><input type="checkbox" ng-checked="instance.approved"
+																ng-click="toggleApproved(instance)" class="navbar-btn btn-sm"
+															></label></span>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -190,76 +238,78 @@ thead td {
 			</div>
 			<div class="col-md-7">
 				<div id="map"></div>
-				<br />
-				<div id="right-scrollable" style="width: 100%; height: 100%;">
-					<div class="row" ng-if="selectedInstance != null">
-						<div class="col-md-4">
-							<h3 style="color: green;">Planned</h3>
-							<p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
-							<p ng-show="selectedInstance.freeTrackingTransport">
-								<b>Free tracking tranport:</b> {{selectedInstance.freeTrackingTransport}}
-							</p>
-							<hr />
-							<p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
+				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths;" name="fix-paths"
+						class="navbar-btn btn-sm"
+					>&nbsp;Fix paths</label>
+					<div id="right-scrollable" style="width: 100%; height: 100%;">
+						<div class="row" ng-if="selectedInstance != null">
+							<div class="col-md-4">
+								<h3 style="color: green;">Planned</h3>
+								<p>{{selectedInstance.itinerary.data.startime|date:'HH:mm'}} - {{selectedInstance.itinerary.data.endtime|date:'HH:mm'}}</p>
+								<p ng-show="selectedInstance.freeTrackingTransport">
+									<b>Free tracking tranport:</b> {{selectedInstance.freeTrackingTransport}}
+								</p>
+								<hr />
+								<p ng-repeat="leg in selectedInstance.itinerary.data.leg">{{leg.transport.type}}</p>
+							</div>
+							<div class="col-md-4">
+								<h3>
+									<span style="color: blue;">Tracked</span> (valid: <span style="">{{selectedInstance.valid}}</span>)
+								</h3>
+								<p>{{selectedInstance.geolocationEvents[0].recorded_at|date:'HH:mm'}} -
+									{{selectedInstance.geolocationEvents[selectedInstance.geolocationEvents.length-1].recorded_at|date:'HH:mm'}}</p>
+								<hr />
+								<p ng-repeat="evt in selectedInstance.legs">
+									<b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span
+										ng-if="evt.recorded_till != null"
+									> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)
+								</p>
+								<!--               <p ng-repeat="evt in selectedInstance.geolocationEvents">{{evt.activity_type ? evt.activity_type : '--'}} ({{evt.recorded_at|date:'HH:mm:ss'}})</p> -->
+							</div>
+							<div class="col-md-4">
+								<h3 style="">Validation</h3>
+								<pre>{{selectedInstance.validationResult | json}}</pre>
+							</div>
 						</div>
-						<div class="col-md-4">
-							<h3>
-								<span style="color: blue;">Tracked</span> (valid: <span style="">{{selectedInstance.valid}}</span>)
-							</h3>
-							<p>{{selectedInstance.geolocationEvents[0].recorded_at|date:'HH:mm'}} -
-								{{selectedInstance.geolocationEvents[selectedInstance.geolocationEvents.length-1].recorded_at|date:'HH:mm'}}</p>
-							<hr />
-							<p ng-repeat="evt in selectedInstance.legs">
-								<b>{{evt.activity_type ? evt.activity_type : '??'}}</b> ({{evt.count}} events, {{evt.recorded_at|date:'HH:mm:ss'}}<span
-									ng-if="evt.recorded_till != null"
-								> -- {{evt.recorded_till|date:'HH:mm:ss'}}</span>)
-							</p>
-							<!--               <p ng-repeat="evt in selectedInstance.geolocationEvents">{{evt.activity_type ? evt.activity_type : '--'}} ({{evt.recorded_at|date:'HH:mm:ss'}})</p> -->
-						</div>
-						<div class="col-md-4">
-							<h3 style="">Validation</h3>
-							<pre>{{selectedInstance.validationResult | json}}</pre>
+						<div class="row" ng-if="selectedInstance != null">
+							<div class="col-md-12">
+								<h3>Tracked events:</h3>
+								<table>
+									<thead>
+										<td></td>
+										<td>When</td>
+										<td>Accuracy</td>
+										<td>Activity</td>
+										<td>Activity Confidence</td>
+										<td>Coordinates</td>
+										<td>Is moving</td>
+										<td>Speed</td>
+									</thead>
+									<tbody>
+										<!-- <tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"> -->
+										<tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="lineclick()" class="instance-row">
+											<div>
+												<!-- <td><span class="glyphicon glyphicon-map-marker" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"></span></td> -->
+												<td><label class="btn" ng-click="newEventMarker(evt.geocoding[1],evt.geocoding[0])"> <span class="glyphicon glyphicon-map-marker"
+														aria-hidden="true"
+													></span>
+												</label></td>
+												<td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
+												<td>{{evt.accuracy}}</td>
+												<td>{{evt.activity_type}}</td>
+												<td>{{evt.activity_confidence}}</td>
+												<td>{{evt.geocoding[1] + " ," + evt.geocoding[0]}}</td>
+												<td>{{evt.is_moving}}</td>
+												<td>{{evt.speed}}</td>
+											</div>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
-					<div class="row" ng-if="selectedInstance != null">
-						<div class="col-md-12">
-							<h3>Tracked events:</h3>
-							<table>
-								<thead>
-									<td></td>
-									<td>When</td>
-									<td>Accuracy</td>
-									<td>Activity</td>
-									<td>Activity Confidence</td>
-									<td>Coordinates</td>
-									<td>Is moving</td>
-									<td>Speed</td>
-								</thead>
-								<tbody>
-									<!-- <tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"> -->
-									<tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="lineclick()" class="instance-row">
-										<div>
-											<!-- <td><span class="glyphicon glyphicon-map-marker" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"></span></td> -->
-											<td><label class="btn" ng-click="newEventMarker(evt.geocoding[1],evt.geocoding[0])"> <span class="glyphicon glyphicon-map-marker"
-													aria-hidden="true"
-												></span>
-											</label></td>
-											<td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
-											<td>{{evt.accuracy}}</td>
-											<td>{{evt.activity_type}}</td>
-											<td>{{evt.activity_confidence}}</td>
-											<td>{{evt.geocoding[1] + "," + evt.geocoding[0]}}</td>
-										<td>{{evt.is_moving}}</td>
-										<td>{{evt.speed}}</td>
-						</div>
-						</tr>
-						</tbody>
-						</table>
-					</div>
-				</div>
 			</div>
 		</div>
-	</div>
 	</div>
 	<!-- Bootstrap core JavaScript
     ================================================== -->

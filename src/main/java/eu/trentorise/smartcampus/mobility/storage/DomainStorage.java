@@ -206,7 +206,8 @@ public class DomainStorage {
 			if (tracked.getEstimatedScore() != null) {
 				update.set("estimatedScore", tracked.getEstimatedScore());
 			}
-			update.set("approved", tracked.isApproved());
+			update.set("switchValidity", tracked.getSwitchValidity());
+			update.set("approved", tracked.getApproved());
 			update.set("appId", tracked.getAppId());
 			
 			template.updateFirst(query, update, TRACKED);

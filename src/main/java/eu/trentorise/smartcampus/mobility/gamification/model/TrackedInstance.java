@@ -38,7 +38,10 @@ public class TrackedInstance {
 
 	private String appId;
 	
-	private boolean approved;
+	private Boolean switchValidity;
+	private Boolean approved;
+	
+	private int groupId;
 	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
@@ -182,13 +185,31 @@ public class TrackedInstance {
 		this.appId = appId;
 	}
 
-	public boolean isApproved() {
+	public Boolean getSwitchValidity() {
+		return switchValidity;
+	}
+
+	public void setSwitchValidity(Boolean switchValidity) {
+		this.switchValidity = switchValidity;
+	}
+
+	public Boolean getApproved() {
 		return approved;
 	}
 
-	public void setApproved(boolean approved) {
+	public void setApproved(Boolean approved) {
 		this.approved = approved;
 	}
+
+	public int getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+
+	
 
 
 	
