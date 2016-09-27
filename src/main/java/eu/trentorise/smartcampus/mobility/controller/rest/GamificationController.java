@@ -606,54 +606,54 @@ public class GamificationController extends SCController {
 		return appId;
 	}		
 
-	@RequestMapping("/console/itinerary")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryList(@RequestHeader(required = true, value = "appId") String appId) throws ParseException {
-		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
-		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
-		Map<String, Object> pars = new TreeMap<String, Object>();
-		pars.put("appId", appId);		
-
-		List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
-		if (instances != null) {
-			for (TrackedInstance o: instances) {
-				ItineraryDescriptor descr = map.get(o.getClientId());
-				if (map.get(o.getClientId()) == null) {
-					descr = new ItineraryDescriptor();
-					if (o.getUserId() != null) {
-						descr.setUserId(o.getUserId());
-					} else {
-						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
-						if (itinerary != null) {
-							descr.setUserId(itinerary.getUserId());
-						} else {
-							continue;
-						}
-					}
-					descr.setTripId(o.getClientId());
-					if (o.getItinerary() != null) {
-						descr.setStartTime(o.getItinerary().getData().getStartime());
-						descr.setEndTime(o.getItinerary().getData().getEndtime());
-						descr.setTripName(o.getItinerary().getName());
-						descr.setRecurrency(o.getItinerary().getRecurrency());
-					} else {
-						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
-						descr.setTripName(o.getClientId());
-						if (o.getDay() != null && o.getTime() != null) {
-							String dt = o.getDay() +" "+o.getTime();
-							descr.setStartTime(fullSdf.parse(dt).getTime());
-						} else if (o.getDay() != null) {
-							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
-						}
-					}
-					descr.setInstances(new ArrayList<TrackedInstance>());
-					map.put(o.getClientId(), descr);
-					list.add(descr);
-				}
-				descr.getInstances().add(o);
-			}
-		}
-		return list;
-	}
+//	@RequestMapping("/console/itinerary")
+//	public @ResponseBody List<ItineraryDescriptor> getItineraryList(@RequestHeader(required = true, value = "appId") String appId) throws ParseException {
+//		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
+//		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
+//		Map<String, Object> pars = new TreeMap<String, Object>();
+//		pars.put("appId", appId);		
+//
+//		List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
+//		if (instances != null) {
+//			for (TrackedInstance o: instances) {
+//				ItineraryDescriptor descr = map.get(o.getClientId());
+//				if (map.get(o.getClientId()) == null) {
+//					descr = new ItineraryDescriptor();
+//					if (o.getUserId() != null) {
+//						descr.setUserId(o.getUserId());
+//					} else {
+//						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+//						if (itinerary != null) {
+//							descr.setUserId(itinerary.getUserId());
+//						} else {
+//							continue;
+//						}
+//					}
+//					descr.setTripId(o.getClientId());
+//					if (o.getItinerary() != null) {
+//						descr.setStartTime(o.getItinerary().getData().getStartime());
+//						descr.setEndTime(o.getItinerary().getData().getEndtime());
+//						descr.setTripName(o.getItinerary().getName());
+//						descr.setRecurrency(o.getItinerary().getRecurrency());
+//					} else {
+//						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+//						descr.setTripName(o.getClientId());
+//						if (o.getDay() != null && o.getTime() != null) {
+//							String dt = o.getDay() +" "+o.getTime();
+//							descr.setStartTime(fullSdf.parse(dt).getTime());
+//						} else if (o.getDay() != null) {
+//							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+//						}
+//					}
+//					descr.setInstances(new ArrayList<TrackedInstance>());
+//					map.put(o.getClientId(), descr);
+//					list.add(descr);
+//				}
+//				descr.getInstances().add(o);
+//			}
+//		}
+//		return list;
+//	}
 	
 	@RequestMapping("/console/useritinerary/{userId}")
 	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
@@ -716,11 +716,10 @@ public class GamificationController extends SCController {
 						}
 						
 					}
-					descr.setInstances(new ArrayList<TrackedInstance>());
 					map.put(o.getClientId(), descr);
-					list.add(descr);
 				}
-				descr.getInstances().add(o);
+				descr.setInstance(o);
+				list.add(descr);
 			}
 		}
 		
@@ -879,7 +878,7 @@ public class GamificationController extends SCController {
 					List<Geolocation> ge2 = Lists.newArrayList(ti2.getGeolocationEvents());
 					Collections.sort(ge1);
 					Collections.sort(ge2);
-					if (Math.abs(ge1.get(0).getRecorded_at().getTime() - ge2.get(ge2.size() - 1).getRecorded_at().getTime()) < 10 * 60 * 1000) {
+					if (Math.abs(ge1.get(0).getRecorded_at().getTime() - ge2.get(ge2.size() - 1).getRecorded_at().getTime()) < 24 * 60 * 60 * 1000) {
 						nears.put(ti1.getId(), ti2);
 					}
 				}

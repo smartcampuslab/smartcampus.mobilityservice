@@ -147,19 +147,10 @@ thead td {
 												</tr>
 												<tr>
 													<td align="right">
-														<!-- 													<div class="input-group"  style="margin-right: 15px">
-														<label >Show&nbsp;</label> 
-														<select ng-model="filterApproved" ng-options="i.name for i in approvedList">
-															
-														</select>
-													</div> -->
 													</td>
 												</tr>
 											</table>
 										</div></td>
-									<!-- 						<td><span><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths"
-												class="navbar-btn btn-sm"
-											>&nbsp;Fix paths</label></span></td> -->
 								</tr>
 							</table>
 						</div>
@@ -178,52 +169,36 @@ thead td {
 								</div>
 								<div ng-if="selectedUser == user">
 									<div ng-repeat="itinerary in userMap[user]" class="panel panel-default itinerary-row">
-										<h5 ng-click="selectItinerary(itinerary)">
-											<div class="col-md-6" style="margin-left:-15px;">
-												<b>Id: </b>{{itinerary.tripName}} ({{itinerary.instances.length}})
-											</div>
-											<div class="col-md-3" style="margin-left:15px;">
-												<b>Start time: </b>{{itinerary.startTime|date:'HH:mm'}} <span ng-if="itinerary.recurrency.daysOfWeek.length > 0">{{itinerary.recurrency.daysOfWeek}}</span>
-											</div>
-										</h5>
-										<br />
 										<div>
-											<div ng-repeat="instance in itinerary.instances" ng-click="selectInstance(instance)" class="instance-row"
-												ng-class="{'selected':selectedInstance == instance, 'valid': getValidityStyle(instance), 'invalid': !getValidityStyle(instance)}"
+											<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
+												ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': getValidityStyle(itinerary.instance), 'invalid': !getValidityStyle(itinerary.instance)}"
 											>
-												<div class="row">
-													<div class="col-md-3">
-														<span ng-show="instance.itinerary == null" class="glyphicon glyphicon-tree-deciduous" title="Free tracking" data-toggle="tooltip"></span><b>Date:</b>
-														{{instance.day ? instance.day : '--'}} <span> <span ng-show="instance.validationResult.geoLocationsN <= 2 && instance.itinerary"
+												<div class="col-md-11" style="margin-left: -15px;">
+													<b>Id: </b>{{itinerary.tripName}} <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
+														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
+													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
+														title="Mismatched activities" data-toggle="tooltip"
+													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
+												</div>
+												<div style="float: right; margin-right: 30px">
+													<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">{{itinerary.instance.groupId}}</span>
+												</div>
+												<div>
+													<div class="col-md-12" style="margin-left: -30px;">
+														</span> <span class="col-md-5"><b>When: </b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " +
+															(itinerary.startTime|date:'HH:mm')}} </span> <span ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary"
 															class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"
-														></span> <!-- <span ng-show="!instance.validationResult.matchedLocations || !instance.validationResult.matchedActivities" class="glyphicon glyphicon-warning-sign"></span> -->
-															<span ng-show="!instance.validationResult.matchedLocations && instance.itinerary" class="glyphicon glyphicon-move" title="Mismatched locations"
-															data-toggle="tooltip"
-														></span> <span ng-show="!instance.validationResult.matchedActivities && instance.itinerary" class="glyphicon glyphicon-plane"
-															title="Mismatched activities" data-toggle="tooltip"
-														></span> <span ng-show="instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
+														></span> <span class="col-md-3"><b>Type: </b> {{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}} </span> 
+														<span class="col-md-4"> <b>Game
+																Points:</b> {{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}}
 														</span>
-													</div>
-													<div class="col-md-3">
-														<b>Free tracking:</b> {{instance.itinerary == null}}
-													</div>
-													<div class="col-md-3">
-														<b>Game points:</b> {{instance.itinerary ? instance.itinerary.data.customData.estimatedScore : instance.estimatedScore}}
-													</div>
-													<div style="float: right; margin-right: 30px">
-														<span ng-if="instance.groupId != 0" class="label label-primary">{{instance.groupId}}</span>
 													</div>
 												</div>
 												<div class="row">
-													<div class="col-md-3" style="margin-top: -6px; margin-left: 5px">
-														<span><label class="navbar-btn"><b>Switch validity&nbsp;</b><input ng-disabled="instance.approved" type="checkbox"
-																ng-checked="instance.switchValidity" ng-click="switchValidity(instance)" class="navbar-btn btn-sm"
-															></label> <!-- <label ng-show="instance.approved"><i>(Approved)</i></label> --></span>
-													</div>
-													<div class="col-md-3" ng-if="instance.switchValidity" style="margin-top: -6px; margin-left: 5px">
-														<span><label class="navbar-btn"><b>Approved&nbsp;</b><input type="checkbox" ng-checked="instance.approved"
-																ng-click="toggleApproved(instance)" class="navbar-btn btn-sm"
-															></label></span>
+													<div class="col-md-6">
+														<span><label class="navbar-btn"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b><input ng-disabled="itinerary.instance.approved" type="checkbox"
+																ng-checked="itinerary.instance.switchValidity" ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
+															> </span>
 													</div>
 												</div>
 											</div>
@@ -299,17 +274,17 @@ thead td {
 												<td>{{evt.activity_type}}</td>
 												<td>{{evt.activity_confidence}}</td>
 												<td>{{evt.geocoding[1] + " ," + evt.geocoding[0]}}</td>
-												<td>{{evt.is_moving}}</td>
-												<td>{{evt.speed}}</td>
-											</div>
-										</tr>
-									</tbody>
-								</table>
+											<td>{{evt.is_moving}}</td>
+											<td>{{evt.speed}}</td>
 							</div>
+							</tr>
+							</tbody>
+							</table>
 						</div>
 					</div>
 			</div>
 		</div>
+	</div>
 	</div>
 	<!-- Bootstrap core JavaScript
     ================================================== -->
