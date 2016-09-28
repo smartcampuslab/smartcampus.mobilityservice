@@ -568,11 +568,11 @@ public class GamificationController extends SCController {
 		for (TrackedInstance ti: instances) {
 			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" + ti.getEstimatedScore() + ";" + (Boolean.TRUE.equals(ti.getSwitchValidity()) ? !ti.getValid() : ti.getValid()) + "\r\n");
 		}
-		System.out.println(sb);
+//		System.out.println(sb);
 		
-//		response.setContentType("application/csv; charset=utf-8");
-//		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".csv\"");
-//		response.getWriter().write(sb.toString());		
+		response.setContentType("application/csv; charset=utf-8");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".csv\"");
+		response.getWriter().write(sb.toString());		
 	}	
 	
 	

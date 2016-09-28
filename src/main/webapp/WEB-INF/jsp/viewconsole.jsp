@@ -81,7 +81,7 @@ thead td {
 <body>
 	<div class="console" ng-controller="GameCtrl">
 		<div class="row">
-			<div class="col-md-5">
+			<div class="col-md-4">
 				<div class="panel panel-default">
 					<form>
 						<div class="panel-heading ">
@@ -93,12 +93,11 @@ thead td {
 												<tr>
 													<td style="padding: 10px;">
 														<div class="col-md-2">
-															<!-- <button class="btn btn-primary btn-sm" ng-click="report()" style="margin-left: -15px; float: left">Report</button> -->
-															<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" target="_blank"
-																role="button" style="margin-left: -15px; float: left"
+															<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" role="button"
+																style="margin-left: -15px; float: left"
 															>Report</a>
 														</div>
-														<div class="col-md-2" style="float: right; margin-right: -40px;">
+														<div class="col-md-2" style="float: right;">
 															<button class="btn btn-danger btn-sm" ng-click="revalidate()" style="margin-left: -15px; float: left">Revalidate</button>
 														</div>
 														<div class="col-md-2" style="float: right;">
@@ -113,41 +112,37 @@ thead td {
 									<td><div class="panel panel-default" style="margin-top: -14px">
 											<table class="table-sm">
 												<tr>
-													<td style="padding: 10px;"><button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button></td>
+													<td style="padding: 12px;"><button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button></td>
+													<td ><label align="right" style="padding-bottom:50px">From:</label><br/><label align="right">To:</label></td>
 													<td>
-														<p class="input-group" style="margin-top: 12px;">
-															<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="fromDate" is-open="openedFrom" close-text="Close"
-																style="font-family: monospace; font-size: 13px; font-weight: bold"
-															/> <span class="input-group-btn">
-																<button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
-																	<i class="glyphicon glyphicon-calendar"></i>
-																</button>
-															</span>
-														</p>
+														<div class="col-md-11" style="padding: 12px;">
+															<p class="input-group" >
+																<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="fromDate" is-open="openedFrom" close-text="Close"
+																	style="font-family: monospace; font-size: 15px; font-weight: bold"
+																/> <span class="input-group-btn">
+																	<button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
+																		<i class="glyphicon glyphicon-calendar"></i>
+																	</button>
+																</span>
+															</p>
+														</div> <br />
+														<div class="col-md-11" style="padding: 12px;">
+															<p class="input-group" style="margin-top: 12px;">
+																<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="toDate" is-open="openedTo" close-text="Close"
+																	style="font-family: monospace; font-size: 15px; font-weight: bold"
+																/> <span class="input-group-btn">
+																	<button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
+																		<i class="glyphicon glyphicon-calendar"></i>
+																	</button>
+																</span>
+															</p>
+														</div>
 													</td>
-													<td>
-														<p class="input-group" style="margin-top: 12px;">
-															<input type="text" class="form-control" datepicker-popup="EEE MMM dd yyyy HH:mm:ss" ng-model="toDate" is-open="openedTo" close-text="Close"
-																style="font-family: monospace; font-size: 13px; font-weight: bold"
-															/> <span class="input-group-btn">
-																<button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
-																	<i class="glyphicon glyphicon-calendar"></i>
-																</button>
-															</span>
-														</p>
-													</td>
-													<td style="padding: 10px;"><span><label class="navbar-btn"><input type="checkbox"
-																ng-click="excludeZeroPoints=!excludeZeroPoints;" name="fix-paths" class="navbar-btn btn-sm"
-															>No 0 pts</label></span></td>
-													<td><span><label class="navbar-btn"><input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly;" name="fix-paths"
-																class="navbar-btn btn-sm"
+													<td style="padding: 10px;"><span><label><input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints;"
+																class="navbar-btn btn-sm" style="margin-right: 5px;"
+															>No 0 pts</label></span><br /> <span><label class="navbar-btn"><input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly;"
+																class="navbar-btn btn-sm" style="margin-right: 5px;"
 															>To approve only</label></span></td>
-												</tr>
-												</td>
-												</tr>
-												<tr>
-													<td align="right">
-													</td>
 												</tr>
 											</table>
 										</div></td>
@@ -173,7 +168,7 @@ thead td {
 											<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
 												ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': getValidityStyle(itinerary.instance), 'invalid': !getValidityStyle(itinerary.instance)}"
 											>
-												<div class="col-md-11" style="margin-left: -15px;">
+												<div class="col-md-7" style="margin-left: -15px;">
 													<b>Id: </b>{{itinerary.tripName}} <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
 														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
 													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
@@ -184,22 +179,25 @@ thead td {
 													<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">{{itinerary.instance.groupId}}</span>
 												</div>
 												<div>
-													<div class="col-md-12" style="margin-left: -30px;">
-														</span> <span class="col-md-5"><b>When: </b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " +
-															(itinerary.startTime|date:'HH:mm')}} </span> <span ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary"
-															class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"
-														></span> <span class="col-md-3"><b>Type: </b> {{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}} </span> 
-														<span class="col-md-4"> <b>Game
-																Points:</b> {{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}}
+													<div class="col-md-10" style="margin-left: -15px;">
+														<span><i>When: </i><b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> </span> <span
+															ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
+															title="Too few points" data-toggle="tooltip"
+														></span> <span><i>Type: </i><b>{{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}}</b> </span> <span> <i>Game Points:</i><b>
+																{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}}</b>
 														</span>
 													</div>
 												</div>
 												<div class="row">
 													<div class="col-md-6">
-														<span><label class="navbar-btn"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b><input ng-disabled="itinerary.instance.approved" type="checkbox"
-																ng-checked="itinerary.instance.switchValidity" ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
-															> </span>
+														<span><label class="navbar-btn"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b><input
+																ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.switchValidity"
+																ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
+															></span>
 													</div>
+													<!-- 													<div class="col-md-3 style="margin-top: 15px" ng-if="itinerary.instance.switchValidity" style="margin-left: 5px">
+														<span><label class="navbar-btn"><b>Approved&nbsp;</b></span>
+													</div> -->
 												</div>
 											</div>
 										</div>
@@ -274,17 +272,17 @@ thead td {
 												<td>{{evt.activity_type}}</td>
 												<td>{{evt.activity_confidence}}</td>
 												<td>{{evt.geocoding[1] + " ," + evt.geocoding[0]}}</td>
-											<td>{{evt.is_moving}}</td>
-											<td>{{evt.speed}}</td>
+												<td>{{evt.is_moving}}</td>
+												<td>{{evt.speed}}</td>
+											</div>
+										</tr>
+									</tbody>
+								</table>
 							</div>
-							</tr>
-							</tbody>
-							</table>
 						</div>
 					</div>
 			</div>
 		</div>
-	</div>
 	</div>
 	<!-- Bootstrap core JavaScript
     ================================================== -->
