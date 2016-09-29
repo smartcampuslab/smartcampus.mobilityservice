@@ -105,6 +105,14 @@ thead td {
   white-space: nowrap;
 }
 
+#left-scrollable {
+  padding-right: 2px;
+}
+
+body {
+  padding-bottom: 0 !important;
+}
+
 </style>
 </head>
 <body>
@@ -169,7 +177,7 @@ thead td {
 					</form>
 					
 		      <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
-					<div class="panel-body panel-collapse">
+					<div class="">
 						<div ng-repeat="user in users" class="panel panel-default user-row">
 							<div class="row">
 								<div class="col-md-6">

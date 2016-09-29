@@ -56,7 +56,7 @@ public class AppSetup {
 			}
 		}		
 		
-		registerApps();
+//		registerApps();
 	}
 	
 	private void registerApps() throws CommunicatorConnectorException {

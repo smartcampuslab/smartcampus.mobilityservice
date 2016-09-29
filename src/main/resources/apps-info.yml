@@ -21,3 +21,14 @@ apps:
     gamePassword : 
     gameStart :    
     routesDB : rovereto
+  - appId: trentoplaygo
+    password: pwd
+    messagingAppId : mobility.trentoplaygo
+    gcmSenderApiKey : AIzaSyD5MVzrD7WfeUqluPyeB8bgmUBXwBJP1gg
+    gcmSenderId : 907144379538
+    agencyIds : [5,6,10,12]
+    gameId : 57ac710fd4c6ac7872b0e7a1
+    gameUser : long-rovereto
+    gamePassword : long_RoVg@me
+    gameStart : 24/11/2014
+    routesDB : trento 

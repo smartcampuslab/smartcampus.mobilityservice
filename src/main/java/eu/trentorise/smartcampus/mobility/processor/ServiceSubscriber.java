@@ -34,7 +34,7 @@ public class ServiceSubscriber {
 
 	private List<ServiceHandler> handlers;
 
-	@Autowired(required=false)
+//	@Autowired(required=false)
 	private ServiceBusClient client;
 	
 	public List<ServiceHandler> getHandlers() {
@@ -46,7 +46,7 @@ public class ServiceSubscriber {
 		this.handlers = handlers;
 	}
 	
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		try {
 			if (client == null) return;
