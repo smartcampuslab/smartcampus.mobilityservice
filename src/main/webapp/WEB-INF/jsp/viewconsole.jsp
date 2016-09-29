@@ -9,6 +9,7 @@
 <title>Gamification Console</title>
 <!-- Custom styles for this template -->
 <link href="../css/style.css" rel="stylesheet">
+<link href="../css/ng-scrollable.min.css" rel="stylesheet">
 <script src="../lib/angular/angular.min.js"></script>
 <script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
@@ -166,7 +167,7 @@ thead td {
 							</div>
 					</form>
 					
-					<div id="left-scrollable" style="width: 100%; height: 100%;">
+		      <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
 						<div class="">
 							<div ng-repeat="user in users" class="panel panel-default user-row">
 								<div class="row">
@@ -224,7 +225,7 @@ thead td {
 			</div>
 			<div class="col-md-8">
 				<div id="map"></div>
-				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths;" name="fix-paths"
+				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths"
 						class="navbar-btn btn-sm"
 					>&nbsp;Fix paths</label>
 					<div id="right-scrollable" style="width: 100%; height: 100%;">
