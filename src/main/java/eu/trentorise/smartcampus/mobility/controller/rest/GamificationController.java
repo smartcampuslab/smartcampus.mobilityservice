@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -870,41 +869,33 @@ public class GamificationController extends SCController {
 	}
 	
 	private void aggregateFollowingTrackedInstances(List<TrackedInstance> instances) {
-		Multimap<String, TrackedInstance> nears = HashMultimap.create();
-		
-		for (TrackedInstance ti1: instances) {
-			for (TrackedInstance ti2: instances) {	
-				if (ti1 == ti2) {
-					continue;
-				}
-//				if (ti1.getUserId().equals(ti2.getUserId())) {
-				if (ti1.getGeolocationEvents() != null && !ti1.getGeolocationEvents().isEmpty() && ti2.getGeolocationEvents() != null && !ti2.getGeolocationEvents().isEmpty()) {
-					List<Geolocation> ge1 = Lists.newArrayList(ti1.getGeolocationEvents());
-					List<Geolocation> ge2 = Lists.newArrayList(ti2.getGeolocationEvents());
-					Collections.sort(ge1);
-					Collections.sort(ge2);
-					if (Math.abs(ge1.get(0).getRecorded_at().getTime() - ge2.get(ge2.size() - 1).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
-						nears.put(ti1.getId(), ti2);
-					}
-				}
-			}
-			nears.put(ti1.getId(), ti1);
+		Map<Geolocation, TrackedInstance> eventsMap = Maps.newHashMap();
+		for (TrackedInstance ti: instances) {
+			List<Geolocation> ge = Lists.newArrayList(ti.getGeolocationEvents());
+			Collections.sort(ge);
+			eventsMap.put(ge.get(0), ti);
 		}
 		
-		int id = 1;
-		Map<Integer, Integer> ids = Maps.newTreeMap();
-		for (String key: nears.keySet()) {
-			if (nears.get(key).size() > 1 && !ids.containsKey(nears.get(key).hashCode())) {
-				ids.put(nears.get(key).hashCode(), id);
-				id++;
-			}
+		List<TrackedInstance> sortedInstances = Lists.newArrayList();
+		List<Geolocation> sortedInstancesKey = Lists.newArrayList(eventsMap.keySet());
+		Collections.sort(sortedInstancesKey);
+		
+		for (Geolocation g: sortedInstancesKey) {
+			sortedInstances.add(eventsMap.get(g));
 		}
 		
-		for (String key: nears.keySet()) {
-			for (TrackedInstance ti: nears.get(key)) {
-				if (ids.containsKey(nears.get(key).hashCode())) {
-					ti.setGroupId(ids.get(nears.get(key).hashCode()));
-				}
+		int groupId = 1;
+		for (int i = 1; i < sortedInstances.size(); i++) {
+			List<Geolocation> ge1 = Lists.newArrayList(sortedInstances.get(i).getGeolocationEvents());
+			List<Geolocation> ge2 = Lists.newArrayList(sortedInstances.get(i - 1).getGeolocationEvents());
+			Collections.sort(ge1);
+			Collections.sort(ge2);
+			
+			if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
+				sortedInstances.get(i).setGroupId(groupId);
+				sortedInstances.get(i - 1).setGroupId(groupId);
+			} else {
+				groupId++;
 			}
 		}
 		
