@@ -1,4 +1,4 @@
-var notification = angular.module('gameconsole', [ 'ui.bootstrap' ]);
+var notification = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable']);
 
 notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.users = [];
@@ -356,6 +356,8 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	};	
 	
 	$scope.initMap = function() {
+		document.getElementById("left-scrollable").style.height = (window.innerHeight - 185) + "px";
+//		document.getElementById("right-scrollable").style.height = (window.innerHeight / 2 - 60) + "px";	
 		if (!document.getElementById('map'))
 			return;
 		var ll = null;

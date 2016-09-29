@@ -19,6 +19,7 @@
 <link href="../css/bootstrap.min.css" rel="stylesheet">
 
 <script src="../lib/angular/angular-route.min.js"></script>
+<script src="../lib/ng-scrollable.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
 <script src="../lib/sprintf.min.js"></script>
 <script src="../lib/date.js"></script>
@@ -168,60 +169,55 @@ thead td {
 					</form>
 					
 		      <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
-						<div class="">
-							<div ng-repeat="user in users" class="panel panel-default user-row">
-								<div class="row">
-									<div class="col-md-6">
-										<a ng-click="selectUser(user)">{{user}} </a>
-									</div>
-									<div class="col-md-6 pull-right">
-										<strong>({{userTotals[user].total}} tracked, <span style="">{{userTotals[user].failed}} invalid</span>)
-										</strong>
-									</div>
+					<div class="panel-body panel-collapse">
+						<div ng-repeat="user in users" class="panel panel-default user-row">
+							<div class="row">
+								<div class="col-md-6">
+									<a ng-click="selectUser(user)">{{user}} </a>
 								</div>
-								<div ng-if="selectedUser == user">
-									<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
-										<div>
-											<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
-												ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': getValidityStyle(itinerary.instance), 'invalid': !getValidityStyle(itinerary.instance)}">
-												
-												<div class="row">
-												  <div class="col-md-6 itinerary-def">
-		                        {{itinerary.tripName}}
-		                        <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
-		                            class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"></span> 
-		                        <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
-		                            title="Mismatched activities" data-toggle="tooltip"></span> 
-		                         <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span>
-		                         <br/>
-		                         <i>Type: </i><b>{{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}}</b>
-		                         
-												  </div>
-												  <div class="col-md-6 text-right">
-                            <b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b>
-                            <span ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" 
-                              class="glyphicon glyphicon-exclamation-sign" title="Too few points" data-toggle="tooltip"></span><br/>
-                            <b>{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}} Points</b>
-                           </div>
+								<div class="col-md-6 pull-right">
+									<strong>({{userTotals[user].total}} tracked, <span style="">{{userTotals[user].failed}} invalid</span>)
+									</strong>
+								</div>
+							</div>
+							<div ng-if="selectedUser == user">
+								<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
+									<div>
+										<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
+											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': getValidityStyle(itinerary.instance), 'invalid': !getValidityStyle(itinerary.instance)}"
+										>
+											<div class="row">
+												<div class="col-md-6 itinerary-def">
+													{{itinerary.tripName}} <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
+														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
+													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
+														title="Mismatched activities" data-toggle="tooltip"
+													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> <br />
+													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}}</b>
 												</div>
-                        
-                        <div class="group-indicator">
-                          <span ng-if="itinerary.instance.groupId != 0" class="label label-primary">group {{itinerary.instance.groupId}}</span>
-                        </div>
-                        
-                        <label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b>
-                        <input ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.switchValidity"
-                            ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm">
-                        </label> 												
-												
+												<div class="col-md-6 text-right">
+													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
+														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
+														title="Too few points" data-toggle="tooltip"
+													></span><br /> <b>{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}}
+														Points</b>
+												</div>
 											</div>
+											<div class="group-indicator">
+												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">group {{itinerary.instance.groupId}}</span>
+											</div>
+											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
+												ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.switchValidity"
+												ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
+											> </label>
 										</div>
 									</div>
 								</div>
 							</div>
-							<div></div>
 						</div>
+						<div></div>
 					</div>
+				</div>
 			</div>
 			<div class="col-md-8">
 				<div id="map"></div>
