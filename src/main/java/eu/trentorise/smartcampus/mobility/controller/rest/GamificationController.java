@@ -74,7 +74,12 @@ import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 @RequestMapping(value = "/gamification")
 public class GamificationController extends SCController {
 
-	 @Autowired
+	 /**
+	 * 
+	 */
+	private static final int SAME_TRIP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+	@Autowired
 	 private DomainStorage storage;
 
 	@Autowired
@@ -878,7 +883,7 @@ public class GamificationController extends SCController {
 					List<Geolocation> ge2 = Lists.newArrayList(ti2.getGeolocationEvents());
 					Collections.sort(ge1);
 					Collections.sort(ge2);
-					if (Math.abs(ge1.get(0).getRecorded_at().getTime() - ge2.get(ge2.size() - 1).getRecorded_at().getTime()) < 24 * 60 * 60 * 1000) {
+					if (Math.abs(ge1.get(0).getRecorded_at().getTime() - ge2.get(ge2.size() - 1).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
 						nears.put(ti1.getId(), ti2);
 					}
 				}

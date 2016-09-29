@@ -1,6 +1,6 @@
 var notification = angular.module('gameconsole', [ 'ui.bootstrap' ]);
 
-notification.controller('GameCtrl', function($scope, $http) {
+notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.users = [];
 	$scope.userMap = {};
 	$scope.selectedUser = null;
@@ -17,7 +17,16 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.unapprovedOnly = false;
 	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
 	$scope.filterApproved = $scope.approvedList[0];
+	
+	$scope.format = 'EEE MMM dd HH:mm';
+	$scope.dateOptions = {
+	    startingDay: 1
+	};
 
+	$timeout(function() {
+		document.getElementById('fromDate').value = $scope.fromDate.toString('ddd MMM dd HH:mm');
+		document.getElementById('toDate').value = $scope.toDate.toString('ddd MMM dd HH:mm');
+	});
 
 	
 	var load = function() {
