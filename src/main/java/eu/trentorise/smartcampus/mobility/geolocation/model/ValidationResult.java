@@ -8,6 +8,7 @@ public class ValidationResult {
 	private int legsLocationsN;
 	private int matchedLocationsN;
 	private Boolean matchedLocations;
+	private Boolean tooFewPoints;
 	
 	private Set<String> geoActivities;
 	private Set<String> legsActivities;
@@ -61,6 +62,14 @@ public class ValidationResult {
 
 	public void setMatchedLocations(Boolean matchedLocations) {
 		this.matchedLocations = matchedLocations;
+	}
+
+	public Boolean getTooFewPoints() {
+		return tooFewPoints;
+	}
+
+	public void setTooFewPoints(Boolean tooFewPoints) {
+		this.tooFewPoints = tooFewPoints;
 	}
 
 	public Boolean getValid() {

@@ -1,51 +1,51 @@
 servicesInstances:
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
-    cronRefresh: "0 * * * * *"
+    cronRefresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
-      password: 
+      password: "Rov14!"
       code: "5061"
     info:
-      name: 
+      name: rovereto
       place: Rovereto
       agencyId: BIKE_SHARING_TOBIKE_ROVERETO
-    enabled: false
+    enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
-    cronRefresh: "6 * * * * *"
+    cronRefresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
-      password: 
+      password: "Rov14!"
       code: "5060"
     info:
-      name: 
+      name: pergine_valsugana
       place: Pergine Valsugana
       agencyId: BIKE_SHARING_TOBIKE_PERGINE_VALSUGANA
-    enabled: false      
+    enabled: true     
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
-    cronRefresh: "12 * * * * *"
+    cronRefresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
-      password: 
+      password: "Rov14!"
       code: "5059"
     info:
-      name:    
+      name: trento 
       place: Trento    
       agencyId: BIKE_SHARING_TOBIKE_TRENTO  
-    enabled: false         
+    enabled: true        
   - class: it.smartcommunitylab.mobilityservice.services.service.oraritreni.TreniService
-    cronRefresh: "18 * * * * *"
+    cronRefresh: "0 */10 * * * *"
     parameters:
       stazione: trento
-    enabled: false
+    enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.trentomale.TrentoMaleService
-    cronRefresh: "24 * * * * *"
-    enabled: false    
-  - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiRoveretoService
-    cronRefresh: "30 * * * * *"
-    enabled: false
-  - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiTrentoService
-    cronRefresh: "36 * * * * *"
-    enabled: false
+    cronRefresh: "0 */10 * * * *"
+    enabled: true   
   - class: it.smartcommunitylab.mobilityservice.services.service.ordinanzerovereto.OrdinanzeRoveretoService
-    cronRefresh: "42 * * * * *"
-    enabled: false
+    cronRefresh: "0 15 10 * * *"
+    enabled: true
+  - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiRoveretoService
+    cronRefresh: "0 */10 * * * *"
+    enabled: true
+  - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiTrentoService
+    cronRefresh: "0 */10 * * * *"
+    enabled: true

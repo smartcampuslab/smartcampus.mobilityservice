@@ -18,10 +18,6 @@ package eu.trentorise.smartcampus.mobility.processor.mobility.services;
 
 import it.smartcommunitylab.mobilityservice.services.MobilityServiceObjectsContainer;
 
-/**
- * @author raman
- *
- */
 public interface MobilityServiceHandler {
 
 	public void process(MobilityServiceObjectsContainer data) throws Exception;

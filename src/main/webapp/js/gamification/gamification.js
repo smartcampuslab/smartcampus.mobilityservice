@@ -10,18 +10,20 @@ notification.controller('GameCtrl', function($scope, $http) {
 	$scope.fixpaths = false;
 	$scope.eventsMarkers = new Map();
 	$scope.fromDate = Date.today().previous().saturday();
-	$scope.toDate = Date.today().previous().saturday().add(-1).minute();
+	$scope.toDate = Date.today().next().saturday().add(-1).minute();
 	$scope.openedFrom = false;
 	$scope.openedTo = false;
+	$scope.excludeZeroPoints = false;
+	$scope.unapprovedOnly = false;
+	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
+	$scope.filterApproved = $scope.approvedList[0];
 
 
 	
 	var load = function() {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
-			console.log($scope.fromDate);
-			console.log($scope.toDate);
-			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
 				data.data.forEach(function(descr) {
@@ -47,7 +49,7 @@ notification.controller('GameCtrl', function($scope, $http) {
 			$scope.selectedUser = user;
 
 			if (!$scope.userMap[user]) {
-				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 				});
 			}
@@ -97,6 +99,39 @@ notification.controller('GameCtrl', function($scope, $http) {
 		$http.post("console/validate", {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 		});
+	}
+	
+	$scope.switchValidity = function(instance) {
+		$http.post("console/itinerary/switchValidity/" + instance.id + "?value=" + !instance.switchValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			instance.switchValidity = data.data.switchValidity;
+		});
+	}			
+	
+	$scope.toggleApproved = function(instance) {
+		$http.post("console/itinerary/approve/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			instance.approved = data.data.approved;
+		});
+	}		
+	
+	$scope.approveAll = function() {
+		$http.post("console/approveFiltered?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			load();
+		});
+	}
+	
+	$scope.report = function() {
+		$http.get("console/report?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			load();
+		});
+	}	
+	
+	$scope.getValidityStyle = function(instance) {
+		if ((instance.valid & !instance.switchValidity) | (!instance.valid & instance.switchValidity)) {
+			return true;
+		}
+		if ((!instance.valid & !instance.switchValidity) | (instance.valid & instance.switchValidity)) {
+			return false;
+		}
 	}
 	
 	$scope.reload = function() {
