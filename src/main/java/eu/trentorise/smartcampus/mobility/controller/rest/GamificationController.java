@@ -73,42 +73,41 @@ import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 @RequestMapping(value = "/gamification")
 public class GamificationController extends SCController {
 
-	 /**
+	/**
 	 * 
 	 */
 	private static final int SAME_TRIP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 	@Autowired
-	 private DomainStorage storage;
+	private DomainStorage storage;
 
 	@Autowired
 	private AuthServices services;
-	
+
 	@Autowired
 	@Value("${geolocations.db.dir}")
-	private String geolocationsDBDir;	
-	
+	private String geolocationsDBDir;
+
 	@Autowired
 	@Value("${geolocations.db}")
-	private String geolocationsDB;	
-	
-	
+	private String geolocationsDB;
+
 	@Autowired
 	@Value("${aacURL}")
-	private String aacURL;	
-	
+	private String aacURL;
+
 	@Autowired
-	private AppSetup appSetup;	
-	
+	private AppSetup appSetup;
+
 	private BasicProfileService basicProfileService;
-	
+
 	@Autowired
 	private GamificationHelper gamificationHelper;
 
 	private static Log logger = LogFactory.getLog(GamificationController.class);
-	
+
 	private Connection connection;
-	
+
 	private Set<String> publishQueue = Sets.newConcurrentHashSet();
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
@@ -120,7 +119,7 @@ public class GamificationController extends SCController {
 	@PostConstruct
 	public void init() throws Exception {
 		basicProfileService = new BasicProfileService(aacURL);
-		
+
 		File f = new File(geolocationsDBDir);
 		if (!f.exists()) {
 			f.mkdir();
@@ -135,11 +134,12 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
-		logger.info("Receiving geolocation events, token = "+token+", "+ geolocationsEvent.getLocation().size() +" events");
+	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId,
+			HttpServletResponse response) throws Exception {
+		logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
 		ObjectMapper mapper = new ObjectMapper();
-		
-//		logger.info(mapper.writeValueAsString(geolocationsEvent));
+
+		// logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
 			String userId = null;
 			try {
@@ -150,52 +150,52 @@ public class GamificationController extends SCController {
 			}
 
 			logger.info("UserId: " + userId);
-			
+
 			String gameId = getGameId(appId);
 			if (gameId == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return "";
-			}			
+			}
 
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 			Map<String, String> freeTracks = new HashMap<String, String>();
 			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
-			
 
 			Collections.sort(geolocationsEvent.getLocation());
-			
+
 			long now = System.currentTimeMillis();
-			
+
 			if (geolocationsEvent.getLocation() != null) {
 				for (Location location : geolocationsEvent.getLocation()) {
 					String locationTravelId = null;
 					Long locationTs = null;
 					if (location.getExtras() != null && location.getExtras().containsKey("idTrip")) {
 						locationTravelId = (String) location.getExtras().get("idTrip");
-						locationTs = location.getExtras().get("start") != null ? Long.parseLong(""+location.getExtras().get("start")) : null;
+						locationTs = location.getExtras().get("start") != null ? Long.parseLong("" + location.getExtras().get("start")) : null;
 					} else {
-						// now the plugin supports correctly the extras for each location.
-						// locations with empty idTrip are possible only upon initialization/synchronization.
+						// now the plugin supports correctly the extras for each
+						// location.
+						// locations with empty idTrip are possible only upon
+						// initialization/synchronization.
 						// we skip them here
-//						logger.info("location without idTrip, user: "+userId);
+						// logger.info("location without idTrip, user: "+userId);
 						continue;
-//						if (lastTravelId != null) {
-//							locationTravelId = lastTravelId;
-//						} else {
-//							continue;
-//						}
+						// if (lastTravelId != null) {
+						// locationTravelId = lastTravelId;
+						// } else {
+						// continue;
+						// }
 					}
-					
+
 					if (locationTs == null) {
 						locationTs = location.getTimestamp().getTime();
 					}
-					
+
 					// discard event older than 2 days
-					if (now - 2*24*3600*1000 > location.getTimestamp().getTime()) {
+					if (now - 2 * 24 * 3600 * 1000 > location.getTimestamp().getTime()) {
 						continue;
 					}
-					
-					
+
 					Coords coords = location.getCoords();
 					Device device = geolocationsEvent.getDevice();
 					Activity activity = location.getActivity();
@@ -245,22 +245,22 @@ public class GamificationController extends SCController {
 
 					}
 
-//					Statement statement = connection.createStatement();
-//					String s = buildInsert(geolocation);
-//					statement.execute(s);
-//					statement.close();
+					// Statement statement = connection.createStatement();
+					// String s = buildInsert(geolocation);
+					// statement.execute(s);
+					// statement.close();
 
 					geolocation.setGeofence(location.getGeofence());
 
 					String day = shortSdf.format(new Date(locationTs));
 					String key = geolocation.getTravelId() + "@" + day;
 					geolocationsByItinerary.put(key, geolocation);
-					if (StringUtils.hasText((String)location.getExtras().get("transportType"))) {
-						freeTracks.put(key, (String)location.getExtras().get("transportType"));
+					if (StringUtils.hasText((String) location.getExtras().get("transportType"))) {
+						freeTracks.put(key, (String) location.getExtras().get("transportType"));
 					}
 					freeTrackStarts.put(key, locationTs);
-					
-//					storage.saveGeolocation(geolocation);
+
+					// storage.saveGeolocation(geolocation);
 				}
 			}
 
@@ -306,10 +306,10 @@ public class GamificationController extends SCController {
 					res.getGeolocationEvents().add(geoloc);
 				}
 
-//				boolean canSave = true;
+				// boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getStarted() && !res.getComplete()) {
-//						canSave = 
+						// canSave =
 						sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary());
 					}
 
@@ -325,7 +325,7 @@ public class GamificationController extends SCController {
 							res.setValid(vr.getValid());
 						}
 						if (vr != null && vr.getValid().booleanValue()) {
-//							canSave = 
+							// canSave =
 							sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {
@@ -337,11 +337,11 @@ public class GamificationController extends SCController {
 					}
 					res.setComplete(true);
 				}
-				
+
 				res.setAppId(appId);
 				storage.saveTrackedInstance(res);
-				
-				logger.info("Saved geolocation events: "+res.getId()+", "+res.getGeolocationEvents().size()+" events.");
+
+				logger.info("Saved geolocation events: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 			}
 
 		} catch (Exception e) {
@@ -351,30 +351,32 @@ public class GamificationController extends SCController {
 		}
 		return "{\"storeResult\":\"OK\"}";
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/geolocations")
-	public @ResponseBody List<Geolocation> searchGeolocationEvent(@RequestParam  Map<String, Object> query, HttpServletResponse response) throws Exception {
-		
+	public @ResponseBody List<Geolocation> searchGeolocationEvent(@RequestParam Map<String, Object> query, HttpServletResponse response) throws Exception {
+
 		Criteria criteria = new Criteria();
-		for (String key: query.keySet()) {
+		for (String key : query.keySet()) {
 			criteria = criteria.and(key).is(query.get(key));
 		}
-		
-		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));;
-		
+
+		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
+		;
+
 		return storage.searchDomainObjects(mongoQuery, Geolocation.class);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
-	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
-		logger.info("Starting free tracking for gamification, device = "+device);
+	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId,
+			@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
+		logger.info("Starting free tracking for gamification, device = " + device);
 		try {
 			String userId = getUserId();
 			if (userId == null) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
-			
+
 			String gameId = getGameId(appId);
 			if (gameId == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -395,7 +397,7 @@ public class GamificationController extends SCController {
 				res2.setUserId(userId);
 				res2.setTime(timeSdf.format(date));
 			}
-			
+
 			if (device != null) {
 				res2.setDeviceInfo(device);
 			}
@@ -403,16 +405,17 @@ public class GamificationController extends SCController {
 			res2.setFreeTrackingTransport(transport);
 			res2.setAppId(appId);
 			storage.saveTrackedInstance(res2);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-	}	
-	
+	}
+
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
-		logger.info("Starting journey for gamification, device = "+device);
+	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response)
+			throws Exception {
+		logger.info("Starting journey for gamification, device = " + device);
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -424,8 +427,8 @@ public class GamificationController extends SCController {
 			if (gameId == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
-			}			
-			
+			}
+
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
 			pars.put("clientId", itineraryId);
@@ -441,7 +444,7 @@ public class GamificationController extends SCController {
 				logger.info("Bad request.");
 				return;
 			}
-			
+
 			Date date = new Date(System.currentTimeMillis());
 			String day = shortSdf.format(date);
 			pars.put("day", day);
@@ -454,41 +457,41 @@ public class GamificationController extends SCController {
 				res2.setTime(timeSdf.format(date));
 			}
 			res2.setItinerary(res);
-			
-//			boolean canSave = true;
+
+			// boolean canSave = true;
 			if (!res2.getStarted() && !res2.getComplete()) {
-//				canSave = 
+				// canSave =
 				sendIntineraryDataToGamificationEngine(appId, userId, itineraryId + "_" + day, res);
 			}
-			
+
 			if (device != null) {
 				res2.setDeviceInfo(device);
 			}
 			res2.setStarted(true);
 			res2.setAppId(appId);
 			storage.saveTrackedInstance(res2);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		Map<String, Object> pars = new TreeMap<String, Object>();
-		pars.put("appId", appId);		
+		pars.put("appId", appId);
 		List<TrackedInstance> result = storage.searchDomainObjects(pars, TrackedInstance.class);
-		for (TrackedInstance ti: result) {
+		for (TrackedInstance ti : result) {
 			try {
 				if (ti.getItinerary() != null) {
-				ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
-				ti.setValidationResult(vr);
-				ti.setValid(vr.getValid());
-				Map<String, Object> data = gamificationHelper.computeTripData(ti.getItinerary().getData(), false);
-				ti.setEstimatedScore((Long)data.get("estimatedScore"));
-				storage.saveTrackedInstance(ti);
-				
+					ValidationResult vr = GamificationHelper.checkItineraryMatching(ti.getItinerary(), ti.getGeolocationEvents());
+					ti.setValidationResult(vr);
+					ti.setValid(vr.getValid());
+					Map<String, Object> data = gamificationHelper.computeTripData(ti.getItinerary().getData(), false);
+					ti.setEstimatedScore((Long) data.get("estimatedScore"));
+					storage.saveTrackedInstance(ti);
+
 				} else {
 					ValidationResult vr = GamificationHelper.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
 					ti.setValidationResult(vr);
@@ -496,67 +499,67 @@ public class GamificationController extends SCController {
 						ti.setValid(vr.getValid());
 					}
 					Map<String, Object> data = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
-					ti.setEstimatedScore((Long)data.get("estimatedScore"));					
+					ti.setEstimatedScore((Long) data.get("estimatedScore"));
 					storage.saveTrackedInstance(ti);
 				}
 			} catch (Exception e) {
 				logger.error("Failed to validate tracked itinerary: " + ti.getId());
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/switchValidity/{instanceId}")
-	public @ResponseBody TrackedInstance switchValidity( @PathVariable String instanceId, @RequestParam(required = true) boolean value) {
+	public @ResponseBody TrackedInstance switchValidity(@PathVariable String instanceId, @RequestParam(required = true) boolean value) {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("id", instanceId);
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
 		instance.setSwitchValidity(value);
 		storage.saveTrackedInstance(instance);
 		return instance;
-	}		
-	
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/approve/{instanceId}")
-	public @ResponseBody TrackedInstance toggleApproval( @PathVariable String instanceId, @RequestParam(required = true) boolean value) {
+	public @ResponseBody TrackedInstance toggleApproval(@PathVariable String instanceId, @RequestParam(required = true) boolean value) {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("id", instanceId);
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
 		instance.setApproved(value);
 		storage.saveTrackedInstance(instance);
 		return instance;
-	}		
-	
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/console/approveFiltered")
 	public @ResponseBody void approveFiltered(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints) {
 		Criteria criteria = new Criteria("switchValidity").is(true);
-		
+
 		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
 			criteria = criteria.and("estimatedScore").gt(0);
 		}
-		
+
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 		}
 		if (toDate != null) {
 			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-		}		
+		}
 		Query query = new Query(criteria);
-		
+
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
-		for (TrackedInstance ti: instances) {
+		for (TrackedInstance ti : instances) {
 			ti.setApproved(true);
 			storage.saveTrackedInstance(ti);
 		}
-	}		
-	
+	}
+
 	@RequestMapping(value = "/console/report")
 	public @ResponseBody void generareReport(HttpServletResponse response, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
 		Criteria criteria = new Criteria("approved").is(true);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String fileName = "report";
-		
+
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 			fileName += "_" + sdf.format(new Date(fromDate));
@@ -564,132 +567,144 @@ public class GamificationController extends SCController {
 		if (toDate != null) {
 			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
 			fileName += "_" + sdf.format(new Date(toDate));
-		}		
+		}
 		Query query = new Query(criteria).with(new Sort(Direction.DESC, "userId"));
-		
+
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		StringBuffer sb = new StringBuffer("userId;id;freeTracking;score;valid\r\n");
-		for (TrackedInstance ti: instances) {
-			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" + ti.getEstimatedScore() + ";" + (Boolean.TRUE.equals(ti.getSwitchValidity()) ? !ti.getValid() : ti.getValid()) + "\r\n");
+		for (TrackedInstance ti : instances) {
+			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" + ti.getEstimatedScore() + ";"
+					+ (Boolean.TRUE.equals(ti.getSwitchValidity()) ? !ti.getValid() : ti.getValid()) + "\r\n");
 		}
-//		System.out.println(sb);
-		
+		// System.out.println(sb);
+
 		response.setContentType("application/csv; charset=utf-8");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".csv\"");
-		response.getWriter().write(sb.toString());		
-	}	
-	
-	
-//	@RequestMapping(method = RequestMethod.POST, value = "/r353nd")
-//	public @ResponseBody void resend(HttpServletResponse response) throws Exception {
-//		List<TrackedInstance> result = storage.searchDomainObjects(new TreeMap<String, Object>(), TrackedInstance.class);
-//		int i = 0;
-//		for (TrackedInstance ti: result) {
-//			try {
-//				logger.info("Sending for player " + ti.getItinerary().getUserId() + ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / " + ti.getItinerary().getClientId() + ")");
-//				sendIntineraryDataToGamificationEngine(gameId, ti.getItinerary().getUserId(), ti.getItinerary());
-//				i++;
-//				logger.info("Resent " + i + "/" + result.size());
-//				Thread.sleep(1000);
-//			} catch (Exception e) {
-//				logger.error("Failed to resend gamification data for: " + ti.getId());
-//			}
-//			
-//		}
-//	}	
-	
-	
+		response.getWriter().write(sb.toString());
+	}
+
+	// @RequestMapping(method = RequestMethod.POST, value = "/r353nd")
+	// public @ResponseBody void resend(HttpServletResponse response) throws
+	// Exception {
+	// List<TrackedInstance> result = storage.searchDomainObjects(new
+	// TreeMap<String, Object>(), TrackedInstance.class);
+	// int i = 0;
+	// for (TrackedInstance ti: result) {
+	// try {
+	// logger.info("Sending for player " + ti.getItinerary().getUserId() +
+	// ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / "
+	// + ti.getItinerary().getClientId() + ")");
+	// sendIntineraryDataToGamificationEngine(gameId,
+	// ti.getItinerary().getUserId(), ti.getItinerary());
+	// i++;
+	// logger.info("Resent " + i + "/" + result.size());
+	// Thread.sleep(1000);
+	// } catch (Exception e) {
+	// logger.error("Failed to resend gamification data for: " + ti.getId());
+	// }
+	//
+	// }
+	// }
+
 	@RequestMapping("/console")
 	public String vewConsole() {
 		return "viewconsole";
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+
+	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	public @ResponseBody String getAppId(HttpServletResponse response) throws Exception {
 		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
 		return appId;
-	}		
+	}
 
-//	@RequestMapping("/console/itinerary")
-//	public @ResponseBody List<ItineraryDescriptor> getItineraryList(@RequestHeader(required = true, value = "appId") String appId) throws ParseException {
-//		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
-//		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
-//		Map<String, Object> pars = new TreeMap<String, Object>();
-//		pars.put("appId", appId);		
-//
-//		List<TrackedInstance> instances = storage.searchDomainObjects(pars, TrackedInstance.class);
-//		if (instances != null) {
-//			for (TrackedInstance o: instances) {
-//				ItineraryDescriptor descr = map.get(o.getClientId());
-//				if (map.get(o.getClientId()) == null) {
-//					descr = new ItineraryDescriptor();
-//					if (o.getUserId() != null) {
-//						descr.setUserId(o.getUserId());
-//					} else {
-//						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
-//						if (itinerary != null) {
-//							descr.setUserId(itinerary.getUserId());
-//						} else {
-//							continue;
-//						}
-//					}
-//					descr.setTripId(o.getClientId());
-//					if (o.getItinerary() != null) {
-//						descr.setStartTime(o.getItinerary().getData().getStartime());
-//						descr.setEndTime(o.getItinerary().getData().getEndtime());
-//						descr.setTripName(o.getItinerary().getName());
-//						descr.setRecurrency(o.getItinerary().getRecurrency());
-//					} else {
-//						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
-//						descr.setTripName(o.getClientId());
-//						if (o.getDay() != null && o.getTime() != null) {
-//							String dt = o.getDay() +" "+o.getTime();
-//							descr.setStartTime(fullSdf.parse(dt).getTime());
-//						} else if (o.getDay() != null) {
-//							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
-//						}
-//					}
-//					descr.setInstances(new ArrayList<TrackedInstance>());
-//					map.put(o.getClientId(), descr);
-//					list.add(descr);
-//				}
-//				descr.getInstances().add(o);
-//			}
-//		}
-//		return list;
-//	}
-	
+	// @RequestMapping("/console/itinerary")
+	// public @ResponseBody List<ItineraryDescriptor>
+	// getItineraryList(@RequestHeader(required = true, value = "appId") String
+	// appId) throws ParseException {
+	// List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
+	// Map<String,ItineraryDescriptor> map = new HashMap<String,
+	// ItineraryDescriptor>();
+	// Map<String, Object> pars = new TreeMap<String, Object>();
+	// pars.put("appId", appId);
+	//
+	// List<TrackedInstance> instances = storage.searchDomainObjects(pars,
+	// TrackedInstance.class);
+	// if (instances != null) {
+	// for (TrackedInstance o: instances) {
+	// ItineraryDescriptor descr = map.get(o.getClientId());
+	// if (map.get(o.getClientId()) == null) {
+	// descr = new ItineraryDescriptor();
+	// if (o.getUserId() != null) {
+	// descr.setUserId(o.getUserId());
+	// } else {
+	// ItineraryObject itinerary =
+	// storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId",
+	// o.getClientId()), ItineraryObject.class);
+	// if (itinerary != null) {
+	// descr.setUserId(itinerary.getUserId());
+	// } else {
+	// continue;
+	// }
+	// }
+	// descr.setTripId(o.getClientId());
+	// if (o.getItinerary() != null) {
+	// descr.setStartTime(o.getItinerary().getData().getStartime());
+	// descr.setEndTime(o.getItinerary().getData().getEndtime());
+	// descr.setTripName(o.getItinerary().getName());
+	// descr.setRecurrency(o.getItinerary().getRecurrency());
+	// } else {
+	// descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+	// descr.setTripName(o.getClientId());
+	// if (o.getDay() != null && o.getTime() != null) {
+	// String dt = o.getDay() +" "+o.getTime();
+	// descr.setStartTime(fullSdf.parse(dt).getTime());
+	// } else if (o.getDay() != null) {
+	// descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+	// }
+	// }
+	// descr.setInstances(new ArrayList<TrackedInstance>());
+	// map.put(o.getClientId(), descr);
+	// list.add(descr);
+	// }
+	// descr.getInstances().add(o);
+	// }
+	// }
+	// return list;
+	// }
+
 	@RequestMapping("/console/useritinerary/{userId}")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
+	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
+			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
+			@RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
-		Map<String,ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
-		
+		Map<String, ItineraryDescriptor> map = new HashMap<String, ItineraryDescriptor>();
+
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
 			criteria = criteria.and("estimatedScore").gt(0);
 		}
 		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
 			criteria = criteria.and("approved").ne(true).and("switchValidity").is(true);
-		}		
-		
+		}
+
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 		}
 		if (toDate != null) {
 			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-		}		
+		}
 		Query query = new Query(criteria);
-		
-		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);		
-		
+
+		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
+
 		if (instances != null) {
 			aggregateFollowingTrackedInstances(instances);
 			for (TrackedInstance o : instances) {
 				Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(o.getGeolocationEvents(), o.getFreeTrackingTransport());
 				if (trackingData.containsKey("estimatedScore")) {
-					o.setEstimatedScore((Long)trackingData.get("estimatedScore"));
-				}				
-				
+					o.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+				}
+
 				ItineraryDescriptor descr = map.get(o.getClientId());
 				if (map.get(o.getClientId()) == null) {
 					descr = new ItineraryDescriptor();
@@ -718,7 +733,7 @@ public class GamificationController extends SCController {
 						} else if (o.getDay() != null) {
 							descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
 						}
-						
+
 					}
 					map.put(o.getClientId(), descr);
 				}
@@ -726,44 +741,45 @@ public class GamificationController extends SCController {
 				list.add(descr);
 			}
 		}
-		
+
 		Collections.sort(list);
 		Collections.reverse(list);
-		
+
 		return list;
-	}	
-	
+	}
+
 	@RequestMapping("/console/users")
-	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
-//		String gameId = getGameId(appId);
-//		if (gameId == null) {
-//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-//			return new ArrayList<UserDescriptor>();
-//		}			
-		
-		Map<String,UserDescriptor> users = new HashMap<String, UserDescriptor>();
-		
+	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
+			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
+		// String gameId = getGameId(appId);
+		// if (gameId == null) {
+		// response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		// return new ArrayList<UserDescriptor>();
+		// }
+
+		Map<String, UserDescriptor> users = new HashMap<String, UserDescriptor>();
+
 		Set<String> keys = new HashSet<String>();
 		keys.add("userId");
 		keys.add("valid");
-		
+
 		Criteria criteria = new Criteria("appId").is(appId);
 		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
 			criteria = criteria.and("estimatedScore").gt(0);
-		}		
+		}
 		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
 			criteria = criteria.and("approved").ne(true).and("switchValidity").is(true);
-		}				
+		}
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 		}
 		if (toDate != null) {
 			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-		}		
+		}
 		Query query = new Query(criteria);
-		
+
 		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
-		for (TrackedInstance ti: tis) {
+		for (TrackedInstance ti : tis) {
 			String userId = ti.getUserId();
 			if (userId == null) {
 				continue;
@@ -776,9 +792,9 @@ public class GamificationController extends SCController {
 				ud.setTotal(0);
 				users.put(userId, ud);
 			}
-			ud.setTotal(ud.getTotal()+1);
+			ud.setTotal(ud.getTotal() + 1);
 			if (Boolean.TRUE.equals(ti.getValid())) {
-				ud.setValid(ud.getValid()+1);
+				ud.setValid(ud.getValid() + 1);
 			}
 		}
 
@@ -786,62 +802,61 @@ public class GamificationController extends SCController {
 		Collections.sort(userList);
 		return userList;
 	}
-	
 
 	@RequestMapping("/console/itinerary/{instanceId}")
-	public @ResponseBody TrackedInstance getItineraryData( @PathVariable String instanceId) {
+	public @ResponseBody TrackedInstance getItineraryData(@PathVariable String instanceId) {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("id", instanceId);
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
 		return instance;
 	}
-	
-//	private String buildInsert(Geolocation geolocation) {
-//		String s = "INSERT INTO geolocations VALUES($next_id,";
-//		s += convertToInsert(geolocation.getUuid()) + "," 
-//				+ convertToInsert(geolocation.getDevice_id()) + "," 
-//				+ convertToInsert(geolocation.getDevice_model()) + ","
-//				+ convertToInsert(geolocation.getLatitude()) + ","
-//				+ convertToInsert(geolocation.getLongitude()) + ","
-//				+ convertToInsert(geolocation.getAccuracy()) + "," 
-//				+ convertToInsert(geolocation.getAltitude()) + ","
-//				+ convertToInsert(geolocation.getSpeed()) + ","
-//				+ convertToInsert(geolocation.getHeading()) + ","
-//				+ convertToInsert(geolocation.getActivity_type()) + ","
-//				+ convertToInsert(geolocation.getActivity_confidence()) + ","
-//				+ convertToInsert(geolocation.getBattery_level()) + ","
-//				+ convertToInsert(geolocation.getBattery_is_charging()) + ","
-//				+ convertToInsert(geolocation.getIs_moving()) + ","
-//				+ convertToInsert(geolocation.getGeofence()) + ","
-//				+ convertToInsert(geolocation.getRecorded_at()) + ","
-//				+ convertToInsert(geolocation.getCreated_at()) + ","
-//				+  convertToInsert(geolocation.getUserId()) + ","
-//				+ convertToInsert(geolocation.getTravelId());
-//		s += ")";
-//		return s;
-//	}
-//	
-//	private String convertToInsert(Object o) {
-//		if (o instanceof String) {
-//			return "\"" + escape(o) + "\"";
-//		}
-//		if (o instanceof Boolean) {
-//			return ((Boolean)o).booleanValue() ? "1" : "0";
-//		}
-//		if (o instanceof Date) {
-//			return "\"" + sdf.format((Date)o)+ "\"";
-//		}
-//		if (o != null) {
-//			return o.toString();
-//		} else {
-//			return null;
-//		}
-//	}
-//	
-//	private String escape(Object o) {
-//		return ((o != null)?o.toString().replace("\"", "\"\""):"");
-//	}	
-//	
+
+	// private String buildInsert(Geolocation geolocation) {
+	// String s = "INSERT INTO geolocations VALUES($next_id,";
+	// s += convertToInsert(geolocation.getUuid()) + ","
+	// + convertToInsert(geolocation.getDevice_id()) + ","
+	// + convertToInsert(geolocation.getDevice_model()) + ","
+	// + convertToInsert(geolocation.getLatitude()) + ","
+	// + convertToInsert(geolocation.getLongitude()) + ","
+	// + convertToInsert(geolocation.getAccuracy()) + ","
+	// + convertToInsert(geolocation.getAltitude()) + ","
+	// + convertToInsert(geolocation.getSpeed()) + ","
+	// + convertToInsert(geolocation.getHeading()) + ","
+	// + convertToInsert(geolocation.getActivity_type()) + ","
+	// + convertToInsert(geolocation.getActivity_confidence()) + ","
+	// + convertToInsert(geolocation.getBattery_level()) + ","
+	// + convertToInsert(geolocation.getBattery_is_charging()) + ","
+	// + convertToInsert(geolocation.getIs_moving()) + ","
+	// + convertToInsert(geolocation.getGeofence()) + ","
+	// + convertToInsert(geolocation.getRecorded_at()) + ","
+	// + convertToInsert(geolocation.getCreated_at()) + ","
+	// + convertToInsert(geolocation.getUserId()) + ","
+	// + convertToInsert(geolocation.getTravelId());
+	// s += ")";
+	// return s;
+	// }
+	//
+	// private String convertToInsert(Object o) {
+	// if (o instanceof String) {
+	// return "\"" + escape(o) + "\"";
+	// }
+	// if (o instanceof Boolean) {
+	// return ((Boolean)o).booleanValue() ? "1" : "0";
+	// }
+	// if (o instanceof Date) {
+	// return "\"" + sdf.format((Date)o)+ "\"";
+	// }
+	// if (o != null) {
+	// return o.toString();
+	// } else {
+	// return null;
+	// }
+	// }
+	//
+	// private String escape(Object o) {
+	// return ((o != null)?o.toString().replace("\"", "\"\""):"");
+	// }
+	//
 	private synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Set<Geolocation> geolocationEvents, String ttype) {
 		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
@@ -855,11 +870,14 @@ public class GamificationController extends SCController {
 
 	private synchronized boolean sendIntineraryDataToGamificationEngine(String appId, String playerId, String publishKey, ItineraryObject itinerary) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
-//		Criteria criteria = new Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());
-//		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
-//		
-//		List<Geolocation> geolocations = storage.searchDomainObjects(mongoQuery, Geolocation.class);
-		
+		// Criteria criteria = new
+		// Criteria("userId").is(playerId).and("travelId").is(itinerary.getClientId());
+		// Query mongoQuery = new Query(criteria).with(new
+		// Sort(Sort.Direction.DESC, "created_at"));
+		//
+		// List<Geolocation> geolocations =
+		// storage.searchDomainObjects(mongoQuery, Geolocation.class);
+
 		if (publishQueue.contains(publishKey)) {
 			return false;
 		}
@@ -867,40 +885,44 @@ public class GamificationController extends SCController {
 		gamificationHelper.saveItinerary(itinerary, appId, playerId);
 		return true;
 	}
-	
+
 	private void aggregateFollowingTrackedInstances(List<TrackedInstance> instances) {
 		Map<Geolocation, TrackedInstance> eventsMap = Maps.newHashMap();
-		for (TrackedInstance ti: instances) {
+		for (TrackedInstance ti : instances) {
 			List<Geolocation> ge = Lists.newArrayList(ti.getGeolocationEvents());
 			Collections.sort(ge);
 			eventsMap.put(ge.get(0), ti);
 		}
-		
+
 		List<TrackedInstance> sortedInstances = Lists.newArrayList();
 		List<Geolocation> sortedInstancesKey = Lists.newArrayList(eventsMap.keySet());
 		Collections.sort(sortedInstancesKey);
-		
-		for (Geolocation g: sortedInstancesKey) {
+
+		for (Geolocation g : sortedInstancesKey) {
 			sortedInstances.add(eventsMap.get(g));
 		}
-		
+
 		int groupId = 1;
-		for (int i = 1; i < sortedInstances.size(); i++) {
-			List<Geolocation> ge1 = Lists.newArrayList(sortedInstances.get(i).getGeolocationEvents());
-			List<Geolocation> ge2 = Lists.newArrayList(sortedInstances.get(i - 1).getGeolocationEvents());
-			Collections.sort(ge1);
-			Collections.sort(ge2);
-			
-			if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
-				sortedInstances.get(i).setGroupId(groupId);
-				sortedInstances.get(i - 1).setGroupId(groupId);
-			} else {
-				groupId++;
+		if (sortedInstances.size() > 1) {
+			for (int i = 1; i < sortedInstances.size(); i++) {
+				List<Geolocation> ge1 = Lists.newArrayList(sortedInstances.get(i).getGeolocationEvents());
+				List<Geolocation> ge2 = Lists.newArrayList(sortedInstances.get(i - 1).getGeolocationEvents());
+				Collections.sort(ge1);
+				Collections.sort(ge2);
+
+				if (ge1.isEmpty() || ge2.isEmpty()) {
+					continue;
+				}
+				if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
+					sortedInstances.get(i).setGroupId(groupId);
+					sortedInstances.get(i - 1).setGroupId(groupId);
+				} else {
+					groupId++;
+				}
 			}
 		}
-		
+
 	}
-	
 
 	private String getGameId(String appId) {
 		if (appId != null) {
@@ -912,7 +934,7 @@ public class GamificationController extends SCController {
 			return gameId;
 		}
 		return null;
-	}	
+	}
 
 	@Override
 	protected AuthServices getAuthServices() {
