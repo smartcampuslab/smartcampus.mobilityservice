@@ -40,6 +40,7 @@
 .user-row {
 	border: 1px solid #bbb;
 	padding: 5px;
+	margin-bottom: 10px !important;
 }
 
 .user-row a {
