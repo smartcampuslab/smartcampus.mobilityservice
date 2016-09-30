@@ -14,10 +14,8 @@
 <script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="../lib/ie10-viewport-bug-workaround.js"></script>
-
 <!-- Bootstrap core CSS -->
 <link href="../css/bootstrap.min.css" rel="stylesheet">
-
 <script src="../lib/angular/angular-route.min.js"></script>
 <script src="../lib/ng-scrollable.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
@@ -80,104 +78,108 @@
 table {
 	width: 100%;
 }
+
 .padding {
-  padding: 8px;
+	padding: 8px;
 }
 
 thead td {
 	font-weight: bold;
 }
+
 .form-check {
-  padding-left: 10px;
+	padding-left: 10px;
 }
+
 .form-check input {
-  margin-right: 5px;
+	margin-right: 5px;
 }
 
 .group-indicator {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
 }
+
 .itinerary-switch {
-  margin: 0;
+	margin: 0;
 }
+
 .itinerary-def {
-  white-space: nowrap;
+	white-space: nowrap;
 }
 
 #left-scrollable {
-  padding-right: 2px;
+	padding-right: 2px;
 }
 
 body {
-  padding-bottom: 0 !important;
+	padding-bottom: 0 !important;
 }
-
 </style>
 </head>
 <body>
 	<div class="console" ng-controller="GameCtrl">
 		<div class="row">
 			<div class="col-md-4">
-					<form>
-            <div class="panel panel-default padding">
-              <div class="row">
-                 <div class="col-md-3">
-                   <a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" role="button">Report</a>
-                 </div>
-                 <div class="col-md-9 text-right">
-                  <button class="btn btn-danger btn-sm" ng-click="revalidate()">Revalidate</button>
-                  <button class="btn btn-danger btn-sm" ng-click="approveAll()" >Approve all</button>
-                 </div>
-              </div>
-            </div>
-						<div class="panel panel-default padding">
-						    <div class="row">
-						      <div class="col-md-3">
-                    <button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>
-                  </div>
-                  <div class="col-md-9 text-right">  
-                    <label class="form-check">
-                      <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
-                    </label>
-                    <label class="form-check">
-                      <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
-                    </label>                   
-						      </div>
-						    </div>
-						    <div class="row padding">
-						      <div class="col-md-3 text-right">
-						        <label>From:</label>
-						      </div>
-						      <div class="col-md-9">
-                    <div class="input-group">
-                          <input id="fromDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="fromDate" is-open="openedFrom" close-text="Close"/> <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
-                              <i class="glyphicon glyphicon-calendar"></i>
-                            </button>
-                          </span>
-                     </div>
-                   </div>
-						    </div>
-                <div class="row padding">
-                  <div class="col-md-3 text-right">
-                    <label>To:</label>
-                  </div>
-                  <div class="col-md-9">
-                    <div class="input-group">
-                          <input id="toDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="toDate" is-open="openedTo" close-text="Close"/> <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
-                              <i class="glyphicon glyphicon-calendar"></i>
-                            </button>
-                          </span>
-                     </div>
-                   </div>
-                </div>
+				<form>
+					<div class="panel panel-default padding">
+						<div class="row">
+							<div class="col-md-3">
+								<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" role="button">Report</a>
 							</div>
-					</form>
-					
-		      <div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
+							<div class="col-md-9 text-right">
+								<button class="btn btn-danger btn-sm" ng-click="revalidate()">Revalidate</button>
+								<button class="btn btn-danger btn-sm" ng-click="approveAll()">Approve all</button>
+							</div>
+						</div>
+					</div>
+					<div class="panel panel-default padding">
+						<div class="row">
+							<div class="col-md-3">
+								<button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>
+							</div>
+							<div class="col-md-9 text-right">
+								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
+								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
+								</label>
+							</div>
+						</div>
+						<div class="row padding">
+							<div class="col-md-3 text-right">
+								<label>From:</label>
+							</div>
+							<div class="col-md-9">
+								<div class="input-group">
+									<input id="fromDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="fromDate"
+										is-open="openedFrom" close-text="Close"
+									/> <span class="input-group-btn">
+										<button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
+											<i class="glyphicon glyphicon-calendar"></i>
+										</button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="row padding">
+							<div class="col-md-3 text-right">
+								<label>To:</label>
+							</div>
+							<div class="col-md-9">
+								<div class="input-group">
+									<input id="toDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="toDate" is-open="openedTo"
+										close-text="Close"
+									/> <span class="input-group-btn">
+										<button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
+											<i class="glyphicon glyphicon-calendar"></i>
+										</button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
 					<div class="">
 						<div ng-repeat="user in users" class="panel panel-default user-row">
 							<div class="row">
@@ -208,8 +210,8 @@ body {
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
-													></span><br /> <b>{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore : itinerary.instance.estimatedScore}}
-														Points</b>
+													></span><br /> <b>{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore :
+														itinerary.instance.estimatedScore}} Points</b>
 												</div>
 											</div>
 											<div class="group-indicator">
@@ -230,8 +232,8 @@ body {
 			</div>
 			<div class="col-md-8">
 				<div id="map"></div>
-				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();" name="fix-paths"
-						class="navbar-btn btn-sm"
+				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();"
+						name="fix-paths" class="navbar-btn btn-sm"
 					>&nbsp;Fix paths</label>
 					<div id="right-scrollable" style="width: 100%; height: 100%;">
 						<div class="row" ng-if="selectedInstance != null">
