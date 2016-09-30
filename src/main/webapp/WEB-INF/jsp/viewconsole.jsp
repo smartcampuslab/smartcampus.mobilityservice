@@ -187,7 +187,7 @@ body {
 									<a ng-click="selectUser(user)">{{user}} </a>
 								</div>
 								<div class="col-md-6 pull-right">
-									<strong>({{userTotals[user].total}} tracked, <span style="">{{userTotals[user].failed}} invalid</span>)
+								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].failed}} invalid</span>)
 									</strong>
 								</div>
 							</div>
