@@ -208,6 +208,7 @@ public class DomainStorage {
 			}
 			update.set("switchValidity", tracked.getSwitchValidity());
 			update.set("approved", tracked.getApproved());
+			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
 			
 			template.updateFirst(query, update, TRACKED);

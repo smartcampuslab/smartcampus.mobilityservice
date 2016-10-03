@@ -1,5 +1,7 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -318,6 +320,9 @@ public class GamificationController extends SCController {
 					ValidationResult vr = GamificationHelper.checkItineraryMatching(res.getItinerary(), res.getGeolocationEvents());
 					res.setValidationResult(vr);
 					res.setValid(vr.getValid());
+					
+					Map<String, Object> data = gamificationHelper.computeTripData(res.getItinerary().getData(), false);
+					res.setEstimatedScore((Long) data.get("estimatedScore"));
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
 						ValidationResult vr = GamificationHelper.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
@@ -520,6 +525,16 @@ public class GamificationController extends SCController {
 		storage.saveTrackedInstance(instance);
 		return instance;
 	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/toCheck/{instanceId}")
+	public @ResponseBody TrackedInstance toCheck(@PathVariable String instanceId, @RequestParam(required = true) boolean value) {
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("id", instanceId);
+		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
+		instance.setToCheck(value);
+		storage.saveTrackedInstance(instance);
+		return instance;
+	}	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/approve/{instanceId}")
 	public @ResponseBody TrackedInstance toggleApproval(@PathVariable String instanceId, @RequestParam(required = true) boolean value) {
@@ -532,13 +547,15 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/console/approveFiltered")
-	public @ResponseBody void approveFiltered(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints) {
+	public @ResponseBody void approveFiltered(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck) {
 		Criteria criteria = new Criteria("switchValidity").is(true);
 
 		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
 			criteria = criteria.and("estimatedScore").gt(0);
 		}
-
+		if (toCheck != null && toCheck.booleanValue()) {
+			criteria = criteria.and("toCheck").is(true);
+		}	
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 		}
@@ -556,7 +573,7 @@ public class GamificationController extends SCController {
 
 	@RequestMapping(value = "/console/report")
 	public @ResponseBody void generareReport(HttpServletResponse response, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
-		Criteria criteria = new Criteria("approved").is(true);
+		Criteria criteria = new Criteria("switchValidity").is(true).and("approved").ne(true);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String fileName = "report";
@@ -572,10 +589,16 @@ public class GamificationController extends SCController {
 		Query query = new Query(criteria).with(new Sort(Direction.DESC, "userId"));
 
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
-		StringBuffer sb = new StringBuffer("userId;id;freeTracking;score;valid\r\n");
+		StringBuffer sb = new StringBuffer("userId;id;freeTracking;itineraryName;score;valid\r\n");
 		for (TrackedInstance ti : instances) {
-			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" + ti.getEstimatedScore() + ";"
-					+ (Boolean.TRUE.equals(ti.getSwitchValidity()) ? !ti.getValid() : ti.getValid()) + "\r\n");
+			if (ti.getItinerary() != null) {
+				Itinerary itinerary = ti.getItinerary().getData();
+				long score = gamificationHelper.computeEstimatedGameScore(itinerary, false);
+				ti.setEstimatedScore(score);
+				storage.saveTrackedInstance(ti);
+			}
+			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" 
+		+ ((ti.getItinerary() != null) ? ti.getItinerary().getName() : "") + ";" + ti.getEstimatedScore() + ";" + (Boolean.TRUE.equals(ti.getSwitchValidity()) ? !ti.getValid() : ti.getValid()) + "\r\n");
 		}
 		// System.out.println(sb);
 
@@ -621,7 +644,7 @@ public class GamificationController extends SCController {
 	@RequestMapping("/console/useritinerary/{userId}")
 	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
 			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
-			@RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
+			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws ParseException {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
@@ -631,6 +654,9 @@ public class GamificationController extends SCController {
 		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
 			criteria = criteria.and("approved").ne(true).and("switchValidity").is(true);
 		}
+		if (toCheck != null && toCheck.booleanValue()) {
+			criteria = criteria.and("toCheck").is(true);
+		}		
 
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
@@ -651,44 +677,43 @@ public class GamificationController extends SCController {
 
 			instances = aggregateFollowingTrackedInstances(instances);
 			for (TrackedInstance o : instances) {
-				
-				
+
 				Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(o.getGeolocationEvents(), o.getFreeTrackingTransport());
 				if (trackingData.containsKey("estimatedScore")) {
 					o.setEstimatedScore((Long) trackingData.get("estimatedScore"));
 				}
 
 				ItineraryDescriptor descr = new ItineraryDescriptor();
-					if (o.getUserId() != null) {
-						descr.setUserId(o.getUserId());
+				if (o.getUserId() != null) {
+					descr.setUserId(o.getUserId());
+				} else {
+					ItineraryObject itinerary = storage.searchDomainObject(Collections.<String, Object> singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+					if (itinerary != null) {
+						descr.setUserId(itinerary.getUserId());
 					} else {
-						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String, Object> singletonMap("clientId", o.getClientId()), ItineraryObject.class);
-						if (itinerary != null) {
-							descr.setUserId(itinerary.getUserId());
-						} else {
-							continue;
-						}
+						continue;
 					}
-					descr.setTripId(o.getClientId());
-					
-					if (o.getGeolocationEvents() != null && !o.getGeolocationEvents().isEmpty()) {
-						Geolocation event = o.getGeolocationEvents().iterator().next();
-						descr.setStartTime(event.getRecorded_at().getTime());
-					} else if (o.getDay() != null && o.getTime() != null) {
-						String dt = o.getDay() + " " + o.getTime();
-						descr.setStartTime(fullSdf.parse(dt).getTime());
-					} else if (o.getDay() != null) {
-						descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
-					}					
-					
-					if (o.getItinerary() != null) {
-						descr.setEndTime(o.getItinerary().getData().getEndtime());
-						descr.setTripName(o.getItinerary().getName());
-						descr.setRecurrency(o.getItinerary().getRecurrency());
-					} else {
-						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
-						descr.setTripName(o.getId());
-					}
+				}
+				descr.setTripId(o.getClientId());
+
+				if (o.getGeolocationEvents() != null && !o.getGeolocationEvents().isEmpty()) {
+					Geolocation event = o.getGeolocationEvents().iterator().next();
+					descr.setStartTime(event.getRecorded_at().getTime());
+				} else if (o.getDay() != null && o.getTime() != null) {
+					String dt = o.getDay() + " " + o.getTime();
+					descr.setStartTime(fullSdf.parse(dt).getTime());
+				} else if (o.getDay() != null) {
+					descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+				}
+
+				if (o.getItinerary() != null) {
+					descr.setEndTime(o.getItinerary().getData().getEndtime());
+					descr.setTripName(o.getItinerary().getName() + " (" + o.getId() + ")");
+					descr.setRecurrency(o.getItinerary().getRecurrency());
+				} else {
+					descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+					descr.setTripName(o.getId());
+				}
 				descr.setInstance(o);
 				list.add(descr);
 			}
@@ -702,7 +727,7 @@ public class GamificationController extends SCController {
 
 	@RequestMapping("/console/users")
 	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
-			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly) throws ParseException {
+			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws ParseException {
 		// String gameId = getGameId(appId);
 		// if (gameId == null) {
 		// response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -722,6 +747,9 @@ public class GamificationController extends SCController {
 		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
 			criteria = criteria.and("approved").ne(true).and("switchValidity").is(true);
 		}
+		if (toCheck != null && toCheck.booleanValue()) {
+			criteria = criteria.and("toCheck").is(true);
+		}			
 		if (fromDate != null) {
 			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
 		}
@@ -849,15 +877,16 @@ public class GamificationController extends SCController {
 				}
 				if (o2.getGeolocationEvents() == null || o2.getGeolocationEvents().isEmpty()) {
 					return 1;
-				}			
+				}
 				return (o1.getGeolocationEvents().iterator().next().compareTo(o2.getGeolocationEvents().iterator().next()));
-			}}); 
-		
+			}
+		});
+
 		int groupId = 1;
 		if (sortedInstances.size() > 1) {
 			for (int i = 1; i < sortedInstances.size(); i++) {
-				List<Geolocation> ge1 = (List)sortedInstances.get(i).getGeolocationEvents();
-				List<Geolocation> ge2 = (List)sortedInstances.get(i - 1).getGeolocationEvents();
+				List<Geolocation> ge1 = (List) sortedInstances.get(i).getGeolocationEvents();
+				List<Geolocation> ge2 = (List) sortedInstances.get(i - 1).getGeolocationEvents();
 
 				if (ge1.isEmpty() || ge2.isEmpty()) {
 					continue;
@@ -870,7 +899,7 @@ public class GamificationController extends SCController {
 				}
 			}
 		}
-		
+
 		return sortedInstances;
 	}
 

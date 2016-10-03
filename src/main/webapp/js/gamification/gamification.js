@@ -14,6 +14,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.openedFrom = false;
 	$scope.openedTo = false;
 	$scope.excludeZeroPoints = false;
+	$scope.toCheck = false;
 	$scope.unapprovedOnly = false;
 	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
 	$scope.filterApproved = $scope.approvedList[0];
@@ -32,9 +33,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	var load = function() {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
-			console.log(JSON.stringify($scope.filterApproved, null, 2));
-//			console.log($scope.filterApproved.name + " -> " + ($scope.filterApproved.value == null));
-			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
 				data.data.forEach(function(descr) {
@@ -60,7 +59,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 			$scope.selectedUser = user;
 
 			if (!$scope.userMap[user]) {
-				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 				});
 			}
@@ -118,6 +117,12 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}			
 	
+	$scope.toggleToCheck = function(instance) {
+		$http.post("console/itinerary/toCheck/" + instance.id + "?value=" + !instance.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			instance.toCheck = data.data.toCheck;
+		});
+	}			
+	
 	$scope.toggleApproved = function(instance) {
 		$http.post("console/itinerary/approve/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			instance.approved = data.data.approved;
@@ -125,7 +130,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	}		
 	
 	$scope.approveAll = function() {
-		$http.post("console/approveFiltered?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/approveFiltered?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 		});
 	}

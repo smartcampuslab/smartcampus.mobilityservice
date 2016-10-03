@@ -341,9 +341,10 @@ public class GamificationHelper {
 	}	
 	
 
-	public void computeEstimatedGameScore(Itinerary itinerary, boolean log) {
+	public long computeEstimatedGameScore(Itinerary itinerary, boolean log) {
 		Long score = (Long) (computeTripData(itinerary, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
+		return score;
 	}
 
 	public static boolean checkItineraryCompletion(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {

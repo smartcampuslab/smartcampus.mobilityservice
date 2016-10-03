@@ -143,6 +143,7 @@ body {
 								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
 								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
 								</label>
+								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check
 							</div>
 						</div>
 						<div class="row padding">
@@ -204,7 +205,7 @@ body {
 													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
 														title="Mismatched activities" data-toggle="tooltip"
 													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> <br />
-													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? 'Free tracking' : 'Planned'}}</b>
+													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? ('Free tracking - ' + itinerary.instance.freeTrackingTransport) : 'Planned'}}</b>
 												</div>
 												<div class="col-md-6 text-right">
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
@@ -221,6 +222,11 @@ body {
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.switchValidity"
 												ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>
+											<label class="itinerary-switch"><b>To check</b> <input
+												ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.toCheck"
+												ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
+											> </label>											
+											
 										</div>
 									</div>
 								</div>

@@ -40,6 +40,7 @@ public class TrackedInstance {
 	
 	private Boolean switchValidity;
 	private Boolean approved;
+	private Boolean toCheck;
 	
 	private int groupId;
 	
@@ -199,6 +200,14 @@ public class TrackedInstance {
 
 	public void setApproved(Boolean approved) {
 		this.approved = approved;
+	}
+
+	public Boolean getToCheck() {
+		return toCheck;
+	}
+
+	public void setToCheck(Boolean toCheck) {
+		this.toCheck = toCheck;
 	}
 
 	public int getGroupId() {
