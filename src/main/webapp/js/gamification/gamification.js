@@ -29,10 +29,35 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		document.getElementById('toDate').value = $scope.toDate.toString('ddd MMM dd HH:mm');
 	});
 
+	var spinOpts = {
+			  lines: 13 // The number of lines to draw
+			, length: 28 // The length of each line
+			, width: 14 // The line thickness
+			, radius: 42 // The radius of the inner circle
+			, scale: 1 // Scales overall size of the spinner
+			, corners: 1 // Corner roundness (0..1)
+			, color: '#000' // #rgb or #rrggbb or array of colors
+			, opacity: 0.25 // Opacity of the lines
+			, rotate: 0 // The rotation offset
+			, direction: 1 // 1: clockwise, -1: counterclockwise
+			, speed: 1 // Rounds per second
+			, trail: 60 // Afterglow percentage
+			, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+			, zIndex: 2e9 // The z-index (defaults to 2000000000)
+			, className: 'spinner' // The CSS class to assign to the spinner
+			, top: '66%' // Top position relative to parent
+			, left: '50%' // Left position relative to parent
+			, shadow: false // Whether to render a shadow
+			, hwaccel: false // Whether to use hardware acceleration
+			, position: 'absolute' // Element positioning
+			}
+	var target = document.getElementById('console')
+	var spinner = new Spinner(spinOpts);
 	
 	var load = function() {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
+			spinner.spin(target);
 			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
@@ -46,6 +71,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 
 				$scope.users = users;
 				$scope.userMap = {};
+				spinner.stop();
 			});			
 		});
 	}
@@ -59,8 +85,10 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 			$scope.selectedUser = user;
 
 			if (!$scope.userMap[user]) {
+				spinner.spin(target);
 				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
+					spinner.stop();
 				});
 			}
 
@@ -106,8 +134,10 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	}
 
 	$scope.revalidate = function() {
+		spinner.spin(target);
 		$http.post("console/validate", {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
+			spinner.stop();
 		});
 	}
 	
@@ -136,14 +166,18 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	}		
 	
 	$scope.approveAll = function() {
+//		spinner.spin(target);		
 		$http.post("console/approveFiltered?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
+			spinner.stop();
 		});
 	}
 	
 	$scope.report = function() {
+		spinner.spin(target);
 		$http.get("console/report?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
+			spinner.stop();
 		});
 	}	
 	

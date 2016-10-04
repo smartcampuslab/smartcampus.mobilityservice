@@ -21,6 +21,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
 <script src="../lib/sprintf.min.js"></script>
 <script src="../lib/date.js"></script>
+<script src="../lib/spin.min.js"></script>
 <script src="../js/gamification/gamification.js"></script>
 <style type="text/css">
 .console {
@@ -115,7 +116,7 @@ body {
 </style>
 </head>
 <body>
-	<div class="console" ng-controller="GameCtrl">
+	<div id="console" class="console" ng-controller="GameCtrl">
 		<div class="row">
 			<div class="col-md-4">
 				<form>
