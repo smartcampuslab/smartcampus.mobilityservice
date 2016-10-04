@@ -111,11 +111,17 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}
 	
-	$scope.switchValidity = function(instance) {
-		$http.post("console/itinerary/switchValidity/" + instance.id + "?value=" + !instance.switchValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-			instance.switchValidity = data.data.switchValidity;
+	$scope.switchCurrentValidity = function(toggle) {
+		if (toggle) {
+		$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.switchValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$scope.selectedInstance.switchValidity = data.data.switchValidity;
+			$scope.reselectInstance();
 		});
-	}			
+		} else {
+			$scope.selectedInstance.switchValidity = !$scope.selectedInstance.switchValidity;
+		}
+	}	
+
 	
 	$scope.toggleToCheck = function(instance) {
 		$http.post("console/itinerary/toCheck/" + instance.id + "?value=" + !instance.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {

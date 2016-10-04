@@ -10,26 +10,18 @@
 <!-- Custom styles for this template -->
 <link href="../css/style.css" rel="stylesheet">
 <link href="../css/ng-scrollable.min.css" rel="stylesheet">
-<script src="../lib/angular/angular.min.js"></script>
-<script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="../lib/ie10-viewport-bug-workaround.js"></script>
 <!-- Bootstrap core CSS -->
 <link href="../css/bootstrap.min.css" rel="stylesheet">
+<script src="../lib/angular/angular.min.js"></script>
 <script src="../lib/angular/angular-route.min.js"></script>
+<script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="../lib/bootstrap.min.js"></script>
 <script src="../lib/ng-scrollable.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&v=3.exp"></script>
 <script src="../lib/sprintf.min.js"></script>
 <script src="../lib/date.js"></script>
 <script src="../js/gamification/gamification.js"></script>
-<!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-<!--[if lt IE 9]><script src="lib/ie8-responsive-file-warning.js"></script><![endif]-->
-<script src="../lib/ie-emulation-modes-warning.js"></script>
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
 <style type="text/css">
 .console {
 	padding: 20px;
@@ -143,7 +135,7 @@ body {
 								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
 								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
 								</label>
-								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check
+								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check 
 							</div>
 						</div>
 						<div class="row padding">
@@ -219,13 +211,11 @@ body {
 												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">group {{itinerary.instance.groupId}}</span>
 											</div>
 											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
-												ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.switchValidity"
-												ng-click="switchValidity(itinerary.instance)" class="navbar-btn btn-sm"
-											> </label>
-											<label class="itinerary-switch"><b>To check</b> <input
-												ng-disabled="itinerary.instance.approved" type="checkbox" ng-checked="itinerary.instance.toCheck"
-												ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
-											> </label>											
+												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
+												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal"
+											> </label> <label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved" type="checkbox"
+												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
+											> </label>										
 											
 										</div>
 									</div>
@@ -310,9 +300,23 @@ body {
 					</div>
 			</div>
 		</div>
+		<div id="confirmModal" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 class="modal-title">Are you sure?</h3>
+					</div>
+					<div class="modal-body">
+						<form id="notification-form">
+							<div class="form-group">
+								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity(true)" data-dismiss="modal">Yes</button>
+								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity(false)" data-dismiss="modal">No</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<!-- Bootstrap core JavaScript
-    ================================================== -->
-	<!-- Placed at the end of the document so the pages load faster -->
 </body>
 </html>
