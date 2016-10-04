@@ -105,6 +105,10 @@ thead td {
 	padding-right: 2px;
 }
 
+.right {
+	float: right;
+}
+
 body {
 	padding-bottom: 0 !important;
 }
@@ -121,8 +125,8 @@ body {
 								<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" role="button">Report</a>
 							</div>
 							<div class="col-md-9 text-right">
-								<button class="btn btn-danger btn-sm" ng-click="revalidate()">Revalidate</button>
-								<button class="btn btn-danger btn-sm" ng-click="approveAll()">Approve all</button>
+								<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal2">Revalidate</button>
+								<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal3">Approve all</button>
 							</div>
 						</div>
 					</div>
@@ -212,7 +216,7 @@ body {
 											</div>
 											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
-												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal"
+												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
 											> </label> <label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved" type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>										
@@ -300,23 +304,58 @@ body {
 					</div>
 			</div>
 		</div>
-		<div id="confirmModal" class="modal fade" role="dialog">
+		<div id="confirmModal1" class="modal fade" role="dialog">
 			<div class="modal-dialog modal-sm">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h3 class="modal-title">Are you sure?</h3>
+						<h4 class="modal-title">Are you sure?</h3>
 					</div>
 					<div class="modal-body">
 						<form id="notification-form">
 							<div class="form-group">
 								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity(true)" data-dismiss="modal">Yes</button>
-								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity(false)" data-dismiss="modal">No</button>
+								<button class="btn btn-primary right" type="button" ng-click="switchCurrentValidity(false)" data-dismiss="modal">No</button>
 							</div>
 						</form>
 					</div>
 				</div>
 			</div>
 		</div>
+		<div id="confirmModal2" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Are you sure?</h3>
+					</div>
+					<div class="modal-body">
+						<form id="notification-form">
+							<div class="form-group">
+								<button class="btn btn-primary" type="button" ng-click="revalidate()" data-dismiss="modal">Yes</button>
+								<button class="btn btn-primary right" type="button" data-dismiss="modal">No</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="confirmModal3" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Are you sure?</h3>
+					</div>
+					<div class="modal-body">
+						<form id="notification-form">
+							<div class="form-group">
+								<button class="btn btn-primary" type="button" ng-click="approveAll()" data-dismiss="modal">Yes</button>
+								<button class="btn btn-primary right" type="button" data-dismiss="modal">No</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>				
 	</div>
 </body>
 </html>
+
