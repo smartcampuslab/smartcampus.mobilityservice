@@ -164,27 +164,33 @@ public class GamificationController extends SCController {
 			Map<String, String> freeTracks = new HashMap<String, String>();
 			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
 
-			for (int i = geolocationsEvent.getLocation().size() - 1; i > 0; i--) {
-				Location l2 = geolocationsEvent.getLocation().get(i);
-				Location l1 = geolocationsEvent.getLocation().get(i - 1);
+			Location lastOk = geolocationsEvent.getLocation().get(geolocationsEvent.getLocation().size() - 1);
+			List<Location> toRemove = Lists.newArrayList();
+			for (int i = geolocationsEvent.getLocation().size() - 2; i >= 0; i--) {
+				Location l1 = geolocationsEvent.getLocation().get(i);
 				
-				Date d2 = l2.getTimestamp();
+				Date dOk = lastOk.getTimestamp();
 				Date d1 = l1.getTimestamp();
 				
-				String tid2 = null;
+				String tidOk = null;
 				String tid1 = null;
 				
-				if (l2.getExtras() != null && l2.getExtras().containsKey("idTrip")) {
-					tid2 = (String)l2.getExtras().get("idTrip");
+				if (lastOk.getExtras() != null && lastOk.getExtras().containsKey("idTrip")) {
+					tidOk = (String)lastOk.getExtras().get("idTrip");
 				}
 				if (l1.getExtras() != null && l1.getExtras().containsKey("idTrip")) {
 					tid1 = (String)l1.getExtras().get("idTrip");
 				}				
 						
-				if (d2.compareTo(d1) < 0) {
-					logger.warn("'Unordered' events for user: " + userId + ", tripId: " + tid1 + " / " + tid2 + ", times: " + d1 + " / " + d2 + ", coordinates: " + l1.getCoords() + " / " + l2.getCoords());
-				}
+				int comp = d1.compareTo(dOk);
+				if (comp < 0) {
+					lastOk = l1;
+				} else {
+					logger.warn("'Unordered' events for user: " + userId + ", tripId: " + tid1 + " / " + tidOk + ", times: " + d1 + " / " + dOk + ", coordinates: " + l1.getCoords() + " / " + lastOk.getCoords());
+					toRemove.add(l1);
+				} 
 			}
+			geolocationsEvent.getLocation().removeAll(toRemove);
 			
 			Collections.sort(geolocationsEvent.getLocation());
 
@@ -777,18 +783,18 @@ public class GamificationController extends SCController {
 
 		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
 		for (TrackedInstance ti : tis) {
-			if (ti.getEstimatedScore() == null) {
-				if (ti.getItinerary() == null) {
-					Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
-					if (trackingData.containsKey("estimatedScore")) {
-						ti.setEstimatedScore((Long) trackingData.get("estimatedScore"));
-					}
-				} else {
-					long score = gamificationHelper.computeEstimatedGameScore(ti.getItinerary().getData(), false);
-					ti.setEstimatedScore(score);
-				}
-				storage.saveTrackedInstance(ti);
-			}			
+//			if (ti.getEstimatedScore() == null) {
+//				if (ti.getItinerary() == null) {
+//					Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
+//					if (trackingData.containsKey("estimatedScore")) {
+//						ti.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+//					}
+//				} else {
+//					long score = gamificationHelper.computeEstimatedGameScore(ti.getItinerary().getData(), false);
+//					ti.setEstimatedScore(score);
+//				}
+//				storage.saveTrackedInstance(ti);
+//			}			
 			
 			String userId = ti.getUserId();
 			if (userId == null) {
