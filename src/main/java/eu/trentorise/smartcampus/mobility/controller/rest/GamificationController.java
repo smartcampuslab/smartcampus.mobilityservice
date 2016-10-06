@@ -164,6 +164,28 @@ public class GamificationController extends SCController {
 			Map<String, String> freeTracks = new HashMap<String, String>();
 			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
 
+			for (int i = geolocationsEvent.getLocation().size() - 1; i > 0; i--) {
+				Location l2 = geolocationsEvent.getLocation().get(i);
+				Location l1 = geolocationsEvent.getLocation().get(i - 1);
+				
+				Date d2 = l2.getTimestamp();
+				Date d1 = l1.getTimestamp();
+				
+				String tid2 = null;
+				String tid1 = null;
+				
+				if (l2.getExtras() != null && l2.getExtras().containsKey("idTrip")) {
+					tid2 = (String)l2.getExtras().get("idTrip");
+				}
+				if (l1.getExtras() != null && l1.getExtras().containsKey("idTrip")) {
+					tid1 = (String)l1.getExtras().get("idTrip");
+				}				
+						
+				if (d2.compareTo(d1) < 0) {
+					logger.warn("'Unordered' events for user: " + userId + ", tripId: " + tid1 + " / " + tid2 + ", times: " + d1 + " / " + d2 + ", coordinates: " + l1.getCoords() + " / " + l2.getCoords());
+				}
+			}
+			
 			Collections.sort(geolocationsEvent.getLocation());
 
 			long now = System.currentTimeMillis();
@@ -241,7 +263,7 @@ public class GamificationController extends SCController {
 					geolocation.setIs_moving(location.getIs_moving());
 
 					geolocation.setRecorded_at(new Date(location.getTimestamp().getTime()));
-					geolocation.setCreated_at(new Date(System.currentTimeMillis()));
+					geolocation.setCreated_at(new Date(now++));
 
 					if (location.getGeofence() != null) {
 						geolocation.setGeofence(mapper.writeValueAsString(location.getGeofence()));
