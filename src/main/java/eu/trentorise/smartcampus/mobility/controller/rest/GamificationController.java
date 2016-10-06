@@ -164,35 +164,40 @@ public class GamificationController extends SCController {
 			Map<String, String> freeTracks = new HashMap<String, String>();
 			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
 
-			Location lastOk = geolocationsEvent.getLocation().get(geolocationsEvent.getLocation().size() - 1);
-			List<Location> toRemove = Lists.newArrayList();
-			for (int i = geolocationsEvent.getLocation().size() - 2; i >= 0; i--) {
-				Location l1 = geolocationsEvent.getLocation().get(i);
-				
-				Date dOk = lastOk.getTimestamp();
-				Date d1 = l1.getTimestamp();
-				
-				String tidOk = null;
-				String tid1 = null;
-				
-				if (lastOk.getExtras() != null && lastOk.getExtras().containsKey("idTrip")) {
-					tidOk = (String)lastOk.getExtras().get("idTrip");
+			if (geolocationsEvent.getLocation() != null && !geolocationsEvent.getLocation().isEmpty()) {
+				Location lastOk = geolocationsEvent.getLocation().get(geolocationsEvent.getLocation().size() - 1);
+				ArrayList<Location> toKeep = Lists.newArrayList();
+				toKeep.add(lastOk);
+				for (int i = geolocationsEvent.getLocation().size() - 2; i >= 0; i--) {
+					Location l1 = geolocationsEvent.getLocation().get(i);
+
+					Date dOk = lastOk.getTimestamp();
+					Date d1 = l1.getTimestamp();
+
+					int comp = d1.compareTo(dOk);
+					if (comp < 0) {
+						lastOk = l1;
+						toKeep.add(l1);
+					} else {
+						String tidOk = null;
+						String tid1 = null;
+
+						if (lastOk.getExtras() != null && lastOk.getExtras().containsKey("idTrip")) {
+							tidOk = (String) lastOk.getExtras().get("idTrip");
+						}
+						if (l1.getExtras() != null && l1.getExtras().containsKey("idTrip")) {
+							tid1 = (String) l1.getExtras().get("idTrip");
+						}						
+						logger.warn("'Unordered' events for user: " + userId + ", tripId: " + tid1 + " / " + tidOk + ", times: " + d1 + " / " + dOk + ", coordinates: " + l1.getCoords() + " / "
+								+ lastOk.getCoords());
+					}
 				}
-				if (l1.getExtras() != null && l1.getExtras().containsKey("idTrip")) {
-					tid1 = (String)l1.getExtras().get("idTrip");
-				}				
-						
-				int comp = d1.compareTo(dOk);
-				if (comp < 0) {
-					lastOk = l1;
-				} else {
-					logger.warn("'Unordered' events for user: " + userId + ", tripId: " + tid1 + " / " + tidOk + ", times: " + d1 + " / " + dOk + ", coordinates: " + l1.getCoords() + " / " + lastOk.getCoords());
-					toRemove.add(l1);
-				} 
+
+				
+				geolocationsEvent.setLocation(toKeep);
+
+				Collections.sort(geolocationsEvent.getLocation());
 			}
-			geolocationsEvent.getLocation().removeAll(toRemove);
-			
-			Collections.sort(geolocationsEvent.getLocation());
 
 			long now = System.currentTimeMillis();
 
