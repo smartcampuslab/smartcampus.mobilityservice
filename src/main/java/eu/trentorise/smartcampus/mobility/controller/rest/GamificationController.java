@@ -321,7 +321,7 @@ public class GamificationController extends SCController {
 					if (res2 == null) {
 						pars = new TreeMap<String, Object>();
 						pars.put("itinerary.clientId", travelId);
-						pars.put("itinerary.userId", travelId);
+						pars.put("itinerary.userId", userId);
 						SavedTrip res3 = storage.searchDomainObject(pars, SavedTrip.class);
 						if (res3 != null) {
 							res.setItinerary(res3.getItinerary());
