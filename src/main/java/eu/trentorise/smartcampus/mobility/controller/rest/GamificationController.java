@@ -777,18 +777,18 @@ public class GamificationController extends SCController {
 
 		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
 		for (TrackedInstance ti : tis) {
-			if (ti.getEstimatedScore() == null) {
-				if (ti.getItinerary() == null) {
-					Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
-					if (trackingData.containsKey("estimatedScore")) {
-						ti.setEstimatedScore((Long) trackingData.get("estimatedScore"));
-					}
-				} else {
-					long score = gamificationHelper.computeEstimatedGameScore(ti.getItinerary().getData(), false);
-					ti.setEstimatedScore(score);
-				}
-				storage.saveTrackedInstance(ti);
-			}			
+//			if (ti.getEstimatedScore() == null) {
+//				if (ti.getItinerary() == null) {
+//					Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
+//					if (trackingData.containsKey("estimatedScore")) {
+//						ti.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+//					}
+//				} else {
+//					long score = gamificationHelper.computeEstimatedGameScore(ti.getItinerary().getData(), false);
+//					ti.setEstimatedScore(score);
+//				}
+//				storage.saveTrackedInstance(ti);
+//			}			
 			
 			String userId = ti.getUserId();
 			if (userId == null) {
