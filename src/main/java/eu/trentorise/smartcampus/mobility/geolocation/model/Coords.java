@@ -63,4 +63,9 @@ public class Coords {
 	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
+	
+	@Override
+	public String toString() {
+		return latitude + "," + longitude;
+	}
 }
