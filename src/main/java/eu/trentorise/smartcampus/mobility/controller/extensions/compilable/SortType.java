@@ -3,13 +3,13 @@ package eu.trentorise.smartcampus.mobility.controller.extensions.compilable;
 import it.sayservice.platform.smartplanner.data.message.RType;
 
 public enum SortType {
-		fastest(RType.fastest),
+		fastest(null),
 		healthy(RType.healthy),
 		leastWalking(RType.leastWalking),
 		leastChanges(RType.leastChanges),
 		greenest(RType.greenest),
 		safest(RType.safest),
-		fastestAndCheapest(null);	
+		fastestAndCheapest(RType.fastest);	
 		
 		private RType matchingRType;
 		

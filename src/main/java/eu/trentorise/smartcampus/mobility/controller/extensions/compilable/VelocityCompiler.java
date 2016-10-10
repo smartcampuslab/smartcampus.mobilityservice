@@ -164,7 +164,7 @@ public class VelocityCompiler {
 		List<PolicyElement> pems = Lists.newArrayList();
 		List<PolicyElement> pefs = Lists.newArrayList();
 		List<PlanningResultGroup> prgs = Lists.newArrayList();
-		PlanningResultGroup prg = new PlanningResultGroup("G1", 1, SortType.fastestAndCheapest);
+		PlanningResultGroup prg = new PlanningResultGroup("G1", 1, RType.fastest);
 		prgs.add(prg);
 
 		{
