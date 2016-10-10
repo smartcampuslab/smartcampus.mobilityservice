@@ -68,7 +68,10 @@
 		</entry>
 		<entry key="Rovereto">
 			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
-		</entry>				
+		</entry>	
+		<entry key="Old Trento">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.OldTrentoPlanningPolicy" />
+		</entry>					
 	</util:map>	
 
 
