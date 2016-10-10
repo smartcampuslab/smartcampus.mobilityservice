@@ -79,7 +79,7 @@ public class ItinerarySorter {
 		if (criterion != null) {
 			switch (criterion) {
 			case fastest:
-				return fastestComparator();
+				return fastestAndCheapestComparator();
 			case greenest:
 				return greenComparator();
 			case healthy:

@@ -21,9 +21,9 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 
-public class RoveretoPlanningPolicy implements PlanningPolicy {
+public class OldTrentoPlanningPolicy implements PlanningPolicy {
 
-	private static Log logger = LogFactory.getLog(RoveretoPlanningPolicy.class);
+	private static Log logger = LogFactory.getLog(TrentoPlanningPolicy.class);
 	
 	@Override
 	public List<PlanningRequest> generatePlanRequests(SingleJourney journeyRequest) {
@@ -33,62 +33,33 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		List<TType> types = Arrays.asList(journeyRequest.getTransportTypes());
 		Set<TType> allTypes = Sets.newHashSet(types);
 		
-		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1,  journeyRequest.getRouteType());
-		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,  journeyRequest.getRouteType());
-		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2,  journeyRequest.getRouteType());
+		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, journeyRequest.getRouteType());
+		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,journeyRequest.getRouteType());
+		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2, journeyRequest.getRouteType());
 		
 		for (PlanningRequest pr: originalPlanningRequests) {
 			TType type = pr.getType(); 
 			
 			if (type.equals(TType.CAR) || type.equals(TType.CARWITHPARKING)) {
 				if (!allTypes.contains(TType.PARK_AND_RIDE)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.PARK_AND_RIDE, null, null, true, prg1a);
 					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.PARK_AND_RIDE, null, null, null, pr.isWheelChair(), true, prg1a);
 					result.add(npr);
 					allTypes.add(TType.PARK_AND_RIDE);
 				}	
-				
-				if (!allTypes.contains(TType.WALK)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, null);
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, null, pr.isWheelChair(), true, null);
-					result.add(npr);
-					allTypes.add(TType.WALK);
-				}	
-				
 				if (!allTypes.contains(TType.TRANSIT)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRANSIT, null, null, true, prg1b);
 					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRANSIT, null, null, null, pr.isWheelChair(), true, prg1b);
 					result.add(npr);
 					allTypes.add(TType.TRANSIT);
 				}
-				
-				if (!allTypes.contains(TType.SHAREDBIKE)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg1b);
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, pr.isWheelChair(), true, prg1b);
-					result.add(npr);
-					allTypes.add(TType.SHAREDBIKE);
-				}					
-				
-
 			}
 			
 			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
 				if (!allTypes.contains(TType.TRAIN)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null, true, prg2);
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null ,null, pr.isWheelChair(), true, prg2);
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.TRAIN, null, null, null, pr.isWheelChair(), true, prg2);
 					result.add(npr);
 					allTypes.add(TType.TRAIN);
 				}	
-				
-				if (!allTypes.contains(TType.SHAREDBIKE)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg2);
-					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, pr.isWheelChair(), true, prg2);
-					result.add(npr);
-					allTypes.add(TType.SHAREDBIKE);
-				}					
-				
 				if (!allTypes.contains(TType.WALK)) {
-//					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, true, prg2);
 					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.WALK, null, 1, null, pr.isWheelChair(), true, prg2);
 					result.add(npr);
 					allTypes.add(TType.WALK);
@@ -100,6 +71,13 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		
 		for (PlanningRequest pr: result) {
 			TType type = pr.getType();
+			
+			// TODO: handle retry
+			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS)) {
+				if (pr.getRouteType().equals(RType.leastWalking)) {
+					pr.setSmartplannerParameter(SmartplannerParameter.maxWalkDistance, 500);
+				}
+			}
 			
 			if (type.equals(TType.CARWITHPARKING)) {
 				pr.setSmartplannerParameter(SmartplannerParameter.extraTransport, TType.WALK);
@@ -117,7 +95,7 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 					pr.setSmartplannerParameter(SmartplannerParameter.maxTotalWalkDistance, 500);
 				} else {
 					pr.setSmartplannerParameter(SmartplannerParameter.maxTotalWalkDistance, 1000);
-				}	
+				}
 			}			
 		}
 		
@@ -127,8 +105,22 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public List<PlanningRequest> evaluatePlanResults(List<PlanningRequest> planRequests) {
-		List<PlanningRequest> ok = Lists.newArrayList(planRequests);
-		planRequests.removeAll(planRequests);
+		List<PlanningRequest> ok = Lists.newArrayList();
+		List<PlanningRequest> unrecoverable = Lists.newArrayList();
+		for (PlanningRequest pr : planRequests) {
+
+			if (!pr.getItinerary().isEmpty()) {
+				ok.add(pr);
+			} else if (pr.getType().equals(TType.TRANSIT) || pr.getType().equals(TType.BUS) && pr.getRouteType().equals(RType.leastWalking) && pr.getIteration() == 0) {
+				pr.setSmartplannerParameter(SmartplannerParameter.maxWalkDistance, 1000);
+				PlanningPolicyHelper.buildSmartplannerRequest(pr);
+			} else {
+				unrecoverable.add(pr);
+			}
+
+		}
+		planRequests.removeAll(ok);
+		planRequests.removeAll(unrecoverable);
 		return ok;
 	}
 
@@ -138,24 +130,6 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		
 		List<Itinerary> remaining = PlanningPolicyHelper.filterByGroups(planRequests, comparator);
 
-		List<Itinerary> toRemove = Lists.newArrayList();
-		for (PlanningRequest pr: planRequests) {
-			List<TType> tt = (List<TType>)Arrays.asList(pr.getOriginalRequest().getTransportTypes());
-			if (tt.contains(TType.CAR) && pr.getType().equals(TType.WALK)) {
-				for (Itinerary it: pr.getItinerary()) {
-					double length = 0;
-					for (Leg leg: it.getLeg()) {
-						length += leg.getLength();
-					}
-					if (length > 2000) {
-						toRemove.add(it);
-					}
-				}
-			}
-		}		
-		
-		remaining.removeAll(toRemove);
-		
 		return remaining;
 	}
 
@@ -176,7 +150,8 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 					|| (analysis.maxDuration != 0
 							&& it.getDuration() > Math.min(analysis.maxDuration
 									+ (1000 * 60 * 30), analysis.maxDuration * 1.5) && it
-							.getEndtime() > analysis.minTime + (1000 * 60 * 10))) {
+							.getEndtime() > analysis.minTime + (1000 * 60 * 10))
+					|| (analysis.maxDuration != 0 && it.getDuration() > analysis.maxDuration + (1000 * 60 * 15))) {
 				toRemove.add(it);
 				logger.info("Removing by \"slow\" trip: " + it.getDuration() + "," + analysis.maxDuration + " / " + it.getStartime() + "," + analysis.maxTime);
 				continue;
@@ -188,7 +163,7 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 				distance += leg.getLength();
 			}
 
-			if (analysis.maxDistance != 0 && distance > 2 * analysis.maxDistance) {
+			if (analysis.maxDistance != 0 && distance > 1.5 * analysis.maxDistance) {
 				toRemove.add(it);
 				logger.info("Removing by distance: " + distance + "/" + analysis.maxDistance);
 				continue;
@@ -207,19 +182,19 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public String getName() {
-		return "Bike Sharing";
+		return "Old Park and Ride";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Rovereto";
-	}	
-	
+		return "Old Trento";
+	}
+
 	@Override
 	public Boolean getDraft() {
 		return false;
 	}	
-	
+
 	@Override
 	public PolicyType getPolicyType() {
 		return PolicyType.hardcoded;

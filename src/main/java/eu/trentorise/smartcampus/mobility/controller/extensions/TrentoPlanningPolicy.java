@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
-import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 
@@ -34,9 +33,10 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 		List<TType> types = Arrays.asList(journeyRequest.getTransportTypes());
 		Set<TType> allTypes = Sets.newHashSet(types);
 		
-		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, SortType.convertType(journeyRequest.getRouteType()));
-		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1, SortType.convertType(journeyRequest.getRouteType()));
-		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2, SortType.convertType(journeyRequest.getRouteType()));
+		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, journeyRequest.getRouteType());
+		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg1c = new PlanningResultGroup("1c", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2,  journeyRequest.getRouteType());
 		
 		for (PlanningRequest pr: originalPlanningRequests) {
 			TType type = pr.getType(); 
@@ -52,6 +52,11 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 					result.add(npr);
 					allTypes.add(TType.TRANSIT);
 				}
+				if (!allTypes.contains(TType.BICYCLE)) {
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.BICYCLE, null, null, null, pr.isWheelChair(), true, prg1c);
+					result.add(npr);
+					allTypes.add(TType.BICYCLE);
+				}				
 			}
 			
 			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
@@ -175,7 +180,7 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 		
 		result = PlanningPolicyHelper.keepPromotedDuplicated(result);
 		
-		result = PlanningPolicyHelper.keepBestPromoted(result, comparator, 2);
+		result = PlanningPolicyHelper.keepBestPromoted(result, comparator, 3);
 		
 		ItinerarySorter.sortDisjoined(result, comparator);
 		return result;

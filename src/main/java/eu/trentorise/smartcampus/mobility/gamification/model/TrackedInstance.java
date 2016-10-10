@@ -1,6 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamification.model;
 
-import java.util.Set;
+import java.util.Collection;
 
 import org.springframework.data.annotation.Id;
 
@@ -21,7 +21,7 @@ public class TrackedInstance {
 	private ItineraryObject itinerary;
 	private String freeTrackingTransport;
 	
-	private Set<Geolocation> geolocationEvents;
+	private Collection<Geolocation> geolocationEvents;
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
 	private Boolean valid = Boolean.FALSE;
@@ -40,6 +40,7 @@ public class TrackedInstance {
 	
 	private Boolean switchValidity;
 	private Boolean approved;
+	private Boolean toCheck;
 	
 	private int groupId;
 	
@@ -79,11 +80,11 @@ public class TrackedInstance {
 		this.itinerary = itinerary;
 	}
 
-	public Set<Geolocation> getGeolocationEvents() {
+	public Collection<Geolocation> getGeolocationEvents() {
 		return geolocationEvents;
 	}
 
-	public void setGeolocationEvents(Set<Geolocation> geolocationEvents) {
+	public void setGeolocationEvents(Collection<Geolocation> geolocationEvents) {
 		this.geolocationEvents = geolocationEvents;
 	}
 
@@ -201,6 +202,14 @@ public class TrackedInstance {
 		this.approved = approved;
 	}
 
+	public Boolean getToCheck() {
+		return toCheck;
+	}
+
+	public void setToCheck(Boolean toCheck) {
+		this.toCheck = toCheck;
+	}
+
 	public int getGroupId() {
 		return groupId;
 	}
@@ -209,7 +218,10 @@ public class TrackedInstance {
 		this.groupId = groupId;
 	}
 
-	
+	@Override
+	public String toString() {
+		return id;
+	}
 
 
 	

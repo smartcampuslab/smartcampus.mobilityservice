@@ -1,7 +1,7 @@
-servicesConfigurations:
+servicesInstances:
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
     alias: bikesharing-rovereto
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
       password: 
@@ -13,7 +13,7 @@ servicesConfigurations:
     enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
     alias: bikesharing-pergine
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
       password: 
@@ -25,7 +25,7 @@ servicesConfigurations:
     enabled: true     
   - class: it.smartcommunitylab.mobilityservice.services.service.tobike.TobikeService
     alias: bikesharing-trento
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     parameters:
       user: "rovereto"
       password: 
@@ -37,23 +37,23 @@ servicesConfigurations:
     enabled: true        
   - class: it.smartcommunitylab.mobilityservice.services.service.oraritreni.TreniService
     alias: treni
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     parameters:
       stazione: trento
     enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.trentomale.TrentoMaleService
     alias: trentomale
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     enabled: true   
   - class: it.smartcommunitylab.mobilityservice.services.service.ordinanzerovereto.OrdinanzeRoveretoService
     alias: ordinanze-rovereto
-    cronRefresh: "0 15 10 * * *"
+    refresh: "0 15 10 * * *"
     enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiRoveretoService
     alias: parcheggi-rovereto
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     enabled: true
   - class: it.smartcommunitylab.mobilityservice.services.service.parcheggi.ParcheggiTrentoService
     alias: parcheggi-trento
-    cronRefresh: "0 */10 * * * *"
+    refresh: "0 */10 * * * *"
     enabled: true

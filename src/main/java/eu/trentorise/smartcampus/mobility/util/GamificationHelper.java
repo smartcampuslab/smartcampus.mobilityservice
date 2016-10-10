@@ -297,7 +297,7 @@ public class GamificationHelper {
 		return data;
 	}
 	
-	public Map<String, Object> computeFreeTrackingData(Set<Geolocation> geolocationEvents, String ttype) {
+	public Map<String, Object> computeFreeTrackingData(Collection<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> result = Maps.newTreeMap();
 		Double score = 0.0;
 		double distance = 0; 		
@@ -341,9 +341,10 @@ public class GamificationHelper {
 	}	
 	
 
-	public void computeEstimatedGameScore(Itinerary itinerary, boolean log) {
+	public long computeEstimatedGameScore(Itinerary itinerary, boolean log) {
 		Long score = (Long) (computeTripData(itinerary, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
+		return score;
 	}
 
 	public static boolean checkItineraryCompletion(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
@@ -798,7 +799,7 @@ public class GamificationHelper {
 	 * @param playerId
 	 * @param geolocationEvents
 	 */
-	public void saveFreeTracking(final String travelId, final String appId, final String playerId, final Set<Geolocation> geolocationEvents, final String ttype) {
+	public void saveFreeTracking(final String travelId, final String appId, final String playerId, final Collection<Geolocation> geolocationEvents, final String ttype) {
 		if (gamificationUrl == null) {
 			logger.debug("No gamification URL, returning.");
 			return;
@@ -824,7 +825,7 @@ public class GamificationHelper {
 		});
 	}
 
-	private void saveFreetracking(String travelId, String appId, String playerId, Set<Geolocation> geolocationEvents, String ttype) {
+	private void saveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
 		if ((Long)data.get("estimatedScore") == 0) {
 			logger.debug("EstimatedScore is 0, returning.");
