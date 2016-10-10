@@ -146,7 +146,7 @@ public class PlanningPolicyHelper {
 		List<Itinerary> remaining = Lists.newArrayList();
 		for (PlanningResultGroup prg : groupMap.keySet()) {
 			List<Itinerary> origIts = Lists.newArrayList(groupMap.get(prg));
-			Comparator<Itinerary> comparator = ItinerarySorter.comparatorBySortType(prg.getSortType());
+			Comparator<Itinerary> comparator = ItinerarySorter.comparatorByRouteType(prg.getRType());
 			ItinerarySorter.sort(origIts, comparator);
 			if (prg.getMaxEntries() != null) {
 				
