@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
-import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.SortType;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 
@@ -34,9 +33,9 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 		List<TType> types = Arrays.asList(journeyRequest.getTransportTypes());
 		Set<TType> allTypes = Sets.newHashSet(types);
 		
-		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, SortType.convertType(journeyRequest.getRouteType()));
-		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1, SortType.convertType(journeyRequest.getRouteType()));
-		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2, SortType.convertType(journeyRequest.getRouteType()));
+		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2,  journeyRequest.getRouteType());
 		
 		for (PlanningRequest pr: originalPlanningRequests) {
 			TType type = pr.getType(); 
