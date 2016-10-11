@@ -63,14 +63,14 @@
 		<entry key="Nessuna">
 			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy" />
 		</entry>
-		<entry key="Trento">
-			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
+		<entry key="New Trento">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.NewTrentoPlanningPolicy" />
 		</entry>
 		<entry key="Rovereto">
 			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy" />
 		</entry>	
-		<entry key="Old Trento">
-			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.OldTrentoPlanningPolicy" />
+		<entry key="Trento">
+			<bean class="eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy" />
 		</entry>					
 	</util:map>	
 

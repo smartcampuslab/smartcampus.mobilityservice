@@ -21,9 +21,9 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
 
-public class OldTrentoPlanningPolicy implements PlanningPolicy {
+public class NewTrentoPlanningPolicy implements PlanningPolicy {
 
-	private static Log logger = LogFactory.getLog(TrentoPlanningPolicy.class);
+	private static Log logger = LogFactory.getLog(NewTrentoPlanningPolicy.class);
 	
 	@Override
 	public List<PlanningRequest> generatePlanRequests(SingleJourney journeyRequest) {
@@ -34,8 +34,9 @@ public class OldTrentoPlanningPolicy implements PlanningPolicy {
 		Set<TType> allTypes = Sets.newHashSet(types);
 		
 		PlanningResultGroup prg1a = new PlanningResultGroup("1a", 1, journeyRequest.getRouteType());
-		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,journeyRequest.getRouteType());
-		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2, journeyRequest.getRouteType());
+		PlanningResultGroup prg1b = new PlanningResultGroup("1b", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg1c = new PlanningResultGroup("1c", 1,  journeyRequest.getRouteType());
+		PlanningResultGroup prg2 = new PlanningResultGroup("2", 2,  journeyRequest.getRouteType());
 		
 		for (PlanningRequest pr: originalPlanningRequests) {
 			TType type = pr.getType(); 
@@ -51,6 +52,11 @@ public class OldTrentoPlanningPolicy implements PlanningPolicy {
 					result.add(npr);
 					allTypes.add(TType.TRANSIT);
 				}
+				if (!allTypes.contains(TType.BICYCLE)) {
+					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.BICYCLE, null, null, null, pr.isWheelChair(), true, prg1c);
+					result.add(npr);
+					allTypes.add(TType.BICYCLE);
+				}				
 			}
 			
 			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS) || type.equals(TType.TRAIN)) {
@@ -174,7 +180,7 @@ public class OldTrentoPlanningPolicy implements PlanningPolicy {
 		
 		result = PlanningPolicyHelper.keepPromotedDuplicated(result);
 		
-		result = PlanningPolicyHelper.keepBestPromoted(result, comparator, 2);
+		result = PlanningPolicyHelper.keepBestPromoted(result, comparator, 3);
 		
 		ItinerarySorter.sortDisjoined(result, comparator);
 		return result;
@@ -182,12 +188,12 @@ public class OldTrentoPlanningPolicy implements PlanningPolicy {
 
 	@Override
 	public String getName() {
-		return "Old Park and Ride";
+		return "New Park and Ride";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Old Trento";
+		return "New Trento";
 	}
 
 	@Override
