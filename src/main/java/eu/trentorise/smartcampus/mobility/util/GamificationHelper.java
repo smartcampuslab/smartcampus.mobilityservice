@@ -252,7 +252,10 @@ public class GamificationHelper {
 //			}
 //		}
 		
-		 
+		
+		if (pnr) {
+			score += 10;
+		}
 		if (zeroImpact) {
 			score *= 1.5;
 		}
