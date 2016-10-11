@@ -64,21 +64,21 @@ public class ParkingChecker {
 
 	}
 
-	public static AlertsSent checkNewAlerts(AlertsSent sent, Parking parking) {
+	public static AlertsSent checkNewAlerts(AlertsSent sent, AlertParking alert) {
 		AlertsSent newSent = new AlertsSent(sent);
 
-		String places = buildDate() + "_" + parking.getFreePlaces()+"_"+parking.getVehicles();
+		String places = buildDate() + "_" + alert.getPlacesAvailable() + "_" + alert.getNoOfvehicles();
 		
-		if (!sent.getParkings().containsKey(parking.getId().replace(".",""))) {
-			newSent.getParkings().put(parking.getId().replace(".",""), places);
+		if (!sent.getParkings().containsKey(alert.getId().replace(".",""))) {
+			newSent.getParkings().put(alert.getId().replace(".",""), places);
 			return newSent;
 		}
 
-		if (sent.getParkings().get(parking.getId().replace(".","")).equals(places)) {
+		if (sent.getParkings().get(alert.getId().replace(".","")).equals(places)) {
 			return null;
 		}
 
-		newSent.getParkings().put(parking.getId().replace(".",""), places);
+		newSent.getParkings().put(alert.getId().replace(".",""), places);
 		
 		
 		

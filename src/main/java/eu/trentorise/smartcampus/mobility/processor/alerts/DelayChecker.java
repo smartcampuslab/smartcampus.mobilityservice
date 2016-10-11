@@ -123,12 +123,12 @@ public class DelayChecker {
 		return res;
 	}
 	
-	public static AlertsSent checkNewAlerts(AlertsSent sent, GenericTrain train) {
+	public static AlertsSent checkNewAlerts(AlertsSent sent, AlertDelay alert) {
 		AlertsSent newSent = new AlertsSent(sent);
 
-		String delay = buildDate() + "_" + train.getDelay();
+		String delay = buildDate() + "_" + alert.getDelay();
 		
-		String tId = getTrainNumericId(train.getTripId());
+		String tId = getTrainNumericId(alert.getId());
 		
 		if (!sent.getDelays().containsKey(tId)) {
 			newSent.getDelays().put(tId, delay);
@@ -140,8 +140,6 @@ public class DelayChecker {
 		}
 
 		newSent.getDelays().put(tId, delay);
-		
-		
 		
 		return newSent;
 	}
