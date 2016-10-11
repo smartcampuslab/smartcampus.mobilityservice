@@ -239,7 +239,7 @@ public class GamificationHelper {
 			score += 25;
 		}
 
-		boolean zeroImpact = (busDist + carDist + trainDist == 0 && walkDist + bikeDist > 0);
+		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
 //		Rovereto
 //		if (zeroImpact && itinerary.isPromoted()) {
 //			score *= 1.7;
