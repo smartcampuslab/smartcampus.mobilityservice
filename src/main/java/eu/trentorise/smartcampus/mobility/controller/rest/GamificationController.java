@@ -384,6 +384,7 @@ public class GamificationController extends SCController {
 			}
 
 		} catch (Exception e) {
+			logger.error("Failed storing events: "+e.getMessage(),e);
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return "{\"storeResult\":\"FAIL\"}";
