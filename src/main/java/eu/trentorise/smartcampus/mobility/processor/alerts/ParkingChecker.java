@@ -15,10 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
-import it.sayservice.platform.smartplanner.data.message.StopId;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
-import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,41 +25,11 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.model.Parking;
-
 public class ParkingChecker {
 
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
 	private static Log logger = LogFactory.getLog(ParkingChecker.class);
-
-	public static AlertParking checkParking(Parking parking) {
-		AlertParking places = new AlertParking();
-		places.setCreatorId("");
-		places.setCreatorType(CreatorType.SERVICE);
-		places.setNoOfvehicles(parking.getVehicles());
-		places.setPlacesAvailable(parking.getFreePlaces());
-		places.setDescription("");
-		places.setNote("");
-		
-		StopId t = new StopId();
-		
-		t.setAgencyId(parking.getAgencyId());
-		t.setId(parking.getId());
-
-		places.setPlace(t);
-		places.setType(AlertType.DELAY);
-		
-		places.setFrom(System.currentTimeMillis());
-		places.setTo(System.currentTimeMillis() + 1000 * 60 * 5);
-
-		places.setNote(parking.getAddress());
-
-		places.setId(places.getPlace().getId() + "_" + CreatorType.SERVICE + "_" + places.getFrom() + "_" + places.getTo());
-
-		return places;
-
-	}
 
 	public static AlertsSent checkNewAlerts(AlertsSent sent, AlertParking alert) {
 		AlertsSent newSent = new AlertsSent(sent);
@@ -79,8 +46,6 @@ public class ParkingChecker {
 		}
 
 		newSent.getParkings().put(alert.getId().replace(".",""), places);
-		
-		
 		
 		return newSent;
 	}

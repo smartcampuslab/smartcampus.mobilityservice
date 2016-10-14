@@ -29,6 +29,7 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
@@ -73,6 +74,8 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 @Component
 public class SmartPlannerService implements SmartPlannerHelper {
 
+	private static final String STATION_NOT_PRESENT_IN_REPOSITORY = "station not present in repository";
+
 	@Autowired
 	@Value("${smartplanner.router}")
 	private String smartplannerRouter;		
@@ -90,7 +93,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	@Autowired
 	@Value("${otp.url}")
 	private String otpURL;	
-
+	
 	private static ObjectMapper mapper = new ObjectMapper();
 	static {
 		mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -278,12 +281,23 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public String parkingsByAgency(String agencyId) throws Exception {
 		return performGET(SMARTPLANNER + "getParkingsByAgency?agencyId=" + agencyId, null);
 	}
+	
+	@Override
+	public String bikeStations() throws Exception {
+		return performGET(SMARTPLANNER + "getBikeStations", null);
+	}	
 
 	@Override
 	public String bikeSharingByAgency(String agencyId) throws Exception {
 		return performGET(SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId, null);
 	}
 
+	@Override
+	public void addBikeSharingStations(List<BikeStation> stations) throws Exception {
+		String body = mapper.writeValueAsString(stations);
+		performPOST(SMARTPLANNER + "data/bikesharing", body);
+	}
+	
 	@Override
 	public String roadInfoByAgency(String agencyId, Long from, Long to) throws Exception {
 		return performGET(SMARTPLANNER + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to, null);
@@ -405,10 +419,26 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		}
 		
 		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
-		logger .info(result);				
-		
+		logger.info(result);				
+		processAlerResult(alert, result);
 	}	
 
+	private void processAlerResult(Alert alert, String result) {
+		if (result == null) {
+			
+		} else if (result.contains(STATION_NOT_PRESENT_IN_REPOSITORY)) {
+			AlertParking ap = (AlertParking)alert;
+			
+			if (ap.getPlace() != null && ap.getPlace().getAgencyId() != null) {
+				if (ap.getPlace().getAgencyId().contains("BIKE_SHARING")) {
+					BikeStation bs = new BikeStation(ap.getPlace(), "BIKE-RENTAL", 0, 0, ap.getNoOfvehicles(), ap.getPlacesAvailable());
+				}
+			}
+			
+			System.err.println(ap.getId() + " / " + ap.getDescription());
+		}
+	}
+	
 	@Override
 	public InputStream routesDB(String appId) throws Exception {
 		return HTTPConnector.doStreamGet(otpURL + OTP + "routesDB/" + appId, null, "application/zip", null);
