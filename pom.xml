@@ -74,20 +74,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>it.sayservice.platform</groupId>
-			<artifactId>service-engine-client</artifactId>
-			<version>1.4</version>
-			<type>jar</type>
-		</dependency>
-
-		<!-- JMS -->
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.5.1</version>
-		</dependency>
-
-		<dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.13</version>
@@ -143,6 +129,7 @@
 			<artifactId>velocity</artifactId>
 			<version>1.7</version>
 		</dependency>
+	
 	</dependencies>
 
 	<build>
