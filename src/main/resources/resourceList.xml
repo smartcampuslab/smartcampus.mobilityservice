@@ -135,6 +135,15 @@
 	<resourceMapping uri="mobilityservice.data"
 		pathPattern="/policies/{name}" />						
 
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/servicedata/publishAlertParkings/" method="POST"/>
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/servicedata/publishAlertDelays/" method="POST"/>
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/servicedata/publishAlertRoads/" method="POST"/>	
+	<resourceMapping uri="mobilityservice.data"
+		pathPattern="/servicedata/publishBikeStations/{comune}/{agencyId}/" method="POST"/>	
+
 
 </service>
 
