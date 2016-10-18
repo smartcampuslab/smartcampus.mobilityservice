@@ -271,7 +271,7 @@ public class TestAlertSender {
 		if (ro.getAlertsSent() == null || ro.getAlertsSent().getAlertsValues() == null || ro.getAlertsSent().getAlertsValues().isEmpty()) return -1;
 		return ro.getAlertsSent().getAlertsValues().get(id);
 	}
-/*
+
 	@Test
 	public void testParking() throws Exception {
 		Itinerary withCar = ObjectCreator.createCarWithParking();
@@ -281,8 +281,7 @@ public class TestAlertSender {
 		storage.saveItinerary(io);
 
 		// parking with 20 slots, should not be registered
-		Parking 
-		parking = ObjectCreator.createParking(20);
+		AlertParking parking = ObjectCreator.createParking(20);
 		alertSender.publishParkings(Collections.singletonList(parking));
 		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
 		int found = hasParkingAlert(io);
@@ -312,8 +311,7 @@ public class TestAlertSender {
 		storage.saveItinerary(io);
 
 		// parking with 10 slots, should not be registered
-		Parking 
-		parking = ObjectCreator.createBikeSharingFrom(10);
+		AlertParking parking = ObjectCreator.createBikeSharingFrom(10);
 		alertSender.publishParkings(Collections.singletonList(parking));
 		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
 		int found = hasParkingAlertVehicles(io, "Parco Venezia");
@@ -349,7 +347,7 @@ public class TestAlertSender {
 		assertEquals(2, found);
 
 	}
-*/
+
 	private int hasParkingAlert(ItineraryObject io) {
 		for (Leg leg : io.getData().getLeg()) {
 			if (leg.getAlertParkingList().size() > 0) return leg.getAlertParkingList().get(0).getPlacesAvailable(); 
@@ -361,7 +359,9 @@ public class TestAlertSender {
 		for (Leg leg : io.getData().getLeg()) {
 			if (leg.getAlertParkingList().size() > 0) {
 				for (AlertParking ap : leg.getAlertParkingList()) {
-					if (id.equals(ap.getPlace().getId())) return ap.getNoOfvehicles(); 
+					if (id.equals(ap.getPlace().getId())) {
+						return ap.getNoOfvehicles();
+					}
 				}
 			}
 		}

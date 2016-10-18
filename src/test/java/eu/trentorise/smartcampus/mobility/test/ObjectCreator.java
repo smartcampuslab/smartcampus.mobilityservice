@@ -19,14 +19,15 @@ package eu.trentorise.smartcampus.mobility.test;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.Position;
+import it.sayservice.platform.smartplanner.data.message.StopId;
 import it.sayservice.platform.smartplanner.data.message.TType;
 import it.sayservice.platform.smartplanner.data.message.Transport;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
 import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +35,6 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
-import eu.trentorise.smartcampus.mobility.model.GenericTrain;
 import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -63,21 +63,6 @@ public class ObjectCreator {
 	
 	public static Itinerary createforGamification() {
 		return JsonUtils.toObject("{ \"from\":{ \"name\":\"Via Sommarive\", \"stopId\":{ \"agencyId\":\"\", \"id\":\"\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.15033017738622\", \"lat\":\"46.06579713638596\" }, \"to\":{ \"name\":\"path\", \"stopId\":{ \"agencyId\":\"\", \"id\":\"\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.115125053385238\", \"lat\":\"46.06624609001834\" }, \"startime\":1457618224000, \"endtime\":1457621105000, \"duration\":2881000, \"walkingDuration\":1201, \"leg\":[ { \"legId\":\"null_null\", \"startime\":1457618224000, \"endtime\":1457618639000, \"duration\":415, \"from\":{ \"name\":\"ViaSommarive\", \"stopId\":{ \"agencyId\":\"\", \"id\":\"\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.15033017738622\", \"lat\":\"46.06579713638596\" }, \"to\":{ \"name\":\"Povo Fac. Scienze\", \"stopId\":{ \"agencyId\":\"12\", \"id\":\"189_12\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.150209\", \"lat\":\"46.063316\" }, \"transport\":{ \"type\":\"WALK\", \"agencyId\":null, \"routeId\":null, \"routeShortName\":null, \"tripId\":null }, \"legGeometery\":{ \"length\":17, \"levels\":null, \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":290.66099999999994 }, { \"legId\":\"12_0002698642015091020160607\", \"startime\":1457618640000, \"endtime\":1457618760000, \"duration\":120, \"from\":{ \"name\":\"Povo Fac. Scienze\", \"stopId\":{ \"agencyId\":\"12\", \"id\":\"189_12\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.150209\", \"lat\":\"46.063316\" }, \"to\":{ \"name\":\"Mesiano Stazione Fs\", \"stopId\":{ \"agencyId\":\"12\", \"id\":\"148_12\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.141726\", \"lat\":\"46.065068\" }, \"transport\":{ \"type\":\"BUS\", \"agencyId\":\"12\", \"routeId\":\"05R\", \"routeShortName\":\"5\", \"tripId\":\"0002698642015091020160607\" }, \"legGeometery\":{ \"length\":24, \"levels\":null, \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":766.2504992247001 }, { \"legId\":\"null_null\", \"startime\":1457618760000, \"endtime\":1457618848000, \"duration\":88, \"from\":{ \"name\":\"Mesiano Stazione Fs\", \"stopId\":{ \"agencyId\":\"12\", \"id\":\"148_12\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.141726\", \"lat\":\"46.065068\" }, \"to\":{ \"name\":\"PovoMesianoFS\", \"stopId\":{ \"agencyId\":\"6\", \"id\":\"Povo-Mesiano_6\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.142631\", \"lat\":\"46.065813\" }, \"transport\":{ \"type\":\"WALK\", \"agencyId\":null, \"routeId\":null, \"routeShortName\":null, \"tripId\":null }, \"legGeometery\":{ \"length\":3, \"levels\":null, \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":68.419 }, { \"legId\":\"6_R5522$2015121320160612\", \"startime\":1457619120000, \"endtime\":1457619720000, \"duration\":600, \"from\":{ \"name\":\"PovoMesianoFS\", \"stopId\":{ \"agencyId\":\"6\", \"id\":\"Povo-Mesiano_6\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.142631\", \"lat\":\"46.065813\" }, \"to\":{ \"name\":\"S.ChiaraFS\", \"stopId\":{ \"agencyId\":\"6\", \"id\":\"S.Chiara_6\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.136178\", \"lat\":\"46.053682\" }, \"transport\":{ \"type\":\"TRAIN\", \"agencyId\":\"6\", \"routeId\":\"TB_R2_R\", \"routeShortName\":\"RG\", \"tripId\":\"R5522$2015121320160612\" }, \"legGeometery\":{ \"length\":41, \"levels\":null, \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":3442.2839235177266 }, { \"legId\":\"null_null\", \"startime\":1457619720000, \"endtime\":1457620418000, \"duration\":698, \"from\":{ \"name\":\"S.ChiaraFS\", \"stopId\":{ \"agencyId\":\"6\", \"id\":\"S.Chiara_6\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.136178\", \"lat\":\"46.053682\" }, \"to\":{ \"name\":\"StazioneFFSS-Ospedale-Trento\", \"stopId\":{ \"agencyId\":\"BIKE_SHARING_TOBIKE_TRENTO\", \"id\":\"StazioneFFSS-Ospedale-Trento\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.135376484652296\", \"lat\":\"46.05448084367269\" }, \"transport\":{ \"type\":\"WALK\", \"agencyId\":null, \"routeId\":null, \"routeShortName\":null, \"tripId\":null }, \"legGeometery\":{ \"length\":27, \"levels\":null, \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":333.544 }, { \"legId\":\"null_null\", \"startime\":1457620419000, \"endtime\":1457621105000, \"duration\":686, \"from\":{ \"name\":\"StazioneFFSS-Ospedale-Trento\", \"stopId\":{ \"agencyId\":\"BIKE_SHARING_TOBIKE_TRENTO\", \"id\":\"StazioneFFSS-Ospedale-Trento\", \"extra\":null }, \"stopCode\":null, \"lon\":\"11.135376484652296\", \"lat\":\"46.05448084367269\" }, \"to\":{ \"name\":\"path\", \"stopId\":null, \"stopCode\":null, \"lon\":\"11.115125053385238\", \"lat\":\"46.06624609001834\" }, \"transport\":{ \"type\":\"BICYCLE\", \"agencyId\":\"BIKE_SHARING_TOBIKE_TRENTO\", \"routeId\":\"null\", \"routeShortName\":\"null\", \"tripId\":\"null\" }, \"legGeometery\":{ \"length\":364, \"levels\":\"null\", \"points\":\"\" }, \"alertStrikeList\":[ ], \"alertDelayList\":[ ], \"alertParkingList\":[ ], \"alertRoadList\":[ ], \"alertAccidentList\":[ ], \"extra\":null, \"length\":2566.0 } ], \"promoted\":false}", Itinerary.class);
-	}
-	
-	public static GenericTrain _createTrainDelayForSingle(int min) throws ParseException {
-		GenericTrain gt = new GenericTrain();
-		gt.setAgencyId("5");
-		gt.setRouteId("BV_R1_G");
-		gt.setDelay(min);
-		gt.setId(""+System.currentTimeMillis());
-		Position from = new Position();
-		gt.setFrom(from);
-		gt.setStation("Trento FS");
-		gt.setTime("07:40");
-		gt.setTripId("R10965");
-		gt.setRefTime(new SimpleDateFormat("ddMMyyyy").parse("22122014").getTime());
-		return gt;
 	}
 	
 	/**
@@ -117,22 +102,7 @@ public class ObjectCreator {
 	public static RecurrentJourney createRecurrent() {
 		return JsonUtils.toObject("{\"parameters\":{\"recurrence\":[1,2,3,4,5,6,7],\"from\":{\"name\":null,\"stopId\":null,\"stopCode\":null,\"lon\":\"11.150704\",\"lat\":\"46.070519\"},\"to\":{\"name\":null,\"stopId\":null,\"stopCode\":null,\"lon\":\"11.040570\",\"lat\":\"45.888927\"},\"fromDate\":1419268490172,\"toDate\":1419318555581,\"time\":\"06:14PM\",\"interval\":7200000,\"transportTypes\":[\"TRANSIT\",\"BICYCLE\"],\"routeType\":\"fastest\",\"resultsNumber\":3},\"legs\":[{\"from\":\"Povo Alla Cascata\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002588832014101520150609\"}},{\"from\":\"Trento FS\",\"to\":\"Rovereto FS\",\"transport\":{\"type\":\"TRAIN\",\"agencyId\":\"5\",\"routeId\":\"BV_R1_G\",\"routeShortName\":\"RG\",\"tripId\":\"R20931\"}},{\"from\":\"Piazzale Orsi Stazione Fs\",\"to\":\"Via Dante Borgo S.Caterina\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"16\",\"routeId\":\"AA_Rov\",\"routeShortName\":\"A\",\"tripId\":\"0002579032014091020150609\"}},{\"from\":\"Povo Alla Cascata\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002588822014101520150609\"}},{\"from\":\"Trento FS\",\"to\":\"Rovereto FS\",\"transport\":{\"type\":\"TRAIN\",\"agencyId\":\"5\",\"routeId\":\"BV_R1_G\",\"routeShortName\":\"RG\",\"tripId\":\"RV2265\"}},{\"from\":\"Povo Fac. Scienze\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002534452014091020150609\"}},{\"from\":\"Trento FS\",\"to\":\"Rovereto FS\",\"transport\":{\"type\":\"TRAIN\",\"agencyId\":\"5\",\"routeId\":\"BV_R1_G\",\"routeShortName\":\"RG\",\"tripId\":\"R10987\"}},{\"from\":\"Piazzale Orsi Stazione Fs\",\"to\":\"Corso Rosmini Monumento\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"16\",\"routeId\":\"01R_Rov\",\"routeShortName\":\"1\",\"tripId\":\"0002579352014091020150609\"}},{\"from\":\"Povo Piazza Manci\",\"to\":\"Verona Einaudi\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"13R\",\"routeShortName\":\"13\",\"tripId\":\"0002551012014091020150609\"}},{\"from\":\"Trento-S.Bartolameo\",\"to\":\"Rovereto-Via Manzoni\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"17\",\"routeId\":\"110_17_0\",\"routeShortName\":\"301\",\"tripId\":\"0001767532014091020150626\"}},{\"from\":\"Povo Alla Cascata\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002551582014091020150609\"}},{\"from\":\"Trento FS\",\"to\":\"Rovereto FS\",\"transport\":{\"type\":\"TRAIN\",\"agencyId\":\"5\",\"routeId\":\"BV_R1_G\",\"routeShortName\":\"RG\",\"tripId\":\"EC83\"}},{\"from\":\"Povo Fac. Scienze\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002534672014091020150609\"}},{\"from\":\"Trento FS\",\"to\":\"Rovereto FS\",\"transport\":{\"type\":\"TRAIN\",\"agencyId\":\"5\",\"routeId\":\"BV_R1_G\",\"routeShortName\":\"RG\",\"tripId\":\"R20933\"}},{\"from\":\"Povo Piazza Manci\",\"to\":\"Verona Einaudi\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"13R\",\"routeShortName\":\"13\",\"tripId\":\"0002551112014091020150609\"}},{\"from\":\"Trento-S.Bartolameo\",\"to\":\"Rovereto-Via Manzoni\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"17\",\"routeId\":\"110_17_0\",\"routeShortName\":\"301\",\"tripId\":\"0001816952014091020150626\"}},{\"from\":\"Povo Fac. Scienze\",\"to\":\"Piazza Dante Dogana\",\"transport\":{\"type\":\"BUS\",\"agencyId\":\"12\",\"routeId\":\"05R\",\"routeShortName\":\"5\",\"tripId\":\"0002534572014091020150609\"}},{\"from\":\"Via alla Cascata\",\"to\":\"Via Europa\",\"transport\":{\"type\":\"BICYCLE\",\"agencyId\":\"null\",\"routeId\":\"null\",\"routeShortName\":\"null\",\"tripId\":\"null\"}}],\"monitorLegs\":{\"12_05R\":true,\"12_13R\":true,\"16_01R_Rov\":true,\"16_AA_Rov\":true,\"17_110_17_0\":true,\"5_BV_R1_G\":true}}", RecurrentJourney.class); 
 	}
-	
-	public static GenericTrain _createTrainDelayForRecurrent(int min) throws ParseException {
-		GenericTrain gt = new GenericTrain();
-		gt.setAgencyId("5");
-		gt.setRouteId("BV_R1_G");
-		gt.setDelay(min);
-		gt.setId(""+System.currentTimeMillis());
-		Position from = new Position();
-		gt.setFrom(from);
-		gt.setStation("Via alla Cascata");
-		gt.setTime("07:40");
-		gt.setTripId("R20931");
-		gt.setRefTime(new SimpleDateFormat("ddMMyyyy").parse("23122014").getTime());
-		return gt;
-	}
-	
+
 	/**
 	 * @param i
 	 * @return
@@ -152,8 +122,7 @@ public class ObjectCreator {
 		t.setTripId("R20931");
 		t.setType(TType.TRAIN);
 		delay.setTransport(t);
-		delay.setFrom(new SimpleDateFormat("ddMMyyyy").parse("22122014").getTime());
-		delay.setTo(new SimpleDateFormat("ddMMyyyy").parse("23122014").getTime());
+		delay.setFrom(new SimpleDateFormat("ddMMyyyy").parse("23122014").getTime());
 
 		Position p = new Position();
 		p.setName("Trento FS");
@@ -172,7 +141,7 @@ public class ObjectCreator {
 		return "AD_5_BV_R1_G_R20931";
 	}
 
-	public static Parking createParking(int n) {
+	public static Parking _createParking(int n) {
 		Parking parking = new Parking();
 		parking.setAddress("Rovereto Centro");
 		parking.setAgencyId("COMUNE_DI_ROVERETO");
@@ -180,8 +149,28 @@ public class ObjectCreator {
 		parking.setFreePlaces(n);
 		return parking;
 	}
+	
+	public static AlertParking createParking(int n) throws Exception {
+		AlertParking parking = new AlertParking();
+		
+		parking.setCreatorId("1");
+		parking.setCreatorType(CreatorType.SERVICE);
+		parking.setNoOfvehicles(n);
+		parking.setType(AlertType.PARKING);
+		
+		StopId stop = new StopId("COMUNE_DI_ROVERETO", "Rovereto Centro");
+		parking.setPlace(stop);
+		
+		parking.setFrom(System.currentTimeMillis());
+		parking.setTo(System.currentTimeMillis() + 1000 * 60 * 5);		
 
-	public static Parking createBikeSharingFrom(int vehicles) {
+		parking.setId(parking.getPlace().getId() + "_" + CreatorType.SERVICE + "_" + parking.getFrom() + "_" + parking.getTo());
+		
+		return parking;
+	}	
+	
+
+	public static Parking _createBikeSharingFrom(int vehicles) {
 		Parking parking = new Parking();
 		parking.setAddress("Parco Venezia");
 		parking.setAgencyId("BIKE_SHARING_ROVERETO");
@@ -189,8 +178,27 @@ public class ObjectCreator {
 		parking.setVehicles(vehicles);
 		return parking;
 	}
+	
+	public static AlertParking createBikeSharingFrom(int n) throws Exception {
+		AlertParking parking = new AlertParking();
+		
+		parking.setCreatorId("1");
+		parking.setCreatorType(CreatorType.SERVICE);
+		parking.setNoOfvehicles(n);
+		parking.setType(AlertType.PARKING);
+		
+		StopId stop = new StopId("BIKE_SHARING_ROVERETO", "Parco Venezia");
+		parking.setPlace(stop);
+		
+		parking.setFrom(System.currentTimeMillis());
+		parking.setTo(System.currentTimeMillis() + 1000 * 60 * 5);		
 
-	public static Parking createBikeSharingTo(int places) {
+		parking.setId(parking.getPlace().getId() + "_" + CreatorType.SERVICE + "_" + parking.getFrom() + "_" + parking.getTo());
+		
+		return parking;
+	}		
+
+	public static Parking _createBikeSharingTo(int places) {
 		Parking parking = new Parking();
 		parking.setAddress("Biki Piazzale Follone - Rovereto");
 		parking.setAgencyId("BIKE_SHARING_ROVERETO");
@@ -198,6 +206,25 @@ public class ObjectCreator {
 		parking.setFreePlaces(places);
 		return parking;
 	}
+	
+	public static AlertParking createBikeSharingTo(int n) throws Exception {
+		AlertParking parking = new AlertParking();
+		
+		parking.setCreatorId("1");
+		parking.setCreatorType(CreatorType.SERVICE);
+		parking.setNoOfvehicles(n);
+		parking.setType(AlertType.PARKING);
+		
+		StopId stop = new StopId("BIKE_SHARING_ROVERETO", "Biki Piazzale Follone - Rovereto");
+		parking.setPlace(stop);
+		
+		parking.setFrom(System.currentTimeMillis());
+		parking.setTo(System.currentTimeMillis() + 1000 * 60 * 5);		
+
+		parking.setId(parking.getPlace().getId() + "_" + CreatorType.SERVICE + "_" + parking.getFrom() + "_" + parking.getTo());
+		
+		return parking;
+	}		
 
 	/**
 	 * @param i
