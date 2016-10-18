@@ -19,6 +19,7 @@ package eu.trentorise.smartcampus.mobility.test;
 import static org.junit.Assert.assertEquals;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 
 import java.util.Collections;
 
@@ -32,7 +33,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.Lists;
 
-import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
@@ -54,9 +54,9 @@ public class TestParkingHandler {
 	public void init() {
 		storage.reset();
 	}
-	
+
 	@Test
-	public void testPlaces() {
+	public void testPlaces() throws Exception {
 		Itinerary bikeSharing = ObjectCreator.createCarWithParking();
 		String id = new ObjectId().toString();
 		ItineraryObject io = new ItineraryObject("1", id, bikeSharing, bikeSharing.getFrom(), bikeSharing.getTo(), "test");
@@ -64,15 +64,15 @@ public class TestParkingHandler {
 		storage.saveItinerary(io);
 
 		// many places available
-		Parking toStation = ObjectCreator.createParking(10);
-		alertSender.publishParkings(Lists.asList(toStation, new Parking[0]));
+		AlertParking toStation = ObjectCreator.createParking(10);
+		alertSender.publishParkings(Lists.asList(toStation, new AlertParking[0]));
 		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
 		long found = hasFewPlacesAvailableAlert(io);
 		assertEquals(-1, found);
 		
 		// few places available
 		toStation = ObjectCreator.createParking(1);
-		alertSender.publishParkings(Lists.asList(toStation, new Parking[0]));
+		alertSender.publishParkings(Lists.asList(toStation, new AlertParking[0]));
 		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
 		found = hasFewPlacesAvailableAlert(io);
 		assertEquals(1, found);				
@@ -84,4 +84,5 @@ public class TestParkingHandler {
 		}
 		return -1L;
 	}	
+
 }

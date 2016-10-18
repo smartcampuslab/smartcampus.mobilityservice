@@ -35,7 +35,6 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
-import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -141,21 +140,12 @@ public class ObjectCreator {
 		return "AD_5_BV_R1_G_R20931";
 	}
 
-	public static Parking _createParking(int n) {
-		Parking parking = new Parking();
-		parking.setAddress("Rovereto Centro");
-		parking.setAgencyId("COMUNE_DI_ROVERETO");
-		parking.setId("Rovereto Centro");
-		parking.setFreePlaces(n);
-		return parking;
-	}
-	
 	public static AlertParking createParking(int n) throws Exception {
 		AlertParking parking = new AlertParking();
 		
 		parking.setCreatorId("1");
 		parking.setCreatorType(CreatorType.SERVICE);
-		parking.setNoOfvehicles(n);
+		parking.setPlacesAvailable(n);
 		parking.setType(AlertType.PARKING);
 		
 		StopId stop = new StopId("COMUNE_DI_ROVERETO", "Rovereto Centro");
@@ -170,15 +160,6 @@ public class ObjectCreator {
 	}	
 	
 
-	public static Parking _createBikeSharingFrom(int vehicles) {
-		Parking parking = new Parking();
-		parking.setAddress("Parco Venezia");
-		parking.setAgencyId("BIKE_SHARING_ROVERETO");
-		parking.setId("Parco Venezia");
-		parking.setVehicles(vehicles);
-		return parking;
-	}
-	
 	public static AlertParking createBikeSharingFrom(int n) throws Exception {
 		AlertParking parking = new AlertParking();
 		
@@ -198,21 +179,12 @@ public class ObjectCreator {
 		return parking;
 	}		
 
-	public static Parking _createBikeSharingTo(int places) {
-		Parking parking = new Parking();
-		parking.setAddress("Biki Piazzale Follone - Rovereto");
-		parking.setAgencyId("BIKE_SHARING_ROVERETO");
-		parking.setId("Biki Piazzale Follone - Rovereto");
-		parking.setFreePlaces(places);
-		return parking;
-	}
-	
 	public static AlertParking createBikeSharingTo(int n) throws Exception {
 		AlertParking parking = new AlertParking();
 		
 		parking.setCreatorId("1");
 		parking.setCreatorType(CreatorType.SERVICE);
-		parking.setNoOfvehicles(n);
+		parking.setPlacesAvailable(n);
 		parking.setType(AlertType.PARKING);
 		
 		StopId stop = new StopId("BIKE_SHARING_ROVERETO", "Biki Piazzale Follone - Rovereto");

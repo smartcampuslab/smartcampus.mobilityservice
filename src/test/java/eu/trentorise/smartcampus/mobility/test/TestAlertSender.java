@@ -319,7 +319,7 @@ public class TestAlertSender {
 		
 		// irrelevant place, should not be registered
 		parking = ObjectCreator.createBikeSharingFrom(2);
-		parking.setId("666");
+		parking.getPlace().setId("666");
 		alertSender.publishParkings(Collections.singletonList(parking));
 		io = storage.searchDomainObject(Collections.<String,Object>singletonMap("clientId", id), ItineraryObject.class);
 		found = hasParkingAlertVehicles(io,"Parco Venezia");
