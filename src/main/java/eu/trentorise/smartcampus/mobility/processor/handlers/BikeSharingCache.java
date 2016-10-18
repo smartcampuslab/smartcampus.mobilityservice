@@ -20,12 +20,10 @@ import it.sayservice.platform.smartplanner.data.message.StopId;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.model.Station;
@@ -50,7 +47,7 @@ public class BikeSharingCache{
 
 	private static final String BIKE_RENTAL = "BIKE-RENTAL";
 	
-	private Map<String, List<Station>> stationsMap = new HashMap<String, List<Station>>();
+	private Map<String, List<Station>> stationsMap = new TreeMap<String, List<Station>>();
 	
 	private Set<String> existingStations;
 	
@@ -60,9 +57,7 @@ public class BikeSharingCache{
 	private static Logger logger = LoggerFactory.getLogger(AlertSender.class);
 	
 	
-	@PostConstruct
-	public void initStations() throws Exception {
-		stationsMap = Maps.newTreeMap();
+	private void getExistingStations() throws Exception {
 		existingStations = Sets.newHashSet();
 		ObjectMapper mapper = new ObjectMapper();
 		String bs = smartPlannerHelper.bikeStations();
@@ -71,10 +66,11 @@ public class BikeSharingCache{
 			Map<String, Object> station = mapper.convertValue(o, Map.class);
 			String idParts[] = ((String)station.get("id")).split("@");
 			existingStations.add(idParts[0]);
-		}		
+		}			
 	}
 
 	public void setStations(String comune, String agencyId, List<Station> stations) throws Exception {
+		getExistingStations();
 		List<BikeStation> toAdd = Lists.newArrayList();
 		List<String> toAddNames = Lists.newArrayList();		
 		for (Station station : stations) {
