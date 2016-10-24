@@ -2,17 +2,20 @@ package eu.trentorise.smartcampus.mobility.security;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.google.common.collect.Lists;
 
 public class AppDetails implements UserDetails, Serializable {
 
 	private static final long serialVersionUID = 4681692038979149760L;
 	
 	private AppInfo app;
+	List<GrantedAuthority> authorities;
 	
 	public AppDetails() {
 		super();
@@ -25,8 +28,12 @@ public class AppDetails implements UserDetails, Serializable {
 
 
 	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Collections.singletonList(new SimpleGrantedAuthority(app.getAppId()));
+	public Collection<GrantedAuthority> getAuthorities() {
+		if (authorities == null) {
+			authorities = Lists.newArrayList();
+			authorities.add(new SimpleGrantedAuthority(app.getAppId()));
+		}
+		return authorities;
 	}
 
 	@Override
