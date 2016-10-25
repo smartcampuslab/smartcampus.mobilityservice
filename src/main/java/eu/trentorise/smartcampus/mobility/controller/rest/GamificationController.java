@@ -350,6 +350,8 @@ public class GamificationController extends SCController {
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 					res.getGeolocationEvents().add(geoloc);
 				}
+				
+				gamificationHelper.checkFaLaCosaGiusta(res.getItinerary(), res.getGeolocationEvents(), appId, userId);
 
 				// boolean canSave = true;
 				if (res.getItinerary() != null) {
@@ -410,7 +412,6 @@ public class GamificationController extends SCController {
 		}
 
 		Query mongoQuery = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
-		;
 
 		return storage.searchDomainObjects(mongoQuery, Geolocation.class);
 	}

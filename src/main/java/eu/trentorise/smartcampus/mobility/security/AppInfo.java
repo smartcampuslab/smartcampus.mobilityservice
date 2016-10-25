@@ -2,6 +2,7 @@ package eu.trentorise.smartcampus.mobility.security;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 
 public class AppInfo implements Serializable {
@@ -19,6 +20,8 @@ public class AppInfo implements Serializable {
     private String gamePassword;
     private String gameStart;
     private String routesDB;
+    
+    private Map<String,Object> extra;
 
 	public String getAppId() {
 		return appId;
@@ -106,6 +109,14 @@ public class AppInfo implements Serializable {
 
 	public void setRoutesDB(String routesDB) {
 		this.routesDB = routesDB;
+	}
+
+	public Map<String, Object> getExtra() {
+		return extra;
+	}
+
+	public void setExtra(Map<String, Object> extra) {
+		this.extra = extra;
 	}
 
 	@Override

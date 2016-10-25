@@ -78,6 +78,7 @@ public class GamificationHelper {
 	private static final double TIME_ERROR = 1000 * 60 * 15;
 
 	private static final String SAVE_ITINERARY = "save_itinerary";
+	private static final String POI_REACHED = "poi_reached";
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationHelper.class);
 
@@ -117,6 +118,69 @@ public class GamificationHelper {
 //				e.printStackTrace();
 //			}
 //		}
+	}
+	
+	public void checkFaLaCosaGiusta(final ItineraryObject itinerary,final Collection<Geolocation> geolocationEvents, final String appId, final String userId) {
+		try {
+		AppInfo app = appSetup.findAppById(appId);
+		
+		if (app.getExtra() == null || !app.getExtra().containsKey("game")) {
+			logger.warn("Game data not defined.");
+			return;
+		}
+		
+		if (itinerary != null) {
+			if (itinerary.getData().getLeg().size() == 1 && itinerary.getData().getLeg().get(0).getTransport().getType().equals(TType.CAR)) {
+					return;
+			}
+		}
+		
+		List<Double> coords = (List<Double>)((Map)app.getExtra().get("game")).get("poi");
+		String from = (String)((Map)app.getExtra().get("game")).get("from");
+		String to = (String)((Map)app.getExtra().get("game")).get("to");
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		Date fromDate = sdf.parse(from);
+		Date toDate = sdf.parse(to);
+		
+		Geolocation poi = new Geolocation(coords.get(0), coords.get(1), new Date());
+		for (Geolocation geolocation : geolocationEvents) {
+			if (geolocation.getRecorded_at().after(fromDate) && geolocation.getRecorded_at().before(toDate) && harvesineDistance(poi, geolocation) <= 0.1) {
+				executorService.execute(new Runnable() {
+					@Override
+					public void run() {
+						sendFaLaCosaGiusta(appId, userId);
+					}
+				});
+				break;
+			}
+		}
+		} catch (Exception e) {
+			logger.error("Error sending data for Fa la Cosa Giusta");
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendFaLaCosaGiusta(final String appId, final String userId) {
+		try {
+			Map<String, Object> data = Maps.newTreeMap();
+			data.put("poiName", "Trento Fiera");
+
+			AppInfo app = appSetup.findAppById(appId);
+			
+			ExecutionDataDTO ed = new ExecutionDataDTO();
+			ed.setGameId(app.getGameId());
+			ed.setPlayerId(userId);
+			ed.setActionId(POI_REACHED);
+			ed.setData(data);
+
+			String content = JsonUtils.toJSON(ed);
+			
+			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + POI_REACHED + ") = " + data);
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());
+		} catch (Exception e) {
+			logger.error("Error sending gamification action: " + e.getMessage());
+		}
 	}
 
 	public void saveItinerary(final BasicItinerary itinerary, final String appId, final String userId) throws ParseException {
