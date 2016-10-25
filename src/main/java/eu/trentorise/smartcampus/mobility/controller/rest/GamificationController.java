@@ -173,6 +173,10 @@ public class GamificationController extends SCController {
 
 					Date dOk = lastOk.getTimestamp();
 					Date d1 = l1.getTimestamp();
+					if (d1 == null) {
+						logger.warn("Missing timestamp in location object: "+l1.toString());
+						continue;
+					}
 
 					int comp = d1.compareTo(dOk);
 					if (comp < 0) {
@@ -223,6 +227,11 @@ public class GamificationController extends SCController {
 						// }
 					}
 
+					if (location.getTimestamp() == null) {
+						logger.warn("Missing timestamp in location object: "+location.toString());
+						continue;
+					}
+					
 					if (locationTs == null) {
 						locationTs = location.getTimestamp().getTime();
 					}
@@ -341,6 +350,8 @@ public class GamificationController extends SCController {
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 					res.getGeolocationEvents().add(geoloc);
 				}
+				
+				gamificationHelper.checkFaLaCosaGiusta(res.getItinerary(), res.getGeolocationEvents(), appId, userId);
 
 				// boolean canSave = true;
 				if (res.getItinerary() != null) {
@@ -384,6 +395,7 @@ public class GamificationController extends SCController {
 			}
 
 		} catch (Exception e) {
+			logger.error("Failed storing events: "+e.getMessage(),e);
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return "{\"storeResult\":\"FAIL\"}";
