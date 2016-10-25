@@ -2,3 +2,6 @@
 /.settings
 /.classpath
 /.project
+/.metadata/*
+RemoteSystemsTempFiles/*
+.tern-project
