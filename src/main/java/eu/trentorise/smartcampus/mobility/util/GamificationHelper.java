@@ -171,7 +171,6 @@ public class GamificationHelper {
 	}
 	
 	private void sendFaLaCosaGiusta(final String appId, final String userId) {
-		System.out.println("FLG");
 		try {
 			Map<String, Object> data = Maps.newTreeMap();
 			data.put("poiName", "Trento Fiera");
