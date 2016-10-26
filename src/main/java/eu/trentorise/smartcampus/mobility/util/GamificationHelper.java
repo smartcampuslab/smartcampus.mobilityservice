@@ -160,7 +160,7 @@ public class GamificationHelper {
 						sendFaLaCosaGiusta(appId, userId);
 					}
 				});
-				break;
+				return;
 			}
 		}
 		logger.debug("Conditions for Fa la Cosa Giusta not matched.");
