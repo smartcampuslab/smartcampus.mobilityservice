@@ -102,11 +102,11 @@ var plannerControllers = angular.module('plannerControllers', [])
 					};
 
 					$scope.init = function($http) {
-						$http.get($rootScope.controllerBase + ($rootScope.publishedOnly ? '?draft=false' : '')).success(function(data) {
-							$scope.policyIds = data;
-						}).error(function(data) {
-							$scope.policyIds = data;
-						});
+//						$http.get($rootScope.controllerBase + ($rootScope.publishedOnly ? '?draft=false' : '')).success(function(data) {
+//							$scope.policyIds = data;
+//						}).error(function(data) {
+//							$scope.policyIds = data;
+//						});
 						// $http.get("notification/announcements/appId").success(function(data)
 						// {
 						// $scope.appId = data;

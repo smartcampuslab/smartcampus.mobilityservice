@@ -1,11 +1,9 @@
 package eu.trentorise.smartcampus.mobility.storage;
 
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-
 import org.springframework.data.annotation.Id;
 
 import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
-import eu.trentorise.smartcampus.mobility.processor.alerts.RecurrentAlertsSent;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
 public class RecurrentJourneyObject extends BasicRecurrentJourney {
 
@@ -14,8 +12,6 @@ public class RecurrentJourneyObject extends BasicRecurrentJourney {
 	
 	private String userId;
 	
-	RecurrentAlertsSent alertsSent;
-
 	public RecurrentJourneyObject() {
 	}
 
@@ -35,13 +31,6 @@ public class RecurrentJourneyObject extends BasicRecurrentJourney {
 		this.id = id;
 	}
 
-	public RecurrentAlertsSent getAlertsSent() {
-		return alertsSent;
-	}
-
-	public void setAlertsSent(RecurrentAlertsSent alertsSent) {
-		this.alertsSent = alertsSent;
-	}
 
 	public String getUserId() {
 		return userId;

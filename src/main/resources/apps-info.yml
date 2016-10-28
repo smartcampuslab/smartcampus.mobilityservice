@@ -1,7 +1,4 @@
 apps:
   - appId: bologna
     password: pwd
-    messagingAppId : mobility.trento 
-    gcmSenderApiKey : GCM_SENDER_API_KEY
-    gcmSenderId : GCM_SENDER_ID
     agencyIds : [5,6,10,12]

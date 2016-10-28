@@ -16,18 +16,6 @@
 
 package eu.trentorise.smartcampus.mobility.test;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
-
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -41,11 +29,14 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.model.Announcement;
-import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
-import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 /**
  * @author raman
@@ -63,29 +54,6 @@ public class TestConfig {
 	public DomainStorage getDomainStorage() {
 		return new DomainStorage();
 	} 
-	
-	@Bean
-	public AlertSender getAlertSender() {
-		return new AlertSender();
-	}
-	
-	@Bean
-	public AlertNotifier getAlertNotifier() {
-		return new AlertNotifier() {
-			@Override
-			public void notifyStrike(String userId, String clientId, String appId, AlertStrike alert, String name) {}
-			@Override
-			public void notifyRoad(String userId, String clientId, String appId, AlertRoad alert, String name) {}
-			@Override
-			public void notifyParking(String userId, String clientId, String appId, AlertParking alert, String name) {}
-			@Override
-			public void notifyDelay(String userId, String clientId, String appId, AlertDelay alert,String name) {}
-			@Override
-			public void notifyAccident(String userId, String clientId, String appId, AlertAccident alert, String name) {}
-			@Override
-			public void notifyAnnouncement(Announcement announcement, String appId) {}
-		};
-	}
 	
 	@Bean
 	public SmartPlannerHelper getSmartPlannerHelper() {

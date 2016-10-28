@@ -15,20 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.client.InvocationException;
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
-import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,10 +25,11 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,40 +49,29 @@ import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
 import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
-import eu.trentorise.smartcampus.mobility.service.AlertSender;
-import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.storage.RouteMonitoringObject;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
-import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
-import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 @Controller
-public class JourneyPlannerController extends SCController {
+public class JourneyPlannerController {
 
 	@Autowired
 	private StatLogger statLogger;
-	private Logger logger = Logger.getLogger(this.getClass());
-
-	@Autowired
-	private AuthServices services;
-
-	@Override
-	protected AuthServices getAuthServices() {
-		return services;
-	}
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private DomainStorage domainStorage;
 
 	@Autowired
 	private SmartPlannerHelper smartPlannerHelper;
-
-	@Autowired
-	private AlertSender alertSender;
 
 	private static ObjectMapper mapper = new ObjectMapper();
 	static {
@@ -105,7 +81,7 @@ public class JourneyPlannerController extends SCController {
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
 	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false) String policyId,
-			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName) throws InvocationException {
+			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName)  {
 		try {
 
 			String userFromToken = getUserId();
@@ -123,7 +99,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
-	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary) throws InvocationException {
+	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -156,11 +132,7 @@ public class JourneyPlannerController extends SCController {
 			io.setOriginalTo(itinerary.getOriginalTo());
 			io.setName(itinerary.getName());
 			io.setData(itinerary.getData());
-			if (itinerary.getAppId() == null || itinerary.getAppId().isEmpty()) {
-				io.setAppId(NotificationHelper.MS_APP);
-			} else {
-				io.setAppId(itinerary.getAppId());
-			}
+			io.setAppId(itinerary.getAppId());
 			io.setRecurrency(itinerary.getRecurrency());
 
 			domainStorage.saveItinerary(io);
@@ -175,7 +147,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -206,11 +178,7 @@ public class JourneyPlannerController extends SCController {
 				res.setOriginalTo(itinerary.getOriginalTo());
 				res.setName(itinerary.getName());
 				res.setData(itinerary.getData());
-				if (itinerary.getAppId() == null || itinerary.getAppId().isEmpty()) {
-					res.setAppId(NotificationHelper.MS_APP);
-				} else {
-					res.setAppId(itinerary.getAppId());
-				}
+				res.setAppId(itinerary.getAppId());
 				res.setRecurrency(itinerary.getRecurrency());
 
 				domainStorage.saveItinerary(res);
@@ -227,7 +195,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary")
-	public @ResponseBody List<ItineraryObject> getItineraries(HttpServletResponse response) throws InvocationException {
+	public @ResponseBody List<ItineraryObject> getItineraries(HttpServletResponse response)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -248,7 +216,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}")
-	public @ResponseBody BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -279,7 +247,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -312,7 +280,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}/monitor/{monitor}")
-	public @ResponseBody Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
+	public @ResponseBody Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -349,7 +317,7 @@ public class JourneyPlannerController extends SCController {
 	// RECURRENT
 
 	@RequestMapping(method = RequestMethod.POST, value = "/planrecurrent")
-	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters) throws InvocationException {
+	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters)  {
 		try {
 			return smartPlannerHelper.planRecurrent(parameters);
 		} catch (ConnectorException e0) {
@@ -363,7 +331,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent")
-	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent) throws InvocationException {
+	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -393,11 +361,7 @@ public class JourneyPlannerController extends SCController {
 			rec.setUserId(userId);
 			rec.setMonitor(recurrent.isMonitor());
 			rec.setClientId(clientId);
-			if (recurrent.getAppId() == null || recurrent.getAppId().isEmpty()) {
-				rec.setAppId(NotificationHelper.MS_APP);
-			} else {
-				rec.setAppId(recurrent.getAppId());
-			}
+			rec.setAppId(recurrent.getAppId());
 
 			domainStorage.saveRecurrent(rec);
 
@@ -412,7 +376,7 @@ public class JourneyPlannerController extends SCController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent/replan/{itineraryId}")
 	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters, @PathVariable String itineraryId)
-			throws InvocationException {
+			 {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -447,7 +411,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/recurrent/{itineraryId}")
-	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -492,7 +456,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent")
-	public @ResponseBody List<RecurrentJourneyObject> getRecurrentJourneys(HttpServletResponse response) throws InvocationException {
+	public @ResponseBody List<RecurrentJourneyObject> getRecurrentJourneys(HttpServletResponse response)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -514,7 +478,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}")
-	public @ResponseBody RecurrentJourneyObject getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody RecurrentJourneyObject getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -546,7 +510,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/recurrent/{itineraryId}")
-	public @ResponseBody Boolean deleteRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws InvocationException {
+	public @ResponseBody Boolean deleteRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -578,7 +542,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}/monitor/{monitor}")
-	public @ResponseBody Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws InvocationException {
+	public @ResponseBody Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -612,36 +576,8 @@ public class JourneyPlannerController extends SCController {
 
 	// ALERTS
 
-	// no crud
-	@RequestMapping(method = RequestMethod.POST, value = "/alert/user")
-	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws InvocationException {
-		try {
-			String userId = getUserId();
-			if (userId == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				return;
-			}
-			statLogger.log(map, getUserId());
-
-			submitAlert(map, userId, null);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/alert/service")
-	public @ResponseBody void submitServiceAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws InvocationException {
-		try {
-			submitAlert(map, null, getClientId());
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
-
 	@RequestMapping(method = RequestMethod.POST, value = "/monitorroute")
-	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req) throws InvocationException {
+	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -678,7 +614,7 @@ public class JourneyPlannerController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute/{clientId}")
-	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId) throws InvocationException {
+	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -718,7 +654,7 @@ public class JourneyPlannerController extends SCController {
 	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/monitorroute")
-	public @ResponseBody List<RouteMonitoring> getMonitorRoutes(HttpServletResponse response,  @RequestParam(required = false, value = "active") Boolean active) throws InvocationException {
+	public @ResponseBody List<RouteMonitoring> getMonitorRoutes(HttpServletResponse response,  @RequestParam(required = false, value = "active") Boolean active)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -746,7 +682,7 @@ public class JourneyPlannerController extends SCController {
 	}	
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/monitorroute/{clientId}")
-	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId) throws InvocationException {
+	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId)  {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -833,45 +769,7 @@ public class JourneyPlannerController extends SCController {
 	
 	
 	
-	private void submitAlert(Map<String, Object> map, String userId, String clientId) throws InvocationException {
-		AlertType type = AlertType.getAlertType((String) map.get("type"));
-
-		Alert alert = null;
-		Map<String, Object> contentMap = map;
-		switch (type) {
-		case ACCIDENT:
-			alert = mapper.convertValue(contentMap, AlertAccident.class);
-			break;
-		case DELAY:
-			alert = mapper.convertValue(contentMap, AlertDelay.class);
-			if (userId != null)
-				logger.info("-" + userId + "~AppProsume~delay=" + ((AlertDelay) alert).getTransport().getAgencyId());
-			break;
-		case PARKING:
-			alert = mapper.convertValue(contentMap, AlertParking.class);
-			break;
-		case STRIKE:
-			alert = mapper.convertValue(contentMap, AlertStrike.class);
-			break;
-		case ROAD:
-			alert = mapper.convertValue(contentMap, AlertRoad.class);
-			break;
-		default:
-			break;
-		}
-
-		alert.setType(type);
-		if (userId != null) {
-			alert.setCreatorId(userId);
-			alert.setCreatorType(CreatorType.USER);
-		} else if (clientId != null) {
-			alert.setCreatorId(clientId);
-			alert.setCreatorType(CreatorType.SERVICE);
-		} else {
-			throw new IllegalArgumentException("unknown sender");
-		}
-		alertSender.publishAlert(alert);
-	}
+	
 
 	// /////////////////////////////////////////////////////////////////////////////
 
@@ -883,13 +781,8 @@ public class JourneyPlannerController extends SCController {
 		return auth.getAuthorizationRequest().getClientId();
 	}
 
-	@Override
 	protected String getUserId() {
-		try {
-			return super.getUserId();
-		} catch (Exception e) {
-			return null;
-		}
+		return null;
 	}
 
 }

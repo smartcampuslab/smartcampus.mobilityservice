@@ -2,7 +2,6 @@ package eu.trentorise.smartcampus.mobility.storage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,6 @@ import com.mongodb.BasicDBObject;
 import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
-import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
-import eu.trentorise.smartcampus.network.JsonUtils;
 
 @Component
 public class DomainStorage {
@@ -49,9 +46,6 @@ public class DomainStorage {
 		}
 		if (cls == RecurrentJourneyObject.class) {
 			return RECURRENT;
-		}
-		if (cls == AlertsSent.class) {
-			return DATA;
 		}
 		if (cls == Announcement.class) {
 			return NEWS;
@@ -90,26 +84,6 @@ public class DomainStorage {
 		query.put("clientId", clientdId);
 		template.getCollection(RECURRENT).remove(query);		
 	}		
-	
-	public AlertsSent getAlertsSent() {
-		AlertsSent alerts = searchDomainObject(new TreeMap<String, Object>(), AlertsSent.class);
-		if (alerts == null) {
-			alerts = new AlertsSent();
-		}
-		return alerts;
-	}
-	
-	public void updateAlertsSent(AlertsSent alerts) {
-		AlertsSent oldAlerts = getAlertsSent();
-		oldAlerts.setDelays(alerts.getDelays());
-		oldAlerts.setParkings(alerts.getParkings());
-		
-		try {
-			template.save(oldAlerts, DATA);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public void saveNews(Announcement announcment) {
 		template.save(announcment, NEWS);
@@ -169,17 +143,14 @@ public class DomainStorage {
 	
 	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
-		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.find(query, clz, getClassCollection(clz));
 	}
 	
 	public <T> List<T> searchDomainObjects(Query query, Class<T> clz) {
-		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.find(query, clz, getClassCollection(clz));
 	}	
 	
 	public <T> T searchDomainObject(Query query, Class<T> clz) {
-		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		return template.findOne(query, clz, getClassCollection(clz));
 	}	
 	
@@ -207,7 +178,6 @@ public class DomainStorage {
 	
 	public <T> void deleteDomainObject(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
-		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
 		template.remove(query, getClassCollection(clz));
 	}	
 		

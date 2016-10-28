@@ -16,6 +16,40 @@
 
 package eu.trentorise.smartcampus.mobility.service;
 
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
+import org.codehaus.jackson.map.DeserializationConfig.Feature;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicy;
+import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
+import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
+import eu.trentorise.smartcampus.network.JsonUtils;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
 import it.sayservice.platform.smartplanner.data.message.TType;
@@ -31,41 +65,6 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
-
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ws.rs.core.MediaType;
-
-import org.codehaus.jackson.map.DeserializationConfig.Feature;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
-import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicy;
-import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
-import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
-import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
-import eu.trentorise.smartcampus.network.JsonUtils;
 
 /**
  * @author raman
@@ -160,11 +159,11 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	private String performGET(String request, String query) throws Exception {
-		return HTTPConnector.doGet(otpURL+request, query, MediaType.APPLICATION_JSON, null, "UTF-8");
+		return HTTPConnector.doGet(otpURL+request, query, MediaType.APPLICATION_JSON_VALUE, null, "UTF-8");
 	}
 
 	private String performPOST(String request, String body) throws Exception {
-		return HTTPConnector.doPost(otpURL+request, body, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+		return HTTPConnector.doPost(otpURL+request, body, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Override
@@ -411,7 +410,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			throw new IllegalArgumentException("Unknown alert type "+alert.getClass().getName());
 		}
 		
-		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
+		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
 		logger .info(result);				
 		
 	}	

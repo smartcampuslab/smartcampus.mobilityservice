@@ -15,10 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.client.InvocationException;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
-
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,7 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,37 +40,28 @@ import eu.trentorise.smartcampus.mobility.model.Timetable;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.network.JsonUtils;
-import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
-import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 @Controller
-public class OTPController extends SCController {
+public class OTPController {
 
-	private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private SmartPlannerHelper smartPlannerHelper;
-
-	@Autowired
-	private AuthServices services;
-	@Override
-	protected AuthServices getAuthServices() {
-		return services;
-	}
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static final int DAY = 1000*60*60*24-1;
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getroutes/{agencyId}")
 	public @ResponseBody
-	void getRoutes(HttpServletResponse response, @PathVariable String agencyId) throws InvocationException{
+	void getRoutes(HttpServletResponse response, @PathVariable String agencyId) {
 		try {
 			//String address =  otpURL + OTP + "getroutes/" + agencyId;
 			//String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String routes = smartPlannerHelper.routes(agencyId);
 
-			logger.info("-"+getUserId()  + "~AppConsume~routes=" + agencyId);
-	
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(routes);
 
@@ -86,13 +74,11 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getstops/{agencyId}/{routeId}")
 	public @ResponseBody
-	void getStops(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId) throws InvocationException{
+	void getStops(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId) {
 		try {
 //			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId;
 //			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String stops = smartPlannerHelper.stops(agencyId, routeId);
-			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
-
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(stops);
 			
@@ -105,11 +91,10 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getstops/{agencyId}/{routeId}/{latitude}/{longitude}/{radius:.+}")
 	public @ResponseBody
-	void getStops(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable double latitude, @PathVariable double longitude, @PathVariable double radius) throws InvocationException {
+	void getStops(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable double latitude, @PathVariable double longitude, @PathVariable double radius)  {
 		try {
 //			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId + "/" + latitude + "/" + longitude + "/" + radius;
 //			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
 			String stops = smartPlannerHelper.stops(agencyId, routeId, latitude, longitude, radius);
 
 			response.setContentType("application/json; charset=utf-8");
@@ -153,13 +138,11 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/gettimetable/{agencyId}/{routeId}/{stopId:.*}")
 	public @ResponseBody
-	void getTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable String stopId) throws InvocationException{
+	void getTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable String stopId) {
 		try {
 //			String address =  otpURL + OTP + "gettimetable/" + agencyId + "/" + routeId + "/" + stopId;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, null);
 			String timetable = smartPlannerHelper.stopTimetable(agencyId, routeId, stopId);
-			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
-
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
 
@@ -172,9 +155,8 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getlimitedtimetable/{agencyId}/{stopId}/{maxResults:.*}")
 	public @ResponseBody
-	void getLimitedTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String stopId, @PathVariable Integer maxResults) throws InvocationException{
+	void getLimitedTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String stopId, @PathVariable Integer maxResults) {
 		try {
-			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
 //			String address =  otpURL + OTP + "getlimitedtimetable/" + agencyId + "/" + stopId + "/" + maxResults;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String timetable = smartPlannerHelper.stopTimetable(agencyId, stopId, maxResults);
@@ -245,9 +227,6 @@ public class OTPController extends SCController {
 	public @ResponseBody
 	void getTransitDelays(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
-			logger.info("-"+getUserId()  + "~AppConsume~delays=" + routeId);
-//			String address =  otpURL + OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to;
-//			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
 			String timetable = smartPlannerHelper.delays(agencyId, routeId, from, to);
 			response.setContentType("application/json; charset=utf-8");
 			
@@ -264,7 +243,7 @@ public class OTPController extends SCController {
 	
 		@RequestMapping(method = RequestMethod.GET, value = "/getparkingsbyagency/{agencyId}")
 		public @ResponseBody
-		void getParkingsByAgency(HttpServletResponse response, @PathVariable String agencyId) throws InvocationException {
+		void getParkingsByAgency(HttpServletResponse response, @PathVariable String agencyId)  {
 			try {
 	//			String address = otpURL + SMARTPLANNER + "getParkingsByAgency?agencyId=" + agencyId;
 	//			HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
@@ -285,7 +264,7 @@ public class OTPController extends SCController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
 		public @ResponseBody
-		void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws InvocationException {
+		void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId)  {
 			try {
 	//			String address = otpURL + SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId;
 	//			HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
@@ -304,7 +283,7 @@ public class OTPController extends SCController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/getroadinfobyagency/{agencyId}/{from}/{to}")
 		public @ResponseBody
-		void getRoadInfoByAgency(HttpServletResponse response, @PathVariable String agencyId, @PathVariable Long from, @PathVariable Long to) throws InvocationException {
+		void getRoadInfoByAgency(HttpServletResponse response, @PathVariable String agencyId, @PathVariable Long from, @PathVariable Long to)  {
 			try {
 	//			String address = otpURL + SMARTPLANNER + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to;
 	//			HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
@@ -325,7 +304,7 @@ public class OTPController extends SCController {
 	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/{latitude}/{longitude}/{radius}")
 	public @ResponseBody void getTaxiStations(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, @PathVariable double latitude, @PathVariable double longitude,
-			@PathVariable double radius) throws InvocationException {
+			@PathVariable double radius)  {
 		try {
 
 			String stops = smartPlannerHelper.getTaxiStations(latitude, longitude, radius);
@@ -340,7 +319,7 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/")
 	public @ResponseBody void getAllTaxiStations(HttpServletRequest request, HttpServletResponse response,
-			HttpSession session) throws InvocationException {
+			HttpSession session)  {
 		try {
 
 			String stops = smartPlannerHelper.getAllTaxiStations();
@@ -356,7 +335,7 @@ public class OTPController extends SCController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiAgencyContacts/")
 	public @ResponseBody void getTaxiAgencyContacts(HttpServletRequest request, HttpServletResponse response,
-			HttpSession session) throws InvocationException {
+			HttpSession session)  {
 		try {
 
 			String contacts = smartPlannerHelper.getTaxiAgencyContacts();
@@ -386,16 +365,8 @@ public class OTPController extends SCController {
 		}
 	}   	
 	
-	
-	
-	
-	@Override
 	protected String getUserId() {
-		try {
-			return super.getUserId();
-		} catch (Exception e) {
 			return null;
-		}
 	}
 
 }
