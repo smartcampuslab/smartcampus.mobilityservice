@@ -351,10 +351,9 @@ public class GamificationController extends SCController {
 					res.getGeolocationEvents().add(geoloc);
 				}
 				
-				gamificationHelper.checkFaLaCosaGiusta(res.getItinerary(), res.getGeolocationEvents(), appId, userId);
-
 				// boolean canSave = true;
 				if (res.getItinerary() != null) {
+					gamificationHelper.checkFaLaCosaGiusta(res.getItinerary(), res.getGeolocationEvents(), appId, userId);
 					if (!res.getStarted() && !res.getComplete()) {
 						// canSave =
 						sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary());
@@ -376,6 +375,7 @@ public class GamificationController extends SCController {
 						}
 						if (vr != null && vr.getValid().booleanValue()) {
 							// canSave =
+							gamificationHelper.checkFaLaCosaGiusta(null, res.getGeolocationEvents(), appId, userId);
 							sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							Map<String, Object> trackingData = gamificationHelper.computeFreeTrackingData(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {

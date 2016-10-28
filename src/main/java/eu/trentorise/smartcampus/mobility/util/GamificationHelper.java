@@ -120,6 +120,7 @@ public class GamificationHelper {
 //		}
 	}
 	
+	
 	public void checkFaLaCosaGiusta(final ItineraryObject itinerary,final Collection<Geolocation> geolocationEvents, final String appId, final String userId) {
 		try {
 		AppInfo app = appSetup.findAppById(appId);
@@ -130,8 +131,16 @@ public class GamificationHelper {
 		}
 		
 		if (itinerary != null) {
-			if (itinerary.getData().getLeg().size() == 1 && itinerary.getData().getLeg().get(0).getTransport().getType().equals(TType.CAR)) {
-					return;
+//			if (itinerary.getData().getLeg().size() == 1 && itinerary.getData().getLeg().get(0).getTransport().getType().equals(TType.CAR)) {
+//					return;
+//			}
+			for (Leg leg: itinerary.getData().getLeg()) {
+				if (leg.getTransport().getType().equals(TType.CAR)) {
+					if (leg.getTo().getStopId().getExtra() == null || !leg.getTo().getStopId().getExtra().containsKey("parkAndRide") || !((Boolean)leg.getTo().getStopId().getExtra().get("parkAndRide")).booleanValue()) {
+						logger.debug("CAR with no PnR, returning");
+						return;
+					}
+				}
 			}
 		}
 		
@@ -145,16 +154,17 @@ public class GamificationHelper {
 		
 		Geolocation poi = new Geolocation(coords.get(0), coords.get(1), new Date());
 		for (Geolocation geolocation : geolocationEvents) {
-			if (geolocation.getRecorded_at().after(fromDate) && geolocation.getRecorded_at().before(toDate) && harvesineDistance(poi, geolocation) <= 0.1) {
+			if (geolocation.getRecorded_at().after(fromDate) && geolocation.getRecorded_at().before(toDate) && harvesineDistance(poi, geolocation) <= 0.05) {
 				executorService.execute(new Runnable() {
 					@Override
 					public void run() {
 						sendFaLaCosaGiusta(appId, userId);
 					}
 				});
-				break;
+				return;
 			}
 		}
+		logger.debug("Conditions for Fa la Cosa Giusta not matched.");
 		} catch (Exception e) {
 			logger.error("Error sending data for Fa la Cosa Giusta");
 			e.printStackTrace();
