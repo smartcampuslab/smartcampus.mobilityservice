@@ -12,28 +12,28 @@
 <meta http-equiv="Expires" content="-1" />
 <title>Notification</title>
 <!-- Bootstrap core CSS -->
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/bootstrap.min.css" rel="stylesheet">
 <!-- Custom styles for this template -->
-<link href="css/style.css" rel="stylesheet">
-<link rel='stylesheet' href='css/textAngular.css'>
+<link href="../css/style.css" rel="stylesheet">
+<link rel='stylesheet' href='../css/textAngular.css'>
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-<script src="lib/angular/angular.min.js"></script>
-<script src="lib/angular/angular-route.min.js"></script>
-<script src="lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
-<script src='lib/ngMask.min.js'></script>
+<script src="../lib/angular/angular.min.js"></script>
+<script src="../lib/angular/angular-route.min.js"></script>
+<script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
+<script src='../lib/ngMask.min.js'></script>
 
 
 
-<script src='lib/angular/textAngular-rangy.min.js'></script>
-<script src='lib/angular/textAngular-sanitize.min.js'></script>
-<script src='lib/angular/textAngular.min.js'></script>
+<script src='../lib/angular/textAngular-rangy.min.js'></script>
+<script src='../lib/angular/textAngular-sanitize.min.js'></script>
+<script src='../lib/angular/textAngular.min.js'></script>
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="lib/bootstrap.min.js"></script>
+<script src="../lib/bootstrap.min.js"></script>
 
-<script src="js/notification.js"></script>
+<script src="../js/notification.js"></script>
 
 </head>
 <body>

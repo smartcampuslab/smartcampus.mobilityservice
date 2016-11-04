@@ -34,13 +34,13 @@ public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticat
 				throw new BadCredentialsException("Incorrect password");
 			} else {
 				ad = new AppDetails(app);
-				ad.getAuthorities().add(new SimpleGrantedAuthority("SERVICE"));
+				ad.getAuthorities().add(new SimpleGrantedAuthority("ROLE_SERVICE"));
 			}
 		} else if (!app.getPassword().equals(authentication.getCredentials().toString())) {
 			throw new BadCredentialsException("Incorrect password");
 		} else {
 			ad = new AppDetails(app);
-			ad.getAuthorities().add(new SimpleGrantedAuthority("CONSOLE"));
+			ad.getAuthorities().add(new SimpleGrantedAuthority("ROLE_CONSOLE"));
 		}
 
 		// if

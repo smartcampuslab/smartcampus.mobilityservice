@@ -26,10 +26,10 @@
           <div class="col-md-offset-4 col-md-4">
             <div class="panel panel-default">
             <h3 style="text-align:center">Mobility Console Login</h3>
-            <form action="j_spring_security_check" method="post">
+            <form action="login" method="post">
                 <div>&nbsp;</div>
-                <div class="col-md-12 form-group"><label> Username: </label><input class="form-control" type="text" name="j_username"/></div>
-                <div class="col-md-12 form-group"><label> Password: </label><input class="form-control" type="password" name="j_password"/></div>
+                <div class="col-md-12 form-group"><label> Username: </label><input class="form-control" type="text" name="username"/></div>
+                <div class="col-md-12 form-group"><label> Password: </label><input class="form-control" type="password" name="password"/></div>
                 <div class="col-md-12 form-group"><button class="btn btn-primary"/>Sign In</button></div>
                 <div>&nbsp;</div>
             </form>

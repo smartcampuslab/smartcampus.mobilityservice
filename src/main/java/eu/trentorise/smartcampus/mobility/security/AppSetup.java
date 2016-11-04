@@ -12,6 +12,7 @@ import javax.naming.ConfigurationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -22,7 +23,7 @@ import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.AppSignature;
 import eu.trentorise.smartcampus.mobility.util.TokenHelper;
 
-
+@Component
 public class AppSetup {
 
 	@Value("classpath:/apps-info.yml")
