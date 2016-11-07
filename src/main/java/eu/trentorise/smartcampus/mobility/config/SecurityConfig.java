@@ -1,4 +1,4 @@
-package eu.trentorise.smartcampus.mobility.config.security;
+package eu.trentorise.smartcampus.mobility.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +28,8 @@ import eu.trentorise.smartcampus.resourceprovider.jdbc.JdbcServices;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-//@Order(0)
 @ComponentScan("eu.trentorise.smartcampus.resourceprovider")
-public class GlobalSecurityConfig {
+public class SecurityConfig {
 
 	@Value("${jdbc.driver}")
 	private String jdbcDriver;
