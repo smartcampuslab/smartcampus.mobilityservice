@@ -881,7 +881,8 @@ var plannerControllers = angular.module('plannerControllers', [])
 									$scope.compileform.extractCode = $scope.tmpForm.extractCode;
 									$scope.compileform.filterCode = $scope.tmpForm.filterCode;
 								}
-
+								$scope.compileform.policyId = $scope.compileform.name;
+								
 								$http({
 									'method' : 'POST',
 									'url' : $rootScope.controllerBase + "/compiled",

@@ -245,6 +245,7 @@ public class DomainStorage {
 			update.set("filterCode", policy.getFilterCode());			
 			update.set("groups", policy.getGroups());
 			update.set("draft", policy.getDraft());
+			update.set("policyId", policy.getPolicyId());
 			template.updateFirst(query, update, COMPILED_POLICY);
 		}
 	}		

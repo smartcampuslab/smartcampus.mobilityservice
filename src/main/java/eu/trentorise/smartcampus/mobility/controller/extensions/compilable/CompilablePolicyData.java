@@ -30,6 +30,8 @@ public class CompilablePolicyData {
 	private boolean modifiedEvaluate;
 	private boolean modifiedExtract;
 	private boolean modifiedFilter;
+	
+	private String policyId;
 
 	public CompilablePolicyData() {
 		create = Lists.newArrayList();
@@ -55,12 +57,16 @@ public class CompilablePolicyData {
 		this.description = description;
 	}
 	
-	public String getPolicyId() {
-		return name;
-	}
-
 	public Boolean getDraft() {
 		return draft;
+	}
+
+	public String getPolicyId() {
+		return policyId != null ? policyId : name;
+	}
+
+	public void setPolicyId(String policyId) {
+		this.policyId = policyId;
 	}
 
 	public void setDraft(Boolean draft) {
