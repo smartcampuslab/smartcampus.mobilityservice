@@ -235,7 +235,10 @@ body {
 				<div id="map"></div>
 				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();"
 						name="fix-paths" class="navbar-btn btn-sm"
-					>&nbsp;Fix paths</label>
+					>&nbsp;Fix paths {{scores}}</label></span>					
+				<span ng-hide="!selectedInstance"><label class="navbar-btn">
+				<button class="btn btn-danger btn-sm" ng-click="showAllPoints()">Show all points</button>
+				</span>					
 					<div id="right-scrollable" style="width: 100%; height: 100%;">
 						<div class="row" ng-if="selectedInstance != null">
 							<div class="col-md-4">
@@ -272,6 +275,7 @@ body {
 								<table>
 									<thead>
 										<td></td>
+										<td>i</td>
 										<td>When</td>
 										<td>Accuracy</td>
 										<td>Activity</td>
@@ -282,13 +286,14 @@ body {
 									</thead>
 									<tbody>
 										<!-- <tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"> -->
-										<tr ng-repeat="evt in selectedInstance.geolocationEvents" ng-click="lineclick()" class="instance-row">
+										<tr ng-repeat="evt in selectedInstance.geolocationEvents track by $index" ng-click="lineclick()" class="instance-row">
 											<div>
 												<!-- <td><span class="glyphicon glyphicon-map-marker" ng-click="newMarker(evt.geocoding[1] + ',' + evt.geocoding[0])"></span></td> -->
-												<td><label class="btn" ng-click="newEventMarker(evt.geocoding[1],evt.geocoding[0])"> <span class="glyphicon glyphicon-map-marker"
+												<td><label class="btn" ng-click="newEventMarker(evt.geocoding[1],evt.geocoding[0],$index + 1)"> <span class="glyphicon glyphicon-map-marker"
 														aria-hidden="true"
 													></span>
 												</label></td>
+												<td>{{$index + 1}}</td>
 												<td>{{evt.recorded_at|date:'HH:mm:ss'}}</td>
 												<td>{{evt.accuracy}}</td>
 												<td>{{evt.activity_type}}</td>
