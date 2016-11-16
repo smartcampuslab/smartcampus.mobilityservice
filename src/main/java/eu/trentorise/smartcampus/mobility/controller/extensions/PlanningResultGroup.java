@@ -2,7 +2,7 @@ package eu.trentorise.smartcampus.mobility.controller.extensions;
 
 import it.sayservice.platform.smartplanner.data.message.RType;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PlanningResultGroup {

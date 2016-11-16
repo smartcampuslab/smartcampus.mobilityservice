@@ -2,7 +2,7 @@ package eu.trentorise.smartcampus.mobility.model;
 
 import java.util.Set;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.google.common.collect.Sets;
 
