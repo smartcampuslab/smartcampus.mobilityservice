@@ -5,3 +5,5 @@
 /.metadata/*
 RemoteSystemsTempFiles/*
 .tern-project
+/tmp/
+/.springBeans

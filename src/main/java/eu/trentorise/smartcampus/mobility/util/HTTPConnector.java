@@ -15,19 +15,46 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.util;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
-import org.apache.commons.codec.binary.Base64;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
 
 public class HTTPConnector {
 	
+	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
+		HttpResponse<String> response = Unirest.get(address + ((req != null) ? ("?" + req) : "")).header("Accept", accept).header("Content-Type", contentType).asString();
+		if (response.getStatus() != 200) {
+			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
+		}		
+		return response.getBody();
+	}
+	
+	public static InputStream doStreamGet(String address, String req, String accept, String contentType) throws Exception {
+		HttpResponse<InputStream> response = Unirest.get(address + ((req != null) ? ("?" + req) : "")).header("Accept", accept).header("Content-Type", contentType).asBinary();
+		if (response.getStatus() != 200) {
+			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
+		}		
+		return response.getBody();
+	}
+	
+	public static String doAuthenticatedPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
+		HttpResponse<String> response = Unirest.post(address).header("Accept", accept).header("Content-Type", contentType).basicAuth(user, password).body(req).asString();
+		if (response.getStatus() != 200) {
+			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
+		}		
+		return response.getBody();		
+	}
+	
+	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
+		HttpResponse<String> response = Unirest.post(address).header("Accept", accept).header("Content-Type", contentType).body(req).asString();
+		if (response.getStatus() != 200) {
+			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
+		}		
+		return response.getBody();		
+	}
+	
+	/*
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
 
 		StringBuffer response = new StringBuffer();
@@ -170,5 +197,6 @@ public class HTTPConnector {
 
 		return response.toString();
 	}
+	*/
 
 }

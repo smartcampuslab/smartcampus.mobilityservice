@@ -1,6 +1,6 @@
 apps:
   - appId: trento
-    password: trento
+    password: 
     messagingAppId : mobility.trento
     gcmSenderApiKey : 
     gcmSenderId : 
@@ -10,13 +10,15 @@ apps:
     gamePassword :
     gameStart : 
     routesDB : trento
+    servicesUser : trento_service
+    servicesPassword : 
     extra:
         game:
             poi : [46.064785, 11.116505]
             from : 29/10/2016 9:00
             to : 30/10/2016 19:00
   - appId: rovereto
-    password: rovereto
+    password: 
     messagingAppId : mobility.rovereto
     gcmSenderApiKey : 
     gcmSenderId : 
@@ -26,3 +28,5 @@ apps:
     gamePassword : 
     gameStart :    
     routesDB : rovereto
+    servicesUser : rovereto_service
+    servicesPassword : 

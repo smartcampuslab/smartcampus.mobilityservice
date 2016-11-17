@@ -29,6 +29,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 					$scope.mydate = new Date();
 					$scope.fromMarker = null;
 					$scope.toMarker = null;
+					$scope.swapFromTo = false;
 					$scope.mode = 'fastest';
 					$scope.policyform = {
 						'name' : 'Dummy',
@@ -453,7 +454,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 						$scope.requestedFrom = $scope.fromMarker.address;
 						$scope.requestedTo = $scope.toMarker.address;
 
-						planner.plan($scope.fromMarker.getPosition(), $scope.toMarker.getPosition(), convertMeans(), $scope.mode, $scope.mydate, $scope.mytime,
+						var from = $scope.fromMarker;
+						var to = $scope.toMarker;
+						if ($scope.swapFromTo) {
+							from = $scope.toMarker;
+							to = $scope.fromMarker;
+						}
+						
+						planner.plan(from.getPosition(), to.getPosition(), convertMeans(), $scope.mode, $scope.mydate, $scope.mytime,
 								$scope.currentPolicy.id, $scope.wheelchair).success(function(data) {
 							$scope.planned = true;
 							if (data && data.length > 0) {
@@ -509,7 +517,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 					};
 
 					$scope.showPlan = function(plan) {
-						formatter.process(plan, $scope.fromMarker.address, $scope.toMarker.address, $scope.useCoordinates);
+						var from = $scope.fromMarker;
+						var to = $scope.toMarker;
+						if ($scope.swapFromTo) {
+							from = $scope.toMarker;
+							to = $scope.fromMarker;
+						}						
+						
+						formatter.process(plan, from.address, to.address, $scope.useCoordinates);
 
 						$scope.currentItinerary = plan;
 						$scope.resetDrawings();
@@ -536,7 +551,14 @@ var plannerControllers = angular.module('plannerControllers', [])
 
 					$scope.popoverShown = false;
 					$scope.request = function() {
-						var data = planner.getRequest($scope.fromMarker.getPosition(), $scope.toMarker.getPosition(), convertMeans(), $scope.mode,
+						var from = $scope.fromMarker;
+						var to = $scope.toMarker;
+						if ($scope.swapFromTo) {
+							from = $scope.toMarker;
+							to = $scope.fromMarker;
+						}						
+						
+						var data = planner.getRequest(from.getPosition(), to.getPosition(), convertMeans(), $scope.mode,
 								$scope.mydate, $scope.mytime, $scope.currentPolicy.name, $scope.wheelchair);
 						$('#reqbutton').popover('destroy');
 						if (!$scope.popoverShown) {
@@ -747,7 +769,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 					$scope.readPolicy = function() {
 						$scope.message = "";
 						$scope.error = "";
-						$http.get($rootScope.controllerBase + "/compiled/" + $scope.currentPolicy.name, {
+						$http.get($rootScope.controllerBase + "compiled/" + $scope.currentPolicy.name, {
 							headers : {
 								'Content-Type' : "application/json",
 								'Accept' : "application/json"
@@ -881,10 +903,11 @@ var plannerControllers = angular.module('plannerControllers', [])
 									$scope.compileform.extractCode = $scope.tmpForm.extractCode;
 									$scope.compileform.filterCode = $scope.tmpForm.filterCode;
 								}
-
+								$scope.compileform.policyId = $scope.compileform.name;
+								
 								$http({
 									'method' : 'POST',
-									'url' : $rootScope.controllerBase + "/compiled",
+									'url' : $rootScope.controllerBase + "compiled",
 									'data' : $scope.compileform,
 									'headers' : {
 										'Content-Type' : "application/json",
@@ -919,7 +942,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 
 						$http({
 							'method' : 'POST',
-							'url' : $rootScope.controllerBase + "/compile?generate=" + $cre + "&evaluate=" + $eval + "&extract=" + $extr + "&filter=" + $filt,
+							'url' : $rootScope.controllerBase + "compile?generate=" + $cre + "&evaluate=" + $eval + "&extract=" + $extr + "&filter=" + $filt,
 							'data' : $scope.compileform,
 							'headers' : {
 								'Content-Type' : "application/json",
@@ -955,7 +978,7 @@ var plannerControllers = angular.module('plannerControllers', [])
 								$scope.error = "";
 								$http({
 									'method' : 'DELETE',
-									'url' : $rootScope.controllerBase + "/compiled/" + $scope.currentPolicy.name,
+									'url' : $rootScope.controllerBase + "compiled/" + $scope.currentPolicy.name,
 								}).success(function(data) {
 									$scope.policyform = {
 										'name' : 'Dummy',

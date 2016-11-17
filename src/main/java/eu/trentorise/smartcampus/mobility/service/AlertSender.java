@@ -23,8 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
-import eu.trentorise.smartcampus.mobility.model.GenericTrain;
-import eu.trentorise.smartcampus.mobility.model.Parking;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertFilter;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertUpdater;
@@ -59,7 +57,7 @@ public class AlertSender {
 	 * Match against user trips and send the alerts
 	 * @param trains
 	 */
-	public void publishTrains(List<GenericTrain> trains) {
+	public void publishTrains(List<AlertDelay> trains) {
 		List<AlertDelay> allDelays = filterSentDelays(trains);
 		
 		List<AlertWrapper> userDelays = findDelayAlertsForUsers(allDelays);
@@ -70,10 +68,10 @@ public class AlertSender {
 	/**
 	 * Convert parking state to parking alerts, filtering only new/changed states.
 	 * Match against  user trips and send the alerts
-	 * @param parkings
+	 * @param alerts
 	 */
-	public void publishParkings(List<Parking> parkings) {
-		List<AlertParking> allAlerts = filterSentParkings(parkings);
+	public void publishParkings(List<AlertParking> alerts) {
+		List<AlertParking> allAlerts = filterSentParkings(alerts);
 		List<AlertWrapper> userAlerts = findParkingAlertsForUsers(allAlerts);
 		publishParkingAlerts(allAlerts, userAlerts);
 	}	
@@ -123,13 +121,12 @@ public class AlertSender {
 		publishRoadWorkAlerts(allAlerts, userAlerts);
 	}
 
-	private List<AlertDelay> filterSentDelays(List<GenericTrain> trains) {
+	private List<AlertDelay> filterSentDelays(List<AlertDelay> trains) {
 		List<AlertDelay> result = Lists.newArrayList();
 		AlertsSent alertsSent = domainStorage.getAlertsSent();
-		for (GenericTrain train: trains) {
-			AlertDelay alert = DelayChecker.checkDelay(train);
+		for (AlertDelay alert: trains) {
 			if (alert != null) {
-				AlertsSent newAlertsSent = DelayChecker.checkNewAlerts(alertsSent, train);
+				AlertsSent newAlertsSent = DelayChecker.checkNewAlerts(alertsSent, alert);
 				if (newAlertsSent != null) {
 					alertsSent = newAlertsSent;
 					result.add(alert);
@@ -334,13 +331,12 @@ public class AlertSender {
 	
 	
 	
-	private List<AlertParking> filterSentParkings(List<Parking> parkings) {
+	private List<AlertParking> filterSentParkings(List<AlertParking> alerts) {
 		List<AlertParking> result = Lists.newArrayList();
 		AlertsSent alertsSent = domainStorage.getAlertsSent();
-		for (Parking parking: parkings) {
-			AlertParking alert = ParkingChecker.checkParking(parking);
+		for (AlertParking alert: alerts) {
 			if (alert != null) {
-				AlertsSent newAlertsSent = ParkingChecker.checkNewAlerts(alertsSent, parking);
+				AlertsSent newAlertsSent = ParkingChecker.checkNewAlerts(alertsSent, alert);
 				if (newAlertsSent != null) {
 					alertsSent = newAlertsSent;
 					result.add(alert);

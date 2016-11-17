@@ -2,7 +2,7 @@ package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.ArrayList;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class GeolocationsEvent {

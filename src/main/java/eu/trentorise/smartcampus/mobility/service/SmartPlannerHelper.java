@@ -21,6 +21,7 @@ import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 import java.io.InputStream;
@@ -41,7 +42,9 @@ public interface SmartPlannerHelper {
 	List<Itinerary> planSingleJourney(SingleJourney journeyRequest, String policyId) throws Exception;
 	
 	String parkingsByAgency(String agencyId) throws Exception;
+	String bikeStations() throws Exception;
 	String bikeSharingByAgency(String agencyId) throws Exception;
+	void addBikeSharingStations(List<BikeStation> stations) throws Exception;
 	String roadInfoByAgency(String agencyId, Long from, Long to) throws Exception;
 	String routes(String agencyId) throws Exception;
 	String stops(String agencyId, String routeId) throws Exception;

@@ -120,7 +120,7 @@ public class GamificationHelper {
 //		}
 	}
 	
-	
+
 	public void checkFaLaCosaGiusta(final ItineraryObject itinerary,final Collection<Geolocation> geolocationEvents, final String appId, final String userId) {
 		try {
 		AppInfo app = appSetup.findAppById(appId);
@@ -578,14 +578,22 @@ public class GamificationHelper {
 		int tooFastCountTotal = 0;
 		double distance = 0;
 		long time = 0;
+		
+
+		
+		
 		int origPointsSize = points.size();
 		if (points.size() >= 2) {
-			logger.debug("Original track points: " + points.size());
-			
+//			logger.debug("Original track points (remove outliers): " + points.size());
+//			removeOutliers(points);
+//			logger.debug("Transformed track points (remove outliers): " + points.size());			
+		
+//			if (points.size() >= 2) {
+			logger.debug("Original track points (transform): " + points.size());
 			points = transform(points);
-			
-			logger.debug("Transformed track points: " + points.size());
-
+			logger.debug("Transformed track points (transform): " + points.size());
+//			}
+		
 			int tooFastCount = 0;
 			if (points.size() >= 2) {
 				for (int i = 1; i < points.size(); i++) {
@@ -635,6 +643,60 @@ public class GamificationHelper {
 		vr.setTime(time);
 		return vr;
 	}
+	
+	public static void removeOutliers(List<Geolocation> points) {
+		Set<Geolocation> toRemove = Sets.newHashSet();
+
+		double averageSpeed = 0;
+
+		double distance = 0;
+		for (int i = 1; i < points.size(); i++) {
+			double d = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+			long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+			if (t > 0) {
+				distance += d;
+			}
+		}
+		double time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+		averageSpeed = 3600000 * distance / (double) time;
+
+		for (int i = 1; i < points.size() - 1; i++) {
+			double d1 = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+			long t1 = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+			double s1 = 0;
+			if (t1 > 0) {
+				s1 = 3600000 * d1 / (double) t1;
+			}
+			double d2 = harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i + 1).getLatitude(), points.get(i + 1).getLongitude());
+			long t2 = points.get(i + 1).getRecorded_at().getTime() - points.get(i).getRecorded_at().getTime();
+			double s2 = 0;
+			if (t2 > 0) {
+				s2 = 3600000 * d2 / (double) t2;
+			}
+
+			Integer index = null;
+
+			double d3 = harvesineDistance(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude(), points.get(i + 1).getLatitude(), points.get(i + 1).getLongitude());
+
+			double a = Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
+
+			if (a < 0.017453292519943 * 3) {
+				index = i;
+			} else if (a < 0.017453292519943 * 30 && s1 > 4 * averageSpeed && s2 > 4 * averageSpeed && i != 1 && i != points.size() - 2) {
+				index = i;
+			} else if (i == 1 && s1 > 4 * averageSpeed) {
+				index = 0;
+			} else if (i == points.size() - 2 && s2 > 4 * averageSpeed) {
+				index = points.size() - 1;
+			}
+
+			if (index != null) {
+				toRemove.add(points.get(index));
+			}
+		}
+
+		points.removeAll(toRemove);
+}
 	
 	private static boolean isMaximumTooFast(double speed, String ttype) {
 		if ("walk".equals(ttype)) {

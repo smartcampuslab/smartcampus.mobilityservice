@@ -15,12 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
-import it.sayservice.platform.smartplanner.data.message.Position;
-import it.sayservice.platform.smartplanner.data.message.TType;
-import it.sayservice.platform.smartplanner.data.message.Transport;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
-import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,74 +23,11 @@ import java.util.Calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import eu.trentorise.smartcampus.mobility.model.GenericTrain;
-
 public class DelayChecker {
 
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
 	private static Log logger = LogFactory.getLog(DelayChecker.class);
-
-	public static AlertDelay checkDelay(GenericTrain train) {
-		AlertDelay delay = new AlertDelay();
-		delay.setCreatorId("");
-		delay.setCreatorType(CreatorType.SERVICE);
-		delay.setDelay(train.getDelay() * (1000 * 60));
-		delay.setDescription("");
-		delay.setNote("");
-
-		Transport t = new Transport();
-		
-		t.setAgencyId(train.getAgencyId());
-		t.setRouteId(train.getRouteId());
-		t.setRouteShortName(buildRouteLongName(train.getAgencyId(), train.getRouteId()));
-		t.setTripId(train.getTripId());
-		t.setType(TType.TRAIN);
-		
-		delay.setTransport(t);
-		delay.setType(AlertType.DELAY);
-
-		Calendar cal = Calendar.getInstance();
-		if (train.getRefTime() != null) {
-			cal.setTimeInMillis(train.getRefTime());
-		}
-		Calendar parsed = Calendar.getInstance();
-		try {
-			parsed.setTime(TIME_FORMAT.parse(train.getTime()));
-			cal.set(Calendar.HOUR_OF_DAY, parsed.get(Calendar.HOUR_OF_DAY));
-			cal.set(Calendar.MINUTE, parsed.get(Calendar.MINUTE));
-		} catch (Exception e) {
-			logger.error("Error parsing delay time: " + e.getMessage());
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.HOUR_OF_DAY, 4);
-		}
-		cal.set(Calendar.MILLISECOND, 0);
-		cal.set(Calendar.SECOND, 0);
-
-		long from = cal.getTimeInMillis();
-		cal.set(Calendar.HOUR_OF_DAY, 23);
-		cal.set(Calendar.MINUTE, 59);
-		long to = cal.getTimeInMillis();
-		delay.setFrom(from);
-		delay.setTo(to);
-		Position p = new Position();
-		p.setName(train.getStation());
-		delay.setPosition(p);
-
-		// if (train.getDelay() > 0) {
-		// delay.setNote("Train " + train.getNumber() + " has a delay of " +
-		// train.getDelay() + " minutes.");
-		// } else {
-		// delay.setNote("Train " + train.getNumber() + " is on time.");
-		// }
-		// USE NOTE AS DIRECTION
-		delay.setNote(train.getDirection());
-
-		delay.setId(delay.getTransport().getTripId() + "_" + CreatorType.SERVICE + "_" + delay.getFrom() + "_" + delay.getTo());
-
-		return delay;
-
-	}
 
 	public static String buildRouteLongName(String agencyId, String routeId) {
 		String res = "";
@@ -123,12 +55,12 @@ public class DelayChecker {
 		return res;
 	}
 	
-	public static AlertsSent checkNewAlerts(AlertsSent sent, GenericTrain train) {
+	public static AlertsSent checkNewAlerts(AlertsSent sent, AlertDelay alert) {
 		AlertsSent newSent = new AlertsSent(sent);
 
-		String delay = buildDate() + "_" + train.getDelay();
+		String delay = buildDate() + "_" + alert.getDelay();
 		
-		String tId = getTrainNumericId(train.getTripId());
+		String tId = getTrainNumericId(alert.getId());
 		
 		if (!sent.getDelays().containsKey(tId)) {
 			newSent.getDelays().put(tId, delay);
@@ -140,8 +72,6 @@ public class DelayChecker {
 		}
 
 		newSent.getDelays().put(tId, delay);
-		
-		
 		
 		return newSent;
 	}

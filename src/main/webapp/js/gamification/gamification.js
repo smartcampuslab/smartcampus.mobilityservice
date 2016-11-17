@@ -8,8 +8,9 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.selectedInstance = null;
 	$scope.layers = [];
 	$scope.fixpaths = false;
+	$scope.removeoutliers = false;
 	$scope.eventsMarkers = new Map();
-	$scope.fromDate = Date.today().previous().saturday();
+	$scope.fromDate = Date.today().previous().saturday().previous().saturday();
 	$scope.toDate = Date.today().next().saturday().add(-1).minute();
 	$scope.openedFrom = false;
 	$scope.openedTo = false;
@@ -18,6 +19,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.unapprovedOnly = false;
 	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
 	$scope.filterApproved = $scope.approvedList[0];
+	$scope.scores = "";
 	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
@@ -198,14 +200,28 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		if ($scope.selectedInstance != null) {
 			$scope.selectInstance($scope.selectedInstance);
 		}
+		
 	}
 	
-	$scope.newEventMarker = function(lat,lng) {
+	$scope.showAllPoints = function() {
+		for (var i = 0; i < $scope.selectedInstance.geolocationEvents.length; i++) {
+			var e = $scope.selectedInstance.geolocationEvents[i];
+			var pos = {'lat' : e.latitude, 'lng' : e.longitude};	
+			var s = e.latitude + "_" + e.longitude;
+			var m = $scope.createMarkerObject(pos, 'circle2', i + 1, true);
+			$scope.layers.push(m);
+//			$scope.eventsMarkers.set(s,m);
+		}
+	}	
+	
+	
+	
+	$scope.newEventMarker = function(lat,lng, i) {
 		var pos = {'lat' : lat, 'lng' : lng};	
 		var s = lat + "_" + lng;
 		
 		if (!$scope.eventsMarkers.has(s)) {
-			var m = $scope.createMarkerObject(pos, 'step');
+			var m = $scope.createMarkerObject(pos, 'circle', i);
 			$scope.layers.push(m);
 			$scope.eventsMarkers.set(s,m);
 		} else {
@@ -217,6 +233,7 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.selectInstance = function(instance) {
 		$scope.selectedInstance = instance;
+		eventsMarkers = new Map();
 
 		resetLayers();
 
@@ -230,11 +247,19 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		var lastLeg = {
 			activity_type : null
 		};
+		
+		var cx = 0;
+		var cy = 0;
+		
 		instance.geolocationEvents.forEach(function(e) {
+			cx += e.longitude;
+			cy += e.latitude;
+			
 			var p = {
 				lat : e.latitude,
 				lng : e.longitude,
-				acc: e.accuracy
+				acc: e.accuracy,
+				recorded_at : e.recorded_at
 			};
 			coordinates.push(p);
 			bounds.extend(new google.maps.LatLng(p.lat, p.lng));
@@ -256,11 +281,26 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 
 		// coordinates.splice(0,1);
 		// coordinates.splice(coordinates.length-1,1);
-		$scope.map.fitBounds(bounds);
 
+		if (instance.freeTrackingTransport) {
+			$scope.scores = "[" + computeFreeTrackingScore(coordinates, instance.freeTrackingTransport);
+		}
 		if ($scope.fixpaths) {
+			coordinates = removeOutliers(coordinates);
 			coordinates = transform(coordinates);
+			
+			if (instance.freeTrackingTransport) {
+				$scope.scores += "," + computeFreeTrackingScore(coordinates, instance.freeTrackingTransport) + "]";
+			}			
+		} else {
+			$scope.scores += ",??]";
 		}		
+
+		if (!instance.freeTrackingTransport) {
+			$scope.scores = "";
+		}
+
+		$scope.map.fitBounds(bounds);
 		
 		newMarker(coordinates[0], 'ic_start');
 		newMarker(coordinates[coordinates.length - 1], 'ic_stop');
@@ -293,22 +333,39 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 		}
 	}
 
-	var newMarker = function(pos, icon) {
-		var m = $scope.createMarkerObject(pos, icon);
+	var newMarker = function(pos, icon, i) {
+		var m = $scope.createMarkerObject(pos, icon, i);
 		$scope.layers.push(m);
 		return m;
 	};
 	
-	$scope.createMarkerObject = function(pos, icon) {
-		var m = new google.maps.Marker({
+	$scope.createMarkerObject = function(pos, icon, i, bottom) {
+		var m;
+		if (i) {
+			m = new google.maps.Marker({
 			position : pos,
 			icon : '../img/' + icon + '.png',
+			label : { text : "" + i, fontWeight : "bold", fontSize : "22px", color: "DarkRed"},
 			map : $scope.map,
 			draggable : false,
 			labelContent : "A",
 			labelAnchor : new google.maps.Point(3, 30),
-			labelClass : "labels"
+			labelClass : "labels",
+			zIndex : (10 + i + bottom ? 0 : 100),
+			draggable: true
+			});
+		} else {
+			m = new google.maps.Marker({
+				position : pos,
+				icon : '../img/' + icon + '.png',
+				map : $scope.map,
+				draggable : false,
+				labelContent : "A",
+				labelAnchor : new google.maps.Point(3, 30),
+				labelClass : "labels",
+				zIndex : 0
 		});
+		}
 		return m;
 	}
 	
@@ -381,11 +438,109 @@ notification.controller('GameCtrl', function($scope, $timeout, $http) {
 	if (d != 0) {
 		var lats = computeLats(p1,p2,d);
 		var lngs = computeLngs(p1,p2,d);
-		res.push({lat: lats[0], lng: lngs[0], acc: (p1.acc + p2.acc) / 2});
-		res.push({lat: lats[1], lng: lngs[1], acc: (p1.acc + p2.acc) / 2});
+		res.push({lat: lats[0], lng: lngs[0], acc: (p1.acc + p2.acc) / 2, recorded_at: (p1.recorded_at + p2.recorded_at) / 2});
+		res.push({lat: lats[1], lng: lngs[1], acc: (p1.acc + p2.acc) / 2, recorded_at: (p1.recorded_at + p2.recorded_at) / 2});
 	}
   }	
 	
+  function removeOutliers(array) {
+	  
+	  var distance = 0;
+	  var itArray = array;
+	  var res = [];
+	  var removed = true;
+	  
+	  for (var i = 1; i < itArray.length; i++) {
+  		var d = dist(itArray[i], itArray[i - 1]) * 1000;
+  		t = itArray[i].recorded_at - itArray[i - 1].recorded_at;
+  		if (t > 0) {
+  			distance += d;
+  		}
+	  }
+	  var t = (itArray[itArray.length - 1].recorded_at - itArray[0].recorded_at) / 1000;
+	  var avgSpeed = (3.6 * distance /  t);
+	  
+	  var toRemove = [];
+//	  console.log(">" + itArray.length);
+
+	  	res = [];
+	  	toRemove = [];
+	    for (var i = 1; i < itArray.length - 1; i++) {
+	    		var d1 = dist(itArray[i], itArray[i - 1]) * 1000;
+	    		var t1 = (itArray[i].recorded_at - itArray[i - 1].recorded_at) / 1000;
+	    		var s1 = 0;
+	    		if (t1 > 0) {
+	    			s1 = (3.6 * d1 /  t1);
+	    		}
+	    		var d2 = dist(itArray[i], itArray[i + 1]) * 1000;
+	    		var t2 = (itArray[i + 1].recorded_at - itArray[i].recorded_at) / 1000;
+	    		var s2 = 0;
+	    		if (t2 > 0) {
+	    			s2 = (3.6 * d2 /  t2);
+	    		}	    		
+    			
+	    		var index = null;
+	    		
+	    		var d3 = dist(itArray[i - 1], itArray[i + 1]) * 1000;
+	    		
+	    		var a = Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
+	    		
+// console.log("\t" + (i + 1) + ": " + a + " <- " + rd1 + "," + rd2 + "," +
+// rd3);
+	    		
+//	    		console.log("@" + i + "/" + (itArray.length) + " -> " + s2 + "/" + avgSpeed);
+	    		
+	    		if (a < 0.017453292519943 * 3) {
+	    			index = i;
+	    		}		    		
+	    		
+				if (a < 0.017453292519943 * 30 && s1 > 4 * avgSpeed && s2 > 4 * avgSpeed && i != 1 && i != itArray.length - 2) {
+					index = i;
+				} else if (s1 > 4 * avgSpeed && i == 1) {
+					index = 0;
+				} else if (s2 > 4 * avgSpeed && i == itArray.length - 2) {
+					index = itArray.length - 1;
+				}	    		
+				
+				if (index) {
+//					console.log(index);
+					toRemove.push(index);
+				}    			
+    			
+	    }
+	    
+	    for (var i = 0; i < itArray.length; i++) {
+	    	if (toRemove.indexOf(i) == -1) {
+	    		res.push(itArray[i]);
+	    	}
+	    }	    
+	    
+	    itArray = res;
+//	    console.log("<" + res.length);
+
+	    return res;
+	  
+  }
+  
+  function computeFreeTrackingScore(array, ttype) {
+	  var distance = 0;
+	  var score = 0.0;
+  
+	    for (var i = 1; i < array.length; i++) {
+    		var d = dist(array[i], array[i - 1]);
+    		distance += d;
+	    }
+	    
+	    if (ttype == "walk") {
+	    	score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
+	    } else if (ttype == "bike") {
+	    	score = Math.min(7, distance) * 5;
+		}
+	    
+	    score *= 1.5;
+	    
+	    return parseInt(score);
+  }
 	
 	$scope.toggleOpen = function($event, $from) {
 		$event.preventDefault();

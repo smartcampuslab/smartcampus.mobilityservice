@@ -20,7 +20,10 @@ public class AppInfo implements Serializable {
     private String gamePassword;
     private String gameStart;
     private String routesDB;
-    
+
+    private String servicesUser;
+    private String servicesPassword;
+
     private Map<String,Object> extra;
 
 	public String getAppId() {
@@ -111,6 +114,22 @@ public class AppInfo implements Serializable {
 		this.routesDB = routesDB;
 	}
 
+	public String getServicesUser() {
+		return servicesUser;
+	}
+
+	public void setServicesUser(String servicesUser) {
+		this.servicesUser = servicesUser;
+	}
+
+	public String getServicesPassword() {
+		return servicesPassword;
+	}
+
+	public void setServicesPassword(String servicesPassword) {
+		this.servicesPassword = servicesPassword;
+	}
+
 	public Map<String, Object> getExtra() {
 		return extra;
 	}
@@ -119,6 +138,7 @@ public class AppInfo implements Serializable {
 		this.extra = extra;
 	}
 
+	
 	@Override
     public String toString() {
     	return appId + "=" + password;

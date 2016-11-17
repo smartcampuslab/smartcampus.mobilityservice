@@ -7,10 +7,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
+import javax.naming.ConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -21,7 +23,7 @@ import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.AppSignature;
 import eu.trentorise.smartcampus.mobility.util.TokenHelper;
 
-
+@Component
 public class AppSetup {
 
 	@Value("classpath:/apps-info.yml")
@@ -37,7 +39,8 @@ public class AppSetup {
 	private CommunicatorConnector communicator;
 	
 	private List<AppInfo> apps;
-	private Map<String,AppInfo> appsMap;	
+	private Map<String, AppInfo> appsMap;
+	private Map<String, AppInfo> servicesMap;	
 
 	public AppSetup() {
 	}	
@@ -49,12 +52,24 @@ public class AppSetup {
 		AppSetup data = (AppSetup) yaml.load(resource.getInputStream());
 		this.apps = data.apps;
 
+		for (AppInfo app : apps) {
+			if (app.getAppId().equals(app.getServicesUser())) {
+				throw new ConfigurationException("AppId and servicesUser must not be equal: " + app.getAppId());
+			}
+		}
+		
 		if (appsMap == null) {
 			appsMap = new HashMap<String, AppInfo>();
 			for (AppInfo app : apps) {
 				appsMap.put(app.getAppId(), app);
 			}
 		}		
+		if (servicesMap == null) {
+			servicesMap = new HashMap<String, AppInfo>();
+			for (AppInfo app : apps) {
+				servicesMap.put(app.getServicesUser(), app);
+			}
+		}			
 		
 		registerApps();
 	}
@@ -127,4 +142,9 @@ public class AppSetup {
 	public AppInfo findAppById(String username) {
 		return appsMap.get(username);
 	}
+	
+	public AppInfo findAppByServiceUser(String username) {
+		return servicesMap.get(username);
+	}	
+	
 }
