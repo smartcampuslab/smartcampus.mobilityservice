@@ -76,6 +76,8 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Bean(name="basicPoliciesMap")
 	public Map<String, PlanningPolicy> getBasicPoliciesMap() {
 		return ArrayUtils.toMap(new Object[][] {
+				{"default" , new TrentoPlanningPolicy()},
+				{"Dummy" , new DummyPlanningPolicy()},
 				{"Nessuna" , new DummyPlanningPolicy()},
 				{"Trento" , new TrentoPlanningPolicy()},
 				{"Rovereto" , new RoveretoPlanningPolicy()},
