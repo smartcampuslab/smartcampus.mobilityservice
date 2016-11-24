@@ -174,7 +174,7 @@ public class SecurityConfig {
     		
     		http
     			.authorizeRequests()
-    				.antMatchers("/itinerary/**","/gamification/geolocations","/gamification/freetracking/**","/gamification/freetracking/**")
+    				.antMatchers("/itinerary/**","/gamification/freetracking/**","/gamification/journey/**")
     					.fullyAuthenticated()
     		.and()
     		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);    		
