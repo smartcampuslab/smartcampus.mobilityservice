@@ -172,11 +172,9 @@ public class SecurityConfig {
     	public void configure(HttpSecurity http) throws Exception {
     		http.csrf().disable();
     		
-    		http
-    			.authorizeRequests()
-    				.antMatchers("/itinerary/**","/gamification/freetracking/**","/gamification/journey/**")
-    					.fullyAuthenticated()
-    		.and()
+    		http.antMatcher("/itinerary/**").authorizeRequests().anyRequest().fullyAuthenticated().and()
+    		.antMatcher("/gamification/journey/**").authorizeRequests().anyRequest().fullyAuthenticated().and()
+    		.antMatcher("/gamification/freetracking/**").authorizeRequests().anyRequest().fullyAuthenticated().and()
     		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);    		
     		
     		
