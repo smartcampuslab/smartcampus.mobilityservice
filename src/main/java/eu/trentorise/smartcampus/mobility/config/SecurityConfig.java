@@ -171,10 +171,10 @@ public class SecurityConfig {
     	@Override
     	public void configure(HttpSecurity http) throws Exception {
     		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     		
-    		http.authorizeRequests().antMatchers("/itinerary/**", "/gamification/freetracking/**", "/gamification/journey/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class); 
+    		http.antMatcher("/itinerary/**").authorizeRequests().anyRequest().fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);    		
+    		
     		
     	}        	
     }    
