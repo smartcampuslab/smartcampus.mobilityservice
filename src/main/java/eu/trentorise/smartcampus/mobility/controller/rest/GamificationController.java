@@ -35,7 +35,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -419,27 +418,14 @@ public class GamificationController extends SCController {
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
 	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId,
-			@RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = true, value = "Authorization") String token, HttpServletResponse response) throws Exception {
+			@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		logger.info("Starting free tracking for gamification, device = " + device);
-//		try {
-//			String userId = getUserId();
-//			if (userId == null) {
-//				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//				return;
-//			}
-			
 		try {
-			String userId = null;
-			try {
-				String t = token.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
-				userId = basicProfileService.getBasicProfile(t).getUserId();
-			} catch (SecurityException e) {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
-
-			logger.info("UserId: " + userId);			
-			
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
@@ -477,16 +463,13 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = true, value = "Authorization") String token, HttpServletResponse response)
+	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response)
 			throws Exception {
 		logger.info("Starting journey for gamification, device = " + device);
 		try {
-			String userId = null;
-			try {
-				String t = token.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
-				userId = basicProfileService.getBasicProfile(t).getUserId();
-			} catch (SecurityException e) {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 

@@ -99,17 +99,10 @@ public class SecurityConfig {
     	return new OAuth2AccessDeniedHandler();
     }    
     
-//    @Bean(name="resourceFilter")
-//    public ResourceFilter getResourceFilter() throws Exception {
-//    	ResourceFilter rf = new ResourceFilter();
-//    	rf.setAuthenticationManager(authenticationManager());
-//    	return rf;
-//    }  
-    
     @Configuration
     @EnableWebSecurity
     @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-    @Order(2)                                                        
+    @Order(10)                                                        
     public static class ServiceSecurityConfig extends WebSecurityConfigurerAdapter {
     
     	@Override
@@ -125,41 +118,8 @@ public class SecurityConfig {
     @Configuration
     @EnableWebSecurity
     @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-    @Order(3)                                                        
-    public static class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
-    
-    	@Override
-    	protected void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.rememberMe();		
-    		
-//    		http.antMatcher("/gamification/console/**").authorizeRequests().antMatchers("/gamification/console/**").fullyAuthenticated().and()
-//    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();	
-//    		
-//    		http.antMatcher("/policies/console/**").authorizeRequests().antMatchers("/policies/console/**").hasRole("CONSOLE").and()
-//    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();		
-//    		
-//    		http.antMatcher("/web/notification/**").authorizeRequests().antMatchers("/web/notification/**").fullyAuthenticated().and()
-//    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();	    		
-    		
-    		http.authorizeRequests().antMatchers("/gamification/console/**").fullyAuthenticated().and()
-    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();	
-    		
-    		http.authorizeRequests().antMatchers("/policies/console/**").hasRole("CONSOLE").and()
-    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();		
-    		
-    		http.authorizeRequests().antMatchers("/web/notification/**").fullyAuthenticated().and()
-    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();	
-    		
-    	}    	
-    	
-    }
-    
-    @Configuration
-    @EnableWebSecurity
-    @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-    @Order(1)
-	public static class OAuthSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Order(20)
+	public static class OAuthSecurityConfig1 extends WebSecurityConfigurerAdapter {
     	
         @Bean(name="resourceFilter")
         public ResourceFilter getResourceFilter() throws Exception {
@@ -171,13 +131,82 @@ public class SecurityConfig {
     	@Override
     	public void configure(HttpSecurity http) throws Exception {
     		http.csrf().disable();
-    		
-    		http.antMatcher("/itinerary/**").authorizeRequests().anyRequest().fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);    		
-    		
-    		
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+    		http.antMatcher("/gamification/freetracking/**").authorizeRequests().antMatchers("/gamification/freetracking/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	    		
     	}        	
     }    
+    
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+    @Order(21)
+	public static class OAuthSecurityConfig2 extends WebSecurityConfigurerAdapter {
+    	
+        @Bean(name="resourceFilter")
+        public ResourceFilter getResourceFilter() throws Exception {
+        	ResourceFilter rf = new ResourceFilter();
+        	rf.setAuthenticationManager(authenticationManager());
+        	return rf;
+        }     	
+    	
+    	@Override
+    	public void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    		
+    		http.antMatcher("/gamification/journey/**").authorizeRequests().antMatchers("/gamification/journey/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
+    	}        	
+    }       
+    
+    
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+    @Order(22)
+	public static class OAuthSecurityConfig3 extends WebSecurityConfigurerAdapter {
+    	
+        @Bean(name="resourceFilter")
+        public ResourceFilter getResourceFilter() throws Exception {
+        	ResourceFilter rf = new ResourceFilter();
+        	rf.setAuthenticationManager(authenticationManager());
+        	return rf;
+        }     	
+    	
+    	@Override
+    	public void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    		
+    		http.antMatcher("/itinerary/**").authorizeRequests().antMatchers("/itinerary/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
+
+    	}        	
+    }      
+    
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+    @Order(30)                                                        
+    public static class HttpSecurityConfig1 extends WebSecurityConfigurerAdapter {
+    
+    	@Override
+    	protected void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+//    		http.rememberMe();		
+
+    		http.authorizeRequests().antMatchers("/policies/console/**","/web/notification/**","/gamification/console/**").hasRole("CONSOLE").and()
+    		.formLogin().loginPage("/login").permitAll().and().logout().permitAll();	    		
+    	}    	
+    	
+    }       
+    
+    
+         
+    
+    
     
 	
 }
