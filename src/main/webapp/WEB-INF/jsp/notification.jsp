@@ -69,7 +69,7 @@
 							</ul>
 
 							<ul class="nav navbar-nav navbar-right">
-								<li><a href="notification/j_spring_security_logout"
+								<li><a href="../logout"
 									role="button"><span class="glyphicon glyphicon-log-out"></span>
 										Logout</a></li>
 							</ul>
