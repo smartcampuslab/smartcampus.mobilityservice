@@ -21,6 +21,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import com.mashape.unirest.http.ObjectMapper;
+import com.mashape.unirest.http.Unirest;
 import com.mongodb.Mongo;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy;
@@ -48,6 +50,27 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 
 	public MobilityConfig() {
 		super();
+		Unirest.setObjectMapper(new ObjectMapper() {
+			private com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+			public <T> T readValue(String value, Class<T> valueType) {
+				try {
+					return mapper.readValue(value, valueType);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			public String writeValue(Object value) {
+				try {
+					return mapper.writeValueAsString(value);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		});		
+		
+		Unirest.setTimeouts(10000, 45000);		
 	}
 
 	@Bean
