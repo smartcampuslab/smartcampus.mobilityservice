@@ -7,3 +7,4 @@ RemoteSystemsTempFiles/*
 .tern-project
 /tmp/
 /.springBeans
+/db/

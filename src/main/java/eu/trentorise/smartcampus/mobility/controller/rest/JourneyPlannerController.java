@@ -45,7 +45,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,26 +70,17 @@ import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.storage.RouteMonitoringObject;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
-import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
-import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
-public class JourneyPlannerController extends SCController {
+public class JourneyPlannerController {
 
 	@Autowired
 	private StatLogger statLogger;
 	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Autowired
-	private AuthServices services;
-
-	@Autowired
 	private GamificationHelper gamificationHelper;
 
-	@Override
-	protected AuthServices getAuthServices() {
-		return services;
-	}
 
 	@Autowired
 	private DomainStorage domainStorage;
@@ -108,7 +98,7 @@ public class JourneyPlannerController extends SCController {
 
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
-	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody SingleJourney journeyRequest, @RequestParam(required = false, defaultValue="default") String policyId,
+	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody(required=false) SingleJourney journeyRequest, @RequestParam(required = false, defaultValue="default") String policyId,
 			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName) throws Exception {
 		try {
 			domainStorage.savePlanRequest(journeyRequest, userId, appName);
@@ -131,7 +121,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
-	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary) throws Exception {
+	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody(required=false) BasicItinerary itinerary) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -186,7 +176,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody BasicItinerary itinerary, @PathVariable String itineraryId) throws Exception {
+	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody(required=false) BasicItinerary itinerary, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -366,7 +356,7 @@ public class JourneyPlannerController extends SCController {
 	// RECURRENT
 
 	@RequestMapping(method = RequestMethod.POST, value = "/planrecurrent")
-	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters) throws Exception {
+	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) RecurrentJourneyParameters parameters) throws Exception {
 		try {
 			return smartPlannerHelper.planRecurrent(parameters);
 		} catch (ConnectorException e0) {
@@ -380,7 +370,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent")
-	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent) throws Exception {
+	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) BasicRecurrentJourney recurrent) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -428,7 +418,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/recurrent/replan/{itineraryId}")
-	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody RecurrentJourneyParameters parameters, @PathVariable String itineraryId)
+	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) RecurrentJourneyParameters parameters, @PathVariable String itineraryId)
 			throws Exception {
 		try {
 			String userId = getUserId();
@@ -464,7 +454,7 @@ public class JourneyPlannerController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/recurrent/{itineraryId}")
-	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws Exception {
+	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -631,7 +621,7 @@ public class JourneyPlannerController extends SCController {
 
 	// no crud
 	@RequestMapping(method = RequestMethod.POST, value = "/alert/user")
-	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws Exception {
+	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody(required=false) Map<String, Object> map) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -647,18 +637,18 @@ public class JourneyPlannerController extends SCController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/alert/service")
-	public @ResponseBody void submitServiceAlert(HttpServletResponse response, @RequestBody Map<String, Object> map) throws Exception {
-		try {
-			submitAlert(map, null, getClientId());
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
+//	@RequestMapping(method = RequestMethod.POST, value = "/alert/service")
+//	public @ResponseBody void submitServiceAlert(HttpServletResponse response, @RequestBody(required=false) Map<String, Object> map) throws Exception {
+//		try {
+//			submitAlert(map, null, getClientId());
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//		}
+//	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/monitorroute")
-	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req) throws Exception {
+	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody(required=false) RouteMonitoring req) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -695,7 +685,7 @@ public class JourneyPlannerController extends SCController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute/{clientId}")
-	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody RouteMonitoring req, @PathVariable String clientId) throws Exception {
+	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody(required=false) RouteMonitoring req, @PathVariable String clientId) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -895,16 +885,17 @@ public class JourneyPlannerController extends SCController {
 	/**
 	 * @return UserDetails instance from security context
 	 */
-	protected String getClientId() {
-		OAuth2Authentication auth = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
-		return auth.getAuthorizationRequest().getClientId();
-	}
+//	protected String getClientId() {
+//		OAuth2Authentication auth = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
+//		return auth.getOAuth2Request().getClientId();
+////		return auth.getAuthorizationRequest().getClientId();
+//	}
 
-	@Override
 	protected String getUserId() {
-		try {
-			return super.getUserId();
-		} catch (Exception e) {
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof String) {
+			return (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		} else {
 			return null;
 		}
 	}

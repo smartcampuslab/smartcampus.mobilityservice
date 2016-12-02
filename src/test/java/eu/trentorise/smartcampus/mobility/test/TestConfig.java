@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.Mongo;
@@ -46,13 +45,12 @@ import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
-import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 
 /**
  * @author raman
  *
  */
-@Configuration
+//@Configuration
 public class TestConfig {
 
 	@Bean(name="domainMongoTemplate")
@@ -60,10 +58,10 @@ public class TestConfig {
 		return new MongoTemplate(new Mongo(), "test-mobility");
 	}
 	
-	@Bean
-	public DomainStorage getDomainStorage() {
-		return new DomainStorage();
-	} 
+//	@Bean
+//	public DomainStorage getDomainStorage() {
+//		return new DomainStorage();
+//	} 
 	
 	@Bean
 	public AlertSender getAlertSender() {

@@ -53,7 +53,7 @@ public class CacheController {
 
   	@RequestMapping(method = RequestMethod.POST, value = "/cachestatus")
   	public @ResponseBody
-  	Map<String, CacheUpdateResponse> cacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, String> versions) {
+  	Map<String, CacheUpdateResponse> cacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody(required=false) Map<String, String> versions) {
 		try {
 //			String address =  otpURL + OTP + "getCacheStatus";
 //			
@@ -74,7 +74,7 @@ public class CacheController {
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.POST, value = "/partialcachestatus")
 	public @ResponseBody
-	Map<String, CacheUpdateResponse> getPartialCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, Map> versions) {
+	Map<String, CacheUpdateResponse> getPartialCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody(required=false) Map<String, Map> versions) {
 		try {
 //			String address =  otpURL + OTP + "getPartialCacheStatus";
 //			
@@ -103,7 +103,7 @@ public class CacheController {
   	@Deprecated
   	@RequestMapping(method = RequestMethod.POST, value = "/getcachestatus")
   	public @ResponseBody
-  	Map<String, Map<String,Object>> getCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody Map<String, String> versions) {
+  	Map<String, Map<String,Object>> getCacheStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestBody(required=false) Map<String, String> versions) {
 		try {
 			Map<String,Map<String,Object>> result = new HashMap<String, Map<String,Object>>();
 			for (String agency : versions.keySet()) {

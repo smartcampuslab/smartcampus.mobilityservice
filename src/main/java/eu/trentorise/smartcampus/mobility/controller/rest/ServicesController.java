@@ -34,7 +34,7 @@ public class ServicesController {
 	private BikeSharingCache bikeSharingCache;
 	
 	@RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertParkings")
-	public @ResponseBody void pushAlertParkings(HttpServletResponse response, @RequestBody List<Map> data) throws Exception {
+	public @ResponseBody void pushAlertParkings(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		List<AlertParking> alerts = Lists.newArrayList();
 		for (Map map: data) {
@@ -45,7 +45,7 @@ public class ServicesController {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertDelays")
-	public @ResponseBody void pushAlertDelays(HttpServletResponse response, @RequestBody List<Map> data) throws Exception {
+	public @ResponseBody void pushAlertDelays(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		List<AlertDelay> alerts = Lists.newArrayList();
 		for (Map map: data) {
@@ -56,7 +56,7 @@ public class ServicesController {
     }    
     
     @RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertRoads")
-    public @ResponseBody void pushAlertRoads(HttpServletResponse response, @RequestBody List<Map> data) throws Exception {
+    public @ResponseBody void pushAlertRoads(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         List<AlertRoad> alerts = Lists.newArrayList();
         for (Map map: data) {
@@ -67,7 +67,7 @@ public class ServicesController {
     }    
 
     @RequestMapping(method = RequestMethod.POST, value = "servicedata/publishBikeStations/{comune}/{agencyId}")
-    public @ResponseBody void publishBikeStations(HttpServletResponse response, @RequestBody List<Map> data, @PathVariable String comune, @PathVariable String agencyId) throws Exception {
+    public @ResponseBody void publishBikeStations(HttpServletResponse response, @RequestBody(required=false) List<Map> data, @PathVariable String comune, @PathVariable String agencyId) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         List<Station> stations = Lists.newArrayList();
         for (Map map: data) {

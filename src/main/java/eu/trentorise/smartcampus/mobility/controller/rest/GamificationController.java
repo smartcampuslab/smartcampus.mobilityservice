@@ -69,12 +69,10 @@ import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
-import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
-import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
 @RequestMapping(value = "/gamification")
-public class GamificationController extends SCController {
+public class GamificationController {
 
 	/**
 	 * 
@@ -83,9 +81,6 @@ public class GamificationController extends SCController {
 
 	@Autowired
 	private DomainStorage storage;
-
-	@Autowired
-	private AuthServices services;
 
 	@Autowired
 	@Value("${geolocations.db.dir}")
@@ -137,7 +132,7 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody String storeGeolocationEvent(@RequestBody GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId,
+	public @ResponseBody String storeGeolocationEvent(@RequestBody(required=false) GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId,
 			HttpServletResponse response) throws Exception {
 		logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
 		ObjectMapper mapper = new ObjectMapper();
@@ -417,7 +412,7 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
-	public @ResponseBody void startFreeTracking(@RequestBody String device, @PathVariable String transport, @PathVariable String itineraryId,
+	public @ResponseBody void startFreeTracking(@RequestBody(required=false) String device, @PathVariable String transport, @PathVariable String itineraryId,
 			@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		logger.info("Starting free tracking for gamification, device = " + device);
 		try {
@@ -463,7 +458,7 @@ public class GamificationController extends SCController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/journey/{itineraryId}")
-	public @ResponseBody void startItinerary(@RequestBody String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response)
+	public @ResponseBody void startItinerary(@RequestBody(required=false) String device, @PathVariable String itineraryId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response)
 			throws Exception {
 		logger.info("Starting journey for gamification, device = " + device);
 		try {
@@ -652,32 +647,9 @@ public class GamificationController extends SCController {
 		response.getWriter().write(sb.toString());
 	}
 
-	// @RequestMapping(method = RequestMethod.POST, value = "/r353nd")
-	// public @ResponseBody void resend(HttpServletResponse response) throws
-	// Exception {
-	// List<TrackedInstance> result = storage.searchDomainObjects(new
-	// TreeMap<String, Object>(), TrackedInstance.class);
-	// int i = 0;
-	// for (TrackedInstance ti: result) {
-	// try {
-	// logger.info("Sending for player " + ti.getItinerary().getUserId() +
-	// ", itinerary: " + ti.getItinerary().getName() + " (" + ti.getId() + " / "
-	// + ti.getItinerary().getClientId() + ")");
-	// sendIntineraryDataToGamificationEngine(gameId,
-	// ti.getItinerary().getUserId(), ti.getItinerary());
-	// i++;
-	// logger.info("Resent " + i + "/" + result.size());
-	// Thread.sleep(1000);
-	// } catch (Exception e) {
-	// logger.error("Failed to resend gamification data for: " + ti.getId());
-	// }
-	//
-	// }
-	// }
-
 	@RequestMapping("/console")
 	public String vewConsole() {
-		return "viewconsole";
+		return "gamificationconsole";
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
@@ -967,8 +939,8 @@ public class GamificationController extends SCController {
 		return null;
 	}
 
-	@Override
-	protected AuthServices getAuthServices() {
-		return services;
+	protected String getUserId() {
+		String principal = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return principal;
 	}
 }

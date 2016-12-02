@@ -41,7 +41,7 @@ public class PoliciesController {
 	private SmartPlannerService plannerService;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/compiled")
-	public @ResponseBody CompilablePolicyData saveCompiledPolicy(@RequestBody CompilablePolicyData policy, @RequestParam(required = false) Boolean compileOnly, HttpServletResponse response)
+	public @ResponseBody CompilablePolicyData saveCompiledPolicy(@RequestBody(required=false) CompilablePolicyData policy, @RequestParam(required = false) Boolean compileOnly, HttpServletResponse response)
 			throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		// System.out.println(mapper.writeValueAsString(policy));
@@ -81,7 +81,7 @@ public class PoliciesController {
 	
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/compile")
-	public @ResponseBody CompilablePolicyData compile(@RequestBody CompilablePolicyData policy, @RequestParam(required = false) Boolean generate, @RequestParam(required = false) Boolean evaluate, @RequestParam(required = false) Boolean extract, @RequestParam(required = false) Boolean filter, HttpServletResponse response)
+	public @ResponseBody CompilablePolicyData compile(@RequestBody(required=false) CompilablePolicyData policy, @RequestParam(required = false) Boolean generate, @RequestParam(required = false) Boolean evaluate, @RequestParam(required = false) Boolean extract, @RequestParam(required = false) Boolean filter, HttpServletResponse response)
 			throws Exception {
 		try {
 			VelocityCompiler velo = new VelocityCompiler();
@@ -177,7 +177,7 @@ public class PoliciesController {
 	 * 
 	 * 
 	 * @RequestMapping(method = RequestMethod.POST, value = "/parametric")
-	 * public @ResponseBody void savePolicy(@RequestBody ParametricPolicyRequest
+	 * public @ResponseBody void savePolicy(@RequestBody(required=false) ParametricPolicyRequest
 	 * policy, HttpServletResponse response) throws Exception { ObjectMapper
 	 * mapper = new ObjectMapper();
 	 * System.out.println(mapper.writeValueAsString(policy)); if
@@ -194,7 +194,7 @@ public class PoliciesController {
 	 * // @RequestMapping(method = RequestMethod.PUT, value = "/scripted",
 	 * consumes = {MediaType.APPLICATION_JSON_VALUE,
 	 * MediaType.APPLICATION_XML_VALUE}) // public @ResponseBody void
-	 * updatePolicy(@RequestBody ScriptedPolicy policy, HttpServletResponse
+	 * updatePolicy(@RequestBody(required=false) ScriptedPolicy policy, HttpServletResponse
 	 * response) throws Exception { // if (policy.getName() == null) { //
 	 * response.addHeader("error_msg", "\"Nome\" è obbligatorio."); //
 	 * response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // return; // }
@@ -205,7 +205,7 @@ public class PoliciesController {
 	 * @RequestMapping(method = RequestMethod.POST, value = "/scripted",
 	 * consumes = {MediaType.APPLICATION_JSON_VALUE,
 	 * MediaType.APPLICATION_XML_VALUE}) public @ResponseBody void
-	 * saveScripted(@RequestBody ScriptedPolicy policy, HttpServletResponse
+	 * saveScripted(@RequestBody(required=false) ScriptedPolicy policy, HttpServletResponse
 	 * response) throws Exception { if (policy.getName() == null ||
 	 * policy.getDescription() == null) { response.addHeader("error_msg",
 	 * "\"Nome\" e \"Descrizione\" sono obbligatori.");
@@ -235,7 +235,7 @@ public class PoliciesController {
 	 * 
 	 * @RequestMapping(method = RequestMethod.PUT, value = "/scripted", consumes
 	 * = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-	 * public @ResponseBody void updateScripted(@RequestBody ScriptedPolicy
+	 * public @ResponseBody void updateScripted(@RequestBody(required=false) ScriptedPolicy
 	 * policy, HttpServletResponse response) throws Exception { if
 	 * (policy.getName() == null || policy.getDescription() == null) {
 	 * response.addHeader("error_msg",
@@ -264,8 +264,8 @@ public class PoliciesController {
 	 */
 
 	@RequestMapping("/console")
-	public String vewConsole() {
-		return "/planningconsole";
+	public String viewConsole() {
+		return "policiesconsole";
 	}
 
 }

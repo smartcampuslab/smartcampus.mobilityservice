@@ -6,7 +6,7 @@ $(document).ready(function(){
 	$('#agencyId-dropdown').tooltip({placement: 'left', title: '<span align="left"><p><b>5</b>: Verona Brennero<br/><b>6</b>: Trento Bassano<br/><b>10</b>: Trento-Mal&#232;<br/><b>12</b>: Trento Urbano<br/><b>16</b>: Rovereto Urbano<br/><b>17</b>: Extraurbano</p>', html: true});   
 });
 
-notification.controller('notification', function($scope, $http) {
+notification.controller('NotificationCtrl', function($scope, $http) {
 	
 	$scope.updateAgency = function($event) {
 		$scope.agencyId = $event.target.innerText;

@@ -120,28 +120,28 @@ public class VelocityCompiler {
 		context.put("pems", pems);
 		context.put("prgs", prgs);
 
-		return velocityMerge("templates/generate.vm", context);
+		return velocityMerge("velocity_templates/generate.vm", context);
 	}
 
 	private String compileEvaluate(List<PolicyElement> pees) throws Exception {
 		VelocityContext context = new VelocityContext();
 		context.put("pees", pees);
 
-		return velocityMerge("templates/evaluate.vm", context);
+		return velocityMerge("velocity_templates/evaluate.vm", context);
 	}
 
 	private String compileExtract(List<PolicyElement> pees) throws Exception {
 		VelocityContext context = new VelocityContext();
 		context.put("pees", pees); // ???
 
-		return velocityMerge("templates/extract.vm", context);
+		return velocityMerge("velocity_templates/extract.vm", context);
 	}
 
 	private String compileFilter(PolicyFilter pf) throws Exception {
 		VelocityContext context = new VelocityContext();
 		context.put("pf", pf);
 
-		return velocityMerge("templates/filter.vm", context);
+		return velocityMerge("velocity_templates/filter.vm", context);
 	}
 
 	private String velocityMerge(String templateName, VelocityContext context) throws Exception {
@@ -238,37 +238,7 @@ public class VelocityCompiler {
 		VelocityCompiler velo = new VelocityCompiler();
 		velo.compile(cp);
 		velo.check(cp);
-		// String res = velo.compileGenerate(pecs, pems, prgs);
-		// System.out.println(res);
 	}
 
-	// public static void main(String[] args) throws Exception {
-	//
-	// Velocity.init();
-	// VelocityEngine ve = new VelocityEngine();
-	// ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-	// ve.setProperty("classpath.resource.loader.class",
-	// ClasspathResourceLoader.class.getName());
-	// VelocityContext context = new VelocityContext();
-	//
-	// PlanningRequest pr = new PlanningRequest();
-	// pr.setType(TType.BICYCLE);
-	//
-	// context.put("pr", pr);
-	//
-	//
-	// Template template = ve.getTemplate("templates/generate.vm");
-	//
-	//
-	// StringWriter sw = new StringWriter();
-	//
-	// template.merge(context, sw);
-	//
-	// sw.flush();
-	// sw.close();
-	//
-	// System.out.println(sw.getBuffer());
-	//
-	// }
 
 }

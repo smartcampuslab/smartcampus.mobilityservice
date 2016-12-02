@@ -1,6 +1,6 @@
-var notification = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable']);
+var gamificationConsole = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable']);
 
-notification.controller('GameCtrl', function($scope, $timeout, $http) {
+gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.users = [];
 	$scope.userMap = {};
 	$scope.selectedUser = null;

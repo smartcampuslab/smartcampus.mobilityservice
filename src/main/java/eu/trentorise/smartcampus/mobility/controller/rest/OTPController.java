@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,11 +45,9 @@ import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingCache;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.network.JsonUtils;
-import eu.trentorise.smartcampus.resourceprovider.controller.SCController;
-import eu.trentorise.smartcampus.resourceprovider.model.AuthServices;
 
 @Controller
-public class OTPController extends SCController {
+public class OTPController  {
 
 	private Logger logger = Logger.getLogger(this.getClass());
 
@@ -57,12 +56,12 @@ public class OTPController extends SCController {
 	@Autowired
 	private BikeSharingCache bikeSharingCache;
 
-	@Autowired
-	private AuthServices services;
-	@Override
-	protected AuthServices getAuthServices() {
-		return services;
-	}
+//	@Autowired
+//	private AuthServices services;
+//	@Override
+//	protected AuthServices getAuthServices() {
+//		return services;
+//	}
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static final int DAY = 1000*60*60*24-1;
@@ -403,13 +402,9 @@ public class OTPController extends SCController {
 	
 	
 	
-	@Override
 	protected String getUserId() {
-		try {
-			return super.getUserId();
-		} catch (Exception e) {
-			return null;
-		}
+		String principal = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return principal;
 	}
 
 }

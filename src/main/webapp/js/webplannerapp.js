@@ -4,8 +4,6 @@ var webplannerApp = angular.module('webplanner', [,'ui.bootstrap',
 'plannerControllers'
 ]);
 
-//$scope.imgBase = '../';
-
 webplannerApp.run(['$rootScope', '$q', '$modal', '$location', 'parking', 'bikesharing', 'taxi',
   function($rootScope, $q, $modal, $location, parking, bikesharing, taxi){
     $rootScope.EXTRAURBAN_AGENCIES = EXTRAURBAN_AGENCIES;
@@ -13,14 +11,17 @@ webplannerApp.run(['$rootScope', '$q', '$modal', '$location', 'parking', 'bikesh
     parking.init(PARKING_AGENCIES);
     bikesharing.init(BIKE_AGENCIES);
     taxi.init();
-	$rootScope.imgBase = '../';
-	$rootScope.controllerBase = './';
+    $rootScope.imgBase = '';
+    $rootScope.controllerBase = 'policies/';
+    $rootScope.publishedOnly = true;
   }]);
 
 
-webplannerApp.config([ '$routeProvider', function($routeProvider) {
-	$routeProvider.when('/', {
-		templateUrl : '../templates/policyplanner.html',
-		controller : 'HomeCtrl'
-	});
-} ]);
+webplannerApp.config(['$routeProvider',
+  function($routeProvider) {
+    $routeProvider.
+      when('/', {
+        templateUrl: 'templates/webplannerinner.html',
+        controller: 'HomeCtrl'
+      });
+  }]);

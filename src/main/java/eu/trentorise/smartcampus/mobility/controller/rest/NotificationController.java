@@ -56,7 +56,7 @@ public class NotificationController {
 	}	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/notify")
-	public @ResponseBody Map<String, String> notify(@RequestBody Announcement announcement, HttpServletResponse response) throws Exception {
+	public @ResponseBody Map<String, String> notify(@RequestBody(required=false) Announcement announcement, HttpServletResponse response) throws Exception {
 		Map<String, String> result = Maps.newTreeMap();
 
 		try {

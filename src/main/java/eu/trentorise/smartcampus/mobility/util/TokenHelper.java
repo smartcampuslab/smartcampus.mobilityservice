@@ -25,10 +25,10 @@ public class TokenHelper extends RemoteConnector {
 	private String aacURL;
 	@Autowired
 	@Value("${smartcampus.clientId}")
-	private String clientId = null;
+	private String clientId;
 	@Autowired
 	@Value("${smartcampus.clientSecret}")
-	private String clientSecret = null;
+	private String clientSecret;
 
 	private String token = null;
 	private Long expiresAt = null;
