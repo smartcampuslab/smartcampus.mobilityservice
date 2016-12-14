@@ -675,15 +675,28 @@ public class GamificationController {
 			criteria = criteria.and("toCheck").is(true);
 		}		
 
+//		if (fromDate != null) {
+//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+//		}
+//		if (toDate != null) {
+//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+//		}
+		
 		if (fromDate != null) {
-			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			String fd = shortSdf.format(new Date(fromDate));
+			criteria = criteria.and("day").gte(fd);
 		}
+		
 		if (toDate != null) {
-			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+			String td = shortSdf.format(new Date(toDate));
+			criteria = criteria.andOperator(new Criteria("day").lte(td));
 		}
+		
 		Query query = new Query(criteria);
 
+		logger.debug("Start itinerary query for " + userId);
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
+		logger.debug("End itinerary query for " + userId);
 
 		if (instances != null) {
 			for (TrackedInstance o : instances) {
@@ -761,13 +774,25 @@ public class GamificationController {
 		if (toCheck != null && toCheck.booleanValue()) {
 			criteria = criteria.and("toCheck").is(true);
 		}			
+//		if (fromDate != null) {
+//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+//		}
+//		if (toDate != null) {
+//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+//		}
+		
 		if (fromDate != null) {
-			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			String fd = shortSdf.format(new Date(fromDate));
+			criteria = criteria.and("day").gte(fd);
 		}
+		
 		if (toDate != null) {
-			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-		}
+			String td = shortSdf.format(new Date(toDate));
+			criteria = criteria.andOperator(new Criteria("day").lte(td));
+		}		
+		
 		Query query = new Query(criteria);
+		query.fields().include("userId").include("valid");
 
 		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
 		for (TrackedInstance ti : tis) {

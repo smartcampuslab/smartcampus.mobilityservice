@@ -3,6 +3,7 @@ package eu.trentorise.smartcampus.mobility.gamification.model;
 import java.util.Collection;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.google.common.collect.Sets;
 
@@ -29,7 +30,8 @@ public class TrackedInstance {
 	private String time;
 	
 	private String deviceInfo;
-	
+
+	@Indexed
 	private String day;
 	
 	private ValidationResult validationResult;
