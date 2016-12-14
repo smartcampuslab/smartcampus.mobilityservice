@@ -14,7 +14,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -80,14 +82,17 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 
 	@Bean(name = "logMongoTemplate")
 	public MongoTemplate getLogMongoTemplate() throws UnknownHostException {
-		MongoTemplate template = new MongoTemplate(new Mongo(), logDB);
+//		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), logDB);
+		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 27017), logDB);
 		return template;
 	}
 
 	@Bean(name = "domainMongoTemplate")
 	@Primary
 	public MongoTemplate getDomainMongoTemplate() throws UnknownHostException {
-		MongoTemplate template = new MongoTemplate(new Mongo(), "mobility-domain");
+//		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), "mobility-domain");
+		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 27017), "mobility-domain");
+		template.indexOps("trackedInstances").ensureIndex(new Index("day", Direction.ASC));
 		return template;
 	}
 
