@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 
 import eu.trentorise.smartcampus.mobility.security.CustomAuthenticationProvider;
 import eu.trentorise.smartcampus.mobility.security.CustomResourceAuthenticationProvider;
+import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 
 @Configuration
 @ComponentScan("eu.trentorise.smartcampus.resourceprovider")
@@ -82,6 +83,7 @@ public class SecurityConfig {
         public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
         	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
         	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
         	rf.setStateless(false);
         	return rf;
         }    	
@@ -104,6 +106,7 @@ public class SecurityConfig {
         public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
         	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
         	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
         	rf.setStateless(false);
         	return rf;
         }      	
@@ -127,6 +130,7 @@ public class SecurityConfig {
         public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
         	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
         	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
         	rf.setStateless(false);
         	return rf;
         }        	
