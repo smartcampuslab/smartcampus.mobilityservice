@@ -144,12 +144,22 @@ public class TestConfig {
 				return null;
 			}
 			@Override
+			public String getAgencyTaxiStations(String agencyId) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
 			public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public String getTaxiAgencyContacts() throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public String getTaxiAgencyContacts(String agencyId) throws Exception {
 				// TODO Auto-generated method stub
 				return null;
 			}
@@ -167,7 +177,7 @@ public class TestConfig {
 				// TODO Auto-generated method stub
 				
 			}
-
+			
 		};
 	}
 }

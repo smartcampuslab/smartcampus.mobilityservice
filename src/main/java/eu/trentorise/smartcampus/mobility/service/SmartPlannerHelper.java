@@ -64,8 +64,10 @@ public interface SmartPlannerHelper {
 	String getVersions() throws Exception;
 	String getTaxiStations(double latitude, double longitude, double radius) throws Exception;
 	String getAllTaxiStations() throws Exception;
+	String getAgencyTaxiStations(String agencyId) throws Exception;
 	
 	Map<String, PlanningPolicy> getPolicies(Boolean draft);
 	String getTaxiAgencyContacts() throws Exception;
+	String getTaxiAgencyContacts(String agencyId) throws Exception;
 	InputStream gtfs(String agencyId) throws Exception;
 }

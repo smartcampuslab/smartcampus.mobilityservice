@@ -16,23 +16,6 @@
 
 package eu.trentorise.smartcampus.mobility.service;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
-import it.sayservice.platform.smartplanner.data.message.TType;
-import it.sayservice.platform.smartplanner.data.message.Transport;
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
-
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -66,6 +49,22 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.Compi
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.SimpleLeg;
+import it.sayservice.platform.smartplanner.data.message.TType;
+import it.sayservice.platform.smartplanner.data.message.Transport;
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.GeolocalizedStopRequest;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
 /**
  * @author raman
@@ -489,12 +488,31 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		String response = null;
 
-		response = performGET(SMARTPLANNER + "taxi/contacts",	null);
+		response = performGET(SMARTPLANNER + "taxi/contacts/",	null);
 
 		return response;
 
 	}	
 	
+	
+	@Override
+	public String getAgencyTaxiStations(String agencyId) throws Exception {
+		String response = null;
+
+		response = performGET(SMARTPLANNER + "taxis/"+agencyId,	null);
+
+		return response;
+	}
+
+	@Override
+	public String getTaxiAgencyContacts(String agencyId) throws Exception {
+		String response = null;
+
+		response = performGET(SMARTPLANNER + "taxi/contacts/"+agencyId,	null);
+
+		return response;
+	}
+
 	@Override
 	public InputStream gtfs(String agencyId) throws Exception {
 		return HTTPConnector.doStreamGet(otpURL + SMARTPLANNER + "gtfs/" + agencyId, null, "application/zip", null);
