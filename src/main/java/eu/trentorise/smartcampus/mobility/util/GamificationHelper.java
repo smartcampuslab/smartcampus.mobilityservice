@@ -16,10 +16,6 @@
 
 package eu.trentorise.smartcampus.mobility.util;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.Leg;
-import it.sayservice.platform.smartplanner.data.message.TType;
-
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,6 +55,9 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 import eu.trentorise.smartcampus.network.RemoteException;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
 
 /**
  * @author raman
@@ -214,7 +213,7 @@ public class GamificationHelper {
 
 	private void saveTrip(BasicItinerary itinerary, String appId, String userId) {
 		try {
-			Map<String, Object> data = computeTripData(itinerary.getData(), true);
+			Map<String, Object> data = computePlannedJourneyScore(itinerary.getData(), true);
 			data.remove("estimatedScore");
 
 			AppInfo app = appSetup.findAppById(appId);
@@ -234,7 +233,7 @@ public class GamificationHelper {
 		}
 	}
 
-	public Map<String, Object> computeTripData(Itinerary itinerary, boolean log) {
+	public Map<String, Object> computePlannedJourneyScore(Itinerary itinerary, boolean log) {
 		Map<String, Object> data = Maps.newTreeMap();
 
 		String parkName = null; // name of the parking
@@ -374,7 +373,7 @@ public class GamificationHelper {
 		return data;
 	}
 	
-	public Map<String, Object> computeFreeTrackingData(Collection<Geolocation> geolocationEvents, String ttype) {
+	public Map<String, Object> computeFreeTrackingScore(Collection<Geolocation> geolocationEvents, String ttype) {
 		Map<String, Object> result = Maps.newTreeMap();
 		Double score = 0.0;
 		double distance = 0; 		
@@ -419,7 +418,7 @@ public class GamificationHelper {
 	
 
 	public long computeEstimatedGameScore(Itinerary itinerary, boolean log) {
-		Long score = (Long) (computeTripData(itinerary, log).get("estimatedScore"));
+		Long score = (Long) (computePlannedJourneyScore(itinerary, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
 		return score;
 	}
@@ -462,7 +461,7 @@ public class GamificationHelper {
 		return false;
 	}
 
-	public static ValidationResult checkItineraryMatching(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
+	public static ValidationResult validatePlannedJourney(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
 
 		boolean legWalkOnly = true;
 		boolean geolocationWalkOnly = true;
@@ -578,9 +577,6 @@ public class GamificationHelper {
 		int tooFastCountTotal = 0;
 		double distance = 0;
 		long time = 0;
-		
-
-		
 		
 		int origPointsSize = points.size();
 		if (points.size() >= 2) {
@@ -937,7 +933,7 @@ public class GamificationHelper {
 	}
 
 	private void saveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype) {
-		Map<String, Object> data = computeFreeTrackingData(geolocationEvents, ttype);
+		Map<String, Object> data = computeFreeTrackingScore(geolocationEvents, ttype);
 		if ((Long)data.get("estimatedScore") == 0) {
 			logger.debug("EstimatedScore is 0, returning.");
 			return;
