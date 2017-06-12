@@ -1,0 +1,32 @@
+gamification:
+  gameId: 
+  password: 
+  startgame: 
+  user: 
+  url: 
+
+feed:
+  entries: 50
+
+communicatorURL: http://localhost:8080/core.communicator
+
+aacURL: http://localhost:8080/aac/
+
+otp:
+  url: http://localhost:7070
+
+smartcampus:
+  clientId: 
+  clientSecret: 
+
+statlogging:
+  dbname: mobility-logging
+  enabled: false
+
+smartplanner:
+  router: trentino
+
+geolocations:
+  db:
+    name: background-geolocation.db
+    dir: db
