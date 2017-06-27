@@ -4,6 +4,10 @@ import java.util.Set;
 
 public class ValidationResult {
 
+	public enum TravelValidity {
+		VALID, INVALID, PENDING
+	}
+	
 	private int geoLocationsN;
 	private int legsLocationsN;
 	private int matchedLocationsN;
@@ -16,12 +20,16 @@ public class ValidationResult {
 	private Boolean tooFast;
 	
 	private Boolean valid;
+	private TravelValidity travelValidity;
 	
 	private Double averageSpeed;
 	private Double maxSpeed;
 	
 	private Double distance;
 	private Long time;
+	
+	private Double validatedDistance;
+	private Long validatedTime;	
 
 	public void reset() {
 		matchedLocations = true;
@@ -140,6 +148,30 @@ public class ValidationResult {
 
 	public void setTime(Long time) {
 		this.time = time;
+	}
+
+	public TravelValidity getTravelValidity() {
+		return travelValidity;
+	}
+
+	public void setTravelValidity(TravelValidity travelValidity) {
+		this.travelValidity = travelValidity;
+	}
+
+	public Double getValidatedDistance() {
+		return validatedDistance;
+	}
+
+	public void setValidatedDistance(Double validatedDistance) {
+		this.validatedDistance = validatedDistance;
+	}
+
+	public Long getValidatedTime() {
+		return validatedTime;
+	}
+
+	public void setValidatedTime(Long validatedTime) {
+		this.validatedTime = validatedTime;
 	}
 
 }
