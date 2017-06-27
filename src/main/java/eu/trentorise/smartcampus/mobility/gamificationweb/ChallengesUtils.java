@@ -511,13 +511,10 @@ public class ChallengesUtils {
 						JSONObject challenge = challengeConceptData.getJSONObject(i);
 						String name = (!challenge.isNull(CHAL_NAME)) ? challenge.getString(CHAL_NAME) : "";
 						String modelName = (!challenge.isNull(CHAL_MODEL_NAME)) ? challenge.getString(CHAL_MODEL_NAME) : "";
-						String startTime = (!challenge.isNull(CHAL_START)) ? challenge.getString(CHAL_START) : "0";
-						String endTime = (!challenge.isNull(CHAL_END)) ? challenge.getString(CHAL_END) : "0";
-						long start = Long.parseLong(startTime);
-						long end = Long.parseLong(endTime);
+						long start = (!challenge.isNull(CHAL_START)) ? challenge.getLong(CHAL_START) : 0;
+						long end = (!challenge.isNull(CHAL_END)) ? challenge.getLong(CHAL_END) : 0;
 						Boolean completed = (!challenge.isNull(CHAL_COMPLETED)) ? challenge.getBoolean(CHAL_COMPLETED) : false;
-						String dateCompletedTime = (!challenge.isNull(CHAL_COMPLETED_DATE)) ? challenge.getString(CHAL_COMPLETED_DATE) : "0";
-						long dateCompleted = Long.parseLong(dateCompletedTime);
+						long dateCompleted = (!challenge.isNull(CHAL_COMPLETED_DATE)) ? challenge.getLong(CHAL_COMPLETED_DATE) : 0;
 						int bonusScore = 0;
 						String periodName = "";
 						String bonusPointType = "green leaves";
@@ -537,52 +534,9 @@ public class ChallengesUtils {
 							counterName = (!chalFields.isNull(CHAL_FIELDS_COUNTER_NAME)) ? chalFields.getString(CHAL_FIELDS_COUNTER_NAME) : "";
 							targetPosMin = (!chalFields.isNull(CHAL_FIELDS_POS_MIN)) ? chalFields.getInt(CHAL_FIELDS_POS_MIN) : 0;
 							targetPosMax = (!chalFields.isNull(CHAL_FIELDS_POS_MAX)) ? chalFields.getInt(CHAL_FIELDS_POS_MAX) : 0;
-							targetRow = (!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getString(CHAL_FIELDS_TARGET) : "0";
-			    			if(targetRow.contains("<")){
-			    				// new challenge for position in classification case
-			    				/*String[] values = targetRow.split("<");
-			    				if(values[0].contains(".")){
-				    				try {
-				    					Float f_target = Float.parseFloat(values[0]);
-				    					target1 = f_target.intValue();
-				    				} catch (Exception ex){
-				    					logger.error("String target value error from float");
-				    				}
-				    			} else {
-					    			try {
-					    				target1 = Integer.parseInt(values[0]);
-					    			} catch (Exception ex){
-					    				logger.error("String target value error from int"); 
-					    			}
-				    			}
-			    				if(values[1].contains(".")){
-				    				try {
-				    					Float f_target = Float.parseFloat(values[1]);
-				    					target2 = f_target.intValue();
-				    				} catch (Exception ex){
-				    					logger.error("String target value error from float");
-				    				}
-				    			} else {
-					    			try {
-					    				target2 = Integer.parseInt(values[1]);
-					    			} catch (Exception ex){
-					    				logger.error("String target value error from int"); 
-					    			}
-				    			}*/
-			    			} else if(targetRow.contains(".")){
-			    				try {
-			    					Float f_target = Float.parseFloat(targetRow);
-			    					target = f_target.intValue();
-			    				} catch (Exception ex){
-			    					logger.error("String target value error from float");
-			    				}
-			    			} else {
-				    			try {
-				    				target = Integer.parseInt(targetRow);
-				    			} catch (Exception ex){
-				    				logger.error("String target value error from int"); 
-				    			}
-			    			}
+							target = (int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
+			    			
+			    			
 							badgeCollectionName = (!chalFields.isNull(CHAL_FIELDS_BADGE_COLLECTION_NAME)) ? chalFields.getString(CHAL_FIELDS_BADGE_COLLECTION_NAME) : "";
 							baseline = (!chalFields.isNull(CHAL_FIELDS_BASELINE)) ? chalFields.getInt(CHAL_FIELDS_BASELINE) : 0;
 							initialBadgeNum = (!chalFields.isNull(CHAL_FIELDS_INITIAL_BADGE_NUM)) ? chalFields.getInt(CHAL_FIELDS_INITIAL_BADGE_NUM) : 0;
@@ -614,6 +568,7 @@ public class ChallengesUtils {
 						long ch_endTime = challData.getEnd();
 						String ch_point_type = challData.getBonusPointType();
 						Boolean ch_success = challData.getCompleted();
+						long successDate = challData.getDateCompleted();
 						long now = System.currentTimeMillis();
 						int daysToEnd = calculateRemainingDays(ch_endTime, now);
 						Boolean active = (now < ch_endTime);
@@ -794,6 +749,9 @@ public class ChallengesUtils {
 	    				tmp_chall.setStartDate(ch_startTime);
 	    				tmp_chall.setEndDate(ch_endTime);
 	    				tmp_chall.setDaysToEnd(daysToEnd);
+	    				tmp_chall.setBonus(ch_bonus);
+	    				tmp_chall.setChallCompletedDate(successDate);
+//	    				tmp_chall.seC
 		    			
 		    			if(type == 0){
 		    				if(now >= ch_startTime - MILLIS_IN_DAY){	// if challenge is started (with one day of offset for mail)

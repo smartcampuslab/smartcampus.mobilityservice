@@ -474,7 +474,7 @@ public class StatusUtils {
 								}
 							}
 						}
-						String nickName = getPlayerNicknameById(allNicks,
+						String nickName = getPlayerNickNameById(allNicks,
 								playerId); // getPlayerNameById(allNicks,
 											// playerId);
 						ClassificationData playerClass = new ClassificationData();
@@ -575,7 +575,7 @@ public class StatusUtils {
 								.getString(PLAYER_ID) : "0";
 						Integer playerScore = (!profileData.isNull(PC_SCORE)) ? profileData
 								.getInt(PC_SCORE) : 0;
-						String nickName = getPlayerNicknameById(allNicks,
+						String nickName = getPlayerNickNameById(allNicks,
 								playerId); // getPlayerNameById(allNicks,
 											// playerId);
 						ClassificationData playerClass = new ClassificationData();
@@ -698,7 +698,7 @@ public class StatusUtils {
 		return name;
 	}
 
-	private String getPlayerNicknameById(Map<String, String> allNicks, String id) {
+	private String getPlayerNickNameById(Map<String, String> allNicks, String id) {
 		String name = "";
 		if (allNicks != null && !allNicks.isEmpty()) {
 			name = allNicks.get(id);
@@ -951,7 +951,7 @@ public class StatusUtils {
 			return gamificationUrl
 					+ "/img/bike_sharing/bikeSharingPioneerStazioneAutocorriere.svg";
 		}
-		if (b_name.compareTo("UniversitÃ  - Trento_BSstation") == 0) {
+		if (b_name.compareTo("Università - Trento_BSstation") == 0) {
 			return gamificationUrl
 					+ "/img/bike_sharing/bikeSharingPioneerUniversita.svg";
 		}
@@ -1069,7 +1069,7 @@ public class StatusUtils {
 		}
 		return "";
 	}
-
+	
 	private Map<String, Object> buildPlayerData(String playerId, String gameId, String nickName) {
 		Map<String, Object> map = Maps.newTreeMap();
 		map.put("playerId", playerId);
@@ -1077,5 +1077,5 @@ public class StatusUtils {
 		map.put("nickName", nickName);
 		return map;
 	}	
-	
+
 }

@@ -1,13 +1,11 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -15,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -23,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +30,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
@@ -54,16 +50,6 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 public class GamificationWebController {
 
 	private static final String GREEN_CLASSIFICATION = "week classification";
-	private static long CACHETIME = 30000; // 30 seconds
-	private static long LASTWEEKDELTA = 1000 * 60 * 60 * 24; // one day of delta
-	private Long oldWeekTimestamp;
-	private Long actualTimeStamp = null;
-	private String lastWeekClassification = "";
-	private String globalCompleteClassification = "";
-	private Map<String, String> allNickNames = null;
-	private Long playerNum = 0L;
-	private static final String CHECK_IN = "checkin";
-	private static final String CHECK_IN_NU = "checkin_new_user_Trento_Fiera";
 
 	private static final String NICK_RECOMMANDATION = "nickRecommandation";
 	private static final String TIMESTAMP = "timestamp";
@@ -142,93 +128,93 @@ public class GamificationWebController {
 		 */
 	});
 	
-	// Scheduled method to cache the old week classification.
-		//@Scheduled(cron="55 59 23 * * FRI") 		// Repeat every Friday at 23:59:55 PM
-		@Scheduled(fixedRate = 31*60*1000) 		// Repeat every 31 minutes
-		public synchronized void refreshOldWeekClassification() throws IOException {
-			//oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 3);
-			oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 7);
-			logger.debug("Refreshing old week classification: new timestamp - " + oldWeekTimestamp);
-			lastWeekClassification = callWSFromEngine(oldWeekTimestamp + "");
-		}
-		
-		@Scheduled(fixedRate = 10*60*1000) 		// Repeat every ten minute
-		public synchronized void refreshGlobalCompleteNicks() throws IOException {
-			Long actualLong = playerRepositoryDao.count();
-			if(actualLong > playerNum){
-				try {
-					allNickNames = getAllNicksMapFromDB();
-				} catch (Exception e) {
-					logger.error("Error in nicknames refresh " + e.getMessage());
-				}
-				playerNum = actualLong;
-			}
-		}
-		
-		@Scheduled(fixedRate = 30*60*1000) 		// Repeat every thirty minute
-		public synchronized void refreshGlobalCompleteClassification() throws IOException {
-			logger.debug("Refreshing global week classification");
-			try{
-				globalCompleteClassification = callWSFromEngine("complete");
-			} catch (Exception ex){
-				logger.error("Error in global classification refresh");
-			}
-		}	
-		
-		// Scheduled method used to check user that has registered with a recommendation nick. If they have points a recommendation is send to gamification
-		@Scheduled(fixedRate = 29*60*1000)		// Repeat every 30 minutes
-		public synchronized void checkRecommendation() {
-			logger.debug("Starting recommendation check...");
-			String allData = "";
-			try {
-				//allData = chacheClass.get("complete");	// all classification data
-				allData = globalCompleteClassification;
-			} catch (Exception e) {
-				logger.error("Exception in global classification reading: " + e.getMessage());
-			}	
-			StatusUtils statusUtils = new StatusUtils();
-			Map<String, Integer> completeClassification = new HashMap<String, Integer>();
-			try {
-				completeClassification = statusUtils.correctGlobalClassification(allData);
-			} catch (JSONException e) {
-				logger.error("Exception in global classification calculating: " + e.getMessage());
-			}
-			String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-			Iterable<Player> iter = playerRepositoryDao.findAllByTypeAndCheckedRecommendation(type, false);
-			if(iter != null && Iterables.size(iter) > 0){
-				for(Player p: iter){
-					Map<String, Object> pData = p.getPersonalData();
-					if(pData != null){
-						String recommender = (String)pData.get(NICK_RECOMMANDATION);
-						String userId = p.getSocialId();
-						Integer points = completeClassification.get(userId);
-						if(points != null){
-							int score = points.intValue();
-							logger.debug("Green leaves point user " + userId + ": " + score);
-							int minRecPoints = 0;
-							try	{
-								minRecPoints = Integer.parseInt(RECOMMENDATION_POINTS);
-							} catch (Exception ex){
-								minRecPoints = 1;
-							}
-							if(score >= minRecPoints){
-								Player recPlayer = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery(recommender), type);
-								if (recommender != null && recPlayer != null) {
-									sendRecommendationToGamification(recPlayer.getPid());
-									p.setCheckedRecommendation(true);
-									playerRepositoryDao.save(p);	//update player data in db
-								}
-							}
-						} else {
-							logger.debug("Green leaves point user " + userId + ": none");
-						}
-					}
-				}
-			} else {
-				logger.debug("No player with recommandation to check!");
-			}
-			logger.debug("Ending recommendation check...");
-		}		
+//	// Scheduled method to cache the old week classification.
+//		//@Scheduled(cron="55 59 23 * * FRI") 		// Repeat every Friday at 23:59:55 PM
+//		@Scheduled(fixedRate = 31*60*1000) 		// Repeat every 31 minutes
+//		public synchronized void refreshOldWeekClassification() throws IOException {
+//			//oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 3);
+//			oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 7);
+//			logger.debug("Refreshing old week classification: new timestamp - " + oldWeekTimestamp);
+//			lastWeekClassification = callWSFromEngine(oldWeekTimestamp + "");
+//		}
+//		
+//		@Scheduled(fixedRate = 10*60*1000) 		// Repeat every ten minute
+//		public synchronized void refreshGlobalCompleteNicks() throws IOException {
+//			Long actualLong = playerRepositoryDao.count();
+//			if(actualLong > playerNum){
+//				try {
+//					allNickNames = getAllNicksMapFromDB();
+//				} catch (Exception e) {
+//					logger.error("Error in nicknames refresh " + e.getMessage());
+//				}
+//				playerNum = actualLong;
+//			}
+//		}
+//		
+//		@Scheduled(fixedRate = 30*60*1000) 		// Repeat every thirty minute
+//		public synchronized void refreshGlobalCompleteClassification() throws IOException {
+//			logger.debug("Refreshing global week classification");
+//			try{
+//				globalCompleteClassification = callWSFromEngine("complete");
+//			} catch (Exception ex){
+//				logger.error("Error in global classification refresh");
+//			}
+//		}	
+//		
+//		// Scheduled method used to check user that has registered with a recommendation nick. If they have points a recommendation is send to gamification
+//		@Scheduled(fixedRate = 29*60*1000)		// Repeat every 30 minutes
+//		public synchronized void checkRecommendation() {
+//			logger.debug("Starting recommendation check...");
+//			String allData = "";
+//			try {
+//				//allData = chacheClass.get("complete");	// all classification data
+//				allData = globalCompleteClassification;
+//			} catch (Exception e) {
+//				logger.error("Exception in global classification reading: " + e.getMessage());
+//			}	
+//			StatusUtils statusUtils = new StatusUtils();
+//			Map<String, Integer> completeClassification = new HashMap<String, Integer>();
+//			try {
+//				completeClassification = statusUtils.correctGlobalClassification(allData);
+//			} catch (JSONException e) {
+//				logger.error("Exception in global classification calculating: " + e.getMessage());
+//			}
+//			String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
+//			Iterable<Player> iter = playerRepositoryDao.findAllByTypeAndCheckedRecommendation(type, false);
+//			if(iter != null && Iterables.size(iter) > 0){
+//				for(Player p: iter){
+//					Map<String, Object> pData = p.getPersonalData();
+//					if(pData != null){
+//						String recommender = (String)pData.get(NICK_RECOMMANDATION);
+//						String userId = p.getSocialId();
+//						Integer points = completeClassification.get(userId);
+//						if(points != null){
+//							int score = points.intValue();
+//							logger.debug("Green leaves point user " + userId + ": " + score);
+//							int minRecPoints = 0;
+//							try	{
+//								minRecPoints = Integer.parseInt(RECOMMENDATION_POINTS);
+//							} catch (Exception ex){
+//								minRecPoints = 1;
+//							}
+//							if(score >= minRecPoints){
+//								Player recPlayer = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery(recommender), type);
+//								if (recommender != null && recPlayer != null) {
+//									sendRecommendationToGamification(recPlayer.getPid());
+//									p.setCheckedRecommendation(true);
+//									playerRepositoryDao.save(p);	//update player data in db
+//								}
+//							}
+//						} else {
+//							logger.debug("Green leaves point user " + userId + ": none");
+//						}
+//					}
+//				}
+//			} else {
+//				logger.debug("No player with recommandation to check!");
+//			}
+//			logger.debug("Ending recommendation check...");
+//		}		
 
 	// Method for mobile player registration (in mobile app)
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/register")
@@ -263,6 +249,7 @@ public class GamificationWebController {
 			return null;
 		}
 		String id = user.getUserId();
+		id = "74";
 		logger.debug("External registration: found user profile with id " + id);
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
 		Player withNick = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery(nickname), type);
@@ -278,7 +265,7 @@ public class GamificationWebController {
 		} else {
 			logger.debug("External registration: new user");
 			data.put(TIMESTAMP, System.currentTimeMillis());
-			p = new Player(user.getUserId(), user.getUserId(), user.getName(), user.getSurname(), nickname, email, language, true, data, null, true, type); // default sendMail attribute value is true
+			p = new Player(id, user.getUserId(), user.getName(), user.getSurname(), nickname, email, language, true, data, null, true, type); // default sendMail attribute value is true
 			if (data.containsKey(NICK_RECOMMANDATION) && !((String) data.get(NICK_RECOMMANDATION)).isEmpty()) {
 				Player recommender = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)), type);
 				if (recommender != null) {
@@ -290,7 +277,7 @@ public class GamificationWebController {
 
 			}
 			try {
-				createPlayerInGamification(user.getUserId());
+				createPlayerInGamification(id);
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
@@ -343,7 +330,7 @@ public class GamificationWebController {
 
 	// Method used to get the user status data (by mobyle app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status")
-	public @ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestParam String token, HttpServletResponse res) throws JSONException {
+	@ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestParam String token, HttpServletResponse res) throws Exception{
 		logger.debug("WS-get status user token " + token);
 		BasicProfile user = null;
 		try {
@@ -359,33 +346,37 @@ public class GamificationWebController {
 		String userId = user.getUserId();
 		Player p = null;
 		String nickName = "";
-		String language = "it";
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
 		p = playerRepositoryDao.findBySocialIdAndType(userId, type);
-		if (p != null) {
+		String language = "it";
+		if(p != null){
 			nickName = p.getNickname();
 			language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
 		}
 		String statusUrl = "state/" + gameName + "/" + userId;
 		String allData = this.getAll(request, statusUrl);
-
+		
 		ChallengesUtils challUtils = new ChallengesUtils();
-		if (challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()) {
+		if(challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()){
 			challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
 		}
-
+		
 		StatusUtils statusUtils = new StatusUtils();
-		return statusUtils.correctPlayerData(allData, userId, gameName, nickName, challUtils, gamificationWebUrl, 1, language);
+		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameName, nickName, challUtils, gamificationWebUrl, 1, language);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ps));
+		
+		return ps;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
-	public @ResponseBody PlayerClassification getPlayerClassification(final HttpServletRequest request, @RequestParam String token, @RequestParam(required = false) Long timestamp,
-			@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end, HttpServletResponse res) throws JSONException {
-		boolean actualWeek = true;
-		long currTime = System.currentTimeMillis();
+	public @ResponseBody
+	PlayerClassification getPlayerClassification(HttpServletRequest request, @RequestParam String token, @RequestParam(required=false) Long timestamp, @RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end, HttpServletResponse res) throws Exception{
 		logger.debug("WS-get classification user token " + token);
 		PlayerClassification playerClassificationData = new PlayerClassification();
 		BasicProfile user = null;
+		int maxClassificationSize = 500;
 		try {
 			user = profileService.getBasicProfile(token);
 			if (user == null) {
@@ -402,98 +393,27 @@ public class GamificationWebController {
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
 		p = playerRepositoryDao.findBySocialIdAndType(userId, type);
 		nickName = (p != null) ? p.getNickname() : null;
-
-		String allData = "";
-		// MB: part for new incremental classification: uncomment when server
-		// support this call
-		/*
-		 * if(timestamp != null){ String incClassUrl = "game/" + gameName +
-		 * "/incclassification/" + GREEN_CLASSIFICATION + "?timestamp=" +
-		 * timestamp; allData = this.getAllClassification(request, incClassUrl);
-		 * } else { String classUrl = "state/" + gameName + "?page=1&size=" +
-		 * maxClassificationSize; allData = this.getAll(request, classUrl); //
-		 * call to get all user status (classification) }
-		 */
-		if (timestamp != null) {
-			if ((currTime - timestamp) > LASTWEEKDELTA) {
-				// last week timestamp
-				actualWeek = false;
-			} else {
-				// current week timestamp
-				actualWeek = true;
-				if (actualTimeStamp == null) {
-					actualTimeStamp = timestamp;
-				} else {
-					long diff = timestamp - actualTimeStamp;
-					if (diff <= CACHETIME) {
-						timestamp = actualTimeStamp;
-					} else {
-						actualTimeStamp = timestamp;
-					}
-				}
-			}
-		}
-		try {
-			if (actualWeek) {
-				if (timestamp != null) {
-					allData = cacheClass.get("" + timestamp);
-				} else {
-					if (globalCompleteClassification.compareTo("") == 0) {
-						globalCompleteClassification = callWSFromEngine("complete");
-					}
-					allData = globalCompleteClassification;
-				}
-				// allData = (timestamp != null) ? chacheClass.get("" +
-				// timestamp) : chacheClass.get("complete");
-			} else {
-				if (oldWeekTimestamp == null) { // the first time I need to
-												// initialize the
-												// oldWeekTimestamp Value
-					oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 7);
-				}
-				if (lastWeekClassification.compareTo("") == 0) {
-					lastWeekClassification = callWSFromEngine(oldWeekTimestamp + "");
-				}
-				allData = lastWeekClassification;
-			}
-		} catch (ExecutionException e) {
-			logger.error(e.getMessage());
-		}
-
+		
+		String classUrl = "state/" + gameName + "?page=1&size=" + maxClassificationSize;
+		String allData = this.getAll(request, classUrl);		// call to get all user status (classification)
 		String statusUrl = "state/" + gameName + "/" + userId;
-		String statusData = this.getAll(request, statusUrl); // call to get
-																// actual user
-																// status (user
-																// scores)
-
-		// List<Player> allNicks = null;
-		// Map<String, String> allNicks = null;
-		if (allNickNames == null) {
-			try {
-				allNickNames = getAllNicksMapFromDB();
-				playerNum = playerRepositoryDao.count();
-				// allNicks = (timestamp != null) ? chacheNicks.get("" +
-				// timestamp) : chacheNicks.get("complete");
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
-		}
-
+		String statusData = this.getAll(request, statusUrl);	// call to get actual user status (user scores)
+//		List<Player> allNicks = null;
+//		try {
+//			allNicks = this.getAllNicknames(request, "");
+//		} catch (Exception ex){
+//			logger.error("Exception in all nick names reading " + ex.getMessage());
+//		}
+		Map<String, String> allNickames = getAllNiksMapFromDB();
+		
 		StatusUtils statusUtils = new StatusUtils();
 		ClassificationData actualPlayerClass = statusUtils.correctPlayerClassificationData(statusData, userId, nickName, timestamp, type);
-		List<ClassificationData> playersClass = new ArrayList<ClassificationData>();
-		// MB: part for new incremental classification: uncomment when server
-		// support this call
-		if (timestamp != null) {
-			playersClass = statusUtils.correctClassificationIncData(allData, allNickNames, timestamp, type);
-		} else {
-			playersClass = statusUtils.correctClassificationData(allData, allNickNames, timestamp, type);
-		}
-
+		List<ClassificationData> playersClass = statusUtils.correctClassificationData(allData, allNickames, timestamp, type);
+		
 		// Sorting
 		Collections.sort(playersClass, Collections.reverseOrder());
 		playerClassificationData = statusUtils.completeClassificationPosition(playersClass, actualPlayerClass, start, end);
-
+		
 		return playerClassificationData;
 	}
 
@@ -545,6 +465,20 @@ public class GamificationWebController {
 		}
 		return list;
 	}
+	
+	private Map<String, String> getAllNiksMapFromDB() throws Exception {
+		logger.debug("DB - get All niks."); //Added for log ws calls info in preliminary phase of portal
+		Map<String, String> niks = new HashMap<String, String>();
+		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
+		Iterable<Player> iter = playerRepositoryDao.findAllByType(type);
+		for(Player p: iter){
+			if(p.getNickname() != null && p.getNickname().compareTo("") != 0){
+				logger.debug(String.format("Profile result %s", p.getNickname()));
+				niks.put(p.getPid(), p.getNickname());
+			}
+		}
+		return niks;
+	}	
 
 	public String getAllClassification(HttpServletRequest request, @RequestParam String urlWS) {
 		RestTemplate restTemplate = new RestTemplate();

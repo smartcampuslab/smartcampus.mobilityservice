@@ -27,6 +27,8 @@ public class TrackedInstance {
 	private Boolean complete = Boolean.FALSE;
 	private Boolean valid = Boolean.FALSE;
 	
+	private Boolean scoreAssigned;
+	
 	private String time;
 	
 	private String deviceInfo;
@@ -202,6 +204,14 @@ public class TrackedInstance {
 
 	public void setApproved(Boolean approved) {
 		this.approved = approved;
+	}
+
+	public Boolean getScoreAssigned() {
+		return scoreAssigned;
+	}
+
+	public void setScoreAssigned(Boolean scoreAssigned) {
+		this.scoreAssigned = scoreAssigned;
 	}
 
 	public Boolean getToCheck() {
