@@ -169,6 +169,30 @@ public class SecurityConfig {
     }          
     
     @Configuration
+    @Order(24)
+	public static class OAuthSecurityConfig5 extends WebSecurityConfigurerAdapter {
+    	
+        @Bean(name="resourceFilter")
+        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+        	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
+        	rf.setStateless(false);
+        	return rf;
+        }        	
+    	
+    	@Override
+    	public void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    		
+    		http.antMatcher("/gamification/statistics/**").authorizeRequests().antMatchers("/gamification/statistics/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
+
+    	}        	
+    }     
+    
+    @Configuration
     @Order(30)                                                        
     public static class HttpSecurityConfig1 extends WebSecurityConfigurerAdapter {
     
