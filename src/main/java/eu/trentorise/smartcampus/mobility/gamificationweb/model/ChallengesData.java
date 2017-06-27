@@ -1,5 +1,8 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class ChallengesData {
 	
 	private String challId = "";
@@ -14,13 +17,15 @@ public class ChallengesData {
 	private long startDate = 0L;
 	private long endDate = 0L;
 	private int daysToEnd = 0;
+	private int bonus = 0;
+	private long challCompletedDate = 0;
 	
 	public ChallengesData(){
 		super();
 	}
 
 	public ChallengesData(String challId, String challDesc, String challCompleteDesc, int challTarget, int status, double row_status,
-			String type, Boolean active, Boolean success, long startDate, long endDate, int daysToEnd) {
+			String type, Boolean active, Boolean success, long startDate, long endDate, int daysToEnd, int bonus, long challCompletedDate) {
 		super();
 		this.challId = challId;
 		this.challDesc = challDesc;
@@ -34,6 +39,8 @@ public class ChallengesData {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.daysToEnd = daysToEnd;
+		this.bonus = bonus;
+		this.challCompletedDate = challCompletedDate;
 	}
 
 	public String getChallId() {
@@ -131,13 +138,27 @@ public class ChallengesData {
 	public void setRow_status(double row_status) {
 		this.row_status = row_status;
 	}
+	
+	public int getBonus() {
+		return bonus;
+	}
+
+	public void setBonus(int bonus) {
+		this.bonus = bonus;
+	}
+
+	public long getChallCompletedDate() {
+		return challCompletedDate;
+	}
+
+	public void setChallCompletedDate(long challCompletedDate) {
+		this.challCompletedDate = challCompletedDate;
+	}
 
 	@Override
 	public String toString() {
-		return "ChallengesData [challId=" + challId + ", challDesc=" + challDesc + ", challCompleteDesc="
-				+ challCompleteDesc + ", challTarget=" + challTarget + ", status=" + status + ", type=" + type
-				+ ", active=" + active + ", success=" + success + ", startDate=" + startDate + ", endDate=" + endDate
-				+ "]";
+		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
+		return tsb.build();
 	}
 
 }
