@@ -15,19 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
-import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -56,6 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.Lists;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
@@ -69,7 +57,18 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.storage.RouteMonitoringObject;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
-import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
+import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
+import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 @Controller
 public class JourneyPlannerController {
@@ -79,7 +78,7 @@ public class JourneyPlannerController {
 	private Logger logger = Logger.getLogger(this.getClass());
 
 	@Autowired
-	private GamificationHelper gamificationHelper;
+	private GamificationValidator gamificationValidator;
 
 
 	@Autowired
@@ -109,7 +108,7 @@ public class JourneyPlannerController {
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, policyId);
 			for (Itinerary itinerary : results) {
-				gamificationHelper.computeEstimatedGameScore(itinerary, false);
+				gamificationValidator.computeEstimatedGameScore(itinerary, false);
 			}
 			return results;
 		} catch (Exception e) {
