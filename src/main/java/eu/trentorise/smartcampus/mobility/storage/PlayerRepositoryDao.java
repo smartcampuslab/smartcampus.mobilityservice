@@ -1,5 +1,7 @@
 package eu.trentorise.smartcampus.mobility.storage;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -32,5 +34,8 @@ public interface PlayerRepositoryDao extends CrudRepository<Player, String>{
 	
 	@Query("{'nickname': { '$regex': ?0, $options:'i'}}")
 	public Player findByNickIgnoreCaseAndType(String nickname, String type);
+
+	@Query ("{'personalData.nickRecommandation': ?0}")
+	public List<Player> findByNickRecommandation(String nickname);
 
 }
