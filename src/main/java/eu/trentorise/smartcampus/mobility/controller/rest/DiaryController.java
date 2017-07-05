@@ -61,9 +61,9 @@ public class DiaryController {
 	@Value("${smartcampus.gamification.url}")
 	private String gamificationWebUrl;
 
-	@Autowired
-	@Value("${smartcampus.gamification.gamename}")
-	private String gameName;
+//	@Autowired
+//	@Value("${smartcampus.gamification.gamename}")
+//	private String gameName;
 
 	@Autowired
 	@Value("${aacURL}")
@@ -89,6 +89,8 @@ public class DiaryController {
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
 	private ChallengesUtils challUtils;
+	
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@PostConstruct
 	public void init() {
@@ -142,6 +144,9 @@ public class DiaryController {
 
 		result = result.stream().filter(x -> x.getTimestamp() >= fromTime && x.getTimestamp() <= toTime).sorted().collect(Collectors.toList());
 
+		
+//		getRanking(p, appId);
+		
 		return result;
 	}
 
@@ -161,10 +166,23 @@ public class DiaryController {
 		}
 		return result;
 	}
+	
+	private void getRanking(Player p, String appId) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+		String gameId = appSetup.findAppById(appId).getGameId();
+//		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "state/" + gameId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "/model/game/" + gameId + "/classification", HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+
+		String allData = res.getBody();		
+//		System.err.println(allData);
+		
+		Map<String, Object> map = mapper.readValue(allData, Map.class);
+		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map));
+		
+	}
 
 	private List<DiaryEntry> getChallenges(Player p, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
-		ObjectMapper mapper = new ObjectMapper();
 
 		String language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
 
@@ -180,7 +198,7 @@ public class DiaryController {
 		}
 
 		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getPid(), gameName, p.getNickname(), challUtils, gamificationWebUrl, 1, language);
+		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getPid(), gameId, p.getNickname(), challUtils, gamificationWebUrl, 1, language);
 
 		if (ps.getChallengeConcept() != null) {
 			List<ChallengesData> cds = Lists.newArrayList();
@@ -188,12 +206,14 @@ public class DiaryController {
 			cds.addAll(ps.getChallengeConcept().getOldChallengeData());
 			for (ChallengesData cd : cds) {
 				DiaryEntry de = new DiaryEntry();
+				de.setEntityId(cd.getChallId());
 				de.setType(DiaryEntryType.CHALLENGE);
 				de.setTimestamp(cd.getStartDate());
 				de.setChallengeName(cd.getChallDesc());
 				de.setChallengeBonus(cd.getBonus());
 				if (cd.getChallCompletedDate() != 0) {
 					DiaryEntry de2 = new DiaryEntry();
+					de2.setEntityId(cd.getChallId());
 					de2.setType(DiaryEntryType.CHALLENGE_WON);
 					de2.setChallengeName(cd.getChallDesc());
 					de2.setChallengeBonus(cd.getBonus());					
@@ -217,7 +237,6 @@ public class DiaryController {
 		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "notification/" + gameId + "/" + playerId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 
-		ObjectMapper mapper = new ObjectMapper();
 		List nots = mapper.readValue(res.getBody(), List.class);
 		for (Object o : nots) {
 			if (((Map) o).containsKey("badge")) {
@@ -268,7 +287,8 @@ public class DiaryController {
 			} else if (instance.getFreeTrackingTransport() != null) {
 				de.setTravelType(TravelType.FREETRACKING);
 			}
-			de.setTravelValid(instance.getValid());
+			de.setTravelValidity(instance.getValidationResult().getTravelValidity());
+			de.setEntityId(instance.getId());
 			result.add(de);
 		}
 
