@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 public class CustomTokenExtractor extends BearerTokenExtractor {
 
 	@Override
-	protected String extractHeaderToken(HttpServletRequest request) {
+	public String extractHeaderToken(HttpServletRequest request) {
 		Enumeration<String> headers = request.getHeaders("Authorization");
 		while (headers.hasMoreElements()) { // typically there is only one (most servers enforce that)
 			String value = headers.nextElement();
