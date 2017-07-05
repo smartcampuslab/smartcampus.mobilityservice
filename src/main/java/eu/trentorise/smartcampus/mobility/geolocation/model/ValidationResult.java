@@ -19,8 +19,7 @@ public class ValidationResult {
 	private Boolean matchedActivities;
 	private Boolean tooFast;
 	
-	private Boolean valid;
-	private TravelValidity travelValidity;
+	private TravelValidity travelValidity = TravelValidity.PENDING;
 	
 	private Double averageSpeed;
 	private Double maxSpeed;
@@ -35,7 +34,7 @@ public class ValidationResult {
 		matchedLocations = true;
 		matchedActivities = true;
 		tooFast = false;
-		valid = true;
+		travelValidity =  TravelValidity.PENDING;
 	}
 	
 	public int getGeoLocationsN() {
@@ -76,14 +75,6 @@ public class ValidationResult {
 
 	public void setTooFewPoints(Boolean tooFewPoints) {
 		this.tooFewPoints = tooFewPoints;
-	}
-
-	public Boolean getValid() {
-		return valid;
-	}
-
-	public void setValid(Boolean valid) {
-		this.valid = valid;
 	}
 
 	public Boolean getTooFast() {
