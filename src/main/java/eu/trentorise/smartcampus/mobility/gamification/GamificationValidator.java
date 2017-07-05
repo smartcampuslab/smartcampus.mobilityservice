@@ -358,9 +358,9 @@ public class GamificationValidator {
 		vr.setMatchedActivities(diffModes.size() == 0);
 		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
 		
-		vr.setValid(vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast());
+		boolean valid = vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast();
 		// TODO temporary
-		vr.setTravelValidity(vr.getValid() ? TravelValidity.VALID : TravelValidity.INVALID);
+		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);
 
 		return vr;
 	}
@@ -447,9 +447,9 @@ public class GamificationValidator {
 		}
 
 		vr.setGeoLocationsN(points.size());
-		vr.setValid(!vr.getTooFast() && origPointsSize >= 2);
+		boolean valid = !vr.getTooFast() && origPointsSize >= 2;
 		// TODO temporary
-		vr.setTravelValidity(vr.getValid() ? TravelValidity.VALID : TravelValidity.INVALID);		
+		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);		
 		
 		vr.setAverageSpeed(averageSpeed);
 		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
