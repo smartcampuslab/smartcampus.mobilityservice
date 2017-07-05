@@ -1,7 +1,5 @@
 package eu.trentorise.smartcampus.mobility.storage;
 
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +27,7 @@ import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 @Component
 public class DomainStorage {
@@ -44,7 +43,7 @@ public class DomainStorage {
 	private static final String MONITORING = "routesMonitoring";
 	
 	@Autowired
-	@Qualifier("domainMongoTemplate")
+	@Qualifier("mongoTemplate")
 	MongoTemplate template;
 	private static final Logger logger = LoggerFactory.getLogger(DomainStorage.class);
 
@@ -197,16 +196,13 @@ public class DomainStorage {
 			if (tracked.getComplete() != null) {
 				update.set("complete", tracked.getComplete());
 			}
-			if (tracked.getValid() != null) {
-				update.set("valid", tracked.getValid());
-			}
 			if (tracked.getValidationResult() != null) {
 				update.set("validationResult", tracked.getValidationResult());
 			}	
 			if (tracked.getEstimatedScore() != null) {
 				update.set("estimatedScore", tracked.getEstimatedScore());
 			}
-			update.set("switchValidity", tracked.getSwitchValidity());
+			update.set("changedValidity", tracked.getChangedValidity());
 			update.set("approved", tracked.getApproved());
 			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
