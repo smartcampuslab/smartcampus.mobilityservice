@@ -80,7 +80,6 @@ public class JourneyPlannerController {
 	@Autowired
 	private GamificationValidator gamificationValidator;
 
-
 	@Autowired
 	private DomainStorage domainStorage;
 
