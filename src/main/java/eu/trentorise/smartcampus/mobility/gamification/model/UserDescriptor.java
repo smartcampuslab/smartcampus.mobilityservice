@@ -4,6 +4,8 @@ public class UserDescriptor implements Comparable<UserDescriptor> {
 
 	private String userId;
 	private int valid;
+	private int invalid;
+	private int pending;
 	private int total;
 	
 	public String getUserId() {
@@ -17,6 +19,18 @@ public class UserDescriptor implements Comparable<UserDescriptor> {
 	}
 	public void setValid(int valid) {
 		this.valid = valid;
+	}
+	public int getInvalid() {
+		return invalid;
+	}
+	public void setInvalid(int invalid) {
+		this.invalid = invalid;
+	}
+	public int getPending() {
+		return pending;
+	}
+	public void setPending(int pending) {
+		this.pending = pending;
 	}
 	public int getTotal() {
 		return total;
