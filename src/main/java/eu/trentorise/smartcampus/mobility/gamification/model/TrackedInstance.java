@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 
 public class TrackedInstance {
@@ -25,7 +26,6 @@ public class TrackedInstance {
 	private Collection<Geolocation> geolocationEvents;
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
-	private Boolean valid = Boolean.FALSE;
 	
 	private Boolean scoreAssigned;
 	
@@ -42,7 +42,7 @@ public class TrackedInstance {
 
 	private String appId;
 	
-	private Boolean switchValidity;
+	private TravelValidity changedValidity;
 	private Boolean approved;
 	private Boolean toCheck;
 	
@@ -50,6 +50,7 @@ public class TrackedInstance {
 	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
+		validationResult = new ValidationResult();
 	}
 	
 	public String getId() {
@@ -106,14 +107,6 @@ public class TrackedInstance {
 
 	public void setComplete(Boolean complete) {
 		this.complete = complete;
-	}
-
-	public Boolean getValid() {
-		return valid;
-	}
-
-	public void setValid(Boolean validity) {
-		this.valid = validity;
 	}
 
 	public String getDay() {
@@ -190,12 +183,12 @@ public class TrackedInstance {
 		this.appId = appId;
 	}
 
-	public Boolean getSwitchValidity() {
-		return switchValidity;
+	public TravelValidity getChangedValidity() {
+		return changedValidity;
 	}
 
-	public void setSwitchValidity(Boolean switchValidity) {
-		this.switchValidity = switchValidity;
+	public void setChangedValidity(TravelValidity changedValidity) {
+		this.changedValidity = changedValidity;
 	}
 
 	public Boolean getApproved() {
