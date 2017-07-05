@@ -125,7 +125,7 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 		return template;
 	}
 
-	@Bean(name = "domainMongoTemplate")
+	@Bean(name = "mongoTemplate")
 	@Primary
 	public MongoTemplate getDomainMongoTemplate() throws UnknownHostException {
 //		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), "mobility-domain");
@@ -133,13 +133,6 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 		template.indexOps("trackedInstances").ensureIndex(new Index("day", Direction.ASC));
 		return template;
 	}
-
-	@Bean(name = "mongoTemplate")
-	@Primary
-	public MongoTemplate getGamificationWebMongoTemplate() throws UnknownHostException {
-		MongoTemplate template = new MongoTemplate(getMongoClient(), "gamification_users");
-		return template;
-	}	
 	
 	@Bean(name = "basicPoliciesMap")
 	public Map<String, PlanningPolicy> getBasicPoliciesMap() {
