@@ -67,7 +67,7 @@
 									<a ng-click="selectUser(user)">{{user}} </a>
 								</div>
 								<div class="col-md-6 pull-right">
-								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].failed}} invalid</span>)
+								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].invalid}} invalid</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pending}} pending</span>)
 									</strong>
 								</div>
 							</div>
@@ -75,7 +75,7 @@
 								<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
 									<div>
 										<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
-											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': getValidityStyle(itinerary.instance), 'invalid': !getValidityStyle(itinerary.instance)}"
+											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}"
 										>
 											<div class="row">
 												<div class="col-md-6 itinerary-def">
@@ -97,10 +97,18 @@
 											<div class="group-indicator">
 												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">group {{itinerary.instance.groupId}}</span>
 											</div>
-											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
+<!-- 											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
 												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
-											> </label> <label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved" type="checkbox"
+											> </label> -->
+											<label class="itinerary-switch"><b>{{'Change validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <select 
+												ng-disabled="itinerary.instance.approved" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
+												<option ng-repeat="x in validities" >{{x}}</option></select>
+											</label>
+											<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal1" ng-disabled="itinerary.instance.approved">Update validity</button>											
+
+											
+											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved" type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>										
 											
@@ -201,8 +209,8 @@
 					<div class="modal-body">
 						<form id="notification-form">
 							<div class="form-group">
-								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity(true)" data-dismiss="modal">Yes</button>
-								<button class="btn btn-primary right" type="button" ng-click="switchCurrentValidity(false)" data-dismiss="modal">No</button>
+								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity()" data-dismiss="modal">Yes</button>
+								<button class="btn btn-primary right" type="button" ng-click="switchCurrentValidity()" data-dismiss="modal">No</button>
 							</div>
 						</form>
 					</div>

@@ -21,6 +21,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.filterApproved = $scope.approvedList[0];
 	$scope.scores = "";
 	
+	$scope.validities = ['INVALID', 'VALID'];
+	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
 	    startingDay: 1
@@ -67,7 +69,9 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 					users.push(descr.userId);
 					$scope.userTotals[descr.userId] = {
 						"total" : descr.total,
-						"failed" : (descr.total - descr.valid)
+						"valid" : (descr.valid),
+						"invalid" : (descr.invalid),
+						"pending" : (descr.pending)
 					};
 				});
 
@@ -120,10 +124,24 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	}
 
 	$scope.validColor = function(totals) {
-		var r = 127 + Math.floor(128 * Math.pow(totals.failed / totals.total, 1.5));
-		var g = 0 + Math.floor(255 * ((totals.total - totals.failed) / totals.total));
-		return "color:rgb(" + r + "," + g + "," + 64 + ")";
+		var notPending = totals.total - totals.pending;
+		if (notPending != 0) {
+			var r = 127 + Math.floor(128 * Math.pow(totals.invalid / totals.total, 1.5));
+			var g = 0 + Math.floor(255 * ((totals.valid) / totals.total));
+			return "color:rgb(" + r + "," + g + "," + 64 + ")";
+		} else {
+			return "color:rgb(0,0,0)";
+		}
 	}
+	
+	$scope.pendingColor = function(totals) {
+		var c = Math.floor(128 * Math.pow(totals.pending / totals.total, 1.5));
+		if (totals.pending > 0) {
+			return "color:rgb(255,192,128)";
+		} else {
+			return "color:rgb(0,0,0)";
+		}
+	}	
 
 	var resetLayers = function() {
 		if (!$scope.layers)
@@ -137,23 +155,39 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 
 	$scope.revalidate = function() {
 		spinner.spin(target);
-		$http.post("console/validate", {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/validate?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
 	}
 	
-	$scope.switchCurrentValidity = function(toggle) {
-		if (toggle) {
-		$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.switchValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-			$scope.selectedInstance.switchValidity = data.data.switchValidity;
-			$scope.reselectInstance();
-		});
-		} else {
-			$scope.selectedInstance.switchValidity = !$scope.selectedInstance.switchValidity;
-		}
-	}	
+//	$scope.switchCurrentValidity = function(toggle) {
+//		if (toggle) {
+//		$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+//			$scope.selectedInstance.changedValidity = data.data.changedValidity;
+//			$scope.reselectInstance();
+//		});
+//		} else {
+//			$scope.selectedInstance.changedValidity = !$scope.selectedInstance.changedValidity;
+//		}
+//	}	
 
+	$scope.switchCurrentValidity = function() {
+		console.log("SV -> " + $scope.selectedInstance.changedValidity);
+		$http.post("console/itinerary/changeValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$scope.selectedInstance.changedValidity = data.data.changedValidity;
+		$scope.reselectInstance();
+	});		
+//	if (toggle) {
+//	$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+//		$scope.selectedInstance.changedValidity = data.data.changedValidity;
+//		$scope.reselectInstance();
+//	});
+//	} else {
+//		$scope.selectedInstance.changedValidity = !$scope.selectedInstance.changedValidity;
+//	}
+}	
+	
 	
 	$scope.toggleToCheck = function(instance) {
 		$http.post("console/itinerary/toCheck/" + instance.id + "?value=" + !instance.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
@@ -161,11 +195,11 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}			
 	
-	$scope.toggleApproved = function(instance) {
-		$http.post("console/itinerary/approve/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-			instance.approved = data.data.approved;
-		});
-	}		
+//	$scope.toggleApproved = function(instance) {
+//		$http.post("console/itinerary/approve/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+//			instance.approved = data.data.approved;
+//		});
+//	}		
 	
 	$scope.approveAll = function() {
 //		spinner.spin(target);		
@@ -183,13 +217,42 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}	
 	
-	$scope.getValidityStyle = function(instance) {
-		if ((instance.valid & !instance.switchValidity) | (!instance.valid & instance.switchValidity)) {
-			return true;
+//	$scope.getValidityStyle = function(instance) {
+//		if ((instance.valid & !instance.switchValidity) | (!instance.valid & instance.switchValidity)) {
+//			return true;
+//		}
+//		if ((!instance.valid & !instance.switchValidity) | (instance.valid & instance.switchValidity)) {
+//			return false;
+//		}
+//	}
+	
+	$scope.hasValidStyle = function(instance) {
+		var style = $scope.getActualValidity(instance) == 'VALID';
+//		console.log('V: ' + style);
+		return style;
+	}
+	
+	$scope.hasInvalidStyle = function(instance) {
+		var style = $scope.getActualValidity(instance) == 'INVALID';
+//		console.log('I: ' + style);
+		return style;		
+
+	}		
+	
+	$scope.hasPendingStyle = function(instance) {
+		var style = $scope.getActualValidity(instance) == 'PENDING';
+//		console.log('I: ' + style);
+		return style;		
+
+	}	
+	
+	$scope.getActualValidity = function(instance) {
+		if (instance.changedValidity) {
+//			console.log('Ch: ' + instance.changedValidity);
+			return instance.changedValidity;
 		}
-		if ((!instance.valid & !instance.switchValidity) | (instance.valid & instance.switchValidity)) {
-			return false;
-		}
+//		console.log('Or: ' + instance.valid);
+		return instance.validationResult.travelValidity;
 	}
 	
 	$scope.reload = function() {
@@ -572,7 +635,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		}
 		$scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
 	}
-
+	
 	$scope.initMap();
 }).directive('toggle', function() {
 	return {
