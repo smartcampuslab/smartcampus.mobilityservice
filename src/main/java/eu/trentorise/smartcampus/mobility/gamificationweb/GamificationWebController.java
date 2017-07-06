@@ -70,7 +70,7 @@ public class GamificationWebController {
 	private static transient final Logger logger = Logger.getLogger(GamificationWebController.class);
 
 	@Autowired
-	@Value("${smartcampus.gamification.url}")
+	@Value("${gamification.url}")
 	private String gamificationUrl;
 	
 	@Autowired
@@ -88,7 +88,7 @@ public class GamificationWebController {
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
 	@Autowired
-	@Value("${smartcampus.isTest}")
+	@Value("${gamification.isTest}")
 	private String isTest;
 
 	@Autowired
@@ -104,7 +104,7 @@ public class GamificationWebController {
 	protected BasicProfileService profileService;
 
 	@Autowired
-	@Value("${smartcampus.gamification.recommendation.points.min}")
+	@Value("${gamification.recommendation.points.min}")
 	private String RECOMMENDATION_POINTS;	
 
 	@Autowired

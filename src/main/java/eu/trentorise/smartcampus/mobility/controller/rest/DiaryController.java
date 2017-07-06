@@ -54,8 +54,8 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 public class DiaryController {
 
 	@Autowired
-	@Value("${smartcampus.gamification.url}")
-	private String gamificationConsoleUrl;
+	@Value("${gamification.url}")
+	private String gamificationUrl;
 
 	@Autowired
 	@Value("${mobilityURL}")
@@ -63,7 +63,7 @@ public class DiaryController {
 	
 
 //	@Autowired
-//	@Value("${smartcampus.gamification.gamename}")
+//	@Value("${gamification.gamename}")
 //	private String gameName;
 
 	@Autowired
@@ -71,7 +71,7 @@ public class DiaryController {
 	private String aacURL;
 
 	@Autowired
-	@Value("${smartcampus.isTest}")
+	@Value("${gamification.isTest}")
 	private String isTest;
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
@@ -172,7 +172,7 @@ public class DiaryController {
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
 //		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "state/" + gameId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "/model/game/" + gameId + "/classification", HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "/model/game/" + gameId + "/classification", HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		String allData = res.getBody();		
 //		System.err.println(allData);
@@ -189,7 +189,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "state/" + gameId + "/" + p.getPid(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getPid(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 
 		String allData = res.getBody();
@@ -235,7 +235,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "notification/" + gameId + "/" + playerId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + playerId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 
 		List nots = mapper.readValue(res.getBody(), List.class);

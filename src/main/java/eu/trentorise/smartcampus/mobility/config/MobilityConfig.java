@@ -1,9 +1,7 @@
 package eu.trentorise.smartcampus.mobility.config;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,8 +17,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -28,7 +24,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.google.common.io.Resources;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mongodb.MongoClient;
@@ -56,16 +51,16 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Value("${statlogging.dbname}")
 	private String logDB;
 	
-	@Value("${gamification.mail.host}")
-	private String host;
-	@Value("${gamification.mail.port}")
-	private String port;
-	@Value("${gamification.mail.protocol}")
-	private String protocol;
-	@Value("${gamification.mail.username}")
-	private String username;
-	@Value("${gamification.mail.password}")
-	private String password;	
+//	@Value("${gamification.mail.host}")
+//	private String host;
+//	@Value("${gamification.mail.port}")
+//	private String port;
+//	@Value("${gamification.mail.protocol}")
+//	private String protocol;
+//	@Value("${gamification.mail.username}")
+//	private String username;
+//	@Value("${gamification.mail.password}")
+//	private String password;	
 
 	public MobilityConfig() {
 		super();
@@ -97,21 +92,21 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 	
-	@Bean
-	public JavaMailSender getJavaMailSender() throws IOException {
-		JavaMailSenderImpl sender = new JavaMailSenderImpl();
-		sender.setHost(host);
-		sender.setPort(Integer.parseInt(port));
-		sender.setProtocol(protocol);
-		sender.setUsername(protocol);
-		sender.setPassword(password);
-		
-		Properties props = new Properties();
-		props.load(Resources.asByteSource(Resources.getResource("javamail.properties")).openBufferedStream());
-		
-		sender.setJavaMailProperties(props);
-		return sender;
-	}
+//	@Bean
+//	public JavaMailSender getJavaMailSender() throws IOException {
+//		JavaMailSenderImpl sender = new JavaMailSenderImpl();
+//		sender.setHost(host);
+//		sender.setPort(Integer.parseInt(port));
+//		sender.setProtocol(protocol);
+//		sender.setUsername(protocol);
+//		sender.setPassword(password);
+//		
+//		Properties props = new Properties();
+//		props.load(Resources.asByteSource(Resources.getResource("javamail.properties")).openBufferedStream());
+//		
+//		sender.setJavaMailProperties(props);
+//		return sender;
+//	}
 	
 	@Bean
 	MongoClient getMongoClient() {
