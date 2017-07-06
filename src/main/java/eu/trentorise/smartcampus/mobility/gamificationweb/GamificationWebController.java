@@ -70,24 +70,16 @@ public class GamificationWebController {
 	private static transient final Logger logger = Logger.getLogger(GamificationWebController.class);
 
 	@Autowired
-	@Value("${smartcampus.urlws.gamification}")
-	private String gamificationUrl;
-
-	@Autowired
 	@Value("${smartcampus.gamification.url}")
-	private String gamificationWebUrl;
-
+	private String gamificationUrl;
+	
 	@Autowired
-	@Value("${smartcampus.urlws.gameclass}")
-	private String gamificationUrlClassification;
+	@Value("${mobilityURL}")
+	private String mobilityUrl;	
 
-	@Autowired
-	@Value("${smartcampus.urlws.gameconsole}")
-	private String gamificationConsoleUrl;
-
-	@Autowired
-	@Value("${smartcampus.urlws.post.gamification}")
-	private String gamificationUrlPost;
+	private String gamificationEngineClassificationUrl;
+	private String gamificationEngineConsoleUrl; 
+	private String gamificationEngineUrl; // gengine
 
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
@@ -128,6 +120,9 @@ public class GamificationWebController {
 	
 	@PostConstruct
 	public void init() {
+		gamificationEngineClassificationUrl = gamificationUrl + "data/";
+		gamificationEngineConsoleUrl = gamificationUrl + "console/";
+		gamificationEngineUrl = gamificationUrl + "gengine/";
 		profileService = new BasicProfileService(aacURL);
 	}
 
@@ -321,7 +316,7 @@ public class GamificationWebController {
 		 data.put("gameId", gameId);
 		data.put("playerId", playerId);
 		String partialUrl = "game/" + gameId + "/player";
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationConsoleUrl + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationEngineConsoleUrl + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
 
@@ -379,7 +374,7 @@ public class GamificationWebController {
 		}
 		String gameId = getGameId(appId);
 		String statusUrl = "state/" + gameId + "/" + userId;
-		String allData = this.getAll(statusUrl);
+		String allData = getAll(statusUrl);
 		
 		ChallengesUtils challUtils = new ChallengesUtils();
 		if(challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()){
@@ -387,7 +382,7 @@ public class GamificationWebController {
 		}
 		
 		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, challUtils, gamificationWebUrl, 1, language);
+		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, challUtils, mobilityUrl, 1, language);
 		
 		return ps;
 	}
@@ -496,7 +491,7 @@ public class GamificationWebController {
 		String result = "";
 		ResponseEntity<String> res = null;
 		try {
-			res = restTemplate.exchange(gamificationUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			res = restTemplate.exchange(gamificationEngineUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -542,7 +537,7 @@ public class GamificationWebController {
 		try {
 			// result = restTemplate.getForObject(gamificationUrl + urlWS,
 			// String.class);
-			tmp_res = restTemplate.exchange(gamificationUrlClassification + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			tmp_res = restTemplate.exchange(gamificationEngineClassificationUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -590,7 +585,7 @@ public class GamificationWebController {
 		data.put("gameId", gameId);
 		data.put("playerId", recommenderId);
 		data.put("data", new HashMap<String, Object>());
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationEngineUrl + "execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent app recommendation to gamification engine " + tmp_res.getStatusCode());
 	}
 

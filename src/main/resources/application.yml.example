@@ -5,6 +5,8 @@ communicatorURL: http://localhost:8080/core.communicator
 
 aacURL: http://localhost:8080/aac/
 
+mobilityURL: http://localhost:8080/core.mobility
+
 otp:
   url: http://localhost:7070
 

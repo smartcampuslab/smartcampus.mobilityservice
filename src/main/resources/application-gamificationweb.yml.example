@@ -1,7 +1,3 @@
-aacExtURL: http://localhost:8080/aac
-
-aacURL: http://localhost:8080/aac
-
 gamification:
   challenges:
     description:
@@ -53,9 +49,9 @@ gamification:
 
 smartcampus:
   gamification:
+    url: http://localhost:2020/gamification/
     clientId: 
     clientSecret: 
-    gamename: test
     pointtype: green leaves
     recommendation:
       points:
@@ -64,15 +60,9 @@ smartcampus:
       crypto:
         key1: CRYPTO_KEY_1
         key2: CRYPTO_KEY_2
-    url: http://localhost:8080/gamificationweb
   isShortClassification: false
   isTest: false
   shortClassificationSize: 15
   task:
     startupTime: 15:10
-  urlws:
-    gameclass: http://localhost:2020/gamification/data/
-    gameconsole: http://localhost:2020/gamification/console/
-    gamification: http://localhost:2020/gamification/gengine/
-    post:
-      gamification: http://localhost:2020/gamification/
+

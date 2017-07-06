@@ -54,12 +54,13 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 public class DiaryController {
 
 	@Autowired
-	@Value("${smartcampus.urlws.gamification}")
+	@Value("${smartcampus.gamification.url}")
 	private String gamificationConsoleUrl;
 
 	@Autowired
-	@Value("${smartcampus.gamification.url}")
-	private String gamificationWebUrl;
+	@Value("${mobilityURL}")
+	private String mobilityUrl;
+	
 
 //	@Autowired
 //	@Value("${smartcampus.gamification.gamename}")
@@ -198,7 +199,7 @@ public class DiaryController {
 		}
 
 		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getPid(), gameId, p.getNickname(), challUtils, gamificationWebUrl, 1, language);
+		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getPid(), gameId, p.getNickname(), challUtils, mobilityUrl, 1, language);
 
 		if (ps.getChallengeConcept() != null) {
 			List<ChallengesData> cds = Lists.newArrayList();
