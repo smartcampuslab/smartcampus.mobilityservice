@@ -1,12 +1,14 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +29,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,16 +37,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
+import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.UserCheck;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import eu.trentorise.smartcampus.profileservice.model.AccountProfile;
@@ -49,10 +60,12 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 @Controller
 public class GamificationWebController {
 
-	private static final String GREEN_CLASSIFICATION = "week classification";
+	private static final String PLAYER_RANKING = "playerRanking";
 
 	private static final String NICK_RECOMMANDATION = "nickRecommandation";
 	private static final String TIMESTAMP = "timestamp";
+	
+//	private String[] pointConcepts = { "p+r", "green", "health"};
 
 	private static transient final Logger logger = Logger.getLogger(GamificationWebController.class);
 
@@ -99,34 +112,42 @@ public class GamificationWebController {
 	protected BasicProfileService profileService;
 
 	@Autowired
-	@Value("${smartcampus.gamification.gamename}")
-	private String gameName;
-	
-	@Autowired
 	@Value("${smartcampus.gamification.recommendation.points.min}")
 	private String RECOMMENDATION_POINTS;	
 
+	@Autowired
+	@Qualifier("mongoTemplate")
+	MongoTemplate template;	
+	
+	@Autowired
+	private AppSetup appSetup;	
+	
+	private ObjectMapper mapper = new ObjectMapper();
+	
+	private CustomTokenExtractor tokenExtractor = new CustomTokenExtractor();
+	
 	@PostConstruct
 	public void init() {
 		profileService = new BasicProfileService(aacURL);
 	}
 
-	// Cache for actual week classification
-	LoadingCache<String, String> cacheClass = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<String, String>() {
-		public String load(String actualWeekTs) throws Exception {
-			return callWSFromEngine(actualWeekTs);
-		}
-
-		/*
-		 * public ListenableFuture<String> reload(final String actualWeekTs,
-		 * String prevData) { if(neverNeedsRefresh(actualWeekTs)){ return
-		 * Futures.immediateFuture(prevData); } else { // asynchronous!
-		 * ListenableFutureTask<String> task = ListenableFutureTask.create(new
-		 * Callable<String>() { public String call() { return
-		 * callWSFromEngine(actualWeekTs); } }); executor.execute(task); return
-		 * task; } }
-		 */
-	});
+	// TODO reenable?
+//	// Cache for actual week classification
+//	LoadingCache<String, String> cacheClass = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<String, String>() {
+//		public String load(String actualWeekTs) throws Exception {
+//			return callWSFromEngine(actualWeekTs);
+//		}
+//
+//		/*
+//		 * public ListenableFuture<String> reload(final String actualWeekTs,
+//		 * String prevData) { if(neverNeedsRefresh(actualWeekTs)){ return
+//		 * Futures.immediateFuture(prevData); } else { // asynchronous!
+//		 * ListenableFutureTask<String> task = ListenableFutureTask.create(new
+//		 * Callable<String>() { public String call() { return
+//		 * callWSFromEngine(actualWeekTs); } }); executor.execute(task); return
+//		 * task; } }
+//		 */
+//	});
 	
 //	// Scheduled method to cache the old week classification.
 //		//@Scheduled(cron="55 59 23 * * FRI") 		// Repeat every Friday at 23:59:55 PM
@@ -218,12 +239,13 @@ public class GamificationWebController {
 
 	// Method for mobile player registration (in mobile app)
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/register")
-	public @ResponseBody Player registerExternal(@RequestBody Map<String, Object> data, @RequestParam String token, @RequestParam String email,
-			@RequestParam(required = false, defaultValue = "it") String language, @RequestParam String nickname, HttpServletResponse res) {
+	public @ResponseBody Player registerExternal(@RequestBody Map<String, Object> data, @RequestParam String email,
+			@RequestParam(required = false, defaultValue = "it") String language, @RequestParam String nickname, @RequestHeader(required = true, value = "appId") String appId, HttpServletRequest req, HttpServletResponse res) {
 		logger.debug("External registration. ");
 
 		BasicProfile user = null;
 		AccountProfile account = null;
+		String token = tokenExtractor.extractHeaderToken(req);
 		try {
 			user = profileService.getBasicProfile(token);
 			if (user == null) {
@@ -249,6 +271,7 @@ public class GamificationWebController {
 			return null;
 		}
 		String id = user.getUserId();
+		String gameId = getGameId(appId);
 		id = "74";
 		logger.debug("External registration: found user profile with id " + id);
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
@@ -270,14 +293,14 @@ public class GamificationWebController {
 				Player recommender = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)), type);
 				if (recommender != null) {
 					p.setCheckedRecommendation(false);
-					sendRecommendationToGamification(recommender.getPid());
+					sendRecommendationToGamification(recommender.getPid(), gameId);
 				} else {
 					p.setCheckedRecommendation(true);
 				}
 
 			}
 			try {
-				createPlayerInGamification(id);
+				createPlayerInGamification(id, gameId);
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
@@ -291,13 +314,13 @@ public class GamificationWebController {
 	}
 
 	// Method to force the player creation in gamification engine
-	private void createPlayerInGamification(String playerId) throws Exception {
+	private void createPlayerInGamification(String playerId, String gameId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		Map<String, Object> data = new HashMap<String, Object>();
 		// data.put("actionId", "app_sent_recommandation");
-		// data.put("gameId", gameName);
+		 data.put("gameId", gameId);
 		data.put("playerId", playerId);
-		String partialUrl = "game/" + gameName + "/player";
+		String partialUrl = "game/" + gameId + "/player";
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationConsoleUrl + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
@@ -305,7 +328,7 @@ public class GamificationWebController {
 	// Method used to check if a user is registered or not to the system (by
 	// mobile app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/checkuser/{socialId}")
-	public @ResponseBody UserCheck getUserData(HttpServletRequest request, @PathVariable String socialId) {
+	public @ResponseBody UserCheck getUserData(HttpServletRequest request, @PathVariable String socialId, @RequestHeader(required = true, value = "appId") String appId) {
 		logger.debug("WS-get checkuser " + socialId);
 		boolean result = false;
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
@@ -330,7 +353,8 @@ public class GamificationWebController {
 
 	// Method used to get the user status data (by mobyle app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status")
-	@ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestParam String token, HttpServletResponse res) throws Exception{
+	@ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
+		String token = tokenExtractor.extractHeaderToken(request);
 		logger.debug("WS-get status user token " + token);
 		BasicProfile user = null;
 		try {
@@ -353,8 +377,9 @@ public class GamificationWebController {
 			nickName = p.getNickname();
 			language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
 		}
-		String statusUrl = "state/" + gameName + "/" + userId;
-		String allData = this.getAll(request, statusUrl);
+		String gameId = getGameId(appId);
+		String statusUrl = "state/" + gameId + "/" + userId;
+		String allData = this.getAll(statusUrl);
 		
 		ChallengesUtils challUtils = new ChallengesUtils();
 		if(challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()){
@@ -362,19 +387,17 @@ public class GamificationWebController {
 		}
 		
 		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameName, nickName, challUtils, gamificationWebUrl, 1, language);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ps));
+		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, challUtils, gamificationWebUrl, 1, language);
 		
 		return ps;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
 	public @ResponseBody
-	PlayerClassification getPlayerClassification(HttpServletRequest request, @RequestParam String token, @RequestParam(required=false) Long timestamp, @RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end, HttpServletResponse res) throws Exception{
+	PlayerClassification getPlayerClassification(HttpServletRequest request, @RequestParam(required=false) Long timestamp, @RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
+		String token = tokenExtractor.extractHeaderToken(request);
 		logger.debug("WS-get classification user token " + token);
-		PlayerClassification playerClassificationData = new PlayerClassification();
+		
 		BasicProfile user = null;
 		int maxClassificationSize = 500;
 		try {
@@ -388,57 +411,86 @@ public class GamificationWebController {
 			return null;
 		}
 		String userId = user.getUserId();
-		Player p = null;
-		String nickName = "";
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		p = playerRepositoryDao.findBySocialIdAndType(userId, type);
-		nickName = (p != null) ? p.getNickname() : null;
+		String gameId = getGameId(appId);
 		
-		String classUrl = "state/" + gameName + "?page=1&size=" + maxClassificationSize;
-		String allData = this.getAll(request, classUrl);		// call to get all user status (classification)
-		String statusUrl = "state/" + gameName + "/" + userId;
-		String statusData = this.getAll(request, statusUrl);	// call to get actual user status (user scores)
-//		List<Player> allNicks = null;
-//		try {
-//			allNicks = this.getAllNicknames(request, "");
-//		} catch (Exception ex){
-//			logger.error("Exception in all nick names reading " + ex.getMessage());
-//		}
-		Map<String, String> allNickames = getAllNiksMapFromDB();
+		PlayerClassification pc = getPlayerClassification(gameId, userId, timestamp, start, end);
 		
-		StatusUtils statusUtils = new StatusUtils();
-		ClassificationData actualPlayerClass = statusUtils.correctPlayerClassificationData(statusData, userId, nickName, timestamp, type);
-		List<ClassificationData> playersClass = statusUtils.correctClassificationData(allData, allNickames, timestamp, type);
+		return pc;
+	}		
+	
+	
+	private PlayerClassification getPlayerClassification(String gameId, String playerId, Long timestamp, Integer start, Integer end) throws Exception {
 		
-		// Sorting
-		Collections.sort(playersClass, Collections.reverseOrder());
-		playerClassificationData = statusUtils.completeClassificationPosition(playersClass, actualPlayerClass, start, end);
-		
-		return playerClassificationData;
-	}
-
-	private String callWSFromEngine(String sTimestamp) {
-		final int maxClassificationSize = 1000;
-		logger.debug("Retrieve all classification from DB");
-		Long timestamp = null;
-		if (sTimestamp != null && sTimestamp.compareTo("complete") != 0) {
-			timestamp = Long.parseLong(sTimestamp);
+		int size = -1;
+		if (end != null) {
+			if (start != null) {
+				size = end - start;
+			} else {
+				size = end;
+			}
 		}
-		String classData = "";
-		if (timestamp != null) {
-			String incClassUrl = "game/" + gameName + "/incclassification/" + GREEN_CLASSIFICATION + "?timestamp=" + timestamp;
-			classData = this.getAllClassification(null, incClassUrl);
+		String paging = ((start != null) ? ("start=" + start + ((size != -1) ? "&" : "") ) : "")
+				+ ((size != -1) ? ("size=" + size) : "");
+		ClassificationBoard board;
+		String url;
+		if (timestamp == null) {
+			url = "game/" + gameId + "/classification/" + URLEncoder.encode("week classification green", "UTF-8")
+			+ ((paging != null) ? ("?" + paging) : "");
 		} else {
-			String classUrl = "state/" + gameName + "?page=1&size=" + maxClassificationSize;
-			classData = this.getAll(null, classUrl); // call to get all user
-														// status
-														// (classification)
+			url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp
+					+ ((paging != null) ? ("&" + paging) : "");
 		}
+		
+		board = getClassification(url);
+		PlayerClassification pc = null;
+		if (board != null) {
+			computeRanking(board);
+			
+			Query query = new Query();
+			query.fields().include("socialId").include("nickname");
+			
+			List<Player> players = template.find(query, Player.class, "player");
+			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getSocialId, Player::getNickname));
 
-		return classData;
+			pc = new PlayerClassification();
+			List<ClassificationData> classificationList = Lists.newArrayList();
+			for (ClassificationPosition pos: board.getBoard()) {
+				if (nicknames.containsKey(pos.getPlayerId())) {
+					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+					classificationList.add(cd);
+					if (playerId.equals(pos.getPlayerId())) {
+						pc.setActualUser(cd);
+					}
+				}
+			}
+			pc.setClassificationList(classificationList);
+			
+		}
+		
+		return pc;
+		
 	}
+	
+	
+	private void computeRanking(ClassificationBoard board) {
+		Multimap<Double, ClassificationPosition> ranking = ArrayListMultimap.create();
+		board.getBoard().forEach(x -> ranking.put(x.getScore(), x));
+		TreeSet<Double> scores = new TreeSet<>(ranking.keySet());
 
-	private String getAll(HttpServletRequest request, @RequestParam String urlWS) {
+		int position = 1;
+		for (Double score : scores.descendingSet()) {
+			final int pos = position;
+			ranking.get(score).stream().forEach(x -> x.setPosition(pos));
+			position++;
+		}
+		board.setBoard(Lists.newArrayList(ranking.values()));
+		Collections.sort(board.getBoard());
+
+		board.setUpdateTime(System.currentTimeMillis());
+	}
+	
+	
+	private String getAll(@RequestParam String urlWS) {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS);
 		String result = "";
@@ -466,7 +518,7 @@ public class GamificationWebController {
 		return list;
 	}
 	
-	private Map<String, String> getAllNiksMapFromDB() throws Exception {
+	private Map<String, String> getAllNicksMapFromDB() throws Exception {
 		logger.debug("DB - get All niks."); //Added for log ws calls info in preliminary phase of portal
 		Map<String, String> niks = new HashMap<String, String>();
 		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
@@ -480,7 +532,7 @@ public class GamificationWebController {
 		return niks;
 	}	
 
-	public String getAllClassification(HttpServletRequest request, @RequestParam String urlWS) {
+	public ClassificationBoard getClassification(@RequestParam String urlWS) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS); // Added for log ws calls info
 													// in preliminary phase of
@@ -497,7 +549,27 @@ public class GamificationWebController {
 		if (tmp_res != null) {
 			result = tmp_res.getBody();
 		}
-		return result;
+
+		ClassificationBoard board = null;
+		if (result != null && !result.isEmpty()) {
+			board = mapper.readValue(result, ClassificationBoard.class);
+			// Collections.sort(board.getBoard());
+
+			Multimap<Double, ClassificationPosition> ranking = ArrayListMultimap.create();
+			board.getBoard().forEach(x -> ranking.put(x.getScore(), x));
+			TreeSet<Double> scores = new TreeSet<>(ranking.keySet());
+
+			int position = 1;
+			for (Double score : scores.descendingSet()) {
+				final int pos = position;
+				ranking.get(score).stream().forEach(x -> x.setPosition(pos));
+				position++;
+			}
+			board.setBoard(Lists.newArrayList(ranking.values()));
+			Collections.sort(board.getBoard());
+		}
+
+		return board;
 	}
 
 	HttpHeaders createHeaders() {
@@ -511,34 +583,32 @@ public class GamificationWebController {
 		};
 	}
 
-	private void sendRecommendationToGamification(String recommenderId) {
+	private void sendRecommendationToGamification(String recommenderId, String gameId) {
 		RestTemplate restTemplate = new RestTemplate();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("actionId", "app_sent_recommandation");
-		data.put("gameId", gameName);
+		data.put("gameId", gameId);
 		data.put("playerId", recommenderId);
 		data.put("data", new HashMap<String, Object>());
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent app recommendation to gamification engine " + tmp_res.getStatusCode());
 	}
 
-	Map<String, String> getAllNicksMapFromDB() throws Exception {
-		logger.debug("DB - get All nicks."); // Added for log ws calls info in
-											// preliminary phase of portal
-		Map<String, String> nicks = new HashMap<String, String>();
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		Iterable<Player> iter = playerRepositoryDao.findAllByType(type);
-		for (Player p : iter) {
-			if (p.getNickname() != null && p.getNickname().compareTo("") != 0) {
-				logger.debug(String.format("Profile result %s", p.getNickname()));
-				nicks.put(p.getPid(), p.getNickname());
-			}
-		}
-		return nicks;
-	}
-
 	private String correctNameForQuery(String nickName) {
 		return "^" + nickName + "$";
 	};
+	
 
+	private String getGameId(String appId) {
+		if (appId != null) {
+			AppInfo ai = appSetup.findAppById(appId);
+			if (ai == null) {
+				return null;
+			}
+			String gameId = ai.getGameId();
+			return gameId;
+		}
+		return null;
+	}	
+	
 }
