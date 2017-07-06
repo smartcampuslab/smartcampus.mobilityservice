@@ -15,6 +15,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.openedFrom = false;
 	$scope.openedTo = false;
 	$scope.excludeZeroPoints = false;
+	$scope.allDates = false;
 	$scope.toCheck = false;
 	$scope.unapprovedOnly = false;
 	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
@@ -62,7 +63,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
 			spinner.spin(target);
-			$http.get("console/users?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
 				data.data.forEach(function(descr) {
@@ -92,7 +93,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 
 			if (!$scope.userMap[user]) {
 				spinner.spin(target);
-				$http.get("console/useritinerary/" + user + "?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				console.log($scope.allDates);
+				$http.get("console/useritinerary/" + user + "?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&toCheck=" + $scope.toCheck  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 					spinner.stop();
 				});
@@ -155,7 +157,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 
 	$scope.revalidate = function() {
 		spinner.spin(target);
-		$http.post("console/validate?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+//		$http.post("console/validate?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/validate?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
@@ -203,7 +206,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.approveAll = function() {
 //		spinner.spin(target);		
-		$http.post("console/approveFiltered?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/approveFiltered?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
@@ -211,7 +214,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.report = function() {
 		spinner.spin(target);
-		$http.get("console/report?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime(), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.get("console/report"  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
