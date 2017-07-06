@@ -36,7 +36,7 @@ public class StatisticsBuilder {
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 	
 	@Autowired
-	@Qualifier("domainMongoTemplate")
+	@Qualifier("mongoTemplate")
 	MongoTemplate template;
 	
 	public StatisticsGroup computeStatistics(String userId, String start, String from, String to, AggregationGranularity granularity) throws Exception {
@@ -53,9 +53,9 @@ public class StatisticsBuilder {
 		return computeStatistics(userId, startDay, fromDay, toDay, granularity);
 	}	
 	
-	public GlobalStatistics getGlobalStatistics(String userId, String start) throws Exception {
+	public GlobalStatistics getGlobalStatistics(String userId, String start, boolean dates) throws Exception {
 		Criteria criteria = new Criteria("userId").is(userId);
-		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000); // * 60 * 60);
+		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000 * 60 * 60);
 		Query query = new Query(criteria);
 		
 		GlobalStatistics statistics = template.findOne(query, GlobalStatistics.class, GLOBAL_STATISTICS);
@@ -63,28 +63,25 @@ public class StatisticsBuilder {
 			statistics = new GlobalStatistics();
 			statistics.setUserId(userId);
 			statistics.setUpdateTime(System.currentTimeMillis());
-			statistics.setStats(computeGlobalStatistics(userId, start));
-			System.err.println("Writing");
+			statistics.setStats(computeGlobalStatistics(userId, start, dates));
 			template.save(statistics, GLOBAL_STATISTICS);
 		}
 		
 		return statistics;
 	}
 	
-	private Map<AggregationGranularity, Map<String, Object>> computeGlobalStatistics(String userId, String start) throws Exception {
+	private Map<AggregationGranularity, Map<String, Object>> computeGlobalStatistics(String userId, String start, boolean dates) throws Exception {
 		Map<AggregationGranularity, Map<String, Object>> result = Maps.newHashMap();
 		for (AggregationGranularity granularity: AggregationGranularity.values()) {
-			result.put(granularity, computeGlobalStatistics(userId, start, granularity));
+			result.put(granularity, computeGlobalStatistics(userId, start, granularity, dates));
 		}
 		
 		return result;
 	}
 	
-	private Map<String, Object> computeGlobalStatistics(String userId, String start, AggregationGranularity granularity) throws Exception {
+	private Map<String, Object> computeGlobalStatistics(String userId, String start, AggregationGranularity granularity, boolean dates) throws Exception {
 		List<TrackedInstance> instances = findAll(userId);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
-//		System.err.println(granularity + "*");
-//		System.err.println(byDay);
 		Multimap<Map<String, String>, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, start, sdf.format(new Date()));
 		Map<Map<String, String>, Map<String,Double>> rangeSum = statsByRanges(byWeek);
 		
@@ -92,11 +89,11 @@ public class StatisticsBuilder {
 		for (Map<String, String> range: rangeSum.keySet()) {
 			Map<String,Double> value = rangeSum.get(range);
 			for (String key: value.keySet()) {
-//				result.put("max " + key, Math.max(result.getOrDefault("max " + key, 0.0), value.get(key)));
 				if (value.get(key) > (Double)result.getOrDefault("max " + key, 0.0)) {
 					result.put("max " + key, Math.max((Double)result.getOrDefault("max " + key, 0.0), value.get(key)));
-					result.put("date max " + key, convertRange(range));
-//					System.err.println(range + " / " + granularity);
+					if (dates) {
+						result.put("date max " + key, convertRange(range));
+					}
 				}
 			}
 		}
@@ -115,8 +112,6 @@ public class StatisticsBuilder {
 	private StatisticsGroup statsByGranularity(String userId, String from, String to, AggregationGranularity granularity) throws Exception {
 		List<TrackedInstance> instances = find(userId, from, to);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
-//		System.err.println(granularity);
-//		System.err.println(byDay);		
 		Multimap<Map<String, String>, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, from, to);
 		Map<Map<String, String>, Map<String,Double>> rangeSum = statsByRanges(byWeek);
 		
@@ -144,7 +139,6 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> findAll(String userId) {
-//		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.travelValidity").is(TravelValidity.VALID);
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.distance").include("day").include("freeTrackingTransport").include("itinerary");
@@ -157,7 +151,6 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> find(String userId, String from, String to) {
-//		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.travelValidity").is(TravelValidity.VALID);
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
@@ -326,8 +319,10 @@ public class StatisticsBuilder {
 				break;
 			case week:
 				c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+//				c.add(Calendar.DAY_OF_YEAR, -2); // saturday?
 				from = c.getTimeInMillis();
 				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+//				c.add(Calendar.DAY_OF_YEAR, -2) // friday?
 				to = c.getTimeInMillis();
 				break;
 			case month:
@@ -344,7 +339,6 @@ public class StatisticsBuilder {
 		
 		result.put("from", sdf.format(new Date(from)));
 		result.put("to", sdf.format(new Date(to)));
-//		result.put("descr", result.get("from") + "-" + result.get("to"));
 
 		return result;
 	}	
