@@ -54,7 +54,7 @@ public class GamificationManager {
 	private ExecutorService executorService;		
 
 	@Autowired(required = false)
-	@Value("${gamification.url}")
+	@Value("${smartcampus.urlws.post}")
 	private String gamificationUrl;
 	
 	private Set<String> publishQueue = Sets.newConcurrentHashSet();

@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -58,10 +57,6 @@ public class GamificationHelper {
 
 	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 
-	@Autowired(required = false)
-	@Value("${gamification.url}")
-	private String gamificationUrl;
-	
 	@Autowired
 	private AppSetup appSetup;		
 

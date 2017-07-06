@@ -26,8 +26,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -60,10 +58,6 @@ public class GamificationValidator {
 
 	private static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 	private static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN, EMPTY);
-
-	@Autowired(required = false)
-	@Value("${gamification.url}")
-	private String gamificationUrl;
 
 	public Map<String, Object> computePlannedJourneyScore(Itinerary itinerary, boolean log) {
 		Map<String, Object> data = Maps.newTreeMap();
