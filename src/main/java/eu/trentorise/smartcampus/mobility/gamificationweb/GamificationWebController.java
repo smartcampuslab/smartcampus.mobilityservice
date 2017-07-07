@@ -88,20 +88,16 @@ public class GamificationWebController {
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
 	@Autowired
-	@Value("${gamification.server.bauth.username}")
+	@Value("${gamification.username}")
 	private String basicAuthUsername;
 	@Autowired
-	@Value("${gamification.server.bauth.password}")
+	@Value("${gamification.password}")
 	private String basicAuthPassword;
 
 	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;
 	protected BasicProfileService profileService;
-
-	@Autowired
-	@Value("${gamification.recommendation.points.min}")
-	private String RECOMMENDATION_POINTS;	
 
 	@Autowired
 	@Qualifier("mongoTemplate")

@@ -61,18 +61,9 @@ public class DiaryController {
 	@Value("${mobilityURL}")
 	private String mobilityUrl;
 	
-
-//	@Autowired
-//	@Value("${gamification.gamename}")
-//	private String gameName;
-
 	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;
-
-//	@Autowired
-//	@Value("${gamification.isTest}")
-//	private String isTest;
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");

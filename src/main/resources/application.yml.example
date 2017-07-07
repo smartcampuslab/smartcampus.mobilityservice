@@ -25,3 +25,8 @@ geolocations:
   db:
     name: background-geolocation.db
     dir: db
+    
+gamification:
+  username: 
+  password: 
+  url: http://localhost:2020/gamification/
