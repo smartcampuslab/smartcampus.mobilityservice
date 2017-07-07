@@ -77,10 +77,6 @@ public class GamificationWebController {
 	@Value("${mobilityURL}")
 	private String mobilityUrl;	
 
-	private String gamificationEngineClassificationUrl;
-	private String gamificationEngineConsoleUrl; 
-	private String gamificationEngineUrl; // gengine
-
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
 
@@ -112,9 +108,6 @@ public class GamificationWebController {
 	
 	@PostConstruct
 	public void init() {
-		gamificationEngineClassificationUrl = gamificationUrl + "data/";
-		gamificationEngineConsoleUrl = gamificationUrl + "console/";
-		gamificationEngineUrl = gamificationUrl + "gengine/";
 		profileService = new BasicProfileService(aacURL);
 	}
 
@@ -307,7 +300,7 @@ public class GamificationWebController {
 		 data.put("gameId", gameId);
 		data.put("playerId", playerId);
 		String partialUrl = "game/" + gameId + "/player";
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationEngineConsoleUrl + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "console/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
 
@@ -480,7 +473,7 @@ public class GamificationWebController {
 		String result = "";
 		ResponseEntity<String> res = null;
 		try {
-			res = restTemplate.exchange(gamificationEngineUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			res = restTemplate.exchange(gamificationUrl + "gengine/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -524,7 +517,7 @@ public class GamificationWebController {
 		try {
 			// result = restTemplate.getForObject(gamificationUrl + urlWS,
 			// String.class);
-			tmp_res = restTemplate.exchange(gamificationEngineClassificationUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			tmp_res = restTemplate.exchange(gamificationUrl + "data/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -572,7 +565,7 @@ public class GamificationWebController {
 		data.put("gameId", gameId);
 		data.put("playerId", recommenderId);
 		data.put("data", new HashMap<String, Object>());
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationEngineUrl + "execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "gengine/execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
 		logger.info("Sent app recommendation to gamification engine " + tmp_res.getStatusCode());
 	}
 
