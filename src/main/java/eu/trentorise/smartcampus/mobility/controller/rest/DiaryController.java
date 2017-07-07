@@ -49,6 +49,8 @@ import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import it.sayservice.platform.smartplanner.data.message.Leg;
 
 @Controller
 public class DiaryController {
@@ -274,8 +276,16 @@ public class DiaryController {
 			}
 			if (instance.getItinerary() != null) {
 				de.setTravelType(TravelType.PLANNED);
+				List<String> modes = Lists.newArrayList();
+				for (Leg leg: instance.getItinerary().getData().getLeg()) {
+					if (leg.getTransport() != null) {
+						modes.add(GamificationHelper.convertTType(leg.getTransport().getType()));
+					}
+				}
+				de.setTravelModes(modes);
 			} else if (instance.getFreeTrackingTransport() != null) {
 				de.setTravelType(TravelType.FREETRACKING);
+				de.setTravelModes(Lists.newArrayList(instance.getFreeTrackingTransport()));
 			}
 			de.setTravelValidity(instance.getValidationResult().getTravelValidity());
 			de.setEntityId(instance.getId());

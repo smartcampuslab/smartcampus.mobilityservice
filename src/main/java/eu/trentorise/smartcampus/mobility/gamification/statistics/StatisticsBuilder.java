@@ -26,7 +26,7 @@ import com.google.common.collect.Multimaps;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
-import it.sayservice.platform.smartplanner.data.message.TType;
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 
 @Component
 public class StatisticsBuilder {
@@ -285,7 +285,7 @@ public class StatisticsBuilder {
 	
 	private Map<String, Double> computePlannedJourneyDistances(ItineraryObject itinerary) {
 		Map<String, Double> result = Maps.newTreeMap();
-		itinerary.getData().getLeg().stream().forEach(x -> result.put(convertTType(x.getTransport().getType()), result.getOrDefault(convertTType(x.getTransport().getType()), 0.0) + x.getLength() / 1000));
+		itinerary.getData().getLeg().stream().forEach(x -> result.put(GamificationHelper.convertTType(x.getTransport().getType()), result.getOrDefault(GamificationHelper.convertTType(x.getTransport().getType()), 0.0) + x.getLength() / 1000));
 		return result;
 	}
 	
@@ -350,23 +350,5 @@ public class StatisticsBuilder {
 		c.add(Calendar.SECOND, -1);
 		return c.getTimeInMillis();
 	}
-	
-	private String convertTType(TType tt) {
-		if (tt.equals(TType.CAR) || tt.equals(TType.CARWITHPARKING)) {
-			return "car";
-		}
-		if (tt.equals(TType.WALK)) {
-			return "walk";
-		}
-		if (tt.equals(TType.BICYCLE) || tt.equals(TType.SHAREDBIKE) || tt.equals(TType.SHAREDBIKE_WITHOUT_STATION)) {
-			return "bike";
-		}
-		// TODO: no transit: bus/train
-		if (tt.equals(TType.BUS)|| tt.equals(TType.TRAIN) || tt.equals(TType.TRANSIT) || tt.equals(TType.GONDOLA) ) {
-			return "transit";
-		}		
-		return "";
-		
-	}
-	
+
 }
