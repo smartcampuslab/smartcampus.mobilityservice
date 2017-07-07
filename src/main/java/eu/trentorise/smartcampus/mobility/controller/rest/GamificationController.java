@@ -567,6 +567,25 @@ public class GamificationController {
 		}
 	}	
 	
+	
+	@RequestMapping("/trackeditinerary/{id}")
+	public @ResponseBody TrackedInstance getTrackedInstance(@PathVariable String id, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws ParseException {
+		String userId = getUserId();
+		if (userId == null) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return null;
+		}
+
+		Criteria criteria = new Criteria("id").is(id).and("appId").is(appId).and("userId").is(userId);
+		
+		Query query = new Query(criteria);
+
+		TrackedInstance instance = storage.searchDomainObject(query, TrackedInstance.class);
+		
+		return instance;
+	}	
+	
+	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
@@ -947,8 +966,7 @@ public class GamificationController {
 		try {
 			String userId = null;
 			try {
-				userId = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//				userId = getUserId();
+				userId = getUserId();
 			} catch (SecurityException e) {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
@@ -992,8 +1010,7 @@ public class GamificationController {
 		try {
 			String userId = null;
 			try {
-				userId = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//				userId = getUserId();
+				userId = getUserId();
 			} catch (SecurityException e) {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
