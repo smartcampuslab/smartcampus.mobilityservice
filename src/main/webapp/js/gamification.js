@@ -22,7 +22,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.filterApproved = $scope.approvedList[0];
 	$scope.scores = "";
 	
-	$scope.validities = ['INVALID', 'VALID'];
+	$scope.validities = ['PENDING', 'INVALID', 'VALID'];
 	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
