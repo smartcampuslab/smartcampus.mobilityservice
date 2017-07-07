@@ -84,13 +84,6 @@ public class GamificationWebController {
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
 	@Autowired
-	@Value("${gamification.username}")
-	private String basicAuthUsername;
-	@Autowired
-	@Value("${gamification.password}")
-	private String basicAuthPassword;
-
-	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;
 	protected BasicProfileService profileService;
@@ -272,14 +265,14 @@ public class GamificationWebController {
 				Player recommender = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)));
 				if (recommender != null) {
 					p.setCheckedRecommendation(false);
-					sendRecommendationToGamification(recommender.getPid(), gameId);
+					sendRecommendationToGamification(recommender.getPid(), gameId, appId);
 				} else {
 					p.setCheckedRecommendation(true);
 				}
 
 			}
 			try {
-				createPlayerInGamification(id, gameId);
+				createPlayerInGamification(id, gameId, appId);
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
@@ -293,14 +286,14 @@ public class GamificationWebController {
 	}
 
 	// Method to force the player creation in gamification engine
-	private void createPlayerInGamification(String playerId, String gameId) throws Exception {
+	private void createPlayerInGamification(String playerId, String gameId, String appId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		Map<String, Object> data = new HashMap<String, Object>();
 		// data.put("actionId", "app_sent_recommandation");
 		 data.put("gameId", gameId);
 		data.put("playerId", playerId);
 		String partialUrl = "game/" + gameId + "/player";
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "console/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "console/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders(appId)), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
 
@@ -356,7 +349,7 @@ public class GamificationWebController {
 		}
 		String gameId = getGameId(appId);
 		String statusUrl = "state/" + gameId + "/" + userId;
-		String allData = getAll(statusUrl);
+		String allData = getAll(statusUrl, appId);
 		
 		ChallengesUtils challUtils = new ChallengesUtils();
 		if(challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()){
@@ -390,13 +383,13 @@ public class GamificationWebController {
 		String userId = user.getUserId();
 		String gameId = getGameId(appId);
 		
-		PlayerClassification pc = getPlayerClassification(gameId, userId, timestamp, start, end);
+		PlayerClassification pc = getPlayerClassification(gameId, userId, timestamp, start, end, appId);
 		
 		return pc;
 	}		
 	
 	
-	private PlayerClassification getPlayerClassification(String gameId, String playerId, Long timestamp, Integer start, Integer end) throws Exception {
+	private PlayerClassification getPlayerClassification(String gameId, String playerId, Long timestamp, Integer start, Integer end, String appId) throws Exception {
 		
 		int size = -1;
 		if (end != null) {
@@ -418,7 +411,7 @@ public class GamificationWebController {
 					+ ((paging != null) ? ("&" + paging) : "");
 		}
 		
-		board = getClassification(url);
+		board = getClassification(url, appId);
 		PlayerClassification pc = null;
 		if (board != null) {
 			computeRanking(board);
@@ -467,13 +460,13 @@ public class GamificationWebController {
 	}
 	
 	
-	private String getAll(@RequestParam String urlWS) {
+	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS);
 		String result = "";
 		ResponseEntity<String> res = null;
 		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			res = restTemplate.exchange(gamificationUrl + "gengine/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -507,7 +500,7 @@ public class GamificationWebController {
 		return niks;
 	}	
 
-	public ClassificationBoard getClassification(@RequestParam String urlWS) throws Exception {
+	public ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS); // Added for log ws calls info
 													// in preliminary phase of
@@ -517,7 +510,7 @@ public class GamificationWebController {
 		try {
 			// result = restTemplate.getForObject(gamificationUrl + urlWS,
 			// String.class);
-			tmp_res = restTemplate.exchange(gamificationUrl + "data/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders()), String.class);
+			tmp_res = restTemplate.exchange(gamificationUrl + "data/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
 		} catch (Exception ex) {
 			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
 		}
@@ -547,10 +540,11 @@ public class GamificationWebController {
 		return board;
 	}
 
-	HttpHeaders createHeaders() {
+	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
 			{
-				String auth = basicAuthUsername + ":" + basicAuthPassword;
+				AppInfo app = appSetup.findAppById(appId);
+				String auth = app.getGameUser() + ":" + app.getGamePassword();
 				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
 				String authHeader = "Basic " + new String(encodedAuth);
 				set("Authorization", authHeader);
@@ -558,14 +552,14 @@ public class GamificationWebController {
 		};
 	}
 
-	private void sendRecommendationToGamification(String recommenderId, String gameId) {
+	private void sendRecommendationToGamification(String recommenderId, String gameId, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("actionId", "app_sent_recommandation");
 		data.put("gameId", gameId);
 		data.put("playerId", recommenderId);
 		data.put("data", new HashMap<String, Object>());
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "gengine/execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders()), String.class);
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "gengine/execute", HttpMethod.POST, new HttpEntity<Object>(data, createHeaders(appId)), String.class);
 		logger.info("Sent app recommendation to gamification engine " + tmp_res.getStatusCode());
 	}
 
