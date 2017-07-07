@@ -62,7 +62,7 @@ public class GamificationWebController {
 
 	private static final String PLAYER_RANKING = "playerRanking";
 
-	private static final String NICK_RECOMMANDATION = "nickRecommandation";
+	private static final String NICK_RECOMMANDATION = "nicknameRecommandation";
 	private static final String TIMESTAMP = "timestamp";
 	
 //	private String[] pointConcepts = { "p+r", "green", "health"};
@@ -86,10 +86,6 @@ public class GamificationWebController {
 
 	@Autowired
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
-
-	@Autowired
-	@Value("${gamification.isTest}")
-	private String isTest;
 
 	@Autowired
 	@Value("${gamification.server.bauth.username}")
@@ -269,23 +265,22 @@ public class GamificationWebController {
 		String gameId = getGameId(appId);
 		id = "74";
 		logger.debug("External registration: found user profile with id " + id);
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		Player withNick = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery(nickname), type);
+		Player withNick = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery(nickname));
 		if (withNick != null && withNick.getSocialId().equals(id)) {
 			logger.debug("External registration: nickname conflict with user " + withNick.getPid());
 			res.setStatus(HttpStatus.CONFLICT.value());
 			return null;
 		}
-		Player p = playerRepositoryDao.findBySocialIdAndType(id, type);
+		Player p = playerRepositoryDao.findBySocialId(id);
 		if (p != null) {
 			logger.debug("External registration: user exists");
 			return null;
 		} else {
 			logger.debug("External registration: new user");
 			data.put(TIMESTAMP, System.currentTimeMillis());
-			p = new Player(id, user.getUserId(), user.getName(), user.getSurname(), nickname, email, language, true, data, null, true, type); // default sendMail attribute value is true
+			p = new Player(id, user.getUserId(), user.getName(), user.getSurname(), nickname, email, language, true, data, null, true); // default sendMail attribute value is true
 			if (data.containsKey(NICK_RECOMMANDATION) && !((String) data.get(NICK_RECOMMANDATION)).isEmpty()) {
-				Player recommender = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)), type);
+				Player recommender = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)));
 				if (recommender != null) {
 					p.setCheckedRecommendation(false);
 					sendRecommendationToGamification(recommender.getPid(), gameId);
@@ -326,8 +321,7 @@ public class GamificationWebController {
 	public @ResponseBody UserCheck getUserData(HttpServletRequest request, @PathVariable String socialId, @RequestHeader(required = true, value = "appId") String appId) {
 		logger.debug("WS-get checkuser " + socialId);
 		boolean result = false;
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		Player p = playerRepositoryDao.findBySocialIdAndType(socialId, type);
+		Player p = playerRepositoryDao.findBySocialId(socialId);
 		if (p != null && p.getNickname() != null && p.getNickname().compareTo("") != 0) {
 			logger.debug(String.format("Profile find result %s", p.toJSONString()));
 			result = true;
@@ -365,8 +359,7 @@ public class GamificationWebController {
 		String userId = user.getUserId();
 		Player p = null;
 		String nickName = "";
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		p = playerRepositoryDao.findBySocialIdAndType(userId, type);
+		p = playerRepositoryDao.findBySocialId(userId);
 		String language = "it";
 		if(p != null){
 			nickName = p.getNickname();
@@ -504,8 +497,7 @@ public class GamificationWebController {
 	private List<Player> getAllNicknames(HttpServletRequest request, @RequestParam String urlWS) throws Exception {
 		logger.debug("WS-get All nickanmes.");
 		List<Player> list = new ArrayList<Player>();
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		Iterable<Player> iter = playerRepositoryDao.findAllByType(type);
+		Iterable<Player> iter = playerRepositoryDao.findAll();
 		for (Player p : iter) {
 			logger.debug(String.format("Profile result %s", p.getNickname()));
 			list.add(p);
@@ -516,8 +508,7 @@ public class GamificationWebController {
 	private Map<String, String> getAllNicksMapFromDB() throws Exception {
 		logger.debug("DB - get All niks."); //Added for log ws calls info in preliminary phase of portal
 		Map<String, String> niks = new HashMap<String, String>();
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-		Iterable<Player> iter = playerRepositoryDao.findAllByType(type);
+		Iterable<Player> iter = playerRepositoryDao.findAll();
 		for(Player p: iter){
 			if(p.getNickname() != null && p.getNickname().compareTo("") != 0){
 				logger.debug(String.format("Profile result %s", p.getNickname()));

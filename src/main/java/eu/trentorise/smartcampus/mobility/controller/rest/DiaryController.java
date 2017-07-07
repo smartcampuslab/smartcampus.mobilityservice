@@ -70,9 +70,9 @@ public class DiaryController {
 	@Value("${aacURL}")
 	private String aacURL;
 
-	@Autowired
-	@Value("${gamification.isTest}")
-	private String isTest;
+//	@Autowired
+//	@Value("${gamification.isTest}")
+//	private String isTest;
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -110,9 +110,7 @@ public class DiaryController {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
 		}	
-		String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-
-		Player p = playerRepositoryDao.findBySocialIdAndType(userId, type);
+		Player p = playerRepositoryDao.findBySocialId(userId);
 
 		List<DiaryEntry> result = Lists.newArrayList();
 
@@ -154,7 +152,7 @@ public class DiaryController {
 	private List<DiaryEntry> getFriendRegistered(Player p, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
-		List<Player> rps = playerRepositoryDao.findByNickRecommandation(p.getNickname());
+		List<Player> rps = playerRepositoryDao.findByNicknameRecommandation(p.getNickname());
 		if (rps != null) {
 			for (Player rp : rps) {
 				long timestamp = (long) rp.getPersonalData().get("timestamp");

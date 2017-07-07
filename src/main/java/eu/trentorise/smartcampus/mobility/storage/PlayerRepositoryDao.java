@@ -21,21 +21,21 @@ public interface PlayerRepositoryDao extends CrudRepository<Player, String>{
 	@Query("{'nickName': { '$regex': ?0, $options:'i'}}")
 	public Player findByNickIgnoreCase(String nickname);*/
 	
-	Iterable<Player> findAllByType(String type);
+	Iterable<Player> findAll();
 	
-	Iterable<Player> findAllByTypeAndCheckedRecommendation(String type, boolean recommendation);
+	Iterable<Player> findAllByCheckedRecommendation(boolean recommendation);
 	
-	public Player findByPidAndType(String id, String type);
+	public Player findByPid(String id);
 	
-	public Player findBySocialIdAndType(String id, String type);
+	public Player findBySocialId(String id);
 
 	@Query("{'nickname': ?0}")
-	public Player findByNickAndType(String nickname, String type);
+	public Player findByNickname(String nickname);
 	
 	@Query("{'nickname': { '$regex': ?0, $options:'i'}}")
-	public Player findByNickIgnoreCaseAndType(String nickname, String type);
+	public Player findByNicknameIgnoreCase(String nickname);
 
-	@Query ("{'personalData.nickRecommandation': ?0}")
-	public List<Player> findByNickRecommandation(String nickname);
+	@Query ("{'personalData.nicknameRecommandation': ?0}")
+	public List<Player> findByNicknameRecommandation(String nickname);
 
 }

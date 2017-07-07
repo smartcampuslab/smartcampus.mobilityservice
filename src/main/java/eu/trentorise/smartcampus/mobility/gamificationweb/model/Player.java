@@ -13,7 +13,6 @@ public class Player {
 	
 	@Id
 	private String pid;
-	private String type;	// test or prod
 	private String socialId;
 	
 	private String name;
@@ -33,7 +32,7 @@ public class Player {
 
 	public Player(String pid, String socialId, String name, String surname, String nickname,
 			//String mail, String language, boolean sendMail, PersonalData personalData, SurveyData surveyData, String type) {
-			String mail, String language, boolean sendMail, Map<String, Object> personalData, SurveyData surveyData, boolean checkRecommendation, String type) {
+			String mail, String language, boolean sendMail, Map<String, Object> personalData, SurveyData surveyData, boolean checkRecommendation) {
 		super();
 		this.pid = pid;
 		this.socialId = socialId;
@@ -46,7 +45,6 @@ public class Player {
 		this.personalData = personalData;
 		this.surveyData = surveyData;
 		this.checkedRecommendation = checkRecommendation;
-		this.type = type;
 	}
 
 	public String getName() {
@@ -111,14 +109,6 @@ public class Player {
 
 	public void setSurveyData(SurveyData surveyData) {
 		this.surveyData = surveyData;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public boolean isSendMail() {
