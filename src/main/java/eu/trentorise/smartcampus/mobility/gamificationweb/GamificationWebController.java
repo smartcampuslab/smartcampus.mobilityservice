@@ -245,7 +245,6 @@ public class GamificationWebController {
 		}
 		String id = user.getUserId();
 		String gameId = getGameId(appId);
-		id = "74";
 		logger.debug("External registration: found user profile with id " + id);
 		Player withNick = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery(nickname));
 		if (withNick != null && withNick.getSocialId().equals(id)) {
