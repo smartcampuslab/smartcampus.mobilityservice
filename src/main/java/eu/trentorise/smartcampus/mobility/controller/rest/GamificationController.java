@@ -139,18 +139,16 @@ public class GamificationController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
-	public @ResponseBody String storeGeolocationEvent(@RequestBody(required=false) GeolocationsEvent geolocationsEvent, @RequestParam String token, @RequestHeader(required = true, value = "appId") String appId,
+	public @ResponseBody String storeGeolocationEvent(@RequestBody(required=false) GeolocationsEvent geolocationsEvent, @RequestHeader(required = true, value = "appId") String appId,
 			HttpServletResponse response) throws Exception {
-		logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
+//		logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
 		ObjectMapper mapper = new ObjectMapper();
 
 		// logger.info(mapper.writeValueAsString(geolocationsEvent));
 		try {
-			String userId = null;
-			try {
-				userId = basicProfileService.getBasicProfile(token).getUserId();
-			} catch (SecurityException e) {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			String userId = getUserId();
+			if (userId == null) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return "";
 			}
 
