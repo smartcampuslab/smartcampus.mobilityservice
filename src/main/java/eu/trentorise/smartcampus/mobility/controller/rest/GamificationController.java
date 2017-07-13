@@ -51,6 +51,7 @@ import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
+import eu.trentorise.smartcampus.mobility.gamification.model.TravelDetails;
 import eu.trentorise.smartcampus.mobility.gamification.model.UserDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
@@ -70,6 +71,7 @@ import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 
@@ -566,8 +568,8 @@ public class GamificationController {
 	}	
 	
 	
-	@RequestMapping("/trackeditinerary/{id}")
-	public @ResponseBody TrackedInstance getTrackedInstance(@PathVariable String id, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws ParseException {
+	@RequestMapping("/traveldetails/{id}")
+	public @ResponseBody TravelDetails getTravelDetails(@PathVariable String id, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws ParseException {
 		String userId = getUserId();
 		if (userId == null) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -580,7 +582,20 @@ public class GamificationController {
 
 		TrackedInstance instance = storage.searchDomainObject(query, TrackedInstance.class);
 		
-		return instance;
+		TravelDetails result = null;
+		if (instance != null) {
+			result = new TravelDetails();
+			result.setFreeTrackingTransport(instance.getFreeTrackingTransport());
+			result.setItinerary(instance.getItinerary());
+			if (instance.getGeolocationEvents() != null && !instance.getGeolocationEvents().isEmpty()) {
+				List<Geolocation> geo = Lists.newArrayList(instance.getGeolocationEvents());
+				Collections.sort(geo);				
+				result.setGeolocationPolyline(GamificationHelper.encodePoly(geo));
+			}
+			result.setValidationResult(instance.getValidationResult());
+		}
+		
+		return result;
 	}	
 	
 	
