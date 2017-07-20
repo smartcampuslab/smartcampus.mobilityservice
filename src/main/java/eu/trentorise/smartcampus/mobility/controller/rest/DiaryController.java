@@ -103,7 +103,9 @@ public class DiaryController {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
 		}	
-		Player p = playerRepositoryDao.findBySocialId(userId);
+		
+		String gameId = appSetup.findAppById(appId).getGameId();
+		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
 
 		List<DiaryEntry> result = Lists.newArrayList();
 
@@ -145,7 +147,8 @@ public class DiaryController {
 	private List<DiaryEntry> getFriendRegistered(Player p, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
-		List<Player> rps = playerRepositoryDao.findByNicknameRecommandation(p.getNickname());
+		String gameId = appSetup.findAppById(appId).getGameId();
+		List<Player> rps = playerRepositoryDao.findByNicknameRecommandationAndGameId(p.getNickname(), gameId);
 		if (rps != null) {
 			for (Player rp : rps) {
 				long timestamp = (long) rp.getPersonalData().get("timestamp");
@@ -180,7 +183,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getPid(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 
 		String allData = res.getBody();
@@ -190,7 +193,7 @@ public class DiaryController {
 		}
 
 		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getPid(), gameId, p.getNickname(), challUtils, mobilityUrl, 1, language);
+		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl, 1, language);
 
 		if (ps.getChallengeConcept() != null) {
 			List<ChallengesData> cds = Lists.newArrayList();
@@ -270,7 +273,7 @@ public class DiaryController {
 				timestamp = shortSdf.parse(instance.getDay()).getTime();
 			}
 			de.setTimestamp(timestamp);
-			de.setTravelEstimatedScore(instance.getEstimatedScore());
+			de.setTravelEstimatedScore(instance.getScore());
 			if (instance.getValidationResult() != null) {
 				de.setTravelLength(instance.getValidationResult().getDistance());
 			}
@@ -289,6 +292,7 @@ public class DiaryController {
 			}
 			de.setTravelValidity(instance.getValidationResult().getTravelValidity());
 			de.setEntityId(instance.getId());
+			de.setClientId(instance.getClientId());
 			result.add(de);
 		}
 

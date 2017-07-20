@@ -33,6 +33,7 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private Double travelLength;
 	private Long travelEstimatedScore;
 	private TravelValidity travelValidity;
+	private String clientId;
 
 	private String badge;
 	private String badgeCollection;
@@ -121,6 +122,14 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public void setTravelValidity(TravelValidity travelValidity) {
 		this.travelValidity = travelValidity;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 	public String getBadge() {
