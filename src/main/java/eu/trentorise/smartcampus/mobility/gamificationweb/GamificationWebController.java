@@ -246,25 +246,25 @@ public class GamificationWebController {
 		String id = user.getUserId();
 		String gameId = getGameId(appId);
 		logger.debug("External registration: found user profile with id " + id);
-		Player withNick = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery(nickname));
-		if (withNick != null && withNick.getSocialId().equals(id)) {
-			logger.debug("External registration: nickname conflict with user " + withNick.getPid());
+		Player withNick = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
+		if (withNick != null && withNick.getId().equals(id)) {
+			logger.debug("External registration: nickname conflict with user " + withNick.getId());
 			res.setStatus(HttpStatus.CONFLICT.value());
 			return null;
 		}
-		Player p = playerRepositoryDao.findBySocialId(id);
+		Player p = playerRepositoryDao.findByIdAndGameId(id, gameId);
 		if (p != null) {
 			logger.debug("External registration: user exists");
 			return null;
 		} else {
 			logger.debug("External registration: new user");
 			data.put(TIMESTAMP, System.currentTimeMillis());
-			p = new Player(id, user.getUserId(), user.getName(), user.getSurname(), nickname, email, language, true, data, null, true); // default sendMail attribute value is true
+			p = new Player(id, gameId, user.getName(), user.getSurname(), nickname, email, language, true, data, null, true); // default sendMail attribute value is true
 			if (data.containsKey(NICK_RECOMMANDATION) && !((String) data.get(NICK_RECOMMANDATION)).isEmpty()) {
-				Player recommender = playerRepositoryDao.findByNicknameIgnoreCase(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)));
+				Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)), gameId);
 				if (recommender != null) {
 					p.setCheckedRecommendation(false);
-					sendRecommendationToGamification(recommender.getPid(), gameId, appId);
+					sendRecommendationToGamification(recommender.getId(), gameId, appId);
 				} else {
 					p.setCheckedRecommendation(true);
 				}
@@ -302,7 +302,9 @@ public class GamificationWebController {
 	public @ResponseBody UserCheck getUserData(HttpServletRequest request, @PathVariable String socialId, @RequestHeader(required = true, value = "appId") String appId) {
 		logger.debug("WS-get checkuser " + socialId);
 		boolean result = false;
-		Player p = playerRepositoryDao.findBySocialId(socialId);
+		String gameId = getGameId(appId);
+		
+		Player p = playerRepositoryDao.findByIdAndGameId(socialId, gameId);
 		if (p != null && p.getNickname() != null && p.getNickname().compareTo("") != 0) {
 			logger.debug(String.format("Profile find result %s", p.toJSONString()));
 			result = true;
@@ -338,15 +340,17 @@ public class GamificationWebController {
 			return null;
 		}
 		String userId = user.getUserId();
+		String gameId = getGameId(appId);
+		
 		Player p = null;
 		String nickName = "";
-		p = playerRepositoryDao.findBySocialId(userId);
+		p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
 		String language = "it";
 		if(p != null){
 			nickName = p.getNickname();
 			language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
 		}
-		String gameId = getGameId(appId);
+
 		String statusUrl = "state/" + gameId + "/" + userId;
 		String allData = getAll(statusUrl, appId);
 		
@@ -419,7 +423,7 @@ public class GamificationWebController {
 			query.fields().include("socialId").include("nickname");
 			
 			List<Player> players = template.find(query, Player.class, "player");
-			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getSocialId, Player::getNickname));
+			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
 
 			pc = new PlayerClassification();
 			List<ClassificationData> classificationList = Lists.newArrayList();
@@ -493,7 +497,7 @@ public class GamificationWebController {
 		for(Player p: iter){
 			if(p.getNickname() != null && p.getNickname().compareTo("") != 0){
 				logger.debug(String.format("Profile result %s", p.getNickname()));
-				niks.put(p.getPid(), p.getNickname());
+				niks.put(p.getId(), p.getNickname());
 			}
 		}
 		return niks;
