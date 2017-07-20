@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Player {
 	
 	@Id
-	private String pid;
-	private String socialId;
+	private String id;
+	private String gameId;
 	
 	private String name;
 	private String surname;
@@ -26,16 +26,18 @@ public class Player {
 	private boolean checkedRecommendation;
 	private List<Event> eventsCheckIn;
 	
+	private boolean firstMailSent;
+	
 	public Player() {
 		super();
 	}
 
-	public Player(String pid, String socialId, String name, String surname, String nickname,
+	public Player(String pid, String gameId, String name, String surname, String nickname,
 			//String mail, String language, boolean sendMail, PersonalData personalData, SurveyData surveyData, String type) {
 			String mail, String language, boolean sendMail, Map<String, Object> personalData, SurveyData surveyData, boolean checkRecommendation) {
 		super();
-		this.pid = pid;
-		this.socialId = socialId;
+		this.id = pid;
+		this.gameId = gameId;
 		this.name = name;
 		this.surname = surname;
 		this.nickname = nickname;
@@ -45,6 +47,8 @@ public class Player {
 		this.personalData = personalData;
 		this.surveyData = surveyData;
 		this.checkedRecommendation = checkRecommendation;
+		
+		this.firstMailSent = false;
 	}
 
 	public String getName() {
@@ -79,20 +83,20 @@ public class Player {
 		this.mail = mail;
 	}
 
-	public String getPid() {
-		return pid;
+	public String getId() {
+		return id;
 	}
 
-	public String getSocialId() {
-		return socialId;
+	public void setId(String pid) {
+		this.id = pid;
+	}
+	
+	public String getGameId() {
+		return gameId;
 	}
 
-	public void setPid(String pid) {
-		this.pid = pid;
-	}
-
-	public void setSocialId(String socialId) {
-		this.socialId = socialId;
+	public void setGameId(String appId) {
+		this.gameId = appId;
 	}
 
 	public Map<String, Object> getPersonalData() {
@@ -117,6 +121,14 @@ public class Player {
 
 	public void setSendMail(boolean sendMail) {
 		this.sendMail = sendMail;
+	}
+
+	public boolean isFirstMailSent() {
+		return firstMailSent;
+	}
+
+	public void setFirstMailSent(boolean firstMailSent) {
+		this.firstMailSent = firstMailSent;
 	}
 
 	public String getLanguage() {
