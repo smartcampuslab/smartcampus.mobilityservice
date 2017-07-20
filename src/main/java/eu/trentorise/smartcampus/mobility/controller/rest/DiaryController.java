@@ -273,7 +273,7 @@ public class DiaryController {
 				timestamp = shortSdf.parse(instance.getDay()).getTime();
 			}
 			de.setTimestamp(timestamp);
-			de.setTravelEstimatedScore(instance.getScore());
+			de.setTravelEstimatedScore(instance.getEstimatedScore());
 			if (instance.getValidationResult() != null) {
 				de.setTravelLength(instance.getValidationResult().getDistance());
 			}
