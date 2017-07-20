@@ -47,6 +47,8 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -79,6 +81,9 @@ public class DiaryController {
 	@Autowired
 	private AppSetup appSetup;
 
+	@Autowired
+	private GameSetup gameSetup;	
+	
 	@Autowired
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
@@ -273,7 +278,7 @@ public class DiaryController {
 				timestamp = shortSdf.parse(instance.getDay()).getTime();
 			}
 			de.setTimestamp(timestamp);
-			de.setTravelEstimatedScore(instance.getEstimatedScore());
+			de.setTravelEstimatedScore(instance.getScore());
 			if (instance.getValidationResult() != null) {
 				de.setTravelLength(instance.getValidationResult().getDistance());
 			}
@@ -290,7 +295,11 @@ public class DiaryController {
 				de.setTravelType(TravelType.FREETRACKING);
 				de.setTravelModes(Lists.newArrayList(instance.getFreeTrackingTransport()));
 			}
-			de.setTravelValidity(instance.getValidationResult().getTravelValidity());
+			if (instance.getChangedValidity() != null) {
+				de.setTravelValidity(instance.getChangedValidity());	
+			} else {
+				de.setTravelValidity(instance.getValidationResult().getTravelValidity());
+			}
 			de.setEntityId(instance.getId());
 			de.setClientId(instance.getClientId());
 			result.add(de);
@@ -303,7 +312,8 @@ public class DiaryController {
 		return new HttpHeaders() {
 			{
 				AppInfo app = appSetup.findAppById(appId);
-				String auth = app.getGameUser() + ":" + app.getGamePassword();
+				GameInfo game = gameSetup.findGameById(app.getGameId());
+				String auth = game.getUser() + ":" + game.getPassword();
 				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
 				String authHeader = "Basic " + new String(encodedAuth);
 				set("Authorization", authHeader);
