@@ -47,8 +47,6 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameInfo;
-import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -81,9 +79,6 @@ public class DiaryController {
 	@Autowired
 	private AppSetup appSetup;
 
-	@Autowired
-	private GameSetup gameSetup;	
-	
 	@Autowired
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
 
@@ -278,7 +273,7 @@ public class DiaryController {
 				timestamp = shortSdf.parse(instance.getDay()).getTime();
 			}
 			de.setTimestamp(timestamp);
-			de.setTravelEstimatedScore(instance.getScore());
+			de.setTravelEstimatedScore(instance.getEstimatedScore());
 			if (instance.getValidationResult() != null) {
 				de.setTravelLength(instance.getValidationResult().getDistance());
 			}
@@ -312,8 +307,7 @@ public class DiaryController {
 		return new HttpHeaders() {
 			{
 				AppInfo app = appSetup.findAppById(appId);
-				GameInfo game = gameSetup.findGameById(app.getGameId());
-				String auth = game.getUser() + ":" + game.getPassword();
+				String auth = app.getGameUser() + ":" + app.getGamePassword();
 				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
 				String authHeader = "Basic " + new String(encodedAuth);
 				set("Authorization", authHeader);
