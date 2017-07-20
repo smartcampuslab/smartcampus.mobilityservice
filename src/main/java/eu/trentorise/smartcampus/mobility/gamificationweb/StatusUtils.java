@@ -541,7 +541,7 @@ public class StatusUtils {
 			for (int i = 0; (i < allNicks.size()) && !find; i++) {
 				Player player = allNicks.get(i);
 				if (player != null) {
-					String socialId = player.getSocialId();
+					String socialId = player.getId();
 					if (socialId.compareTo(id) == 0) {
 						name = player.getNickname();
 						find = true;
