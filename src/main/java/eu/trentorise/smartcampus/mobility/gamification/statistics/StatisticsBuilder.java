@@ -258,16 +258,16 @@ public class StatisticsBuilder {
 				if (ti.getFreeTrackingTransport() != null) {
 					dist = computeFreeTrackingDistances(ti.getValidationResult().getDistance(), ti.getFreeTrackingTransport());
 					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
-					if (ti.getEstimatedScore() != null) {
-						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
+					if (ti.getScore() != null) {
+						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
 					}
 					
 				}
 				if (ti.getItinerary() != null) {
 					dist = computePlannedJourneyDistances(ti.getItinerary());
 					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
-					if (ti.getEstimatedScore() != null) {					
-						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
+					if (ti.getScore() != null) {					
+						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
 					}
 				}
 				for (String key: dist.keySet()) {
