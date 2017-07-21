@@ -85,7 +85,9 @@
 														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
 													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
 														title="Mismatched activities" data-toggle="tooltip"
-													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> <br />
+													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> 
+													<span ng-show="!itinerary.instance.validationResult.inAreas" class="glyphicon glyphicon-flag" title="Not in areas" data-toggle="tooltip"></span>
+													<br />
 													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? ('Free tracking - ' + itinerary.instance.freeTrackingTransport) : 'Planned'}}</b>
 												</div>
 												<div class="col-md-6 text-right">
