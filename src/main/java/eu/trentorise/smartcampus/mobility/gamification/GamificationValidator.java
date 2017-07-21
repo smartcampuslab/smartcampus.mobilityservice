@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -36,6 +37,10 @@ import com.google.common.collect.Sets.SetView;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -58,8 +63,23 @@ public class GamificationValidator {
 
 	private static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 	private static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN, EMPTY);
+	
+	@Autowired
+	private AppSetup appSetup;
+	
+	@Autowired
+	private GameSetup gameSetup;	
 
-	public Map<String, Object> computePlannedJourneyScore(Itinerary itinerary, boolean log) {
+	public Map<String, Object> computePlannedJourneyScore(Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
+		if (geolocations != null) {
+			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
+			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+				logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
+				return computeFreeTrackingScore(geolocations, ttype);
+			}
+		}
+		
+		
 		Map<String, Object> data = Maps.newTreeMap();
 
 		String parkName = null; // name of the parking
@@ -124,21 +144,32 @@ public class GamificationValidator {
 
 		Double score = 0.0;
 		// score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10; Rovereto
-		score += (walkDist < 0.25 ? 0 : Math.min(3.5, walkDist)) * 10;
-		score += Math.min(7, bikeDist) * 5;
+//		score += (walkDist < 0.25 ? 0 : Math.min(3.5, walkDist)) * 10;
+		score += (walkDist < 0.25 ? 0 : walkDist) * 15;
+//		score += Math.min(7, bikeDist) * 5;
+		score += bikeDist * 7;
 
 		double busTrainTransitDist = busDist + trainDist;
-		if (busTrainTransitDist > 0) {
-			score += (busTrainTransitDist > 0 && busTrainTransitDist < 1) ? 10 : ((busTrainTransitDist > 1 && busTrainTransitDist < 5) ? 15 : (busTrainTransitDist >= 5 && busTrainTransitDist < 10) ? 20
-					: (busTrainTransitDist >= 10 && busTrainTransitDist < 30) ? 30 : 40);
-		}
+//		if (busTrainTransitDist > 0) {
+//			score += (busTrainTransitDist > 0 && busTrainTransitDist < 1) ? 10 : ((busTrainTransitDist > 1 && busTrainTransitDist < 5) ? 15 : (busTrainTransitDist >= 5 && busTrainTransitDist < 10) ? 20
+//					: (busTrainTransitDist >= 10 && busTrainTransitDist < 30) ? 30 : 40);
+//		}
+		
+		if (busDist > 0) {
+			score += (busDist > 0 && busDist < 1) ? 10 : ((busDist > 1 && busDist < 5) ? 15 : 20);
+		}		
+		if (trainDist > 0) {
+			score += (trainDist > 0 && trainDist < 1) ? 10 : ((trainDist > 1 && trainDist < 5) ? 15 : 20);
+		}				
+		
 		
 		// Trento only
 		if (transitDist > 0) {
-			score += 25;
+//			score += 25;
+			score += 15;
 		}
 
-		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
+//		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
 //		Rovereto
 //		if (zeroImpact && itinerary.isPromoted()) {
 //			score *= 1.7;
@@ -153,11 +184,12 @@ public class GamificationValidator {
 		
 		
 		if (pnr) {
-			score += 10;
+//			score += 10;
+			score += 15;
 		}
-		if (zeroImpact) {
-			score *= 1.5;
-		}
+//		if (zeroImpact) {
+//			score *= 1.5;
+//		}
 
 		if (bikeDist > 0) {
 			data.put("bikeDistance", bikeDist);
@@ -193,7 +225,7 @@ public class GamificationValidator {
 			data.put("p+r", pnr);
 		}
 		data.put("sustainable", itinerary.isPromoted());
-		data.put("zeroimpact", zeroImpact);
+//		data.put("zeroimpact", zeroImpact);
 		data.put("estimatedScore", Math.round(score));
 
 		return data;
@@ -227,11 +259,13 @@ public class GamificationValidator {
 
 			if ("walk".equals(ttype)) {
 				result.put("walkDistance", distance);
-				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
+//				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
+				score = (distance < 0.25 ? 0 : distance) * 15;
 			}
 			if ("bike".equals(ttype)) {
 				result.put("bikeDistance", distance);
-				score += Math.min(7, distance) * 5;
+//				score += Math.min(7, distance) * 5;
+				score += distance * 7;
 			}
 			
 			// always zero impact
@@ -244,16 +278,22 @@ public class GamificationValidator {
 	
 
 	// TODO: remove?
-	public long computeEstimatedGameScore(Itinerary itinerary, boolean log) {
-		Long score = (Long) (computePlannedJourneyScore(itinerary, log).get("estimatedScore"));
+	public long computeEstimatedGameScore(Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
+		Long score = (Long) (computePlannedJourneyScore(itinerary, geolocations, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
 		return score;
 	}
 
 
 
-	public ValidationResult validatePlannedJourney(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
+	public ValidationResult validatePlannedJourney(ItineraryObject itinerary, Collection<Geolocation> geolocations, String appId) throws Exception {
 
+		String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
+		if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+			logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
+			return validateFreeTracking(geolocations, ttype, appId);
+		}
+		
 		boolean legWalkOnly = true;
 		boolean geolocationWalkOnly = true;
 
@@ -290,7 +330,29 @@ public class GamificationValidator {
 		double distance = 0;
 		long time = 0;		
 		
+
 		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
+		Collections.sort(points, new Comparator<Geolocation>() {
+
+			@Override
+			public int compare(Geolocation o1, Geolocation o2) {
+				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+			}
+
+		});
+		
+		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
+
+		boolean inRange = true;
+
+		if (game.getAreas() != null && !game.getAreas().isEmpty()) {
+			if (!points.isEmpty()) {
+				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
+				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
+			}
+		}
+		
 		for (int i = 1; i < points.size(); i++) {
 			double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
 			distance += d;
@@ -351,15 +413,18 @@ public class GamificationValidator {
 		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
 		vr.setMatchedActivities(diffModes.size() == 0);
 		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
+		vr.setInAreas(inRange);
 		
-		boolean valid = vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast();
+		// TODO temporary validation rules
+//		boolean valid = vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast();
+		boolean valid = !vr.getTooFewPoints() && !vr.getTooFast() && vr.getInAreas();
 		// TODO temporary
-		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);
+		vr.setTravelValidity(valid ? TravelValidity.PENDING : TravelValidity.INVALID);
 
 		return vr;
 	}
 
-	public ValidationResult validateFreeTracking(Collection<Geolocation> geolocations, String ttype) throws Exception {
+	public ValidationResult validateFreeTracking(Collection<Geolocation> geolocations, String ttype, String appId) throws Exception {
 		if (geolocations == null || ttype == null) {
 			return null;
 		}
@@ -385,10 +450,22 @@ public class GamificationValidator {
 		double validatedDistance = 0;
 		long validatedTime = 0; 		
 		
+		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
+
+		boolean inRange = true;
+
+		if (game.getAreas() != null && !game.getAreas().isEmpty()) {
+			if (!points.isEmpty()) {
+				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
+				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
+			}
+		}		
+		
 		int origPointsSize = points.size();
 		if (points.size() >= 2) {
 //			logger.debug("Original track points (remove outliers): " + points.size());
-//			removeOutliers(points);
+			GamificationHelper.removeOutliers(points);
 //			logger.debug("Transformed track points (remove outliers): " + points.size());			
 		
 //			if (points.size() >= 2) {
@@ -441,9 +518,6 @@ public class GamificationValidator {
 		}
 
 		vr.setGeoLocationsN(points.size());
-		boolean valid = !vr.getTooFast() && origPointsSize >= 2;
-		// TODO temporary
-		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);		
 		
 		vr.setAverageSpeed(averageSpeed);
 		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
@@ -452,6 +526,13 @@ public class GamificationValidator {
 		vr.setTime(time);
 		vr.setValidatedDistance(validatedDistance);
 		vr.setValidatedTime(validatedTime);
+		vr.setInAreas(inRange);
+		
+		
+		boolean valid = !vr.getTooFast() && !vr.getTooFewPoints() && vr.getInAreas();
+		// TODO temporary
+		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);			
+		
 		return vr;
 	}
 
