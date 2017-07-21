@@ -13,6 +13,7 @@ public class ValidationResult {
 	private int matchedLocationsN;
 	private Boolean matchedLocations;
 	private Boolean tooFewPoints;
+	private Boolean inAreas;
 	
 	private Set<String> geoActivities;
 	private Set<String> legsActivities;
@@ -79,6 +80,14 @@ public class ValidationResult {
 
 	public Boolean getTooFast() {
 		return tooFast;
+	}
+
+	public Boolean getInAreas() {
+		return inAreas;
+	}
+
+	public void setInAreas(Boolean inAreas) {
+		this.inAreas = inAreas;
 	}
 
 	public void setTooFast(Boolean walkOnly) {
