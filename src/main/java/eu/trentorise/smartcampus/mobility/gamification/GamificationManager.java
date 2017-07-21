@@ -36,6 +36,8 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -49,6 +51,9 @@ public class GamificationManager {
 	
 	@Autowired
 	private AppSetup appSetup;
+	
+	@Autowired
+	private GameSetup gameSetup;	
 
 	@Autowired
 	private ExecutorService executorService;		
@@ -93,6 +98,7 @@ public class GamificationManager {
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
 
 		try {
 			ExecutionDataDTO ed = new ExecutionDataDTO();
@@ -104,7 +110,7 @@ public class GamificationManager {
 			String content = JsonUtils.toJSON(ed);
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());		
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
 		}
@@ -123,9 +129,10 @@ public class GamificationManager {
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
 		try {
-			if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
+			if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(game.getStart()).getTime()) {
 				logger.debug("Game not yet started, returning.");
 				return;
 			}
@@ -148,8 +155,10 @@ public class GamificationManager {
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
-		if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(app.getGameStart()).getTime()) {
+		
+		if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(game.getStart()).getTime()) {
 			return;
 		}
 
@@ -167,6 +176,7 @@ public class GamificationManager {
 			trackingData.remove("estimatedScore");
 
 			AppInfo app = appSetup.findAppById(appId);
+			GameInfo game = gameSetup.findGameById(app.getGameId());
 			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
 			ed.setGameId(app.getGameId());
@@ -177,7 +187,7 @@ public class GamificationManager {
 			String content = JsonUtils.toJSON(ed);
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", app.getGameUser(), app.getGamePassword());
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
 		}
