@@ -14,6 +14,10 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 
 public class TrackedInstance {
 
+	public enum ScoreStatus {
+		UNASSIGNED, COMPUTED, SENT, ASSIGNED
+	}	
+	
 	@Id
 	private String id;
 
@@ -27,7 +31,7 @@ public class TrackedInstance {
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
 	
-	private Boolean scoreAssigned;
+	private ScoreStatus scoreStatus = ScoreStatus.UNASSIGNED;
 	
 	private String time;
 	
@@ -38,7 +42,7 @@ public class TrackedInstance {
 	
 	private ValidationResult validationResult;
 	
-	private Long estimatedScore;
+	private Long score;
 
 	private String appId;
 	
@@ -167,12 +171,12 @@ public class TrackedInstance {
 		this.freeTrackingTransport = freeTrackingTransport;
 	}
 
-	public Long getEstimatedScore() {
-		return estimatedScore;
+	public Long getScore() {
+		return score;
 	}
 
-	public void setEstimatedScore(Long estimatedScore) {
-		this.estimatedScore = estimatedScore;
+	public void setScore(Long estimatedScore) {
+		this.score = estimatedScore;
 	}
 
 	public String getAppId() {
@@ -199,12 +203,12 @@ public class TrackedInstance {
 		this.approved = approved;
 	}
 
-	public Boolean getScoreAssigned() {
-		return scoreAssigned;
+	public ScoreStatus getScoreStatus() {
+		return scoreStatus;
 	}
 
-	public void setScoreAssigned(Boolean scoreAssigned) {
-		this.scoreAssigned = scoreAssigned;
+	public void setScoreStatus(ScoreStatus scoreAssigned) {
+		this.scoreStatus = scoreAssigned;
 	}
 
 	public Boolean getToCheck() {
