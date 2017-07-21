@@ -9,6 +9,8 @@ import java.util.TimerTask;
 import javax.annotation.PostConstruct;
 import javax.naming.ConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -41,6 +43,8 @@ public class AppSetup {
 	private List<AppInfo> apps;
 	private Map<String, AppInfo> appsMap;
 	private Map<String, AppInfo> servicesMap;	
+	
+	private static Log logger = LogFactory.getLog(AppSetup.class);
 
 	public AppSetup() {
 	}	
@@ -107,9 +111,13 @@ public class AppSetup {
 								Thread.sleep(10000);
 							} catch (InterruptedException e1) {
 							}
-							e.printStackTrace();
+//							logger.warn("Failed to register app" + signature.getAppId());
+//							e.printStackTrace();
 						}
 					} while (!ok);
+					
+					logger.info("Registered app " + signature.getAppId());
+					
 				}
 
 			}
