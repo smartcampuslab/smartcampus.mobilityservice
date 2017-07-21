@@ -51,6 +51,7 @@ import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamification.model.TravelDetails;
 import eu.trentorise.smartcampus.mobility.gamification.model.UserDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
@@ -69,6 +70,8 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.Tra
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
@@ -101,6 +104,9 @@ public class GamificationController {
 
 	@Autowired
 	private AppSetup appSetup;
+	
+	@Autowired
+	private GameSetup gameSetup;
 	
 	@Autowired
 	private StatisticsBuilder statisticsBuilder;
@@ -356,31 +362,33 @@ public class GamificationController {
 				// boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getComplete()) {
-						ValidationResult vr = gamificationValidator.validatePlannedJourney(res.getItinerary(), res.getGeolocationEvents());
+						ValidationResult vr = gamificationValidator.validatePlannedJourney(res.getItinerary(), res.getGeolocationEvents(), appId);
 						res.setValidationResult(vr);
 
 						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
-							Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(res.getItinerary().getData(), false);
+							Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(res.getItinerary().getData(), res.getGeolocationEvents(), false);
 							if (trackingData.containsKey("estimatedScore")) {
-								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
+							trackingData.put("travelId", res.getId());
 							gamificationManager.sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary(), trackingData);
-							res.setScoreAssigned(true);
+							res.setScoreStatus(ScoreStatus.SENT);
 						}
 						res.setComplete(true);
 					}
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
-						ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport());
+						ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
 						res.setValidationResult(vr);
 						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
 							// canSave =
 							Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(res.getGeolocationEvents(), res.getFreeTrackingTransport());
 							if (trackingData.containsKey("estimatedScore")) {
-								res.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
+							trackingData.put("travelId", res.getId());
 							gamificationManager.sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport(), trackingData);
-							res.setScoreAssigned(true);
+							res.setScoreStatus(ScoreStatus.SENT);
 						} else {
 							logger.debug("Validation result null, not sending data to gamification");
 						}
@@ -625,17 +633,23 @@ public class GamificationController {
 		for (TrackedInstance ti : result) {
 			try {
 				if (ti.getItinerary() != null) {
-					ValidationResult vr = gamificationValidator.validatePlannedJourney(ti.getItinerary(), ti.getGeolocationEvents());
+					ValidationResult vr = gamificationValidator.validatePlannedJourney(ti.getItinerary(), ti.getGeolocationEvents(), appId);
 					ti.setValidationResult(vr);
-					Map<String, Object> data = gamificationValidator.computePlannedJourneyScore(ti.getItinerary().getData(), false);
-					ti.setEstimatedScore((Long) data.get("estimatedScore"));
+					Map<String, Object> data = gamificationValidator.computePlannedJourneyScore(ti.getItinerary().getData(), ti.getGeolocationEvents(), false);
+					if (ti.getScoreStatus() == null || ScoreStatus.UNASSIGNED.equals(ti.getScoreStatus())) {
+						ti.setScoreStatus(ScoreStatus.COMPUTED);
+					}
+					ti.setScore((Long) data.get("estimatedScore"));
 					storage.saveTrackedInstance(ti);
 
 				} else {
-					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
+					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), appId);
 					ti.setValidationResult(vr);
 					Map<String, Object> data = gamificationValidator.computeFreeTrackingScore(ti.getGeolocationEvents(), ti.getFreeTrackingTransport());
-					ti.setEstimatedScore((Long) data.get("estimatedScore"));
+					if (ti.getScoreStatus() == null || ScoreStatus.UNASSIGNED.equals(ti.getScoreStatus())) {
+						ti.setScoreStatus(ScoreStatus.COMPUTED);
+					}					
+					ti.setScore((Long) data.get("estimatedScore"));
 					storage.saveTrackedInstance(ti);
 				}
 			} catch (Exception e) {
@@ -651,25 +665,27 @@ public class GamificationController {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("id", instanceId);
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
-		if (instance.getScoreAssigned() != null && instance.getScoreAssigned().booleanValue()) {
+		if (instance.getScoreStatus() != null && !ScoreStatus.UNASSIGNED.equals(instance.getScoreStatus())) {
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
 			return null;
 		}
 		
 		if (instance.getItinerary() != null) {
-			Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(instance.getItinerary().getData(), false);
+			Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(instance.getItinerary().getData(), instance.getGeolocationEvents(), false);
 			if (trackingData.containsKey("estimatedScore")) {
-				instance.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+				instance.setScore((Long) trackingData.get("estimatedScore"));
 			}
+			trackingData.put("travelId", instance.getId());
 			gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(), trackingData);
-			instance.setScoreAssigned(true);
+			instance.setScoreStatus(ScoreStatus.SENT);
 		} else if (instance.getFreeTrackingTransport() != null) {
 			Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(instance.getGeolocationEvents(), instance.getFreeTrackingTransport());
+			trackingData.put("travelId", instance.getId());
 			if (trackingData.containsKey("estimatedScore")) {
-				instance.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+				instance.setScore((Long) trackingData.get("estimatedScore"));
 			}
 			gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(), instance.getFreeTrackingTransport(), trackingData);
-			instance.setScoreAssigned(true);
+			instance.setScoreStatus(ScoreStatus.SENT);
 		}
 		
 		storage.saveTrackedInstance(instance);
@@ -725,21 +741,23 @@ public class GamificationController {
 		if (!TravelValidity.VALID.equals(instance.getValidationResult().getTravelValidity()) && TravelValidity.VALID.equals(instance.getChangedValidity())) {
 			logger.info("Sending approved itinerary data to GE: " + instance.getId());
 			if (instance.getItinerary() != null) {
-				Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(instance.getItinerary().getData(), false);
+				Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(instance.getItinerary().getData(), instance.getGeolocationEvents(), false);
 				if (trackingData.containsKey("estimatedScore")) {
-					instance.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
+				trackingData.put("travelId", instance.getId());
 				gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(),
 						trackingData);
-				instance.setScoreAssigned(true);
+				instance.setScoreStatus(ScoreStatus.SENT);
 			} else if (instance.getFreeTrackingTransport() != null) {
 				Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(instance.getGeolocationEvents(), instance.getFreeTrackingTransport());
 				if (trackingData.containsKey("estimatedScore")) {
-					instance.setEstimatedScore((Long) trackingData.get("estimatedScore"));
+					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
+				trackingData.put("travelId", instance.getId());
 				gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(),
 						instance.getFreeTrackingTransport(), trackingData);
-				instance.setScoreAssigned(true);
+				instance.setScoreStatus(ScoreStatus.SENT);
 			}
 		}
 
@@ -767,16 +785,16 @@ public class GamificationController {
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		StringBuffer sb = new StringBuffer("userId;id;freeTracking;itineraryName;score;valid\r\n");
 		for (TrackedInstance ti : instances) {
-			if (ti.getEstimatedScore() == null) {
+			if (ti.getScore() == null) {
 				if (ti.getItinerary() != null) {
 					Itinerary itinerary = ti.getItinerary().getData();
-					long score = gamificationValidator.computeEstimatedGameScore(itinerary, false);
-					ti.setEstimatedScore(score);
+					long score = gamificationValidator.computeEstimatedGameScore(itinerary, ti.getGeolocationEvents(), false);
+					ti.setScore(score);
 					storage.saveTrackedInstance(ti);
 				}
 			}
 			sb.append(ti.getUserId() + ";" + ti.getId() + ";" + (ti.getFreeTrackingTransport() != null) + ";" 
-		+ ((ti.getItinerary() != null) ? ti.getItinerary().getName() : "") + ";" + ti.getEstimatedScore() + ";" + ((ti.getChangedValidity() != null) ? ti.getChangedValidity() : ti.getValidationResult().getTravelValidity()) + "\r\n");
+		+ ((ti.getItinerary() != null) ? ti.getItinerary().getName() : "") + ";" + ti.getScore() + ";" + ((ti.getChangedValidity() != null) ? ti.getChangedValidity() : ti.getValidationResult().getTravelValidity()) + "\r\n");
 		}
 
 		response.setContentType("application/csv; charset=utf-8");
@@ -842,7 +860,7 @@ public class GamificationController {
 				o.setGeolocationEvents(geo);
 			}
 
-			instances = aggregateFollowingTrackedInstances(instances);
+//			instances = aggregateFollowingTrackedInstances(instances);
 			for (TrackedInstance o : instances) {
 				ItineraryDescriptor descr = new ItineraryDescriptor();
 				if (o.getUserId() != null) {
@@ -991,7 +1009,9 @@ public class GamificationController {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return null;
 			}
-			String startDate = ai.getGameStart();
+			GameInfo game = gameSetup.findGameById(ai.getGameId());			
+			
+			String startDate = game.getStart();
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 			start = sdf.parse(startDate).getTime();
 			
@@ -1035,7 +1055,9 @@ public class GamificationController {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return null;
 			}
-			String startDate = ai.getGameStart();
+			GameInfo game = gameSetup.findGameById(ai.getGameId());
+			
+			String startDate = game.getStart();
 			SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
 			start = sdf1.parse(startDate).getTime();
 			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");

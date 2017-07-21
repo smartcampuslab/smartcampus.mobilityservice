@@ -107,7 +107,7 @@ public class JourneyPlannerController {
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, policyId);
 			for (Itinerary itinerary : results) {
-				gamificationValidator.computeEstimatedGameScore(itinerary, false);
+				gamificationValidator.computeEstimatedGameScore(itinerary, null, false);
 			}
 			return results;
 		} catch (Exception e) {
