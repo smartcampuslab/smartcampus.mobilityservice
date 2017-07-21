@@ -52,6 +52,8 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.UserCheck;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import eu.trentorise.smartcampus.profileservice.model.AccountProfile;
@@ -93,7 +95,10 @@ public class GamificationWebController {
 	MongoTemplate template;	
 	
 	@Autowired
-	private AppSetup appSetup;	
+	private AppSetup appSetup;
+	
+	@Autowired
+	private GameSetup gameSetup;	
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -547,7 +552,8 @@ public class GamificationWebController {
 		return new HttpHeaders() {
 			{
 				AppInfo app = appSetup.findAppById(appId);
-				String auth = app.getGameUser() + ":" + app.getGamePassword();
+				GameInfo game = gameSetup.findGameById(app.getGameId());
+				String auth = game.getUser() + ":" + game.getPassword();
 				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
 				String authHeader = "Basic " + new String(encodedAuth);
 				set("Authorization", authHeader);
