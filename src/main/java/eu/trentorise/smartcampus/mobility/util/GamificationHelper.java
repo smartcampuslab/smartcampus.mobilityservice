@@ -35,9 +35,12 @@ import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.Circle;
+import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
 import eu.trentorise.smartcampus.network.RemoteException;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.TType;
 
@@ -54,11 +57,10 @@ public class GamificationHelper {
 	private static final String UNKNOWN = "unknown";
 	private static final String EMPTY = "unknown";
 
-
 	public static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 
 	@Autowired
-	private AppSetup appSetup;		
+	private AppSetup appSetup;
 
 	@Autowired
 	private ExecutorService executorService;
@@ -117,8 +119,8 @@ public class GamificationHelper {
 		}
 
 		points.removeAll(toRemove);
-}
-	
+	}
+
 	private static boolean isMaximumTooFast(double speed, String ttype) {
 		if ("walk".equals(ttype)) {
 			if (speed > 20) {
@@ -138,9 +140,9 @@ public class GamificationHelper {
 		for (int i = 1; i < points.size(); i++) {
 			transformPair(points.get(i - 1), points.get(i), result);
 		}
-		
+
 		Collections.sort(result);
-		
+
 		return result;
 	}
 
@@ -155,7 +157,7 @@ public class GamificationHelper {
 		Geolocation p1n = new Geolocation(lats[0], lngs[0], p1.getRecorded_at());
 		Geolocation p2n = new Geolocation(lats[1], lngs[1], p2.getRecorded_at());
 		result.add(p1n);
-		result.add(p2n);			
+		result.add(p2n);
 
 	}
 
@@ -172,7 +174,7 @@ public class GamificationHelper {
 			double[] res = computeLats(p2, p1, distance);
 			return new double[] { res[1], res[0] };
 		}
-		return compute(p1.getLatitude(), (double)p1.getAccuracy(), p2.getLatitude(), (double)p2.getAccuracy(), distance);
+		return compute(p1.getLatitude(), (double) p1.getAccuracy(), p2.getLatitude(), (double) p2.getAccuracy(), distance);
 	}
 
 	private static double[] computeLngs(Geolocation p1, Geolocation p2, double distance) {
@@ -180,9 +182,9 @@ public class GamificationHelper {
 			double[] res = computeLngs(p2, p1, distance);
 			return new double[] { res[1], res[0] };
 		}
-		return compute(p1.getLongitude(), (double)p1.getAccuracy(), p2.getLongitude(), (double)p2.getAccuracy(), distance);
+		return compute(p1.getLongitude(), (double) p1.getAccuracy(), p2.getLongitude(), (double) p2.getAccuracy(), distance);
 	}
-	
+
 	private static Date[] computeRecordedAt(Geolocation p1, Geolocation p2) {
 		Date[] res = new Date[2];
 		if (p1.getRecorded_at().compareTo(p2.getRecorded_at()) < 0) {
@@ -316,15 +318,6 @@ public class GamificationHelper {
 
 	}
 
-	public static void main(String[] args) throws UnknownHostException, MongoException, SecurityException, RemoteException {
-		MongoTemplate mg = new MongoTemplate(new Mongo("127.0.0.1", 37017), "mobility-logging");
-		List<Map> findAll = mg.findAll(Map.class, "forgamification");
-		for (Map m : findAll) {
-			m.remove("_id");
-			RemoteConnector.postJSON("http://localhost:8900", "/execute", JsonUtils.toJSON(m), null);
-		}
-	}
-
 	public static String convertTType(TType tt) {
 		if (tt.equals(TType.CAR) || tt.equals(TType.CARWITHPARKING)) {
 			return "car";
@@ -336,12 +329,65 @@ public class GamificationHelper {
 			return "bike";
 		}
 		// TODO: no transit: bus/train
-		if (tt.equals(TType.BUS)|| tt.equals(TType.TRAIN) || tt.equals(TType.TRANSIT) || tt.equals(TType.GONDOLA) ) {
+		if (tt.equals(TType.BUS) || tt.equals(TType.TRAIN) || tt.equals(TType.TRANSIT) || tt.equals(TType.GONDOLA)) {
 			return "transit";
-		}		
+		}
 		return "";
-		
+
 	}
-		
+
+	public static boolean inAreas(List<Circle> circles, Geolocation point) {
+		if (circles != null) {
+			for (Circle circle : circles) {
+				Geolocation center = new Geolocation(circle.getCenter()[0], circle.getCenter()[1], null);
+				if (harvesineDistance(point, center) > circle.getRadius()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	
+	public static String getFreetrackingTransportForItinerary(ItineraryObject itinerary) {
+		Set<TType> ttypes = Sets.newHashSet();
+		
+		for (Leg leg: itinerary.getData().getLeg()) {
+			if (leg.getTransport() != null && leg.getTransport().getType() != null) {
+				ttypes.add(leg.getTransport().getType());
+			}
+		}
+		
+		if (ttypes.size() != 1) {
+			return null;
+		}
+		
+		return convertTType(ttypes.iterator().next());
+	}
+
+	
+	public static String getFreetrackingTransportForItinerary(Itinerary itinerary) {
+		Set<TType> ttypes = Sets.newHashSet();
+		
+		for (Leg leg: itinerary.getLeg()) {
+			if (leg.getTransport() != null && leg.getTransport().getType() != null) {
+				ttypes.add(leg.getTransport().getType());
+			}
+		}
+		
+		if (ttypes.size() != 1) {
+			return null;
+		}
+		
+		return convertTType(ttypes.iterator().next());
+	}	
+	
+	public static void main(String[] args) throws UnknownHostException, MongoException, SecurityException, RemoteException {
+		MongoTemplate mg = new MongoTemplate(new Mongo("127.0.0.1", 37017), "mobility-logging");
+		List<Map> findAll = mg.findAll(Map.class, "forgamification");
+		for (Map m : findAll) {
+			m.remove("_id");
+			RemoteConnector.postJSON("http://localhost:8900", "/execute", JsonUtils.toJSON(m), null);
+		}
+	}
+
 }
