@@ -30,6 +30,8 @@ public class ValidationResult {
 	
 	private Double validatedDistance;
 	private Long validatedTime;	
+	
+	private Boolean plannedAsFreeTracking;
 
 	public void reset() {
 		matchedLocations = true;
@@ -172,6 +174,14 @@ public class ValidationResult {
 
 	public void setValidatedTime(Long validatedTime) {
 		this.validatedTime = validatedTime;
+	}
+
+	public Boolean getPlannedAsFreeTracking() {
+		return plannedAsFreeTracking;
+	}
+
+	public void setPlannedAsFreeTracking(Boolean plannedAsFreeTracking) {
+		this.plannedAsFreeTracking = plannedAsFreeTracking;
 	}
 
 }

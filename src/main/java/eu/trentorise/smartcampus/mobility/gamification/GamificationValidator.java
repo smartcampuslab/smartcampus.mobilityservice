@@ -287,11 +287,12 @@ public class GamificationValidator {
 
 
 	public ValidationResult validatePlannedJourney(ItineraryObject itinerary, Collection<Geolocation> geolocations, String appId) throws Exception {
-
 		String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
 		if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
 			logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
-			return validateFreeTracking(geolocations, ttype, appId);
+			ValidationResult vr = validateFreeTracking(geolocations, ttype, appId);
+			vr.setPlannedAsFreeTracking(true);
+			return vr;
 		}
 		
 		boolean legWalkOnly = true;
