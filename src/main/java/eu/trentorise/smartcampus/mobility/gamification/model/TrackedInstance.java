@@ -175,8 +175,8 @@ public class TrackedInstance {
 		return score;
 	}
 
-	public void setScore(Long estimatedScore) {
-		this.score = estimatedScore;
+	public void setScore(Long score) {
+		this.score = score;
 	}
 
 	public String getAppId() {
