@@ -89,13 +89,14 @@
 													<span ng-show="!itinerary.instance.validationResult.inAreas" class="glyphicon glyphicon-flag" title="Not in areas" data-toggle="tooltip"></span>
 													<br />
 													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? ('Free tracking - ' + itinerary.instance.freeTrackingTransport) : 'Planned'}}</b>
+													<i>{{itinerary.instance.validationResult.plannedAsFreeTracking ? '(as free tracking)' : ''}}</i>
 												</div>
 												<div class="col-md-6 text-right">
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
-													></span><br /> <b>{{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore :
-														itinerary.instance.estimatedScore}} Points</b>
+													></span><br /> <b>Estimated score: {{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore :
+														itinerary.instance.estimatedScore}}, {{itinerary.instance.scoreStatus}}: {{itinerary.instance.score}}</b>
 												</div>
 											</div>
 											<div class="group-indicator">
