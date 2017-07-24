@@ -74,7 +74,7 @@ public class GamificationValidator {
 		if (geolocations != null) {
 			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
 			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
-				logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
+				logger.info("Planned has single ttype: " + ttype + ", computing as freetracking");
 				return computeFreeTrackingScore(geolocations, ttype);
 			}
 		}
@@ -249,7 +249,7 @@ public class GamificationValidator {
 
 			});
 			
-			points = GamificationHelper.transform(points);
+			points = GamificationHelper.optimize(points);
 			
 			for (int i = 1; i < points.size(); i++) {
 				double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
@@ -456,31 +456,25 @@ public class GamificationValidator {
 
 		boolean inRange = true;
 
-		if (game.getAreas() != null && !game.getAreas().isEmpty()) {
-			if (!points.isEmpty()) {
-				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
-				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
-			}
-		}		
-		
-		int origPointsSize = points.size();
 		if (points.size() >= 2) {
-//			logger.debug("Original track points (remove outliers): " + points.size());
-			GamificationHelper.removeOutliers(points);
-//			logger.debug("Transformed track points (remove outliers): " + points.size());			
 		
-//			if (points.size() >= 2) {
 			logger.debug("Original track points (transform): " + points.size());
-			points = GamificationHelper.transform(points);
+			points = GamificationHelper.optimize(points);
 			logger.debug("Transformed track points (transform): " + points.size());
-//			}
+			
+			if (game.getAreas() != null && !game.getAreas().isEmpty()) {
+				if (!points.isEmpty()) {
+					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
+					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
+				}
+			}			
 		
 			int tooFastCount = 0;
 			List<Geolocation> fastToRemove = Lists.newArrayList();
 			if (points.size() >= 2) {
+				// compute distance, time, too fast count...
 				for (int i = 1; i < points.size(); i++) {
 					double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-//					System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
 					
 					long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
 					if (t > 0) {
