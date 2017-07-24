@@ -17,7 +17,9 @@
 package eu.trentorise.smartcampus.mobility.util;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class GamificationHelper {
 
 	private final static int EARTH_RADIUS = 6371; // Earth radius in km.
 
-	public static void removeOutliers(List<Geolocation> points) {
+	private static void removeOutliers(List<Geolocation> points) {
 		Set<Geolocation> toRemove = Sets.newHashSet();
 
 		double averageSpeed = 0;
@@ -121,6 +123,21 @@ public class GamificationHelper {
 		points.removeAll(toRemove);
 	}
 
+	public static List<Geolocation> optimize(List<Geolocation> geolocations) {
+		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
+		Collections.sort(points, new Comparator<Geolocation>() {
+
+			@Override
+			public int compare(Geolocation o1, Geolocation o2) {
+				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+			}
+
+		});		
+		
+		removeOutliers(points);
+		return transform(points);
+	}
+	
 	private static boolean isMaximumTooFast(double speed, String ttype) {
 		if ("walk".equals(ttype)) {
 			if (speed > 20) {
@@ -135,7 +152,7 @@ public class GamificationHelper {
 		return false;
 	}
 
-	public static List<Geolocation> transform(List<Geolocation> points) {
+	private static List<Geolocation> transform(List<Geolocation> points) {
 		List<Geolocation> result = Lists.newArrayList();
 		for (int i = 1; i < points.size(); i++) {
 			transformPair(points.get(i - 1), points.get(i), result);
