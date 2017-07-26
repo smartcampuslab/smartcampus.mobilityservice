@@ -95,8 +95,7 @@
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
-													></span><br /> <b>Estimated score: {{itinerary.instance.itinerary ? itinerary.instance.itinerary.data.customData.estimatedScore :
-														itinerary.instance.estimatedScore}}, {{itinerary.instance.scoreStatus}}: {{itinerary.instance.score}}</b>
+													></span><br /> <span ng-show="itinerary.instance.itinerary"><b>Estimated score: {{itinerary.instance.itinerary.data.customData.estimatedScore}},</span> {{itinerary.instance.scoreStatus}}: {{itinerary.instance.score}}</b>
 												</div>
 											</div>
 											<div class="group-indicator">
@@ -107,13 +106,13 @@
 												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
 											> </label> -->
 											<label class="itinerary-switch"><b>{{'Change validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <select 
-												ng-disabled="itinerary.instance.approved" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
+												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
 												<option ng-repeat="x in validities" >{{x}}</option></select>
 											</label>
-											<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal1" ng-disabled="itinerary.instance.approved">Update validity</button>											
+											<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal1" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'">Update validity</button>											
 
 											
-											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved" type="checkbox"
+											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'" type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>										
 											
