@@ -33,11 +33,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.DiaryEntryType;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelType;
 import eu.trentorise.smartcampus.mobility.gamification.model.BadgeNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.StatusUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
@@ -86,6 +88,9 @@ public class DiaryController {
 	
 	@Autowired
 	private ChallengeDescriptionDataSetup challDescriptionSetup;
+	
+	@Autowired
+	private GamificationManager gamificationManager;
 
 	private ChallengesUtils challUtils;
 	
@@ -252,8 +257,10 @@ public class DiaryController {
 
 		return result;
 	}
-
+	
 	private List<DiaryEntry> getTrackedInstances(String playerId, String appId, long from, long to) throws Exception {
+		Map<String, Double> scores = gamificationManager.getScoreNotification(appId, playerId);
+		
 		List<DiaryEntry> result = Lists.newArrayList();
 
 		Criteria criteria = new Criteria("userId").is(playerId).and("appId").is(appId);
@@ -302,7 +309,16 @@ public class DiaryController {
 			}
 			de.setEntityId(instance.getId());
 			de.setClientId(instance.getClientId());
+			
+			if (scores.containsKey(instance.getId()) && ! ScoreStatus.ASSIGNED.equals(instance.getScoreStatus())) {
+				instance.setScore(scores.get(instance.getId()).longValue());
+				instance.setScoreStatus(ScoreStatus.ASSIGNED);
+				storage.saveTrackedInstance(instance);
+			}
+			de.setScoreStatus(instance.getScoreStatus());
+			
 			result.add(de);
+			
 		}
 
 		return result;

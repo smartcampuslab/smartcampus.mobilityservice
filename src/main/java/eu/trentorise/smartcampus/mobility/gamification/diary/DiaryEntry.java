@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 
 @JsonInclude(Include.NON_NULL)
@@ -32,6 +33,7 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private Date travelDate;
 	private Double travelLength;
 	private Long travelEstimatedScore;
+	private ScoreStatus scoreStatus;
 	private TravelValidity travelValidity;
 	private String clientId;
 
@@ -115,6 +117,14 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 		this.travelEstimatedScore = travelEstimatedScore;
 	}
 
+
+	public ScoreStatus getScoreStatus() {
+		return scoreStatus;
+	}
+
+	public void setScoreStatus(ScoreStatus scoreStatus) {
+		this.scoreStatus = scoreStatus;
+	}
 
 	public TravelValidity getTravelValidity() {
 		return travelValidity;

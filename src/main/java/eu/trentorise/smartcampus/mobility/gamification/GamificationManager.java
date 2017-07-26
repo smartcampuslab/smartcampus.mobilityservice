@@ -16,9 +16,11 @@
 
 package eu.trentorise.smartcampus.mobility.gamification;
 
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -27,11 +29,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
+import eu.trentorise.smartcampus.mobility.gamification.model.MessageNotification;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -74,7 +85,7 @@ public class GamificationManager {
 		saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
 		return true;
 	}
-
+	
 	public synchronized boolean sendIntineraryDataToGamificationEngine(String appId, String playerId, String publishKey, ItineraryObject itinerary, Map<String, Object> trackingData) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
 		if (publishQueue.contains(publishKey)) {
@@ -193,6 +204,43 @@ public class GamificationManager {
 		}
 	}	
 
+	public Map<String, Double> getScoreNotification(String appId, String userId) throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		
+		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
+		
+		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification";
+		
+		RestTemplate restTemplate = new RestTemplate();
+		
+		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
+		
+		List nots = mapper.readValue(res.getBody(), List.class);
+		
+		Map<String, Double> result = Maps.newTreeMap();
+		for (Object not: nots) {
+			MessageNotification msg = mapper.convertValue(not, MessageNotification.class);
+			Map data = msg.getData();
+			result.put((String)data.get("travelId"), (Double)data.get("score"));
+		}		
+		
+		return result;
+		
+	}
 	
 
+	HttpHeaders createHeaders(String appId) {
+		return new HttpHeaders() {
+			{
+				AppInfo app = appSetup.findAppById(appId);
+				GameInfo game = gameSetup.findGameById(app.getGameId());
+				String auth = game.getUser() + ":" + game.getPassword();
+				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
+				String authHeader = "Basic " + new String(encodedAuth);
+				set("Authorization", authHeader);
+			}
+		};
+	}	
+	
 }

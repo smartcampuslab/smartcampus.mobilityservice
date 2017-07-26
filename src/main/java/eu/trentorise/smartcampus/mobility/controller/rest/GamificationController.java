@@ -816,7 +816,7 @@ public class GamificationController {
 	@RequestMapping("/console/useritinerary/{userId}")
 	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
 			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
-			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws ParseException {
+			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws Exception {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
@@ -853,11 +853,19 @@ public class GamificationController {
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		logger.debug("End itinerary query for " + userId);
 
+		Map<String, Double> scores = gamificationManager.getScoreNotification(appId, userId);
+		
 		if (instances != null) {
 			for (TrackedInstance o : instances) {
 				List<Geolocation> geo = Lists.newArrayList(o.getGeolocationEvents());
 				Collections.sort(geo);
 				o.setGeolocationEvents(geo);
+				
+				if (scores.containsKey(o.getId()) && ! ScoreStatus.ASSIGNED.equals(o.getScoreStatus())) {
+					o.setScore(scores.get(o.getId()).longValue());
+					o.setScoreStatus(ScoreStatus.ASSIGNED);
+					storage.saveTrackedInstance(o);
+				}				
 			}
 
 //			instances = aggregateFollowingTrackedInstances(instances);
