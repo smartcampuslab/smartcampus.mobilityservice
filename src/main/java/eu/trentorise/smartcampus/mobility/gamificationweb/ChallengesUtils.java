@@ -57,8 +57,8 @@ public class ChallengesUtils {
 	private final String CHAL_DESC_1B_ENG = "Do at least TARGET km MODE and you will get a bonus of BONUS POINT_TYPE points";
 	private final String CHAL_DESC_2_ENG = "Do at least TARGET trip without MODE and you will get a bonus of BONUS POINT_TYPE points";
 	private final String CHAL_DESC_3_ENG = "Do at least TARGET trip MODE and you will get a bonus of BONUS POINT_TYPE points";
-	private final String CHAL_DESC_5_ENG = "Get at least TARGET POINT_TYPE points and you will have BONUS additinal POINT_TYPE bonus points";
-	private final String CHAL_DESC_5A_ENG = "Get at least TARGET more POINT_TYPE points and you will have BONUS additinal POINT_TYPE bonus points";
+	private final String CHAL_DESC_5_ENG = "Get at least TARGET POINT_TYPE points and you will have BONUS additional POINT_TYPE bonus points";
+	private final String CHAL_DESC_5A_ENG = "Get at least TARGET more POINT_TYPE points and you will have BONUS additional POINT_TYPE bonus points";
 	private final String CHAL_DESC_6_ENG = "Get at least TARGET badge in BADGE_COLL_NAME Badge Collection and you will get a bonus of BONUS POINT_TYPE points";
 	private final String CHAL_DESC_7_ENG = "Complete a Bange Collection and you will get a bonus of BONUS POINT_TYPE points";
 	private final String CHAL_DESC_8_ENG = "Fill out the end-game survay and you will gain a bonus of BONUS POINT_TYPE points";
