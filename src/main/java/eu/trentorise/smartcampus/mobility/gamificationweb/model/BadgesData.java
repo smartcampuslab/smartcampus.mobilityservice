@@ -1,84 +1,83 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 public class BadgesData {
 	
+	private String path;
 	private String imageName = "";
+	
 	private byte[] imageByte = null;
 	private String imageType = "";
 	private String textId = "";
-	private String showedText = "";
-	private String showedTextEng = "";
+	private Map<String, String> text;
 	
 	public BadgesData(){
 		super();
 	};
 	
-	public BadgesData(String imageName, byte[] imageByte, String imageType,
-			String textId, String showedText, String showedTextEng) {
-		super();
-		this.imageName = imageName;
-		this.imageByte = imageByte;
-		this.imageType = imageType;
-		this.textId = textId;
-		this.showedText = showedText;
-		this.showedTextEng = showedTextEng;
+	public void readImage() throws IOException {
+		File f = new File(path);
+		imageByte = FileUtils.readFileToByteArray(f);
 	}
 
-	public String getTextId() {
-		return textId;
+	public String getPath() {
+		return path;
 	}
 
-	public String getShowedText() {
-		return showedText;
-	}
-
-	public void setTextId(String textId) {
-		this.textId = textId;
-	}
-
-	public void setShowedText(String showedText) {
-		this.showedText = showedText;
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	public String getImageName() {
 		return imageName;
 	}
 
-	public byte[] getImageByte() {
-		return imageByte;
-	}
-
-	public String getImageType() {
-		return imageType;
-	}
-
 	public void setImageName(String imageName) {
 		this.imageName = imageName;
+	}
+
+	public byte[] getImageByte() {
+		return imageByte;
 	}
 
 	public void setImageByte(byte[] imageByte) {
 		this.imageByte = imageByte;
 	}
 
+	public String getImageType() {
+		return imageType;
+	}
+
 	public void setImageType(String imageType) {
 		this.imageType = imageType;
 	}
 
-	public String getShowedTextEng() {
-		return showedTextEng;
+	public String getTextId() {
+		return textId;
 	}
 
-	public void setShowedTextEng(String showedTextEng) {
-		this.showedTextEng = showedTextEng;
+	public void setTextId(String textId) {
+		this.textId = textId;
+	}
+
+	public Map<String, String> getText() {
+		return text;
+	}
+
+	public void setText(Map<String, String> text) {
+		this.text = text;
 	}
 
 	@Override
 	public String toString() {
-		return "BagesData [imageName=" + imageName + ", imageByte="
-				+ Arrays.toString(imageByte) + ", imageType=" + imageType
-				+ ", textId=" + textId + ", showedText=" + showedText + "]";
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
 }

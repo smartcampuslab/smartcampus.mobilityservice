@@ -40,6 +40,7 @@ import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelTy
 import eu.trentorise.smartcampus.mobility.gamification.model.BadgeNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
+import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.StatusUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
@@ -91,6 +92,9 @@ public class DiaryController {
 	
 	@Autowired
 	private GamificationManager gamificationManager;
+	
+	@Autowired
+	private BadgesCache badgesCache;
 
 	private ChallengesUtils challUtils;
 	
@@ -130,7 +134,7 @@ public class DiaryController {
 		}
 
 		if (types.contains(DiaryEntryType.BADGE)) {
-			List<DiaryEntry> badges = getNotifications(userId, appId);
+			List<DiaryEntry> badges = getBadgeNotifications(p, appId);
 			result.addAll(badges);
 		}
 		if (types.contains(DiaryEntryType.TRAVEL)) {
@@ -234,12 +238,12 @@ public class DiaryController {
 		return result;
 	}
 
-	private List<DiaryEntry> getNotifications(String playerId, String appId) throws Exception {
+	private List<DiaryEntry> getBadgeNotifications(Player player, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + playerId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 
 		List nots = mapper.readValue(res.getBody(), List.class);
@@ -250,6 +254,7 @@ public class DiaryController {
 				de.setType(DiaryEntryType.BADGE);
 				de.setTimestamp(not.getTimestamp());
 				de.setBadge(not.getBadge());
+				de.setBadgeText(badgesCache.getBadge(not.getBadge()).getText().get(player.getLanguage()));
 				de.setBadgeCollection(not.getCollectionName());
 				result.add(de);
 			}

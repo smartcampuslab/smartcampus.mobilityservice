@@ -38,6 +38,7 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private String clientId;
 
 	private String badge;
+	private String badgeText;
 	private String badgeCollection;
 	
 	private String challengeName;
@@ -148,6 +149,14 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public void setBadge(String badge) {
 		this.badge = badge;
+	}
+
+	public String getBadgeText() {
+		return badgeText;
+	}
+
+	public void setBadgeText(String badgeText) {
+		this.badgeText = badgeText;
 	}
 
 	public String getBadgeCollection() {
