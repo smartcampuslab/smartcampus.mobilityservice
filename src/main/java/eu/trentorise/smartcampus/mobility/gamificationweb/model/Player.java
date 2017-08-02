@@ -26,8 +26,6 @@ public class Player {
 	private boolean checkedRecommendation;
 	private List<Event> eventsCheckIn;
 	
-	private boolean firstMailSent;
-	
 	public Player() {
 		super();
 	}
@@ -47,8 +45,6 @@ public class Player {
 		this.personalData = personalData;
 		this.surveyData = surveyData;
 		this.checkedRecommendation = checkRecommendation;
-		
-		this.firstMailSent = false;
 	}
 
 	public String getName() {
@@ -121,14 +117,6 @@ public class Player {
 
 	public void setSendMail(boolean sendMail) {
 		this.sendMail = sendMail;
-	}
-
-	public boolean isFirstMailSent() {
-		return firstMailSent;
-	}
-
-	public void setFirstMailSent(boolean firstMailSent) {
-		this.firstMailSent = firstMailSent;
 	}
 
 	public String getLanguage() {
