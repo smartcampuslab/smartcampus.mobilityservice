@@ -2,7 +2,6 @@ package eu.trentorise.smartcampus.mobility.gamificationweb;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +19,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import com.google.common.collect.Lists;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
@@ -43,10 +44,9 @@ public class EmailService {
     
     private static final Logger logger = Logger.getLogger(EmailService.class);
     
-    public void sendMailGamification(
-    		final boolean isFirstMail, final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
+    public void sendMailGamification(final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
             final String position, final String week_number, final String week_theme, final String last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
-            final ArrayList<BadgesData> badges,
+            final List<BadgesData> badges,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,
             final List<WeekPrizeData> prizes,
@@ -58,14 +58,14 @@ public class EmailService {
     	logger.debug(String.format("Gamification Mail Prepare for %s - OK", recipientName));
     	
     	// Correct the winners:
-    	List<WeekWinnersData> last_week_winners = new ArrayList<WeekWinnersData>();
+    	List<WeekWinnersData> last_week_winners = Lists.newArrayList();
     	for(int i = 0; i < winners.size(); i++){
     		if(winners.get(i).getWeekNum().compareTo(last_week_number) == 0){
     			last_week_winners.add(winners.get(i));
     		}
     	}
     	// Correct the win challenges
-    	List<ChallengesData> winChallenges = new ArrayList<ChallengesData>();
+    	List<ChallengesData> winChallenges = Lists.newArrayList();
     	if(last_week_challenges != null){
 	    	for(int i = 0; i < last_week_challenges.size(); i++){
 	    		if(last_week_challenges.get(i).getSuccess()){
@@ -147,11 +147,11 @@ public class EmailService {
 
         // Create the HTML body using Thymeleaf
         String htmlContent = "";
-        if(isFirstMail){
-        	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-startgame-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-startgame-tn-eng", ctx);
-        } else {
+//        if(isFirstMail){
+//        	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-startgame-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-startgame-tn-eng", ctx);
+//        } else {
         	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-tn-eng", ctx);
-        }
+//        }
         message.setText(htmlContent, true /* isHtml */);
         
         // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
@@ -189,7 +189,7 @@ public class EmailService {
     public void sendMailGamificationForWinners(
             final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
             final String position, final String week_number, final String week_theme, final String last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
-            final ArrayList<BadgesData> badges,
+            final List<BadgesData> badges,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,
             final List<WeekPrizeData> prizes,
@@ -201,14 +201,14 @@ public class EmailService {
     	logger.debug(String.format("Gamification Mail Prepare for %s - OK", recipientName));
     	
     	// Correct the winners:
-    	List<WeekWinnersData> last_week_winners = new ArrayList<WeekWinnersData>();
+    	List<WeekWinnersData> last_week_winners = Lists.newArrayList();
     	for(int i = 0; i < winners.size(); i++){
     		if(winners.get(i).getWeekNum().compareTo(last_week_number) == 0){
     			last_week_winners.add(winners.get(i));
     		}
     	}
     	// Correct the win challenges
-    	List<ChallengesData> winChallenges = new ArrayList<ChallengesData>();
+    	List<ChallengesData> winChallenges = Lists.newArrayList();
     	for(int i = 0; i < last_week_challenges.size(); i++){
     		if(last_week_challenges.get(i).getSuccess()){
     			winChallenges.add(last_week_challenges.get(i));
@@ -416,8 +416,8 @@ public class EmailService {
     
     public void sendMailSummary(
             final String recipientName, final String point_green, final String point_health, final String point_pr, 
-            final ArrayList<Summary> summary,
-            final ArrayList<MailImage> standardImages,
+            final List<Summary> summary,
+            final List<MailImage> standardImages,
             final String recipientEmail, final Locale locale)
             throws MessagingException {
         
