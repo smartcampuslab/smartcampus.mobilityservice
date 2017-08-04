@@ -38,15 +38,14 @@ import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.DiaryEntryType;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelType;
 import eu.trentorise.smartcampus.mobility.gamification.model.BadgeNotification;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
+import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
-import eu.trentorise.smartcampus.mobility.gamificationweb.StatusUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -96,6 +95,9 @@ public class DiaryController {
 	@Autowired
 	private BadgesCache badgesCache;
 
+	@Autowired
+	private ChallengeManager challengeManager;
+	
 	private ChallengesUtils challUtils;
 	
 	private ObjectMapper mapper = new ObjectMapper();
@@ -202,38 +204,61 @@ public class DiaryController {
 
 		String allData = res.getBody();
 
-		if (challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()) {
-			challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
-		}
-
-		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl, 1, language);
-
-		if (ps.getChallengeConcept() != null) {
-			List<ChallengesData> cds = Lists.newArrayList();
-			cds.addAll(ps.getChallengeConcept().getActiveChallengeData());
-			cds.addAll(ps.getChallengeConcept().getOldChallengeData());
-			for (ChallengesData cd : cds) {
-				DiaryEntry de = new DiaryEntry();
-				de.setEntityId(cd.getChallId());
-				de.setType(DiaryEntryType.CHALLENGE);
-				de.setTimestamp(cd.getStartDate());
-				de.setChallengeName(cd.getChallDesc());
-				de.setChallengeBonus(cd.getBonus());
-				if (cd.getChallCompletedDate() != 0) {
-					DiaryEntry de2 = new DiaryEntry();
-					de2.setEntityId(cd.getChallId());
-					de2.setType(DiaryEntryType.CHALLENGE_WON);
-					de2.setChallengeName(cd.getChallDesc());
-					de2.setChallengeBonus(cd.getBonus());					
-					de2.setTimestamp(cd.getChallCompletedDate());
-					result.add(de2);
-				}
-				de.setChallengeEnd(cd.getEndDate());
-				
-				result.add(de);
+		List<ChallengeConcept> challengeConcepts = challengeManager.parse(allData);
+		for (ChallengeConcept challengeConcept: challengeConcepts) {
+			String description = challengeManager.fillDescription(challengeConcept, language);
+			
+			DiaryEntry de = new DiaryEntry();
+			de.setEntityId(challengeConcept.getName());
+			de.setType(DiaryEntryType.CHALLENGE);
+			de.setTimestamp(challengeConcept.getStart().getTime());
+			de.setChallengeName(description);
+			de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
+			if (challengeConcept.isCompleted()) {
+				DiaryEntry de2 = new DiaryEntry();
+				de2.setEntityId(challengeConcept.getName());
+				de2.setType(DiaryEntryType.CHALLENGE_WON);
+				de2.setChallengeName(description);
+				de2.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());					
+				de2.setTimestamp(challengeConcept.getDateCompleted().getTime());
+				result.add(de2);
 			}
+			de.setChallengeEnd(challengeConcept.getEnd().getTime());		
+			result.add(de);
 		}
+		
+//		if (challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()) {
+//			challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
+//		}
+//		
+//		StatusUtils statusUtils = new StatusUtils();
+//		PlayerStatus ps = statusUtils.correctPlayerData(allData, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl, 1, language);
+//
+//		if (ps.getChallengeConcept() != null) {
+//			List<ChallengesData> cds = Lists.newArrayList();
+//			cds.addAll(ps.getChallengeConcept().getActiveChallengeData());
+//			cds.addAll(ps.getChallengeConcept().getOldChallengeData());
+//			for (ChallengesData cd : cds) {
+//				DiaryEntry de = new DiaryEntry();
+//				de.setEntityId(cd.getChallId());
+//				de.setType(DiaryEntryType.CHALLENGE);
+//				de.setTimestamp(cd.getStartDate());
+//				de.setChallengeName(cd.getChallDesc());
+//				de.setChallengeBonus(cd.getBonus());
+//				if (cd.getChallCompletedDate() != 0) {
+//					DiaryEntry de2 = new DiaryEntry();
+//					de2.setEntityId(cd.getChallId());
+//					de2.setType(DiaryEntryType.CHALLENGE_WON);
+//					de2.setChallengeName(cd.getChallDesc());
+//					de2.setChallengeBonus(cd.getBonus());					
+//					de2.setTimestamp(cd.getChallCompletedDate());
+//					result.add(de2);
+//				}
+//				de.setChallengeEnd(cd.getEndDate());
+//				
+//				result.add(de);
+//			}
+//		}
 
 		return result;
 	}
