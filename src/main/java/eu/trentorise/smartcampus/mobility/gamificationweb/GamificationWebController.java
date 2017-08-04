@@ -427,7 +427,7 @@ public class GamificationWebController {
 		ClassificationBoard board;
 		String url;
 		if (timestamp == null) {
-			url = "game/" + gameId + "/classification/" + URLEncoder.encode("week classification green", "UTF-8")
+			url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8")
 			+ ((paging != null) ? ("?" + paging) : "");
 		} else {
 			url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp
