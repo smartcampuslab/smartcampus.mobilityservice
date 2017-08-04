@@ -69,7 +69,7 @@ public class GamificationHelper {
 
 	private final static int EARTH_RADIUS = 6371; // Earth radius in km.
 
-	private static void removeOutliers(List<Geolocation> points) {
+	public static void removeOutliers(List<Geolocation> points) {
 		Set<Geolocation> toRemove = Sets.newHashSet();
 
 		double averageSpeed = 0;
@@ -152,7 +152,7 @@ public class GamificationHelper {
 		return false;
 	}
 
-	private static List<Geolocation> transform(List<Geolocation> points) {
+	public static List<Geolocation> transform(List<Geolocation> points) {
 		List<Geolocation> result = Lists.newArrayList();
 		for (int i = 1; i < points.size(); i++) {
 			transformPair(points.get(i - 1), points.get(i), result);
