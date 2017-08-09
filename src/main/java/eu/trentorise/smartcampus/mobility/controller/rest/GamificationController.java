@@ -601,6 +601,11 @@ public class GamificationController {
 				result.setGeolocationPolyline(GamificationHelper.encodePoly(geo));
 			}
 			result.setValidationResult(instance.getValidationResult());
+			if (instance.getChangedValidity() != null) {
+				result.setValidity(instance.getChangedValidity());	
+			} else {
+				result.setValidity(instance.getValidationResult().getTravelValidity());
+			}			
 		}
 		
 		return result;

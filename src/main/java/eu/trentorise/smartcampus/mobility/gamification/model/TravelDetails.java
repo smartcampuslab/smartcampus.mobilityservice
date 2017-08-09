@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.gamification.model;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 
 public class TravelDetails {
@@ -9,6 +10,7 @@ public class TravelDetails {
 	private String freeTrackingTransport;
 	private String geolocationPolyline;
 	private ValidationResult validationResult;
+	private TravelValidity validity;
 	
 	public TravelDetails() {
 	}
@@ -43,6 +45,14 @@ public class TravelDetails {
 
 	public void setValidationResult(ValidationResult validationResult) {
 		this.validationResult = validationResult;
+	}
+
+	public TravelValidity getValidity() {
+		return validity;
+	}
+
+	public void setValidity(TravelValidity validity) {
+		this.validity = validity;
 	}
 
 }
