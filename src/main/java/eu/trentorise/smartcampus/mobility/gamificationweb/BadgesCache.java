@@ -1,5 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,11 @@ public class BadgesCache {
 		List list = mapper.readValue(Resources.getResource("badges.json"), List.class);
 		for (Object o: list) {
 			BadgesData badge = mapper.convertValue(o, BadgesData.class);
-			badge.setPath(badge.getPath());
-			badge.readImage();
+			
+			URL resource = getClass().getResource("/public/" + badge.getPath());
+			byte b[] = Resources.asByteSource(resource).read();
+
+			badge.setImageByte(b);					
 			badges.put(badge.getTextId(), badge);
 		}
 	}

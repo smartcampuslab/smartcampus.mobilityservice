@@ -1,12 +1,9 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import com.google.common.io.Resources;
 
 public class BadgesData {
 	
@@ -22,10 +19,6 @@ public class BadgesData {
 		super();
 	};
 	
-	public void readImage() throws IOException {
-		imageByte = Resources.asByteSource(Resources.getResource("/public/" + path)).read();
-	}
-
 	public String getPath() {
 		return path;
 	}
