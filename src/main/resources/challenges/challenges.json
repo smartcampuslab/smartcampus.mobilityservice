@@ -77,6 +77,13 @@
 	}
 },
 {
+	"name": "survey",
+	"description": {
+		"it": "Compila il questionario <surveyType> e guadagna <bonusScore> punti <bonusPointType>.",
+		"en": "Fill out the <surveyType> survey and gain a bonus of <bonusScore> <bonusPointType> points."
+	}
+},
+{
 	"name": "poiCheckin",
 	"description": {
 		"it": "Sabato 29 o domenica 30 ottobre visita lo stand ViaggiaTrento Play&Go a \"Fa' la cosa giusta!\" ( TrentoFiere - Via di Briamasco, 2) usando una modalita' di trasporto sostenibile e vinci un bonus di <bonusScore> punti <bonusPointType>.",

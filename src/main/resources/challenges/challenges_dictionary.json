@@ -138,5 +138,34 @@
 			"it": "la funivia",
 			"en": "the cable"
 		}
-	}]
+	}],
+	"start": [{
+		"negative": false,
+		"word": {
+			"it": "iniziale",
+			"en": "start"
+		}
+	},
+	{
+		"negative": true,
+		"word": {
+			"it": "iniziale",
+			"en": "start"
+		}
+	}],
+	"end": [{
+		"negative": false,
+		"word": {
+			"it": "finale",
+			"en": "final"
+		}
+	},
+	{
+		"negative": true,
+		"word": {
+			"it": "finale",
+			"en": "final"
+		}
+	}]		
+	
 }
