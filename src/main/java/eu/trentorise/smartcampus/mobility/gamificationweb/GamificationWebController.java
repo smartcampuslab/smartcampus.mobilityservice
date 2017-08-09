@@ -8,6 +8,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
@@ -295,6 +297,7 @@ public class GamificationWebController {
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
+				assignSurveyChallenge(id, gameId, appId);
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
@@ -315,6 +318,30 @@ public class GamificationWebController {
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "console/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders(appId)), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
+	
+	// /data/game/{gameId}/player/{playerId}/challenges
+	private void assignSurveyChallenge(String playerId, String gameId, String appId) {
+		RestTemplate restTemplate = new RestTemplate();
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("bonusPointType", "green leaves");
+		data.put("bonusScore", new Double(100.0));
+		data.put("surveyType", "start");
+		
+		ChallengeDataDTO challenge = new ChallengeDataDTO();
+		long now = System.currentTimeMillis();
+		challenge.setStart(new Date(now));
+		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
+
+		challenge.setModelName("survey");
+		challenge.setInstanceName("start_survey-" + Long.toHexString(now) + "-" + Integer.toHexString((playerId + gameId).hashCode()));
+		
+		challenge.setData(data);
+		
+		String partialUrl = "game/" + gameId + "/player/" + playerId + "/challenges";
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(challenge, createHeaders(appId)), String.class);
+		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
+	}	
+	
 
 	// Method used to check if a user is registered or not to the system (by
 	// mobile app)
