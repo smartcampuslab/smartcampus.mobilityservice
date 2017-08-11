@@ -212,7 +212,7 @@ public class DiaryController {
 		List<ChallengeConcept> challengeConcepts = challengeManager.parse(allData);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			String description = challengeManager.fillDescription(challengeConcept, language);
-			String longDescription = challengeManager.fillLongDescription(challengeConcept, language);
+//			String longDescription = challengeManager.fillLongDescription(challengeConcept, language);
 			
 			DiaryEntry de = new DiaryEntry();
 			de.setEntityId(challengeConcept.getName());
