@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class ChallengeConcept extends GameConcept {
 	private String modelName;
 	private Map<String, Object> fields = new HashMap<String, Object>();
@@ -64,5 +67,11 @@ public class ChallengeConcept extends GameConcept {
 	public boolean isCompleted() {
 		return completed;
 	}
+	
+	@Override
+	public String toString() {
+		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
+		return tsb.build();
+	}	
 
 }
