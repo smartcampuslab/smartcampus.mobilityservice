@@ -326,6 +326,7 @@ public class GamificationWebController {
 		data.put("bonusPointType", "green leaves");
 		data.put("bonusScore", new Double(100.0));
 		data.put("surveyType", "start");
+		data.put("link", ""); // TODO
 		
 		ChallengeDataDTO challenge = new ChallengeDataDTO();
 		long now = System.currentTimeMillis();
