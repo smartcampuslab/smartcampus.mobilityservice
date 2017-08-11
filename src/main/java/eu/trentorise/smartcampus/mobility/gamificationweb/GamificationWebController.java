@@ -74,7 +74,7 @@ public class GamificationWebController {
 
 	private static final String PLAYER_RANKING = "playerRanking";
 
-	private static final String NICK_RECOMMANDATION = "nicknameRecommandation";
+	private static final String NICK_RECOMMANDATION = "nick_recommandation";
 	private static final String TIMESTAMP = "timestamp";
 	
 //	private String[] pointConcepts = { "p+r", "green", "health"};
@@ -277,6 +277,7 @@ public class GamificationWebController {
 		Player p = playerRepositoryDao.findByIdAndGameId(id, gameId);
 		if (p != null) {
 			logger.debug("External registration: user exists");
+			res.setStatus(HttpStatus.CONFLICT.value());
 			return null;
 		} else {
 			logger.debug("External registration: new user");
