@@ -1,7 +1,8 @@
 package eu.trentorise.smartcampus.mobility.gamification.diary;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -29,7 +30,8 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private String entityId;
 
 	private TravelType travelType;
-	private List<String> travelModes;
+	private Set<String> travelModes; //  TODO: remove
+	private Map<String, Double> travelDistances;
 	private Date travelDate;
 	private Double travelLength;
 	private Long travelEstimatedScore;
@@ -90,12 +92,20 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 		this.travelType = travelType;
 	}
 
-	public List<String> getTravelModes() {
+	public Set<String> getTravelModes() {
 		return travelModes;
 	}
 
-	public void setTravelModes(List<String> travelModes) {
+	public void setTravelModes(Set<String> travelModes) {
 		this.travelModes = travelModes;
+	}
+
+	public Map<String, Double> getTravelDistances() {
+		return travelDistances;
+	}
+
+	public void setTravelDistances(Map<String, Double> travelDistances) {
+		this.travelDistances = travelDistances;
 	}
 
 	public void setTravelDate(Date travelDate) {

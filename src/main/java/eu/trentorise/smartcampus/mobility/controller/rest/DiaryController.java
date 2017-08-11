@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -31,7 +32,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry;
@@ -207,6 +212,7 @@ public class DiaryController {
 		List<ChallengeConcept> challengeConcepts = challengeManager.parse(allData);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			String description = challengeManager.fillDescription(challengeConcept, language);
+			String longDescription = challengeManager.fillLongDescription(challengeConcept, language);
 			
 			DiaryEntry de = new DiaryEntry();
 			de.setEntityId(challengeConcept.getName());
@@ -321,16 +327,28 @@ public class DiaryController {
 			}
 			if (instance.getItinerary() != null) {
 				de.setTravelType(TravelType.PLANNED);
-				List<String> modes = Lists.newArrayList();
+				Map<String, Double> distances = getTransportDistances(instance.getItinerary().getData().getLeg());
+
+				de.setTravelDistances(distances);
+				
+				// TODO: remove
+				Set<String> modes = Sets.newHashSet();
 				for (Leg leg: instance.getItinerary().getData().getLeg()) {
 					if (leg.getTransport() != null) {
 						modes.add(GamificationHelper.convertTType(leg.getTransport().getType()));
 					}
 				}
-				de.setTravelModes(modes);
+				de.setTravelModes(modes);					
 			} else if (instance.getFreeTrackingTransport() != null) {
 				de.setTravelType(TravelType.FREETRACKING);
-				de.setTravelModes(Lists.newArrayList(instance.getFreeTrackingTransport()));
+				
+				Map<String, Double> distances = Maps.newTreeMap();
+				distances.put(instance.getFreeTrackingTransport(), instance.getValidationResult() != null ? instance.getValidationResult().getDistance(): 0.0);
+				
+				de.setTravelDistances(distances);
+				
+				// TODO: remove
+				de.setTravelModes(Sets.newHashSet(instance.getFreeTrackingTransport()));
 			}
 			if (instance.getChangedValidity() != null) {
 				de.setTravelValidity(instance.getChangedValidity());	
@@ -354,6 +372,28 @@ public class DiaryController {
 		return result;
 	}
 
+	private Map<String, Double> getTransportDistances(List<Leg> legs) {
+		Multimap<String, Double> distances = ArrayListMultimap.create();
+		Map<String, Double> result = Maps.newTreeMap();
+		
+		for (Leg leg: legs) {
+			if (leg.getTransport() != null) {
+				String mode = GamificationHelper.convertTType(leg.getTransport().getType());
+				distances.put(mode, leg.getLength());
+			}
+		}
+		
+		for (String key: distances.keySet()) {
+			double value = 0;
+			for (Double v: distances.get(key)) {
+				value += v;
+			}
+			result.put(key, value);
+		}
+		
+		return result;
+	}
+	
 	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
 			{
