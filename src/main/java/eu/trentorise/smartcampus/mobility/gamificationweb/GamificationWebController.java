@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -58,6 +60,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationDa
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.UserCheck;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -124,6 +127,7 @@ public class GamificationWebController {
 	@PostConstruct
 	public void init() {
 		profileService = new BasicProfileService(aacURL);
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	// TODO reenable?
@@ -286,10 +290,9 @@ public class GamificationWebController {
 			if (data.containsKey(NICK_RECOMMANDATION) && !((String) data.get(NICK_RECOMMANDATION)).isEmpty()) {
 				Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery((String) data.get(NICK_RECOMMANDATION)), gameId);
 				if (recommender != null) {
-					p.setCheckedRecommendation(false);
-					sendRecommendationToGamification(recommender.getId(), gameId, appId);
-				} else {
 					p.setCheckedRecommendation(true);
+				} else {
+					p.setCheckedRecommendation(false);
 				}
 
 			}
@@ -307,6 +310,62 @@ public class GamificationWebController {
 		}
 		return null;
 	}
+
+	@Scheduled(fixedRate = 30 * 60*1000) 
+	public synchronized void checkRecommendations() throws Exception {
+		for (AppInfo appInfo : appSetup.getApps()) {
+			try {
+				checkRecommendations(appInfo.getAppId());
+			} catch (Exception e) {
+				logger.error("Error checking recommendations for " + appInfo.getAppId());
+				e.printStackTrace();
+			}
+		}
+	}	
+	
+	private void checkRecommendations(String appId) throws Exception {
+		String gameId = appSetup.findAppById(appId).getGameId();
+		Iterable<Player> players = playerRepositoryDao.findAllByCheckedRecommendationAndGameId(true, gameId);
+		for (Player player : players) {
+
+			String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
+			if (nickname != null) {
+				Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(nickname, gameId);
+				if (recommender != null) {
+					RestTemplate restTemplate = new RestTemplate();
+					ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
+							new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+					String data = res.getBody();
+
+					if (getGreenLeavesPoints(data) > 0) {
+						logger.info("Sending recommendation to gamification engine: " + player.getId() + " -> " + recommender.getId());
+						sendRecommendationToGamification(recommender.getId(), gameId, appId);
+						player.setCheckedRecommendation(false);
+						playerRepositoryDao.save(player);
+					}
+				}
+			}
+		}
+	}
+	
+	private int getGreenLeavesPoints(String data) throws Exception {
+		List<PointConcept> concepts = Lists.newArrayList();
+
+		Map playerMap = mapper.readValue(data, Map.class);
+		if (playerMap.containsKey("state")) {
+			Map stateMap = mapper.convertValue(playerMap.get("state"), Map.class);
+			if (stateMap.containsKey("PointConcept")) {
+				List conceptList = mapper.convertValue(stateMap.get("PointConcept"), List.class);
+				for (Object o : conceptList) {
+					PointConcept concept = mapper.convertValue(o, PointConcept.class);
+					if ("green leaves".equals(concept.getName())) {
+						return concept.getScore();
+					}
+				}
+			}
+		}
+		return 0;
+	}	
 
 	// Method to force the player creation in gamification engine
 	private void createPlayerInGamification(String playerId, String gameId, String appId) throws Exception {
