@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -51,6 +52,7 @@ import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
+import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -65,6 +67,8 @@ import it.sayservice.platform.smartplanner.data.message.Leg;
 
 @Controller
 public class DiaryController {
+
+	private static final Logger logger = Logger.getLogger(ChallengesUtils.class);
 
 	@Autowired
 	@Value("${gamification.url}")
@@ -402,7 +406,7 @@ public class DiaryController {
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	ErrorInfo handleBadRequest(HttpServletRequest req, Exception ex) {
-		ex.printStackTrace();
+		logger.error("Error generating diary information", ex);
 		StackTraceElement ste = ex.getStackTrace()[0];
 		return new ErrorInfo(req.getRequestURL().toString(), ex.getClass().getTypeName(), ste.getClassName(),
 				ste.getLineNumber());
