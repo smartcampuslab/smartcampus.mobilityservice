@@ -335,6 +335,6 @@
 			"it": "Per vincere la sfida la tua posizione nella classifica settimanale dovra' essere compresa tra il <posMin>° e il <posMax>° posto alla fine di questa settimana di gioco (cioe' la notte di venerdi' 2 dicembre).",
 			"en": "To succeed in this challenge, your position in the weekly leaderboard must be in between place <posMin> and place <posMax> at the end of the week (i.e. on the night of Friday the 2nd of December)."
 		}
-	},
+	}
 
 ]
