@@ -316,16 +316,16 @@
 		"modelName": "survey",
 		"filter": "end",
 		"description": {
-			"it": "Per vincere la sfida compila il questionario di fine gioco che visualizzi al seguente <a href='<LINK>' target='_system'>indirizzo</a>.",
-			"en": "To win this challenge, complete the final game questionnaire that you can access <a href='<LINK>' target='_system'>here</a>."
+			"it": "Per vincere la sfida compila il questionario di fine gioco che visualizzi al seguente LINK.",
+			"en": "To win this challenge, complete the final game questionnaire that you can access HERE."
 		}
 	},
   {
     "modelName": "survey",
     "filter": "start",
     "description": {
-      "it": "Per vincere la sfida compila il questionario di inizio gioco che visualizzi al seguente <a href='<LINK>' target='_system'>indirizzo</a>.",
-      "en": "To win this challenge, complete the initial game questionnaire that you can access <a href='<LINK>' target='_system'>here</a>."
+      "it": "Per vincere la sfida compila il questionario di inizio gioco che visualizzi al seguente LINK.",
+      "en": "To win this challenge, complete the initial game questionnaire that you can access HERE."
     }
   },
 	{
