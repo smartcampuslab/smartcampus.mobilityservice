@@ -103,9 +103,6 @@ public class GamificationWebController {
 	private PlayerRepositoryDao playerRepositoryDao;
 
 	@Autowired
-	private ChallengeDescriptionDataSetup challDescriptionSetup;
-
-	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;
 	protected BasicProfileService profileService;
@@ -119,6 +116,10 @@ public class GamificationWebController {
 	
 	@Autowired
 	private GameSetup gameSetup;	
+	
+	@Autowired
+	private StatusUtils statusUtils;
+
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -462,13 +463,7 @@ public class GamificationWebController {
 		String statusUrl = "state/" + gameId + "/" + userId;
 		String allData = getAll(statusUrl, appId);
 		
-		ChallengesUtils challUtils = new ChallengesUtils();
-		if(challUtils.getChallLongDescriptionList() == null || challUtils.getChallLongDescriptionList().isEmpty()){
-			challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
-		}
-		
-		StatusUtils statusUtils = new StatusUtils();
-		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, challUtils, mobilityUrl, 1, language);
+		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
 		
 		return ps;
 	}

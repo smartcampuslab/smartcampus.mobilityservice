@@ -43,7 +43,6 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.MailImage;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Notification;
@@ -97,10 +96,10 @@ public class ReportEmailSender {
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
 
-	private int i = 0;
-
 	@Autowired
-	private ChallengeDescriptionDataSetup challDescriptionSetup;
+	private StatusUtils statusUtils;
+	
+	private int i = 0;
 
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
@@ -147,12 +146,8 @@ public class ReportEmailSender {
 	// @Scheduled(cron="0 0 17 * * FRI") // Repeat every Friday at 17:00 PM
 	public synchronized void sendWeeklyNotification(String appId) throws Exception {
 		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
-		StatusUtils statusUtils = new StatusUtils();
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of one week //long millis = 1415660400000L; //(for test)
-
-		ChallengesUtils challUtils = new ChallengesUtils();
-		challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
 
 		URL resource = getClass().getResource("/public/");
 		String path = resource.getPath();
@@ -255,7 +250,7 @@ public class ReportEmailSender {
 						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
 					}
 					try {
-						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl + "/gamificationweb/", 0, language);
+						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
 						states = completePlayerStatus.getPointConcept();
 						ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();
 						// @SuppressWarnings("rawtypes")
@@ -359,13 +354,9 @@ public class ReportEmailSender {
 	// @Scheduled(cron="0 15 15 * * MON") // Repeat every Monday at 15:15
 	public synchronized void checkWinnersNotification(String appId) throws Exception {
 		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
-		StatusUtils statusUtils = new StatusUtils();
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		
-		ChallengesUtils challUtils = new ChallengesUtils();
-		challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
-
 		URL resource = getClass().getResource("/");
 		String path = resource.getPath();
 		logger.debug(String.format("class path : %s", path));
@@ -461,7 +452,7 @@ public class ReportEmailSender {
 						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
 					}
 					try {
-						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl + "/gamificationweb/", 0, language);
+						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
 						states = completePlayerStatus.getPointConcept();
 						ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();
 						// @SuppressWarnings("rawtypes")
@@ -561,15 +552,11 @@ public class ReportEmailSender {
 	// @Scheduled(cron="0 30 11 * * WED") // Repeat every WED at 11:30 AM
 	public synchronized void sendReportMail(String appId) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException {
 		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
-		StatusUtils statusUtils = new StatusUtils();
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		String timestamp = "?timestamp=" + millis;
 		long millisNoEvent = 1480978800000L; // Tue Dec 06 2016 00:00:00 GMT+0100
 		boolean showFinalEvent = (System.currentTimeMillis() <= millisNoEvent) ? true : false;
-
-		ChallengesUtils challUtils = new ChallengesUtils();
-		challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
 
 		URL resource = getClass().getResource("/");
 		String path = resource.getPath();
@@ -637,7 +624,7 @@ public class ReportEmailSender {
 							mailLoc = Locale.ITALIAN;
 						}
 						try {
-							PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), challUtils, mobilityUrl + "/gamificationweb/", 0,
+							PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0,
 									language);
 							states = completePlayerStatus.getPointConcept();
 							ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();

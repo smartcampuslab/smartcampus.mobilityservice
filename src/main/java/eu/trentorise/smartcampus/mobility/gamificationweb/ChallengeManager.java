@@ -6,9 +6,6 @@ import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.stringtemplate.v4.ST;
 
@@ -18,6 +15,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeLongDescrStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeStructure;
 
 @Component
@@ -25,22 +23,25 @@ public class ChallengeManager {
 
 	private ObjectMapper mapper = new ObjectMapper();
 
-	@Autowired
-	@Qualifier("mongoTemplate")
-	MongoTemplate template;
+//	@Autowired
+//	@Qualifier("mongoTemplate")
+//	MongoTemplate template;
 
 	private Map<String, ChallengeStructure> challengeStructureMap;
+	private Map<String, ChallengeLongDescrStructure> challengeLongStructureMap;
 
 	private Map<String, List> challengeDictionaryMap;
 	private Map<String, String> challengeReplacements;
 
 	// private VelocityEngine engine;
 
+	@SuppressWarnings("unchecked")
 	@PostConstruct
 	private void init() throws Exception {
 		// template.dropCollection(ChallengeStructure.class);
 
 		challengeStructureMap = Maps.newTreeMap();
+		challengeLongStructureMap = Maps.newTreeMap();
 
 		List list = mapper.readValue(Resources.getResource("challenges/challenges.json"), List.class);
 		for (Object o : list) {
@@ -48,8 +49,15 @@ public class ChallengeManager {
 
 			String key = challenge.getName() + "#" + challenge.getCounterName();
 			challengeStructureMap.put(key, challenge);
+//			template.save(challenge);
+		}
+		list = mapper.readValue(Resources.getResource("challenges/challenges_descriptions.json"), List.class);
+		for (Object o : list) {
+			ChallengeLongDescrStructure challenge = mapper.convertValue(o, ChallengeLongDescrStructure.class);
 
-			template.save(challenge);
+			String key = challenge.getModelName() + "#" + challenge.getFilter();
+			challengeLongStructureMap.put(key, challenge);
+//			template.save(challenge);
 		}
 
 		challengeDictionaryMap = mapper.readValue(Resources.getResource("challenges/challenges_dictionary.json"), Map.class);
@@ -84,7 +92,7 @@ public class ChallengeManager {
 		return concepts;
 	}
 
-	public String fillDescription(ChallengeConcept challenge, String lang) throws Exception {
+	public String fillDescription(ChallengeConcept challenge, String lang) {
 		String description = null;
 		String name = challenge.getModelName();
 		String counterName = (String) challenge.getFields().get("counterName");
@@ -147,7 +155,26 @@ public class ChallengeManager {
 
 	}
 
-	private String fillDescription(ChallengeStructure structure, String counterNameA, String counterNameB, ChallengeConcept challenge, String lang) throws Exception {
+	public String fillLongDescription(ChallengeConcept challenge, String filterField, String lang) {
+		String description = null;
+		String name = challenge.getModelName();
+		String counterName = filterField != null ? (String) challenge.getFields().get(filterField) : null;
+
+		ChallengeLongDescrStructure challengeStructure = challengeLongStructureMap.getOrDefault(name + "#" + counterName, null);
+
+		if (challengeStructure != null) {
+			description = fillLongDescription(challengeStructure, counterName, challenge, lang);
+			
+			for (String key: challengeReplacements.keySet()) {
+				description = description.replaceAll(key, challengeReplacements.get(key));
+			}			
+		} else {
+			System.err.println(name + " / " + counterName);
+			return "";
+		}
+		return description;
+	}
+	private String fillDescription(ChallengeStructure structure, String counterNameA, String counterNameB, ChallengeConcept challenge, String lang) {
 		// VelocityContext context = new VelocityContext();
 		// for (String field: challenge.getFields().keySet()) {
 		// context.put(field, challenge.getFields().get(field));
@@ -182,6 +209,16 @@ public class ChallengeManager {
 		return st.render();
 	}
 
+	private String fillLongDescription(ChallengeLongDescrStructure structure, String counterName, ChallengeConcept challenge, String lang)  {
+		ST st = new ST(structure.getDescription().get(lang));
+
+		for (String field : challenge.getFields().keySet()) {
+			Object o = challenge.getFields().get(field);
+			st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
+		}
+
+		return st.render();
+	}
 	private String instantiateWord(String word, boolean negative, String lang) {
 		if (word != null) {
 			List versions = challengeDictionaryMap.get(word.toLowerCase());
@@ -194,5 +231,4 @@ public class ChallengeManager {
 		}
 		return word;
 	}
-
 }

@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 
@@ -29,6 +31,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
 
+@Component
 public class StatusUtils {
 
 	private static final Logger logger = Logger.getLogger(StatusUtils.class);
@@ -66,11 +69,11 @@ public class StatusUtils {
 
 	private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-	public StatusUtils() {
-	}
-
+	@Autowired
+	private ChallengesUtils challUtils;
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public PlayerStatus correctPlayerData(String profile, String playerId, String gameId, String nickName, ChallengesUtils challUtils, String gamificationUrl, int challType, String language)
+	public PlayerStatus correctPlayerData(String profile, String playerId, String gameId, String nickName, String gamificationUrl, int challType, String language)
 			throws JSONException {
 		List<ChallengesData> challenges = new ArrayList<ChallengesData>();
 		List<ChallengesData> oldChallenges = new ArrayList<ChallengesData>();
@@ -188,7 +191,8 @@ public class StatusUtils {
 																// anyway
 						cc.setOldChallengeData(oldChallenges);
 					}
-				} catch (JSONException e) {
+				} catch (Exception e) {
+					logger.error("Error creating challenge info", e);
 					e.printStackTrace();
 				}
 			}

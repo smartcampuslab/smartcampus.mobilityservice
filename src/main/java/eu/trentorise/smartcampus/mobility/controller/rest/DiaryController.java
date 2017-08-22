@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +47,6 @@ import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
-import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -92,9 +89,6 @@ public class DiaryController {
 	private GameSetup gameSetup;	
 	
 	@Autowired
-	private ChallengeDescriptionDataSetup challDescriptionSetup;
-	
-	@Autowired
 	private GamificationManager gamificationManager;
 	
 	@Autowired
@@ -103,15 +97,7 @@ public class DiaryController {
 	@Autowired
 	private ChallengeManager challengeManager;
 	
-	private ChallengesUtils challUtils;
-	
 	private ObjectMapper mapper = new ObjectMapper();
-
-	@PostConstruct
-	public void init() {
-		challUtils = new ChallengesUtils();
-		challUtils.setChallLongDescriptionList(challDescriptionSetup.getDescriptions());
-	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/diary")
 	public @ResponseBody List<DiaryEntry> getNotifications(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long from,
