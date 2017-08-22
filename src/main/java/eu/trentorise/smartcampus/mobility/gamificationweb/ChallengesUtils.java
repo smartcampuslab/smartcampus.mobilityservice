@@ -502,13 +502,13 @@ public class ChallengesUtils {
 					int baseline = 0;
 					int initialBadgeNum = 0;
 					if(challenge.getFields() != null){
-						bonusScore = (int)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0);
+						bonusScore = ((Double)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0)).intValue();
 						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");// (!chalFields.isNull(CHAL_FIELDS_PERIOD_NAME)) ? chalFields.getString(CHAL_FIELDS_PERIOD_NAME) : "";
 						bonusPointType = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_POINT_TYPE,"");// (!chalFields.isNull(CHAL_FIELDS_BONUS_POINT_TYPE)) ? chalFields.getString(CHAL_FIELDS_BONUS_POINT_TYPE) : "";
 						counterName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");//(!chalFields.isNull(CHAL_FIELDS_COUNTER_NAME)) ? chalFields.getString(CHAL_FIELDS_COUNTER_NAME) : "";
-						target =  (int)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0); ///(int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
+						target =  ((Double)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0)).intValue(); ///(int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
 						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");//(!chalFields.isNull(CHAL_FIELDS_BADGE_COLLECTION_NAME)) ? chalFields.getString(CHAL_FIELDS_BADGE_COLLECTION_NAME) : "";
-						baseline = (int)challenge.getFields().getOrDefault(CHAL_FIELDS_BASELINE,0); //(!chalFields.isNull(CHAL_FIELDS_BASELINE)) ? chalFields.getInt(CHAL_FIELDS_BASELINE) : 0;
+						baseline = ((Double)challenge.getFields().getOrDefault(CHAL_FIELDS_BASELINE,0)).intValue(); //(!chalFields.isNull(CHAL_FIELDS_BASELINE)) ? chalFields.getInt(CHAL_FIELDS_BASELINE) : 0;
 						initialBadgeNum = (int)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0); //(!chalFields.isNull(CHAL_FIELDS_INITIAL_BADGE_NUM)) ? chalFields.getInt(CHAL_FIELDS_INITIAL_BADGE_NUM) : 0;
 					}
 					ServerChallengesData challData = new ServerChallengesData();
