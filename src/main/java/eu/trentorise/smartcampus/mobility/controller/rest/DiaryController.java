@@ -3,6 +3,7 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -336,10 +337,9 @@ public class DiaryController {
 				de.setTravelModes(modes);					
 			} else if (instance.getFreeTrackingTransport() != null) {
 				de.setTravelType(TravelType.FREETRACKING);
-				
-				Map<String, Double> distances = Maps.newTreeMap();
-				distances.put(instance.getFreeTrackingTransport(), instance.getValidationResult() != null ? instance.getValidationResult().getDistance(): 0.0);
-				
+
+				Double val = instance.getValidationResult() != null ? instance.getValidationResult().getDistance() : 0;
+				Map<String, Double> distances = Collections.singletonMap(instance.getFreeTrackingTransport(), val);
 				de.setTravelDistances(distances);
 				
 				// TODO: remove
