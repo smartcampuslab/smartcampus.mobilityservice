@@ -74,7 +74,7 @@ public class TestStats {
 	@Test
 	public void testGlobalStats() throws Exception {
 		GlobalStatistics globalStatistics = statBuilder.getGlobalStatistics(USER,"1970/01/01", true);
-		assertTrue("Global stats should not be empty", globalStatistics.getStats().size() > 0 && globalStatistics.getStats().get("total") != null && !globalStatistics.getStats().get("total").isEmpty());
+		assertTrue("Global stats should not be empty", globalStatistics.getStats().size() > 0 && globalStatistics.getStats().get(AggregationGranularity.total) != null && !globalStatistics.getStats().get(AggregationGranularity.total).isEmpty());
 	}	
 
 }
