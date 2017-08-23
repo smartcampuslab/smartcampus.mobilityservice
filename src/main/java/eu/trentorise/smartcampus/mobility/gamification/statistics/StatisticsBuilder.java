@@ -81,11 +81,11 @@ public class StatisticsBuilder {
 	private Map<String, Object> computeGlobalStatistics(String userId, String start, AggregationGranularity granularity, boolean dates) throws Exception {
 		List<TrackedInstance> instances = findAll(userId);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
-		Multimap<Map<String, String>, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, start, sdf.format(new Date()));
-		Map<Map<String, String>, Map<String,Double>> rangeSum = statsByRanges(byWeek);
+		Multimap<Range, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, start, sdf.format(new Date()));
+		Map<Range, Map<String,Double>> rangeSum = statsByRanges(byWeek);
 		
 		Map<String, Object> result = Maps.newTreeMap();
-		for (Map<String, String> range: rangeSum.keySet()) {
+		for (Range range: rangeSum.keySet()) {
 			Map<String,Double> value = rangeSum.get(range);
 			for (String key: value.keySet()) {
 				if (value.get(key) > (Double)result.getOrDefault("max " + key, 0.0)) {
@@ -100,19 +100,18 @@ public class StatisticsBuilder {
 		return result;
 	}
 	
-	private Map<String, Long> convertRange(Map<String, String> range) throws Exception {
+	private Map<String, Long> convertRange(Range range) throws Exception {
 		Map<String, Long> result = Maps.newTreeMap();
-		for (String key: range.keySet()) {
-			result.put(key, sdf.parse(range.get(key)).getTime());
-		}
+		result.put(range.from, sdf.parse(range.from).getTime());
+		result.put(range.to, sdf.parse(range.to).getTime());
 		return result;
 	}
 	
 	private StatisticsGroup statsByGranularity(String userId, String from, String to, AggregationGranularity granularity) throws Exception {
 		List<TrackedInstance> instances = find(userId, from, to);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
-		Multimap<Map<String, String>, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, from, to);
-		Map<Map<String, String>, Map<String,Double>> rangeSum = statsByRanges(byWeek);
+		Multimap<Range, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, from, to);
+		Map<Range, Map<String,Double>> rangeSum = statsByRanges(byWeek);
 		
 		Map<String, String> outside = outside(userId, from, to);
 		
@@ -125,10 +124,10 @@ public class StatisticsBuilder {
 		}
 		
 		List<StatisticsAggregation> aggregations = Lists.newArrayList();
-		for (Map<String, String> range: rangeSum.keySet()) {
+		for (Range range: rangeSum.keySet()) {
 			StatisticsAggregation aggregation = new StatisticsAggregation();
-			aggregation.setFrom(sdf.parse(range.get("from")).getTime());
-			aggregation.setTo(endOfDay(range.get("to")));
+			aggregation.setFrom(sdf.parse(range.from).getTime());
+			aggregation.setTo(endOfDay(range.to));
 			aggregation.setData(rangeSum.get(range));
 			aggregations.add(aggregation);
 		}
@@ -200,18 +199,18 @@ public class StatisticsBuilder {
 		return result;
 	}
 	
-	private Multimap<Map<String, String>, TrackedInstance> mergeByGranularity(Multimap<String, TrackedInstance> byDay, AggregationGranularity granularity, String from, String to) throws Exception {
-		Multimap<Map<String, String>, TrackedInstance> result = ArrayListMultimap.create(); 
-		Multimap<Map<String, String>, String> weekDays = ArrayListMultimap.create();
+	private Multimap<Range, TrackedInstance> mergeByGranularity(Multimap<String, TrackedInstance> byDay, AggregationGranularity granularity, String from, String to) throws Exception {
+		Multimap<Range, TrackedInstance> result = ArrayListMultimap.create(); 
+		Multimap<Range, String> weekDays = ArrayListMultimap.create();
 
 		Calendar c = new GregorianCalendar();
 		c.setFirstDayOfWeek(Calendar.MONDAY);
 		for (String day: byDay.keySet()) {
-			Map<String, String> range = buildRanges(day, granularity, from, to);
+			Range range = buildRanges(day, granularity, from, to);
 			weekDays.put(range, day);
 		}
 		
-		for (Map<String, String> range: weekDays.keySet()) {
+		for (Range range: weekDays.keySet()) {
 			for (String day: weekDays.get(range)) {
 				result.putAll(range, byDay.get(day));
 			}
@@ -220,9 +219,9 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private Map<Map<String, String>, Map<String,Double>> statsByRanges(Multimap<Map<String, String>, TrackedInstance> group) {
-		Map<Map<String, String>, Map<String,Double>> result = Maps.newHashMap();
-		for (Map<String, String> groupKey: group.keys()) {
+	private Map<Range, Map<String,Double>> statsByRanges(Multimap<Range, TrackedInstance> group) {
+		Map<Range, Map<String,Double>> result = Maps.newHashMap();
+		for (Range groupKey: group.keys()) {
 			Map<String, Double> statByRange = Maps.newTreeMap();
 			for (TrackedInstance ti: group.get(groupKey)) {
 				Map<String, Double> dist = null;
@@ -230,7 +229,7 @@ public class StatisticsBuilder {
 				if (val == null) val = 0.0;
 				if (ti.getFreeTrackingTransport() != null) {
 					dist = computeFreeTrackingDistances(val, ti.getFreeTrackingTransport());
-					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
+//					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
 //					}
@@ -238,7 +237,7 @@ public class StatisticsBuilder {
 				}
 				if (ti.getItinerary() != null) {
 					dist = computePlannedJourneyDistances(ti.getItinerary());
-					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
+//					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {					
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
 //					}
@@ -253,36 +252,36 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private Map<Map<String, String>, Map<String,Double>> computeGlobalStatistics(Multimap<Map<String, String>, TrackedInstance> group) {
-		Map<Map<String, String>, Map<String,Double>> result = Maps.newHashMap();
-		for (Map<String, String> groupKey: group.keys()) {
-			Map<String, Double> statByRange = Maps.newTreeMap();
-			for (TrackedInstance ti: group.get(groupKey)) {
-				Map<String, Double> dist = null;
-				if (ti.getFreeTrackingTransport() != null) {
-					dist = computeFreeTrackingDistances(ti.getValidationResult().getDistance(), ti.getFreeTrackingTransport());
-					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
-					if (ti.getScore() != null) {
-						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
-					}
-					
-				}
-				if (ti.getItinerary() != null) {
-					dist = computePlannedJourneyDistances(ti.getItinerary());
-					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
-					if (ti.getScore() != null) {					
-						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
-					}
-				}
-				for (String key: dist.keySet()) {
-					statByRange.put(key, statByRange.getOrDefault(key, 0.0) + dist.get(key));
-					statByRange.put("max " + key, Math.max(statByRange.getOrDefault("max " + key, 0.0), dist.get(key)));
-				}
-			}
-			result.put(groupKey, statByRange);
-		}
-		return result;
-	}	
+//	private Map<Map<String, String>, Map<String,Double>> computeGlobalStatistics(Multimap<Map<String, String>, TrackedInstance> group) {
+//		Map<Map<String, String>, Map<String,Double>> result = Maps.newHashMap();
+//		for (Map<String, String> groupKey: group.keys()) {
+//			Map<String, Double> statByRange = Maps.newTreeMap();
+//			for (TrackedInstance ti: group.get(groupKey)) {
+//				Map<String, Double> dist = null;
+//				if (ti.getFreeTrackingTransport() != null) {
+//					dist = computeFreeTrackingDistances(ti.getValidationResult().getDistance(), ti.getFreeTrackingTransport());
+//					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
+//					if (ti.getScore() != null) {
+//						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
+//					}
+//					
+//				}
+//				if (ti.getItinerary() != null) {
+//					dist = computePlannedJourneyDistances(ti.getItinerary());
+//					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
+//					if (ti.getScore() != null) {					
+//						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getScore());
+//					}
+//				}
+//				for (String key: dist.keySet()) {
+//					statByRange.put(key, statByRange.getOrDefault(key, 0.0) + dist.get(key));
+//					statByRange.put("max " + key, Math.max(statByRange.getOrDefault("max " + key, 0.0), dist.get(key)));
+//				}
+//			}
+//			result.put(groupKey, statByRange);
+//		}
+//		return result;
+//	}	
 	
 	
 	
@@ -299,52 +298,36 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private Map<String, String> buildRanges(String day, AggregationGranularity granularity, String from, String to) throws Exception {
-		Calendar c = new GregorianCalendar();
-		c.setFirstDayOfWeek(Calendar.MONDAY);
-		c.setTime(sdf.parse(day));
-		return buildRanges(c.getTimeInMillis(), granularity, sdf.parse(from).getTime(), sdf.parse(to).getTime());
-	}
-	
-	private Map<String, String> buildRanges(long day, AggregationGranularity granularity, long fromTime, long toTime) throws Exception {
-		 Map<String, String> result = Maps.newTreeMap();
-		
-		Calendar c = new GregorianCalendar();
-		c.setFirstDayOfWeek(Calendar.MONDAY);
-		c.setTimeInMillis(day);
-		
-		long from = 0;
-		long to = 0;
-		
+	private Range buildRanges(String day, AggregationGranularity granularity, String from, String to) throws Exception {
 		switch (granularity) {
 			case day:
-				from = day;
-				to = day;
-				break;
-			case week:
+				return new Range(day, day);
+			case week: {
+				Range range = new Range();
+				Calendar c = Calendar.getInstance();
+				c.setFirstDayOfWeek(Calendar.MONDAY);
+				c.setTimeInMillis(sdf.parse(day).getTime());
 				c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-//				c.add(Calendar.DAY_OF_YEAR, -2); // saturday?
-				from = c.getTimeInMillis();
+				range.from = sdf.format(new Date(c.getTimeInMillis()));
 				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-//				c.add(Calendar.DAY_OF_YEAR, -2) // friday?
-				to = c.getTimeInMillis();
-				break;
-			case month:
+				range.to = sdf.format(new Date(c.getTimeInMillis()));
+				return range;
+			}	
+			case month: {
+				Range range = new Range();
+				Calendar c = Calendar.getInstance();
+				c.setFirstDayOfWeek(Calendar.MONDAY);
 				c.set(Calendar.DAY_OF_MONTH, 1);
-				from = c.getTimeInMillis();
+				range.from = sdf.format(new Date(c.getTimeInMillis()));
 				c.add(Calendar.MONTH, 1);
 				c.add(Calendar.DAY_OF_YEAR, -1);
-				to = c.getTimeInMillis();
-				break;
+				range.to = sdf.format(new Date(c.getTimeInMillis()));
+				return range;
+			}	
 			case total:
-				from = fromTime;
-				to = toTime;
+			default:
+				return new Range(from, to);
 		}
-		
-		result.put("from", sdf.format(new Date(from)));
-		result.put("to", sdf.format(new Date(to)));
-
-		return result;
 	}	
 	
 	private long endOfDay(String day) throws Exception {
@@ -353,6 +336,51 @@ public class StatisticsBuilder {
 		c.add(Calendar.DAY_OF_YEAR, 1);
 		c.add(Calendar.SECOND, -1);
 		return c.getTimeInMillis();
+	}
+	
+	private static class Range {
+		String from, to;
+
+		public Range() {}
+
+		public Range(String from, String to) {
+			super();
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((to == null) ? 0 : to.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Range other = (Range) obj;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (to == null) {
+				if (other.to != null)
+					return false;
+			} else if (!to.equals(other.to))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 }
