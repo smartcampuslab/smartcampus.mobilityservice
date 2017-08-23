@@ -22,9 +22,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
 
 /**
  * @author raman
@@ -195,6 +200,38 @@ public class ValidationStatus {
 		effectiveDistances = new HashMap<>();
 		effectiveDistances.put(modeType, slowDistance);
 		effectiveDistances.put(MODE_TYPE.OTHER, distance - slowDistance);
+	}
+	
+	public void updatePlannedDistances(Itinerary itinerary) {
+		final Map<TType, Double> map = itinerary.getLeg().stream().collect(Collectors.groupingBy(leg -> leg.getTransport().getType(), Collectors.summingDouble(Leg::getLength)));
+		final Map<MODE_TYPE, Double> plannedDistances = new HashMap<>();
+		map.entrySet().forEach(entry -> plannedDistances.put(toModeType(entry.getKey()), entry.getValue()));
+		setPlannedDistances(plannedDistances);
+		
+	}
+	
+	/**
+	 * @param key
+	 * @return
+	 */
+	private MODE_TYPE toModeType(TType key) {
+		switch(key) {
+		case CAR:
+		case CARWITHPARKING:
+		case SHAREDCAR:
+		case SHAREDCAR_WITHOUT_STATION:
+			return MODE_TYPE.CAR;
+		case TRAIN: 
+			return MODE_TYPE.TRAIN;
+		case BICYCLE:
+		case SHAREDBIKE:
+		case SHAREDBIKE_WITHOUT_STATION:
+			return MODE_TYPE.BIKE;
+		case WALK:
+			return MODE_TYPE.WALK;
+		default:
+			return MODE_TYPE.BUS;
+		}
 	}
 	
 	public TRIP_TYPE getTripType() {

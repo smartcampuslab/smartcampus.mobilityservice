@@ -23,10 +23,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
-import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
-import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus;
 
 @Component
 public class StatisticsBuilder {
@@ -137,9 +137,12 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> findAll(String userId) {
-		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
+		Criteria criteria = new Criteria("userId").is(userId);//.and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
+		criteria.orOperator(
+				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
+				new Criteria("changedValidity").is(TravelValidity.VALID));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.validationStatus.distance").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -155,7 +158,7 @@ public class StatisticsBuilder {
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.validationStatus.distance").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -235,8 +238,8 @@ public class StatisticsBuilder {
 //					}
 					
 				}
-				if (ti.getItinerary() != null) {
-					dist = computePlannedJourneyDistances(ti.getItinerary());
+				if (ti.getItinerary() != null && ti.getValidationResult() != null) {
+					dist = computePlannedJourneyDistances(ti.getValidationResult().getValidationStatus());
 //					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {					
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
@@ -281,14 +284,13 @@ public class StatisticsBuilder {
 //			result.put(groupKey, statByRange);
 //		}
 //		return result;
-//	}	
+//	}		
 	
-	
-	
-	
-	private Map<String, Double> computePlannedJourneyDistances(ItineraryObject itinerary) {
+	private Map<String, Double> computePlannedJourneyDistances(ValidationStatus vs) {
 		Map<String, Double> result = Maps.newTreeMap();
-		itinerary.getData().getLeg().stream().forEach(x -> result.put(GamificationHelper.convertTType(x.getTransport().getType()), result.getOrDefault(GamificationHelper.convertTType(x.getTransport().getType()), 0.0) + x.getLength() / 1000));
+		if (vs.getPlannedDistances() != null && !vs.getPlannedDistances().isEmpty()) {
+			vs.getPlannedDistances().entrySet().forEach(entry -> result.put(TrackValidator.toModeString(entry.getKey()), entry.getValue()));
+		}
 		return result;
 	}
 	

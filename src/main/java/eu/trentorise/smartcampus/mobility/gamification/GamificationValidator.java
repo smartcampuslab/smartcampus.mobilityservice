@@ -305,6 +305,7 @@ public class GamificationValidator {
 			logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
 			ValidationResult vr = validateFreeTracking(geolocations, ttype, appId);
 			vr.setPlannedAsFreeTracking(true);
+			vr.getValidationStatus().updatePlannedDistances(itinerary.getData());
 			return vr;
 		}
 		

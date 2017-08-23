@@ -32,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
+import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
@@ -69,7 +70,11 @@ public class TestStats {
 		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
 		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.day);
 		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
-		
 	}
+	@Test
+	public void testGlobalStats() throws Exception {
+		GlobalStatistics globalStatistics = statBuilder.getGlobalStatistics(USER,"1970/01/01", true);
+		assertTrue("Global stats should not be empty", globalStatistics.getStats().size() > 0 && globalStatistics.getStats().get("total") != null && !globalStatistics.getStats().get("total").isEmpty());
+	}	
 
 }
