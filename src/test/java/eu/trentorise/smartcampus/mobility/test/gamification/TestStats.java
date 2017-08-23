@@ -49,7 +49,7 @@ import eu.trentorise.smartcampus.mobility.test.TestConfig;
 @ContextConfiguration(classes = {RemoteTestConfig.class})
 public class TestStats {
 
-	private final static String USER = "8";
+	private final static String USER = "7";
 
 	@Autowired
 	StatisticsBuilder statBuilder;

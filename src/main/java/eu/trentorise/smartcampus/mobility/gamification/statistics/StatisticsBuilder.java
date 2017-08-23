@@ -226,8 +226,10 @@ public class StatisticsBuilder {
 			Map<String, Double> statByRange = Maps.newTreeMap();
 			for (TrackedInstance ti: group.get(groupKey)) {
 				Map<String, Double> dist = null;
+				Double val = ti.getValidationResult().getDistance();
+				if (val == null) val = 0.0;
 				if (ti.getFreeTrackingTransport() != null) {
-					dist = computeFreeTrackingDistances(ti.getValidationResult().getDistance(), ti.getFreeTrackingTransport());
+					dist = computeFreeTrackingDistances(val, ti.getFreeTrackingTransport());
 					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
@@ -291,7 +293,7 @@ public class StatisticsBuilder {
 		return result;
 	}
 	
-	private Map<String, Double> computeFreeTrackingDistances(double distance, String ttype) {
+	private Map<String, Double> computeFreeTrackingDistances(Double distance, String ttype) {
 		Map<String, Double> result = Maps.newTreeMap();
 		result.put(ttype, distance);
 		return result;
