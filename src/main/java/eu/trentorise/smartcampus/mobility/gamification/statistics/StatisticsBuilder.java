@@ -39,18 +39,17 @@ public class StatisticsBuilder {
 	@Qualifier("mongoTemplate")
 	MongoTemplate template;
 	
-	public StatisticsGroup computeStatistics(String userId, String start, String from, String to, AggregationGranularity granularity) throws Exception {
+	private StatisticsGroup computeStatistics(String userId, String from, String to, AggregationGranularity granularity) throws Exception {
 		StatisticsGroup result = statsByGranularity(userId, from, to, granularity);
 //		result.setGlobalStats(getGlobalStatistics(userId, start).getStats());
 		return result;
 	}
 	
-	public StatisticsGroup computeStatistics(String userId, long start, long from, long to, AggregationGranularity granularity) throws Exception {
+	public StatisticsGroup computeStatistics(String userId, long from, long to, AggregationGranularity granularity) throws Exception {
 		String fromDay = sdf.format(new Date(from));
 		String toDay = sdf.format(new Date(to));
-		String startDay = sdf.format(new Date(start));
 		
-		return computeStatistics(userId, startDay, fromDay, toDay, granularity);
+		return computeStatistics(userId, fromDay, toDay, granularity);
 	}	
 	
 	public GlobalStatistics getGlobalStatistics(String userId, String start, boolean dates) throws Exception {
@@ -151,7 +150,10 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> find(String userId, String from, String to) {
-		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.travelValidity").is(TravelValidity.VALID);
+		Criteria criteria = new Criteria("userId").is(userId);//and("validationResult.travelValidity").is(TravelValidity.VALID);
+		criteria.orOperator(
+				new Criteria("validationResult.travelValidity").is(TravelValidity.VALID).and("changedValidity").is(null),
+				new Criteria("changedValidity").is(TravelValidity.VALID));
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.distance").include("day").include("freeTrackingTransport").include("itinerary");

@@ -434,7 +434,7 @@ public class GamificationWebController {
 
 	// Method used to get the user status data (by mobyle app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status")
-	@ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
+	public @ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
 		String token = tokenExtractor.extractHeaderToken(request);
 		logger.debug("WS-get status user token " + token);
 		BasicProfile user = null;

@@ -1030,6 +1030,8 @@ public class GamificationController {
 			
 			if (from == null) {
 				from = start;
+			} else {
+				from = Math.max(from, start);
 			}			
 			if (to == null) {
 				to = System.currentTimeMillis();
@@ -1039,7 +1041,7 @@ public class GamificationController {
 			}
 			
 
-			result = statisticsBuilder.computeStatistics(userId, start, from, to, granularity);
+			result = statisticsBuilder.computeStatistics(userId, from, to, granularity);
 			
 		} catch (Exception e) {
 			logger.error("Failed retrieving player statistics events: "+e.getMessage(),e);
