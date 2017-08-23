@@ -357,12 +357,12 @@ public class GamificationHelper {
 		if (circles != null) {
 			for (Circle circle : circles) {
 				Geolocation center = new Geolocation(circle.getCenter()[0], circle.getCenter()[1], null);
-				if (harvesineDistance(point, center) > circle.getRadius()) {
-					return false;
+				if (harvesineDistance(point, center) <= circle.getRadius()) {
+					return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 	
 	public static String getFreetrackingTransportForItinerary(ItineraryObject itinerary) {

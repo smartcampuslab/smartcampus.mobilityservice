@@ -37,7 +37,7 @@ public class ValidationStatus {
 	private static final SimpleDateFormat DT_FORMATTER = new SimpleDateFormat("HH:mm:ss");
 
 	public enum TRIP_TYPE {FREE, PLANNED};
-	public enum MODE_TYPE {WALK, BIKE, BUS, TRAIN, MULTI, OTHER};
+	public enum MODE_TYPE {WALK, BIKE, BUS, TRAIN, MULTI, OTHER, CAR};
 	
 	public enum ERROR_TYPE {TOO_SHORT, TOO_SLOW, TOO_FAST, OUT_OF_AREA, DOES_NOT_MATCH, DATA_HOLE, NO_DATA};
 	
@@ -268,6 +268,7 @@ public class ValidationStatus {
 
 
 	public Map<MODE_TYPE, Double> getPlannedDistances() {
+		if (plannedDistances == null) plannedDistances = new HashMap<>();
 		return plannedDistances;
 	}
 
@@ -278,6 +279,7 @@ public class ValidationStatus {
 
 
 	public Map<MODE_TYPE, Double> getEffectiveDistances() {
+		if (effectiveDistances == null) effectiveDistances = new HashMap<>();
 		return effectiveDistances;
 	}
 

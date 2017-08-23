@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.TrackSplit;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
@@ -38,6 +38,9 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MOD
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.TRIP_TYPE;
 import eu.trentorise.smartcampus.mobility.security.Circle;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
 
 /**
  * @author raman
@@ -54,7 +57,7 @@ public class TrackValidator {
 	public static final double VALIDITY_THRESHOLD = 80; // %
 	public static final double ACCURACY_THRESHOLD = 150; // meters
 	public static final int COVERAGE_THRESHOLD = 80; // %
-	public static final double DISTANCE_THRESHOLD = 250; // meters
+	public static final double DISTANCE_THRESHOLD = 0; // meters TODO change to 250
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
 
 	/**
@@ -97,14 +100,14 @@ public class TrackValidator {
 	 * @param areas
 	 * @return preprocessed track data
 	 */
-	public static List<Geolocation> prevalidate(TrackedInstance track, ValidationStatus status, List<Circle> areas) {
+	public static List<Geolocation> prevalidate(Collection<Geolocation> track, ValidationStatus status, List<Circle> areas) {
 		// check data present
-		if (track.getGeolocationEvents() == null || track.getGeolocationEvents().size() <= 1) {
+		if (track == null || track.size() <= 1) {
 			status.setError(ERROR_TYPE.NO_DATA);
 			status.setValidationOutcome(TravelValidity.INVALID);
 			return Collections.emptyList();
 		}
-		List<Geolocation> points = new ArrayList<Geolocation>(track.getGeolocationEvents());
+		List<Geolocation> points = new ArrayList<Geolocation>(track);
 		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
 		// check for data holes. If there is missing data, set status to PENDING and stop
 //		for (int i = 1; i < points.size(); i++) {
@@ -134,10 +137,9 @@ public class TrackValidator {
 		// check if the track is in the area of interest
 		boolean inRange = true;
 		if (areas != null && !areas.isEmpty()) {
-			if (!points.isEmpty()) {
-				inRange &= GamificationHelper.inAreas(areas, points.get(0));
-				inRange &= GamificationHelper.inAreas(areas, points.get(points.size() - 1));
-			}
+			inRange = false;
+			inRange |= GamificationHelper.inAreas(areas, points.get(0));
+			inRange |= GamificationHelper.inAreas(areas, points.get(points.size() - 1));
 		}	
 		if (!inRange) {
 			status.setValidationOutcome(TravelValidity.INVALID);
@@ -154,19 +156,47 @@ public class TrackValidator {
 	
 	/**
 	 * Validate free tracking: train. Take reference train shapes as input.
-	 * Preprocess track data; check if contains more than 2 points; split into blocks with 20km/h - 3 mins for stop - at least 1 min fast track; 
-	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 90% of length is matched. If no
+	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 1 min fast track; 
+	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 80% of length is matched. If no
 	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
 	 * @param track
 	 * @param referenceTracks
 	 * @return
 	 */
-	public static ValidationStatus validateFreeTrain(TrackedInstance track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
+	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
+		MODE_TYPE mode = MODE_TYPE.TRAIN; 
+		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
+		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold);
+	}
+
+	/**
+	 * Validate free tracking: bus. Take reference bus shapes as input.
+	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 1 min fast track; 
+	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 80% of length is matched. If no
+	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
+	 * @param track
+	 * @param referenceTracks
+	 * @return
+	 */
+	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
+		MODE_TYPE mode = MODE_TYPE.BUS; 
+		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
+		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold);
+	}
+	
+	private static ValidationStatus validateFreePTMode(
+			Collection<Geolocation> track, 
+			List<List<Geolocation>> referenceTracks,
+			List<Circle> areas, 
+			MODE_TYPE mode, 
+			double speedThreshold, 
+			double timeThreshold, 
+			double minTrackThreshold) 
+	{
 		ValidationStatus status = new ValidationStatus();
-		
 		// set parameters
 		status.setTripType(TRIP_TYPE.FREE);
-		status.setModeType(MODE_TYPE.TRAIN);
+		status.setModeType(mode);
 		status.setValidityThreshold(VALIDITY_THRESHOLD);
 		status.setMatchThreshold(ACCURACY_THRESHOLD);
 		status.setCoverageThreshold(COVERAGE_THRESHOLD);
@@ -178,7 +208,7 @@ public class TrackValidator {
 		}
 		
 		// split track into pieces. For train consider 15km/h threshold
-		TrackSplit trackSplit = TrackSplit.fastSplit(points, 15, 3*60*1000, 1*60*1000);
+		TrackSplit trackSplit = TrackSplit.fastSplit(points, speedThreshold, timeThreshold, minTrackThreshold);
 		if (trackSplit.getFastIntervals().isEmpty()) {
 			status.setValidationOutcome(TravelValidity.PENDING);
 			status.setError(ERROR_TYPE.TOO_SLOW);
@@ -186,38 +216,73 @@ public class TrackValidator {
 		}
 		status.updateFastSplit(trackSplit);
 
-		// compute matches checking each fast fragment against available reference train tracks
-		// check max coverage for each fragment
-		// if overall distance coverage is high enough, set trip valid 
-		double matchedDistance = 0;
-		for (Interval interval: status.getIntervals()) {
-			List<Geolocation> subtrack = trackSplit.getTrack().subList(interval.getStart(), interval.getEnd());
-			int effectiveLength = subtrack.size();
-			int invalid = effectiveLength;
-			double subtrackPrecision = 0;
-			for (List<Geolocation> ref: referenceTracks) {
-				invalid = Math.min(trackMatch(subtrack, ref, status.getMatchThreshold()),invalid); 
-				subtrackPrecision = 100.0 * (effectiveLength-invalid) / (effectiveLength);
-				if (subtrackPrecision >= status.getValidityThreshold()) break;
+		if (referenceTracks != null && !referenceTracks.isEmpty()) {
+			// compute matches checking each fast fragment against available reference train tracks
+			// check max coverage for each fragment
+			// if overall distance coverage is high enough, set trip valid 
+			double matchedDistance = 0;
+			for (Interval interval: status.getIntervals()) {
+				List<Geolocation> subtrack = trackSplit.getTrack().subList(interval.getStart(), interval.getEnd());
+				int effectiveLength = subtrack.size();
+				int invalid = effectiveLength;
+				double subtrackPrecision = 0;
+				for (List<Geolocation> ref: referenceTracks) {
+					invalid = Math.min(trackMatch(subtrack, ref, status.getMatchThreshold()),invalid); 
+					subtrackPrecision = 100.0 * (effectiveLength-invalid) / (effectiveLength);
+					if (subtrackPrecision >= status.getValidityThreshold()) break;
+				}
+				interval.setMatch(subtrackPrecision);
+				if (subtrackPrecision >= status.getValidityThreshold()) {
+					status.setMatchedIntervals(status.getMatchedIntervals()+1);
+					matchedDistance += interval.getDistance();
+				}
 			}
-			interval.setMatch(subtrackPrecision);
-			if (subtrackPrecision >= status.getValidityThreshold()) {
-				status.setMatchedIntervals(status.getMatchedIntervals()+1);
-				matchedDistance += interval.getDistance();
-			}
+			double coverage = 100.0 * matchedDistance / status.getDistance();
+			status.setValidationOutcome(coverage >= COVERAGE_THRESHOLD ? TravelValidity.VALID : TravelValidity.PENDING);
+			return status;
+		} else {
+			status.setValidationOutcome(TravelValidity.PENDING);
+			return status;
 		}
-		double coverage = 100.0 * matchedDistance / status.getDistance();
-		status.setValidationOutcome(coverage >= COVERAGE_THRESHOLD ? TravelValidity.VALID : TravelValidity.PENDING);
-		
-		return status;
 	}
 	
-	public static ValidationStatus validateFreeWalk(TrackedInstance track, List<Circle> areas) {
-		ValidationStatus status = new ValidationStatus();
+	/**
+	 * Validate free walk. Check track start/stop is within the areas,
+	 * consider only the piece with valid walk speed (if any) and is longer than 250 meters.
+	 * @param track
+	 * @param areas
+	 * @return
+	 */
+	public static ValidationStatus validateFreeWalk(Collection<Geolocation> track, List<Circle> areas) {
+
+		MODE_TYPE mode = MODE_TYPE.WALK; 
+		double speedThreshold = WALK_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = WALK_AVG_SPEED_THRESHOLD; 
+
 		
+		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold);
+	}
+
+	/**
+	 * Validate free walk. Check track start/stop is within the areas,
+	 * consider only the piece with valid bike speed (if any) and is longer than 250 meters.
+	 * @param track
+	 * @param areas
+	 * @return
+	 */
+	public static ValidationStatus validateFreeBike(Collection<Geolocation> track, List<Circle> areas) {
+
+		MODE_TYPE mode = MODE_TYPE.BIKE; 
+		double speedThreshold = BIKE_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = BIKE_AVG_SPEED_THRESHOLD; 
+		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold);
+	}
+
+	
+	private static ValidationStatus validateFreeMode(Collection<Geolocation> track, List<Circle> areas, MODE_TYPE mode,
+			double speedThreshold, double timeThreshold, double minTrackThreshold, double avgSpeedThreshold) {
+		ValidationStatus status = new ValidationStatus();
 		// set parameters
 		status.setTripType(TRIP_TYPE.FREE);
-		status.setModeType(MODE_TYPE.WALK);
+		status.setModeType(mode);
 		status.setValidityThreshold(VALIDITY_THRESHOLD);
 		status.setCoverageThreshold(COVERAGE_THRESHOLD);
 
@@ -227,12 +292,11 @@ public class TrackValidator {
 			return status;
 		}
 		
-		
-		// split track into pieces. For walk consider 20km/h threshold
-		TrackSplit trackSplit = TrackSplit.slowSplit(points, WALK_SPEED_THRESHOLD, 20*1000, 30*1000);
+		// split track into pieces. 
+		TrackSplit trackSplit = TrackSplit.slowSplit(points, speedThreshold, timeThreshold, minTrackThreshold);
 		// if no slow intervals or no fast intervals and speed is high, invalid
 		if (trackSplit.getSlowIntervals().isEmpty() || trackSplit.getFastIntervals().isEmpty()) {
-			if (status.getAverageSpeed() > WALK_AVG_SPEED_THRESHOLD) {
+			if (status.getAverageSpeed() > avgSpeedThreshold) {
 				status.setValidationOutcome(TravelValidity.INVALID);
 				status.setError(ERROR_TYPE.TOO_FAST);
 				return status;
@@ -240,12 +304,12 @@ public class TrackValidator {
 		}
 		status.updateSlowSplit(trackSplit, true);
 		// distance should be non-trivial
-		double distance = status.getEffectiveDistances().get(MODE_TYPE.WALK);
+		double distance = status.getEffectiveDistances().get(mode);
 		// min distance 
 		if (distance < DISTANCE_THRESHOLD) {
 			// check the average speed of fast part.
 			int fastPart = trackSplit.getSlowIntervals().isEmpty() ? 0 : trackSplit.getSlowIntervals().getFirst()[0];
-			if (getFragmentEffectiveAverage(points, fastPart, points.size()) > WALK_AVG_SPEED_THRESHOLD) {
+			if (getFragmentEffectiveAverage(points, fastPart, points.size()) > avgSpeedThreshold) {
 				status.setValidationOutcome(TravelValidity.INVALID);
 				status.setError(ERROR_TYPE.DOES_NOT_MATCH);
 				return status;
@@ -255,50 +319,75 @@ public class TrackValidator {
 		
 		return status;
 	}
-	
-	public static ValidationStatus validateFreeBike(TrackedInstance track, List<Circle> areas) {
+	/**
+	 * Validate planned trip
+	 * @param track
+	 * @param areas
+	 * @return
+	 */
+	public static ValidationStatus validatePlanned(Collection<Geolocation> track, Itinerary itinerary, List<Circle> areas) {
 		ValidationStatus status = new ValidationStatus();
-		
 		// set parameters
-		status.setTripType(TRIP_TYPE.FREE);
-		status.setModeType(MODE_TYPE.BIKE);
+		status.setTripType(TRIP_TYPE.PLANNED);
 		status.setValidityThreshold(VALIDITY_THRESHOLD);
-		status.setCoverageThreshold(COVERAGE_THRESHOLD);
+		status.setMatchThreshold(ACCURACY_THRESHOLD);
 
 		// basic validation
-		List<Geolocation> points = prevalidate(track, status, areas);
+		prevalidate(track, status, areas);
 		if (status.getValidationOutcome() != null) {
 			return status;
 		}
+		// TODO match legs
 		
-		// split track into pieces. For walk consider 20km/h threshold
-		TrackSplit trackSplit = TrackSplit.slowSplit(points, BIKE_SPEED_THRESHOLD, 20*1000, 30*1000);
-		// if no slow intervals or no fast intervals and speed is high, invalid
-		if (trackSplit.getSlowIntervals().isEmpty() || trackSplit.getFastIntervals().isEmpty()) {
-			if (status.getAverageSpeed() > BIKE_AVG_SPEED_THRESHOLD) {
-				status.setValidationOutcome(TravelValidity.INVALID);
-				status.setError(ERROR_TYPE.TOO_FAST);
-				return status;
-			}	
+		if (itinerary != null) {
+			final Map<TType, Double> map = itinerary.getLeg().stream().collect(Collectors.groupingBy(leg -> leg.getTransport().getType(), Collectors.summingDouble(Leg::getLength)));
+			final Map<MODE_TYPE, Double> plannedDistances = new HashMap<>();
+			map.entrySet().forEach(entry -> plannedDistances.put(toModeType(entry.getKey()), entry.getValue()));
+			status.setPlannedDistances(plannedDistances);
 		}
-		status.updateSlowSplit(trackSplit, true);
-		// distance should be non-trivial
-		double distance = status.getEffectiveDistances().get(MODE_TYPE.BIKE);
-		// min distance 
-		if (distance < DISTANCE_THRESHOLD) {
-			// check the average speed of fast part.
-			int fastPart = trackSplit.getSlowIntervals().isEmpty() ? 0 : trackSplit.getSlowIntervals().getFirst()[0];
-			if (getFragmentEffectiveAverage(points, fastPart, points.size()) > BIKE_AVG_SPEED_THRESHOLD) {
-				status.setValidationOutcome(TravelValidity.INVALID);
-				status.setError(ERROR_TYPE.DOES_NOT_MATCH);
-				return status;
-			}
-		}
-		status.setValidationOutcome(TravelValidity.VALID);
 		
+		status.setValidationOutcome(TravelValidity.PENDING);
 		return status;
 	}
 	
+	/**
+	 * @param key
+	 * @return
+	 */
+	public static MODE_TYPE toModeType(TType key) {
+		switch(key) {
+		case CAR:
+		case CARWITHPARKING:
+		case SHAREDCAR:
+		case SHAREDCAR_WITHOUT_STATION:
+			return MODE_TYPE.CAR;
+		case TRAIN: 
+			return MODE_TYPE.TRAIN;
+		case BICYCLE:
+		case SHAREDBIKE:
+		case SHAREDBIKE_WITHOUT_STATION:
+			return MODE_TYPE.BIKE;
+		case WALK:
+			return MODE_TYPE.WALK;
+		default:
+			return MODE_TYPE.BUS;
+		}
+	}
+	
+	public static MODE_TYPE toModeType(String key) {
+		switch(key) {
+		case "bus":
+			return MODE_TYPE.BUS;
+		case "train": 
+			return MODE_TYPE.TRAIN;
+		case "bike":
+			return MODE_TYPE.BIKE;
+		case "walk":
+			return MODE_TYPE.WALK;
+		default:
+			return MODE_TYPE.OTHER;
+		}
+	}
 	private static final double getFragmentEffectiveAverage(List<Geolocation> points, int start, int end) {
 		double realTime = 0;
 		double remainingDistance = 0;

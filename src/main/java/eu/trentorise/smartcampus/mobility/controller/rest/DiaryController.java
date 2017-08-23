@@ -44,6 +44,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
+import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.DiaryEntryType;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelType;
@@ -56,6 +57,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
@@ -65,6 +67,7 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ErrorInfo;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
 
 @Controller
 public class DiaryController {
@@ -340,8 +343,9 @@ public class DiaryController {
 
 				logger.debug("DATA: "+instance+", "+ instance.getValidationResult()+", "+ instance.getValidationResult().getDistance());
 				Double val = 0.0; 
-				if (instance.getValidationResult() != null && instance.getValidationResult().getDistance() != null) {
-					val = instance.getValidationResult().getDistance();
+				MODE_TYPE type = TrackValidator.toModeType(instance.getFreeTrackingTransport());
+				if (instance.getValidationResult() != null && instance.getValidationResult().getValidationStatus().getEffectiveDistances().containsKey(type)) {
+					val = instance.getValidationResult().getValidationStatus().getEffectiveDistances().get(type);
 				}
 				Map<String, Double> distances = Collections.singletonMap(instance.getFreeTrackingTransport(), val);
 				de.setTravelDistances(distances);

@@ -137,9 +137,9 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> findAll(String userId) {
-		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.travelValidity").is(TravelValidity.VALID);
+		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.distance").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus.distance").include("day").include("freeTrackingTransport").include("itinerary");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -149,13 +149,13 @@ public class StatisticsBuilder {
 	}	
 	
 	private List<TrackedInstance> find(String userId, String from, String to) {
-		Criteria criteria = new Criteria("userId").is(userId);//and("validationResult.travelValidity").is(TravelValidity.VALID);
+		Criteria criteria = new Criteria("userId").is(userId);
 		criteria.orOperator(
-				new Criteria("validationResult.travelValidity").is(TravelValidity.VALID).and("changedValidity").is(null),
+				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.distance").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus.distance").include("day").include("freeTrackingTransport").include("itinerary");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -167,7 +167,7 @@ public class StatisticsBuilder {
 	private Map<String, String> outside(String userId, String from, String to) {
 		Map<String, String> result = Maps.newTreeMap();
 		
-		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.distance").gt(0.0); // .and("validationResult.valid").is(true)
+		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		criteria = criteria.and("day").lt(from);
 		Query query = new Query(criteria);
 		query.with(new Sort(Sort.Direction.DESC, "day"));
@@ -178,7 +178,7 @@ public class StatisticsBuilder {
 			result.put("before", before.getDay());
 		}
 		
-		criteria = new Criteria("userId").is(userId).and("validationResult.distance").gt(0.0); // .and("validationResult.valid").is(true)
+		criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		criteria = criteria.and("day").gt(to);
 		query = new Query(criteria);
 		query.with(new Sort(Sort.Direction.ASC, "day"));

@@ -16,10 +16,7 @@
 
 package eu.trentorise.smartcampus.mobility.gamification;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,11 +29,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
-import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
@@ -70,16 +67,16 @@ public class GamificationValidator {
 	@Autowired
 	private GameSetup gameSetup;	
 
-	public Map<String, Object> computePlannedJourneyScore(Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
-		if (geolocations != null) {
-			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
-			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
-				logger.info("Planned has single ttype: " + ttype + ", computing as freetracking");
-				return computeFreeTrackingScore(geolocations, ttype);
-			}
-		}
-		
-		
+	public Map<String, Object> computePlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
+//		if (geolocations != null) {
+//			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
+//			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+//				logger.info("Planned has single ttype: " + ttype + ", computing as freetracking");
+//				return computeFreeTrackingScore(geolocations, ttype);
+//			}
+//		}
+//		
+//		
 		Map<String, Object> data = Maps.newTreeMap();
 
 		String parkName = null; // name of the parking
@@ -231,41 +228,54 @@ public class GamificationValidator {
 		return data;
 	}
 	
-	public Map<String, Object> computeFreeTrackingScore(Collection<Geolocation> geolocationEvents, String ttype) {
+	public Map<String, Object> computeFreeTrackingScore(String appId, Collection<Geolocation> geolocationEvents, String ttype, ValidationStatus vs) throws Exception {
 		Map<String, Object> result = Maps.newTreeMap();
 		Double score = 0.0;
 		double distance = 0; 		
 		
 		if (geolocationEvents != null & geolocationEvents.size() >= 2) {
-
-			List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents);
-			
-			Collections.sort(points, new Comparator<Geolocation>() {
-
-				@Override
-				public int compare(Geolocation o1, Geolocation o2) {
-					return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
-				}
-
-			});
-			
-			points = GamificationHelper.optimize(points);
-			
-			for (int i = 1; i < points.size(); i++) {
-				double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-//				System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
-				distance += d; 
+			if (vs == null) {
+				vs = validateFreeTracking(geolocationEvents, ttype, appId).getValidationStatus();
 			}
 
-			if ("walk".equals(ttype)) {
+//			List<Geolocation> points = new ArrayList<Geolocation>(geolocationEvents);
+//			
+//			Collections.sort(points, new Comparator<Geolocation>() {
+//
+//				@Override
+//				public int compare(Geolocation o1, Geolocation o2) {
+//					return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+//				}
+//
+//			});
+//			
+//			points = GamificationHelper.optimize(points);
+//			
+//			for (int i = 1; i < points.size(); i++) {
+//				double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+////				System.out.println(points.get(i - 1).getLatitude() + "," + points.get(i - 1).getLongitude() + " / " +  points.get(i).getLatitude() + "," +  points.get(i).getLongitude() + " = " + d);
+//				distance += d; 
+//			}
+
+			if ("walk".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.WALK)) {
+				distance = vs.getEffectiveDistances().get(MODE_TYPE.WALK) / 1000.0;
 				result.put("walkDistance", distance);
 //				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
 				score = (distance < 0.25 ? 0 : distance) * 15;
 			}
-			if ("bike".equals(ttype)) {
+			if ("bike".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.BIKE)) {
+				distance = vs.getEffectiveDistances().get(MODE_TYPE.BIKE) / 1000.0;
 				result.put("bikeDistance", distance);
 //				score += Math.min(7, distance) * 5;
 				score += distance * 7;
+			} if ("bus".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.BUS)) {
+				distance = vs.getEffectiveDistances().get(MODE_TYPE.BUS) / 1000.0;
+				result.put("busDistance", distance);
+				result.put("transitDistance", distance);
+			} if ("train".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.TRAIN)) {
+				distance = vs.getEffectiveDistances().get(MODE_TYPE.TRAIN) / 1000.0;
+				result.put("trainDistance", distance);
+				result.put("transitDistance", distance);
 			}
 			
 			// always zero impact
@@ -278,8 +288,8 @@ public class GamificationValidator {
 	
 
 	// TODO: remove?
-	public long computeEstimatedGameScore(Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
-		Long score = (Long) (computePlannedJourneyScore(itinerary, geolocations, log).get("estimatedScore"));
+	public long computeEstimatedGameScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
+		Long score = (Long) (computePlannedJourneyScore(appId, itinerary, geolocations, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
 		return score;
 	}
@@ -287,264 +297,304 @@ public class GamificationValidator {
 
 
 	public ValidationResult validatePlannedJourney(ItineraryObject itinerary, Collection<Geolocation> geolocations, String appId) throws Exception {
+		if (geolocations == null) {
+			return null;
+		}
 		String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
-		if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+		if ("walk".equals(ttype) || "bike".equals(ttype)) {
 			logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
 			ValidationResult vr = validateFreeTracking(geolocations, ttype, appId);
 			vr.setPlannedAsFreeTracking(true);
 			return vr;
 		}
 		
-		boolean legWalkOnly = true;
-		boolean geolocationWalkOnly = true;
-
-		Set<String> geolocationModes = Sets.newHashSet();
-		Set<String> legsModes = Sets.newHashSet();
-
-		ValidationResult vr = new ValidationResult();
-		vr.setGeoLocationsN(geolocations.size());
-		vr.setGeoActivities(geolocationModes);
-		vr.setLegsActivities(legsModes);
-
-		List<List<Geolocation>> legPositions = Lists.newArrayList();
-		List<List<Geolocation>> matchedPositions = Lists.newArrayList();
-		for (Leg leg : itinerary.getData().getLeg()) {
-			legPositions.addAll(GamificationHelper.splitList(GamificationHelper.decodePoly(leg)));
-
-			TType tt = leg.getTransport().getType();
-			if (FAST_TRANSPORTS.contains(tt)) {
-				// onLeg.setActivity_type(IN_VEHICLE);
-				legsModes.add(IN_VEHICLE);
-				legWalkOnly = false;
-			} else if (tt.equals(TType.BICYCLE)) {
-				// onLeg.setActivity_type(ON_BICYCLE);
-				legsModes.add(ON_BICYCLE);
-				legWalkOnly = false;
-			} else if (tt.equals(TType.WALK)) {
-				// onLeg.setActivity_type(ON_FOOT);
-				legsModes.add(ON_FOOT);
-			}
-		}
-
-		vr.setLegsLocationsN(legPositions.size());
-
-		double distance = 0;
-		long time = 0;		
-		
-
-		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
-		Collections.sort(points, new Comparator<Geolocation>() {
-
-			@Override
-			public int compare(Geolocation o1, Geolocation o2) {
-				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
-			}
-
-		});
-		
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 
-		boolean inRange = true;
-
-		if (game.getAreas() != null && !game.getAreas().isEmpty()) {
-			if (!points.isEmpty()) {
-				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
-				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
-			}
-		}
+		ValidationResult vr = new ValidationResult();
+		vr.setValidationStatus(TrackValidator.validatePlanned(geolocations, itinerary.getData(), game.getAreas()));
 		
-		for (int i = 1; i < points.size(); i++) {
-			double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-			distance += d;
-		}
-		time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
-		vr.setDistance(distance);
-		vr.setTime(time);
-		
-		for (Geolocation geolocation : geolocations) {
-
-			if (geolocation.getAccuracy() != null && geolocation.getActivity_confidence() != null && geolocation.getAccuracy() > SPACE_ERROR * 1000 * 2 && geolocation.getActivity_confidence() < 50) {
-				continue;
-			}
-
-			double lat = geolocation.getLatitude();
-			double lon = geolocation.getLongitude();
-
-			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
-				if (WALKLIKE.contains(geolocation.getActivity_type())) {
-					geolocationModes.addAll(WALKLIKE);
-				} else {
-					geolocationModes.add(geolocation.getActivity_type());
-				}
-
-				if (geolocation.getActivity_type().equals(IN_VEHICLE) && geolocation.getActivity_confidence() > 50) {
-					geolocationWalkOnly = false;
-				}
-			}
-			if (geolocation.getActivity_type() == null) {
-				geolocationModes.addAll(WALKLIKE);
-			}
-
-			List<Geolocation> toRemove = null;
-			for (List<Geolocation> poss : legPositions) {
-				for (Geolocation pos : poss) {
-					double d = GamificationHelper.harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
-					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
-					if (d <= Math.max(SPACE_ERROR, geolocation.getAccuracy() != null ? ((double) geolocation.getAccuracy() / 10000) : 0)) {
-						toRemove = poss;
-						break;
-					}
-				}
-				if (toRemove != null) {
-					break;
-				}
-			}
-			if (toRemove != null) {
-				legPositions.remove(toRemove);
-				matchedPositions.add(toRemove);
-			}
-
-		}
-
-		SetView<String> diffModes = Sets.difference(legsModes, geolocationModes);
-
-		vr.setMatchedLocationsN(matchedPositions.size());
-		vr.setMatchedLocations(vr.getMatchedLocationsN() > Math.ceil(vr.getLegsLocationsN() / 2));
-		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
-		vr.setMatchedActivities(diffModes.size() == 0);
-		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
-		vr.setInAreas(inRange);
-		
-		// TODO temporary validation rules
-//		boolean valid = vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast();
-		boolean valid = !vr.getTooFewPoints() && !vr.getTooFast() && vr.getInAreas();
-		// TODO temporary
-		vr.setTravelValidity(valid ? TravelValidity.PENDING : TravelValidity.INVALID);
-
 		return vr;
+		
+//		if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+//			logger.info("Planned has single ttype: " + ttype + ", validating as freetracking");
+//			ValidationResult vr = validateFreeTracking(geolocations, ttype, appId);
+//			vr.setPlannedAsFreeTracking(true);
+//			return vr;
+//		}
+//		
+//		boolean legWalkOnly = true;
+//		boolean geolocationWalkOnly = true;
+//
+//		Set<String> geolocationModes = Sets.newHashSet();
+//		Set<String> legsModes = Sets.newHashSet();
+//
+//		ValidationResult vr = new ValidationResult();
+//		vr.setGeoLocationsN(geolocations.size());
+//		vr.setGeoActivities(geolocationModes);
+//		vr.setLegsActivities(legsModes);
+//
+//		List<List<Geolocation>> legPositions = Lists.newArrayList();
+//		List<List<Geolocation>> matchedPositions = Lists.newArrayList();
+//		for (Leg leg : itinerary.getData().getLeg()) {
+//			legPositions.addAll(GamificationHelper.splitList(GamificationHelper.decodePoly(leg)));
+//
+//			TType tt = leg.getTransport().getType();
+//			if (FAST_TRANSPORTS.contains(tt)) {
+//				// onLeg.setActivity_type(IN_VEHICLE);
+//				legsModes.add(IN_VEHICLE);
+//				legWalkOnly = false;
+//			} else if (tt.equals(TType.BICYCLE)) {
+//				// onLeg.setActivity_type(ON_BICYCLE);
+//				legsModes.add(ON_BICYCLE);
+//				legWalkOnly = false;
+//			} else if (tt.equals(TType.WALK)) {
+//				// onLeg.setActivity_type(ON_FOOT);
+//				legsModes.add(ON_FOOT);
+//			}
+//		}
+//
+//		vr.setLegsLocationsN(legPositions.size());
+//
+//		double distance = 0;
+//		long time = 0;		
+//		
+//
+//		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
+//		Collections.sort(points, new Comparator<Geolocation>() {
+//
+//			@Override
+//			public int compare(Geolocation o1, Geolocation o2) {
+//				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+//			}
+//
+//		});
+//		
+//		AppInfo app = appSetup.findAppById(appId);
+//		GameInfo game = gameSetup.findGameById(app.getGameId());
+//
+//		boolean inRange = true;
+//
+//		if (game.getAreas() != null && !game.getAreas().isEmpty()) {
+//			if (!points.isEmpty()) {
+//				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
+//				inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
+//			}
+//		}
+//		
+//		for (int i = 1; i < points.size(); i++) {
+//			double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+//			distance += d;
+//		}
+//		time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+//		vr.setDistance(distance);
+//		vr.setTime(time);
+//		
+//		for (Geolocation geolocation : geolocations) {
+//
+//			if (geolocation.getAccuracy() != null && geolocation.getActivity_confidence() != null && geolocation.getAccuracy() > SPACE_ERROR * 1000 * 2 && geolocation.getActivity_confidence() < 50) {
+//				continue;
+//			}
+//
+//			double lat = geolocation.getLatitude();
+//			double lon = geolocation.getLongitude();
+//
+//			if (geolocation.getActivity_type() != null && !geolocation.getActivity_type().isEmpty()) {
+//				if (WALKLIKE.contains(geolocation.getActivity_type())) {
+//					geolocationModes.addAll(WALKLIKE);
+//				} else {
+//					geolocationModes.add(geolocation.getActivity_type());
+//				}
+//
+//				if (geolocation.getActivity_type().equals(IN_VEHICLE) && geolocation.getActivity_confidence() > 50) {
+//					geolocationWalkOnly = false;
+//				}
+//			}
+//			if (geolocation.getActivity_type() == null) {
+//				geolocationModes.addAll(WALKLIKE);
+//			}
+//
+//			List<Geolocation> toRemove = null;
+//			for (List<Geolocation> poss : legPositions) {
+//				for (Geolocation pos : poss) {
+//					double d = GamificationHelper.harvesineDistance(lat, lon, pos.getLatitude(), pos.getLongitude());
+//					double t = Math.abs(pos.getRecorded_at().getTime() - geolocation.getRecorded_at().getTime());
+//					if (d <= Math.max(SPACE_ERROR, geolocation.getAccuracy() != null ? ((double) geolocation.getAccuracy() / 10000) : 0)) {
+//						toRemove = poss;
+//						break;
+//					}
+//				}
+//				if (toRemove != null) {
+//					break;
+//				}
+//			}
+//			if (toRemove != null) {
+//				legPositions.remove(toRemove);
+//				matchedPositions.add(toRemove);
+//			}
+//
+//		}
+//
+//		SetView<String> diffModes = Sets.difference(legsModes, geolocationModes);
+//
+//		vr.setMatchedLocationsN(matchedPositions.size());
+//		vr.setMatchedLocations(vr.getMatchedLocationsN() > Math.ceil(vr.getLegsLocationsN() / 2));
+//		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
+//		vr.setMatchedActivities(diffModes.size() == 0);
+//		vr.setTooFast(legWalkOnly & !geolocationWalkOnly);
+//		vr.setInAreas(inRange);
+//		
+//		// TODO temporary validation rules
+////		boolean valid = vr.getMatchedActivities() && vr.getMatchedLocations() && !vr.getTooFast();
+//		boolean valid = !vr.getTooFewPoints() && !vr.getTooFast() && vr.getInAreas();
+//		// TODO temporary
+//		vr.setTravelValidity(valid ? TravelValidity.PENDING : TravelValidity.INVALID);
+//
+//		return vr;
 	}
 
 	public ValidationResult validateFreeTracking(Collection<Geolocation> geolocations, String ttype, String appId) throws Exception {
 		if (geolocations == null || ttype == null) {
 			return null;
 		}
-		ValidationResult vr = new ValidationResult();
-		vr.reset();
-
-		double averageSpeed = 0;
-		double maxSpeed = 0;
-
-		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
-		Collections.sort(points, new Comparator<Geolocation>() {
-
-			@Override
-			public int compare(Geolocation o1, Geolocation o2) {
-				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
-			}
-
-		});
-
-		int tooFastCountTotal = 0;
-		double distance = 0;
-		long time = 0;
-		double validatedDistance = 0;
-		long validatedTime = 0; 		
-		
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 
-		boolean inRange = true;
-
-		if (points.size() >= 2) {
+		ValidationResult vr = new ValidationResult();
 		
-			logger.debug("Original track points (transform): " + points.size());
-			points = GamificationHelper.optimize(points);
-			logger.debug("Transformed track points (transform): " + points.size());
-			
-			if (game.getAreas() != null && !game.getAreas().isEmpty()) {
-				if (!points.isEmpty()) {
-					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
-					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
-				}
-			}			
-		
-			int tooFastCount = 0;
-			List<Geolocation> fastToRemove = Lists.newArrayList();
-			if (points.size() >= 2) {
-				// compute distance, time, too fast count...
-				for (int i = 1; i < points.size(); i++) {
-					double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
-					
-					long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
-					if (t > 0) {
-						double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
-						maxSpeed = Math.max(maxSpeed, s);
-						if (isMaximumTooFast(s, ttype)) {
-							fastToRemove.add(points.get(i));
-							tooFastCount++;
-							tooFastCountTotal = Math.max(tooFastCountTotal, tooFastCount);
-						} else {
-							tooFastCount = 0;
-							validatedDistance += d;
-							validatedTime += t;							}
-						distance += d;
-					}
-				}
-				
-				time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
-				averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
-			}
+		switch(ttype) {
+		case "walk":
+			vr.setValidationStatus(TrackValidator.validateFreeWalk(geolocations, game.getAreas()));
+			break;
+		case "bike": 
+			vr.setValidationStatus(TrackValidator.validateFreeBike(geolocations, game.getAreas()));
+			break;
+		case "bus": 
+			// TODO reference shapes
+			vr.setValidationStatus(TrackValidator.validateFreeBus(geolocations, null, game.getAreas()));
+			break;
+		case "train": 
+			// TODO reference shapes
+			vr.setValidationStatus(TrackValidator.validateFreeTrain(geolocations, null, game.getAreas()));
+			break;
 		}
-
-		vr.setTooFast(false);
-		if ("walk".equals(ttype)) {
-			if (averageSpeed > 15) {
-				vr.setTooFast(true);
-			}
-		}
-		if ("bike".equals(ttype)) {
-			if (averageSpeed > 27) {
-				vr.setTooFast(true);
-			}
-		}
-		if (tooFastCountTotal > 3) {
-			vr.setTooFast(true);
-		}
-
-		vr.setGeoLocationsN(points.size());
-		
-		vr.setAverageSpeed(averageSpeed);
-		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
-		vr.setMaxSpeed(maxSpeed);
-		vr.setDistance(distance);
-		vr.setTime(time);
-		vr.setValidatedDistance(validatedDistance);
-		vr.setValidatedTime(validatedTime);
-		vr.setInAreas(inRange);
-		
-		
-		boolean valid = !vr.getTooFast() && !vr.getTooFewPoints() && vr.getInAreas();
-		// TODO temporary
-		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);			
-		
 		return vr;
+		
+//		vr.reset();
+//
+//		double averageSpeed = 0;
+//		double maxSpeed = 0;
+//
+//		List<Geolocation> points = new ArrayList<Geolocation>(geolocations);
+//		Collections.sort(points, new Comparator<Geolocation>() {
+//
+//			@Override
+//			public int compare(Geolocation o1, Geolocation o2) {
+//				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+//			}
+//
+//		});
+//
+//		int tooFastCountTotal = 0;
+//		double distance = 0;
+//		long time = 0;
+//		double validatedDistance = 0;
+//		long validatedTime = 0; 		
+//		
+//		AppInfo app = appSetup.findAppById(appId);
+//		GameInfo game = gameSetup.findGameById(app.getGameId());
+//
+//		boolean inRange = true;
+//
+//		if (points.size() >= 2) {
+//		
+//			logger.debug("Original track points (transform): " + points.size());
+//			points = GamificationHelper.optimize(points);
+//			logger.debug("Transformed track points (transform): " + points.size());
+//			
+//			if (game.getAreas() != null && !game.getAreas().isEmpty()) {
+//				if (!points.isEmpty()) {
+//					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(0));
+//					inRange &= GamificationHelper.inAreas(game.getAreas(), points.get(points.size() - 1));
+//				}
+//			}			
+//		
+//			int tooFastCount = 0;
+//			List<Geolocation> fastToRemove = Lists.newArrayList();
+//			if (points.size() >= 2) {
+//				// compute distance, time, too fast count...
+//				for (int i = 1; i < points.size(); i++) {
+//					double d = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+//					
+//					long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+//					if (t > 0) {
+//						double s = (1000.0 * d / ((double) t / 1000)) * 3.6;
+//						maxSpeed = Math.max(maxSpeed, s);
+//						if (isMaximumTooFast(s, ttype)) {
+//							fastToRemove.add(points.get(i));
+//							tooFastCount++;
+//							tooFastCountTotal = Math.max(tooFastCountTotal, tooFastCount);
+//						} else {
+//							tooFastCount = 0;
+//							validatedDistance += d;
+//							validatedTime += t;							}
+//						distance += d;
+//					}
+//				}
+//				
+//				time = points.get(points.size() - 1).getRecorded_at().getTime() - points.get(0).getRecorded_at().getTime();
+//				averageSpeed = (1000.0 * distance / ((double) time / 1000)) * 3.6;
+//			}
+//		}
+//
+//		vr.setTooFast(false);
+//		if ("walk".equals(ttype)) {
+//			if (averageSpeed > 15) {
+//				vr.setTooFast(true);
+//			}
+//		}
+//		if ("bike".equals(ttype)) {
+//			if (averageSpeed > 27) {
+//				vr.setTooFast(true);
+//			}
+//		}
+//		if (tooFastCountTotal > 3) {
+//			vr.setTooFast(true);
+//		}
+//
+//		vr.setGeoLocationsN(points.size());
+//		
+//		vr.setAverageSpeed(averageSpeed);
+//		vr.setTooFewPoints(vr.getGeoLocationsN() < 2);
+//		vr.setMaxSpeed(maxSpeed);
+//		vr.setDistance(distance);
+//		vr.setTime(time);
+//		vr.setValidatedDistance(validatedDistance);
+//		vr.setValidatedTime(validatedTime);
+//		vr.setInAreas(inRange);
+//		
+//		
+//		boolean valid = !vr.getTooFast() && !vr.getTooFewPoints() && vr.getInAreas();
+//		// TODO temporary
+//		vr.setTravelValidity(valid ? TravelValidity.VALID : TravelValidity.INVALID);			
+//		
+//		return vr;
 	}
 
-	private boolean isMaximumTooFast(double speed, String ttype) {
-		if ("walk".equals(ttype)) {
-			if (speed > 20) {
-				return true;
-			}
-		}
-		if ("bike".equals(ttype)) {
-			if (speed > 65) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+//	private boolean isMaximumTooFast(double speed, String ttype) {
+//		if ("walk".equals(ttype)) {
+//			if (speed > 20) {
+//				return true;
+//			}
+//		}
+//		if ("bike".equals(ttype)) {
+//			if (speed > 65) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+//	
 //	public static boolean checkItineraryCompletion(ItineraryObject itinerary, Collection<Geolocation> geolocations) throws Exception {
 //	if (itinerary == null) {
 //		return false;
