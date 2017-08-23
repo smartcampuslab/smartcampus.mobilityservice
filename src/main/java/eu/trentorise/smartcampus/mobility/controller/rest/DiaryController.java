@@ -338,6 +338,7 @@ public class DiaryController {
 			} else if (instance.getFreeTrackingTransport() != null) {
 				de.setTravelType(TravelType.FREETRACKING);
 
+				logger.error("DATA: "+instance+", "+ instance.getValidationResult()+", "+ instance.getValidationResult().getDistance());
 				Double val = instance.getValidationResult() != null ? instance.getValidationResult().getDistance() : 0;
 				Map<String, Double> distances = Collections.singletonMap(instance.getFreeTrackingTransport(), val);
 				de.setTravelDistances(distances);
