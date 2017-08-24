@@ -16,6 +16,8 @@
 
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.security.InvalidKeyException;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,4 +80,30 @@ public class WebLinkUtils {
 		String compileSurveyUrl = String.format(UNSUBSCRIBE_URL, mobilityUrl, id);
 		return compileSurveyUrl;
 	}
+	
+
+	/**
+	 * @param playerId
+	 * @return identity corresponding to the string
+	 * @throws Exception 
+	 */
+	public PlayerIdentity decryptIdentity(String value) throws Exception {
+		String decrypted = cryptUtils.decrypt(value);
+		String[] parts = decrypted.split(":");
+		if (parts == null || parts.length != 2) throw new InvalidKeyException("Invalid identity content: "+decrypted);
+		PlayerIdentity identity = new PlayerIdentity();
+		identity.playerId = parts[0];
+		identity.gameId = parts[1];
+		return identity;
+	}
+	
+	/**
+	 * Player identity structure
+	 * @author raman
+	 *
+	 */
+	public static class PlayerIdentity {
+		public String playerId, gameId;
+	}
+	
 }

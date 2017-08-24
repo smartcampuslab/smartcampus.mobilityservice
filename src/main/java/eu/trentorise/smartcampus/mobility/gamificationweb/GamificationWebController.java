@@ -1,23 +1,17 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +49,7 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
+import eu.trentorise.smartcampus.mobility.gamificationweb.WebLinkUtils.PlayerIdentity;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
@@ -87,13 +83,6 @@ public class GamificationWebController {
 	@Autowired
 	@Value("${mobilityURL}")
 	private String mobilityUrl;	
-	
-	@Autowired
-	@Value("${gamification.secretKey1}")
-	private String secretKey1;
-	@Autowired
-	@Value("${gamification.secretKey2}")
-	private String secretKey2;	
 
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
@@ -116,6 +105,8 @@ public class GamificationWebController {
 	@Autowired
 	private StatusUtils statusUtils;
 
+	@Autowired
+	private WebLinkUtils linkUtils;
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -425,38 +416,55 @@ public class GamificationWebController {
 		return pc;
 		
 	}
+
+	// Method used to unsubscribe user to mailing list
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
+	public 
+	ModelAndView survey(@PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		model.put("language", lang);
+		model.put("key", playerId);
+		return new ModelAndView("web/survey/"+survey, model);
+	}
+
+	// Method used to unsubscribe user to mailing list
+	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey")	///{socialId}
+	public 
+	ModelAndView sendSurvey() throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		return new ModelAndView("web/survey_complete", model);
+	}
 	
 	// Method used to unsubscribe user to mailing list
-		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail")	///{socialId}
+		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
 		public 
-		ModelAndView unsubscribeMail(HttpServletRequest request, @RequestParam String playerId, @RequestParam String gameId) throws UnsupportedEncodingException, NoSuchPaddingException, NoSuchAlgorithmException {
-			EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
+		ModelAndView unsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
+			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+			
 			Map<String, Object> model = new HashMap<String, Object>();
 			String user_language = "it";
 			Player p = null;
 			if(playerId != null && playerId.compareTo("") != 0) { // && playerId.length() >= 16){
 				logger.debug("WS-GET. Method unsubscribeMail. Passed data : " + playerId);
-				String sId = "";
-				try {
-					sId = cryptUtils.decrypt(playerId);
-				} catch (InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException e1) {
-					logger.error("Error in decrypting socialId: " + e1.getMessage());
-				} 
+				String sId = identity.playerId;
+				String gameId = identity.gameId;
 				if(sId != null && sId.compareTo("") != 0){	// case of incorrect encrypted string
-					logger.info("WS-GET. Method unsubscribeMail. Finded player : " + sId);
+					logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
 					try {
 						p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
-//						p.setSendMail(false);
+						p.setSendMail(false);
 						playerRepositoryDao.save(p);
 						user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
 					} catch (Exception ex){
-						logger.error("Error in mailing unsubscribtion " + ex.getMessage());
+						logger.error("Error in mail unsubscribtion " + ex.getMessage());
+						p = null;
 					}
 				}
 			}
 			boolean res = (p != null) ? true : false;
 			model.put("wsresult", res);
-			model.put("language", user_language);
+			
+			RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(user_language));
 			return new ModelAndView("web/unsubscribe", model);
 		}	
 	
