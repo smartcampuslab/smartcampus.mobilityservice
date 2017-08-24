@@ -1,26 +1,18 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.mail.MessagingException;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -38,7 +30,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
@@ -63,17 +54,14 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @EnableScheduling
 public class ReportEmailSender {
 
-	@Autowired
-	@Value("${gamification.secretKey1}")
-	private String secretKey1;
-	@Autowired
-	@Value("${gamification.secretKey2}")
-	private String secretKey2;
+	/**
+	 * 
+	 */
+	private static final String START_SURVEY = "start";
 
 	@Autowired
-	@Value("${gamification.surveyUrl}")
-	private String mailSurveyUrl;
-
+	private WebLinkUtils utils;
+	
 	@Autowired
 	@Value("${gamification.url}")
 	private String gamificationUrl;
@@ -89,10 +77,6 @@ public class ReportEmailSender {
 	@Value("${mail.redirectUrl}")
 	private String mailRedirectUrl;
 
-	private final String JSON_GAMEID = "gameId";
-	private final String JSON_PLAYERID = "playerId";
-	private final String JSON_TIMESTAMP = "timestamp";
-	private final String JSON_BADGE = "badge";
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
 
@@ -145,7 +129,6 @@ public class ReportEmailSender {
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 0 17 * * FRI") // Repeat every Friday at 17:00 PM
 	public synchronized void sendWeeklyNotification(String appId) throws Exception {
-		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of one week //long millis = 1415660400000L; //(for test)
 
@@ -213,16 +196,8 @@ public class ReportEmailSender {
 			}
 
 			if (p.isSendMail()) {
-				String surveyLanguage = "?language=" + ((p.getLanguage() != null) ? p.getLanguage() : "it");
-				String compileSurveyUrl = mailSurveyUrl + "/" + p.getId() + surveyLanguage;
-				String encriptedId = "";
-				try {
-					encriptedId = cryptUtils.encrypt(p.getId());
-				} catch (InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException e1) {
-					logger.error("Error in socialId encripting: " + e1.getMessage());
-				}
-				
-				String unsubcribeLink = mobilityUrl + "/gamificationweb/unsubscribeMail?playerId=" + encriptedId + "&gameId=" + gameId;
+				String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
+				String unsubcribeLink = utils.createUnsubscribeUrl(p.getId(), gameId);
 				List<PointConcept> states = null;
 				List<Notification> notifications = null;
 				List<BadgesData> someBadge = null;
@@ -264,7 +239,6 @@ public class ReportEmailSender {
 					}
 
 					// WS Notification Invocation
-					String urlWSNot = "gengine/notification/" + gameId + "/" + p.getId();
 					notifications = getBadgeNotifications(millis, appId, p.getId());
 				} catch (InterruptedException ie) {
 					logger.error(String.format("Ws invoke sleep exception  %s", ie.getMessage()));
@@ -350,10 +324,13 @@ public class ReportEmailSender {
 		// }
 	}
 
+public String getPlayerLang(Player p) {
+	return p.getLanguage() != null ? p.getLanguage() : ITA_LANG;
+}
+
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 15 15 * * MON") // Repeat every Monday at 15:15
 	public synchronized void checkWinnersNotification(String appId) throws Exception {
-		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		
@@ -414,16 +391,8 @@ public class ReportEmailSender {
 			}
 
 			if (p.isSendMail()) {
-				String surveyLanguage = "?language=" + ((p.getLanguage() != null) ? p.getLanguage() : "it");
-				String compileSurveyUrl = mailSurveyUrl + "/" + p.getId() + surveyLanguage;
-				String encriptedId = "";
-				try {
-					encriptedId = cryptUtils.encrypt(p.getId());
-				} catch (InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException e1) {
-					logger.error("Error in socialId encripting: " + e1.getMessage());
-				}
-				
-				String unsubcribeLink = mobilityUrl + "/gamificationweb/unsubscribeMail/?socialId=" + encriptedId; // + p.getSocialId();
+				String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
+				String unsubcribeLink = utils.createUnsubscribeUrl(p.getId(), gameId);
 				// List<State> states = null;
 				List<PointConcept> states = null;
 				List<Notification> notifications = null;
@@ -466,7 +435,6 @@ public class ReportEmailSender {
 					}
 
 					// WS Notification Invocation
-					String urlWSNot = "gengine/notification/" + gameId + "/" + p.getId();
 					notifications = getBadgeNotifications(millis, appId, p.getId());
 				} catch (InterruptedException ie) {
 					logger.error(String.format("Ws invoke sleep exception  %s", ie.getMessage()));
@@ -551,10 +519,8 @@ public class ReportEmailSender {
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 30 11 * * WED") // Repeat every WED at 11:30 AM
 	public synchronized void sendReportMail(String appId) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException {
-		EncryptDecrypt cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
-		String timestamp = "?timestamp=" + millis;
 		long millisNoEvent = 1480978800000L; // Tue Dec 06 2016 00:00:00 GMT+0100
 		boolean showFinalEvent = (System.currentTimeMillis() <= millisNoEvent) ? true : false;
 
@@ -586,22 +552,8 @@ public class ReportEmailSender {
 				String moduleName = "mail/certificates-pdf/Certificato_TrentoPlayAndGo_" + p.getId() + ".pdf";
 				try {
 					File finalModule = new File(path + moduleName);
-					String surveyLanguage = "?language=" + ((p.getLanguage() != null) ? p.getLanguage() : "it");
-					String compileSurveyUrl = mailSurveyUrl + "/" + p.getId() + surveyLanguage;
-					String compileSurveyUrlShort = mailSurveyUrl + "/" + p.getId();
-					String encriptedId = "";
-					try {
-						encriptedId = cryptUtils.encrypt(p.getId());
-					} catch (InvalidKeyException e1) {
-						logger.error("Errore in socialId encripting: " + e1.getMessage());
-					} catch (InvalidAlgorithmParameterException e2) {
-						logger.error("Errore in socialId encripting: " + e2.getMessage());
-					} catch (BadPaddingException e3) {
-						logger.error("Errore in socialId encripting: " + e3.getMessage());
-					} catch (IllegalBlockSizeException e4) {
-						logger.error("Errore in socialId encripting: " + e4.getMessage());
-					}
-					String unsubcribeLink = mobilityUrl + "/gamificationweb/rest/unsubscribeMail/?socialId=" + encriptedId; // + p.getSocialId();
+					String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
+					String unsubcribeLink = utils.createUnsubscribeUrl(p.getId(), gameId);
 					// List<State> states = null;
 					List<PointConcept> states = null;
 					List<Notification> notifications = null;
@@ -637,7 +589,6 @@ public class ReportEmailSender {
 						}
 
 						// WS Notification Invocation
-						String urlWSNot = "gengine/notification/" + gameId + "/" + p.getId();
 						notifications = getBadgeNotifications(millis, appId, p.getId());
 					} catch (InterruptedException ie) {
 						logger.error(String.format("Ws invoke sleep exception  %s", ie.getMessage()));
@@ -656,10 +607,10 @@ public class ReportEmailSender {
 							if (states != null && states.size() > 0) {
 								this.emailService.sendMailGamificationWithReport(playerName, states.get(0).getScore() + "", null, null, null, null, // health and pr point are null
 										null, null, null, null, null, null, surveyCompiled, finalModule, challenges, lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl,
-										compileSurveyUrl, compileSurveyUrlShort, showFinalEvent, unsubcribeLink, mailLoc);
+										compileSurveyUrl, compileSurveyUrl, showFinalEvent, unsubcribeLink, mailLoc);
 							} else {
 								this.emailService.sendMailGamificationWithReport(playerName, "0", "0", "0", null, null, null, null, null, null, null, null, surveyCompiled, finalModule, challenges,
-										lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl, compileSurveyUrl, compileSurveyUrlShort, showFinalEvent, unsubcribeLink, mailLoc);
+										lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl, compileSurveyUrl, compileSurveyUrl, showFinalEvent, unsubcribeLink, mailLoc);
 							}
 						} catch (MessagingException e) {
 							logger.error(String.format("Errore invio mail : %s", e.getMessage()));
@@ -1001,6 +952,7 @@ public class ReportEmailSender {
 		return correctBadges;
 	}
 
+	@SuppressWarnings("serial")
 	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
 			{
@@ -1086,12 +1038,12 @@ public class ReportEmailSender {
 //		return notifications;
 //	}
 
+	@SuppressWarnings("rawtypes")
 	public List<Notification> getBadgeNotifications(long timestamp, String appId, String userId) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		
 		AppInfo app = appSetup.findAppById(appId);
-		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
 		String url = gamificationUrl + "notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=BadgeNotification&fromTs=" + timestamp * 0;
 		
@@ -1102,7 +1054,6 @@ public class ReportEmailSender {
 		List nots = mapper.readValue(res.getBody(), List.class);
 		List<Notification> notifications = Lists.newArrayList();
 		
-		Map<String, Double> result = Maps.newTreeMap();
 		for (Object not: nots) {
 			Notification msg = mapper.convertValue(not, Notification.class);
 			notifications.add(msg);
@@ -1112,40 +1063,6 @@ public class ReportEmailSender {
 		
 	}	
 	
-	
-	
-	
-	
-	/**
-	 * Method checlNotification: convert the result JSON string in an array of objects
-	 * 
-	 * @param result:
-	 *            input string with the json of the ws
-	 * @return Notification List
-	 */
-	private List<Notification> chekNotification(String result) {
-		List<Notification> notificationList = Lists.newArrayList();
-		logger.debug(String.format("Result from WS: %s", result));
-
-		// Here I have to convert result string in a list of notifications
-		try {
-			JSONArray JNotifics = new JSONArray(result);
-			for (int i = 0; i < JNotifics.length(); i++) {
-				JSONObject fields = JNotifics.getJSONObject(i);
-				String gameId = fields.getString(JSON_GAMEID);
-				String playerId = fields.getString(JSON_PLAYERID);
-				Long timestamp = fields.getLong(JSON_TIMESTAMP);
-				String badge = fields.getString(JSON_BADGE);
-				Notification notification = new Notification(gameId, playerId, timestamp, badge);
-				notificationList.add(notification);
-			}
-
-		} catch (JSONException e) {
-			logger.error(String.format("Exception in parsing notification: %s", e.getMessage()));
-		}
-		return notificationList;
-	}
-
 	/**
 	 * Method checkNotification: convert the result JSON string in an array of objects
 	 * 
@@ -1174,7 +1091,6 @@ public class ReportEmailSender {
 
 	// Method used to read a week conf data file and store all values in a list of WeekConfData object
 	public List<WeekConfData> readWeekConfFile(String src) throws Exception {
-		BufferedReader br = null;
 
 		String cvsSplitBy = ",";
 		List<WeekConfData> confWeekFileData = Lists.newArrayList();
@@ -1207,7 +1123,6 @@ public class ReportEmailSender {
 
 	// Method used to read a week prizes file and store all data in a list of WeekPrizeData object
 	public List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
-		BufferedReader br = null;
 		String cvsSplitBy = ",";
 		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
 
@@ -1240,7 +1155,6 @@ public class ReportEmailSender {
 	}
 
 	public List<WeekWinnersData> readWeekWinnersFile(String src) throws Exception {
-		BufferedReader br = null;
 		String cvsSplitBy = ",";
 		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
 

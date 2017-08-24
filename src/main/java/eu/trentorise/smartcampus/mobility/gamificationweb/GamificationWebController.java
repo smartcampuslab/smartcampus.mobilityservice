@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,7 +54,6 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeDescriptionDataSetup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
@@ -74,8 +72,6 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 
 @Controller
 public class GamificationWebController {
-
-	private static final String PLAYER_RANKING = "playerRanking";
 
 	private static final String NICK_RECOMMANDATION = "nick_recommandation";
 	private static final String TIMESTAMP = "timestamp";
@@ -130,112 +126,6 @@ public class GamificationWebController {
 		profileService = new BasicProfileService(aacURL);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
-
-	// TODO reenable?
-//	// Cache for actual week classification
-//	LoadingCache<String, String> cacheClass = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<String, String>() {
-//		public String load(String actualWeekTs) throws Exception {
-//			return callWSFromEngine(actualWeekTs);
-//		}
-//
-//		/*
-//		 * public ListenableFuture<String> reload(final String actualWeekTs,
-//		 * String prevData) { if(neverNeedsRefresh(actualWeekTs)){ return
-//		 * Futures.immediateFuture(prevData); } else { // asynchronous!
-//		 * ListenableFutureTask<String> task = ListenableFutureTask.create(new
-//		 * Callable<String>() { public String call() { return
-//		 * callWSFromEngine(actualWeekTs); } }); executor.execute(task); return
-//		 * task; } }
-//		 */
-//	});
-	
-//	// Scheduled method to cache the old week classification.
-//		//@Scheduled(cron="55 59 23 * * FRI") 		// Repeat every Friday at 23:59:55 PM
-//		@Scheduled(fixedRate = 31*60*1000) 		// Repeat every 31 minutes
-//		public synchronized void refreshOldWeekClassification() throws IOException {
-//			//oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 3);
-//			oldWeekTimestamp = System.currentTimeMillis() - (LASTWEEKDELTA * 7);
-//			logger.debug("Refreshing old week classification: new timestamp - " + oldWeekTimestamp);
-//			lastWeekClassification = callWSFromEngine(oldWeekTimestamp + "");
-//		}
-//		
-//		@Scheduled(fixedRate = 10*60*1000) 		// Repeat every ten minute
-//		public synchronized void refreshGlobalCompleteNicks() throws IOException {
-//			Long actualLong = playerRepositoryDao.count();
-//			if(actualLong > playerNum){
-//				try {
-//					allNickNames = getAllNicksMapFromDB();
-//				} catch (Exception e) {
-//					logger.error("Error in nicknames refresh " + e.getMessage());
-//				}
-//				playerNum = actualLong;
-//			}
-//		}
-//		
-//		@Scheduled(fixedRate = 30*60*1000) 		// Repeat every thirty minute
-//		public synchronized void refreshGlobalCompleteClassification() throws IOException {
-//			logger.debug("Refreshing global week classification");
-//			try{
-//				globalCompleteClassification = callWSFromEngine("complete");
-//			} catch (Exception ex){
-//				logger.error("Error in global classification refresh");
-//			}
-//		}	
-//		
-//		// Scheduled method used to check user that has registered with a recommendation nick. If they have points a recommendation is send to gamification
-//		@Scheduled(fixedRate = 29*60*1000)		// Repeat every 30 minutes
-//		public synchronized void checkRecommendation() {
-//			logger.debug("Starting recommendation check...");
-//			String allData = "";
-//			try {
-//				//allData = chacheClass.get("complete");	// all classification data
-//				allData = globalCompleteClassification;
-//			} catch (Exception e) {
-//				logger.error("Exception in global classification reading: " + e.getMessage());
-//			}	
-//			StatusUtils statusUtils = new StatusUtils();
-//			Map<String, Integer> completeClassification = new HashMap<String, Integer>();
-//			try {
-//				completeClassification = statusUtils.correctGlobalClassification(allData);
-//			} catch (JSONException e) {
-//				logger.error("Exception in global classification calculating: " + e.getMessage());
-//			}
-//			String type = (isTest.compareTo("true") == 0) ? "test" : "prod";
-//			Iterable<Player> iter = playerRepositoryDao.findAllByTypeAndCheckedRecommendation(type, false);
-//			if(iter != null && Iterables.size(iter) > 0){
-//				for(Player p: iter){
-//					Map<String, Object> pData = p.getPersonalData();
-//					if(pData != null){
-//						String recommender = (String)pData.get(NICK_RECOMMANDATION);
-//						String userId = p.getSocialId();
-//						Integer points = completeClassification.get(userId);
-//						if(points != null){
-//							int score = points.intValue();
-//							logger.debug("Green leaves point user " + userId + ": " + score);
-//							int minRecPoints = 0;
-//							try	{
-//								minRecPoints = Integer.parseInt(RECOMMENDATION_POINTS);
-//							} catch (Exception ex){
-//								minRecPoints = 1;
-//							}
-//							if(score >= minRecPoints){
-//								Player recPlayer = playerRepositoryDao.findByNickIgnoreCaseAndType(correctNameForQuery(recommender), type);
-//								if (recommender != null && recPlayer != null) {
-//									sendRecommendationToGamification(recPlayer.getPid());
-//									p.setCheckedRecommendation(true);
-//									playerRepositoryDao.save(p);	//update player data in db
-//								}
-//							}
-//						} else {
-//							logger.debug("Green leaves point user " + userId + ": none");
-//						}
-//					}
-//				}
-//			} else {
-//				logger.debug("No player with recommandation to check!");
-//			}
-//			logger.debug("Ending recommendation check...");
-//		}		
 
 	// Method for mobile player registration (in mobile app)
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/register")
@@ -349,9 +239,8 @@ public class GamificationWebController {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private int getGreenLeavesPoints(String data) throws Exception {
-		List<PointConcept> concepts = Lists.newArrayList();
-
 		Map playerMap = mapper.readValue(data, Map.class);
 		if (playerMap.containsKey("state")) {
 			Map stateMap = mapper.convertValue(playerMap.get("state"), Map.class);
@@ -423,15 +312,6 @@ public class GamificationWebController {
 		return uc;
 	}
 
-	private String getFieldValue(String completeParam) {
-		String val = "";
-		String[] nameAndVal = completeParam.split("=");
-		if (nameAndVal.length > 1) {
-			val = nameAndVal[1];
-		}
-		return val;
-	}
-
 	// Method used to get the user status data (by mobyle app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status")
 	public @ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
@@ -475,7 +355,6 @@ public class GamificationWebController {
 		logger.debug("WS-get classification user token " + token);
 		
 		BasicProfile user = null;
-		int maxClassificationSize = 500;
 		try {
 			user = profileService.getBasicProfile(token);
 			if (user == null) {
@@ -617,30 +496,6 @@ public class GamificationWebController {
 		return result;
 	}
 
-	private List<Player> getAllNicknames(HttpServletRequest request, @RequestParam String urlWS) throws Exception {
-		logger.debug("WS-get All nickanmes.");
-		List<Player> list = new ArrayList<Player>();
-		Iterable<Player> iter = playerRepositoryDao.findAll();
-		for (Player p : iter) {
-			logger.debug(String.format("Profile result %s", p.getNickname()));
-			list.add(p);
-		}
-		return list;
-	}
-	
-	private Map<String, String> getAllNicksMapFromDB() throws Exception {
-		logger.debug("DB - get All niks."); //Added for log ws calls info in preliminary phase of portal
-		Map<String, String> niks = new HashMap<String, String>();
-		Iterable<Player> iter = playerRepositoryDao.findAll();
-		for(Player p: iter){
-			if(p.getNickname() != null && p.getNickname().compareTo("") != 0){
-				logger.debug(String.format("Profile result %s", p.getNickname()));
-				niks.put(p.getId(), p.getNickname());
-			}
-		}
-		return niks;
-	}	
-
 	public ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS); // Added for log ws calls info
@@ -681,6 +536,7 @@ public class GamificationWebController {
 		return board;
 	}
 
+	@SuppressWarnings("serial")
 	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
 			{

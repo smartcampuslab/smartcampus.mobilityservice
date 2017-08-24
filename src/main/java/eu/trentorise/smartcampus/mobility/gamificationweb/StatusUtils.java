@@ -179,7 +179,7 @@ public class StatusUtils {
 				// new Challenge management part
 				try {
 					if (challUtils != null) {
-						List<List> challLists = challUtils.correctChallengeData(profile, challType, language, pointConcept, bcc_list);
+						List<List> challLists = challUtils.correctChallengeData(playerId, gameId, profile, challType, language, pointConcept, bcc_list);
 						if (challLists != null && challLists.size() == 2) {
 							challenges = challLists.get(0);
 							oldChallenges = challLists.get(1);

@@ -18,7 +18,8 @@ public class ChallengesUtils {
 	
 	@Autowired
 	private ChallengeManager challengeManager;
-	
+	@Autowired
+	private WebLinkUtils utils;
 	// Class used to read the player personalData and create the correct challenges
 	// challeng_keys
 //	private final String CHAL_K = "ch_";
@@ -477,7 +478,7 @@ public class ChallengesUtils {
 	
 	// Method correctChallengeData: used to retrieve the challenge data objects from the user profile data
 	@SuppressWarnings("rawtypes")
-	public List<List> correctChallengeData(String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
+	public List<List> correctChallengeData(String playerId, String gameId, String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
 		List<ChallengesData> challenges = new ArrayList<ChallengesData>();
     	List<ChallengesData> oldChallenges = new ArrayList<ChallengesData>();
     	List<List> challengesList = new ArrayList<List>();
@@ -600,8 +601,10 @@ public class ChallengesUtils {
 		    				if(tmp_chall.getSuccess()){
 	    						row_status = 1; status = 100;
 	    					}
+		    				// survey link to be passed
+		    				String link = utils.createSurveyUrl(playerId, gameId, (String)challenge.getFields().get("surveyType"), language);
+		    				challenge.getFields().put("surveylink", link);
 		    				String completeDesc = challengeManager.fillLongDescription(challenge, "surveyType", language);
-		    				completeDesc = completeDesc.replaceAll("<LINK>", "");
 		    				tmp_chall.setChallCompleteDesc(completeDesc);
 		    				
 		    				break;

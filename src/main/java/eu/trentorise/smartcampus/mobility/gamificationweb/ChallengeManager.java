@@ -231,4 +231,10 @@ public class ChallengeManager {
 		}
 		return word;
 	}
+	
+	public static void main(String[] args) {
+		ST st = new ST("test LINK <link> \\<a href='<link>'>HERE\\</a>");
+		st.add("link", "test");
+		System.err.println(st.render());
+	}
 }

@@ -27,4 +27,18 @@ geolocations:
     dir: db
     
 gamification:
-  url: http://localhost:2020/gamification/
+  url: http://localhost:8080/gamification/
+  secretKey1: 
+  secretKey2: 
+
+mail:
+  username: 
+  password: 
+  host: smtp.gmail.com
+  port: 465
+  protocol: smtps   
+  from: 
+  to: 
+  send: false
+  subject: Gamification Notification  
+  redirectUrl: http://localhost:8010/core.mobility/gamificationweb
