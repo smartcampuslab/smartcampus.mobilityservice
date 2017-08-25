@@ -24,10 +24,10 @@
   }
   .navbar-default .navbar-nav
   
-/*  .navbar-default .navbar-nav > .active { */
-/*      color: #00984a; /*#555555;*/ */
-/*      background-color: #c2c2c2; */
-/*  } */
+  .navbar-default .navbar-nav > .active { 
+      color: #00984a; /*#555555;*/ 
+      background-color: #c2c2c2; 
+  } 
   
   .navbar-default .navbar-nav > .active > a, 
   .navbar-default .navbar-nav > .active > a:hover, 
