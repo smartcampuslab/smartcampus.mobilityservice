@@ -1,0 +1,146 @@
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.thymeleaf.org"
+  th:with="lang=${#locale.language}" th:lang="${lang}">
+<head lang="it">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title th:text="#{survey.title}">Play&amp;Go - Questionario finale</title>
+<link href="../../../../css/bootstrap.min.css" rel="stylesheet" />
+<link href="../../../../css/bootstrap-theme.min.css" rel="stylesheet" />
+<link href="../../../../css/gg_style.css" rel="stylesheet" />
+
+<!-- required libraries -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="../../../../lib/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+  <h3 th:text="#{survey.head}" style="text-align:center;">Questionario Play&amp;Go</h3>
+  <form id="form" role="form" name="form" action="../../" method="POST" >
+    <input type="hidden" name="key" th:value="${key}"/>
+    
+    <div class="form-group">
+      <label for="age" th:text="#{survey.age}">Seleziona una fascia di età</label>
+      <select name="age" id="age" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="0-20" th:text="#{survey.age.1}">&lt; 20 anni</option>
+        <option value="20-35" th:text="#{survey.age.2}">20 - 35 anni</option>
+        <option value="35-50" th:text="#{survey.age.3}">35 - 50 anni</option>
+        <option value="50-70" th:text="#{survey.age.4}">50 - 70 anni</option>
+        <option value="70+" th:text="#{survey.age.5}">&gt; 70 anni</option>
+      </select>
+    </div> 
+    
+    <div class="form-group">
+      <label for="mean" th:text="#{survey.mean}">Quale dei seguenti mezzi utilizzi più di frequente per i tuoi spostamenti quotidiani?</label>
+      <select name="mean" id="mean" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="auto" th:text="#{survey.mean.1}"></option>
+        <option value="public" th:text="#{survey.mean.2}"></option>
+        <option value="bike" th:text="#{survey.mean.3}"></option>
+        <option value="walk" th:text="#{survey.mean.4}"></option>
+        <option value="bikesharing" th:text="#{survey.mean.5}"></option>
+        <option value="carsharing" th:text="#{survey.mean.6}"></option>
+      </select>
+    </div> 
+
+    <div class="form-group">
+      <label for="kms" th:text="#{survey.kms}">Quanti Km percorri in media ogni giorno?</label>
+      <select name="kms" id="kms" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="0-5" th:text="#{survey.kms.1}"></option>
+        <option value="5-10" th:text="#{survey.kms.2}"></option>
+        <option value="10-30" th:text="#{survey.kms.3}"></option>
+        <option value="30+" th:text="#{survey.kms.4}"></option>
+      </select>
+    </div> 
+
+    <div class="form-group">
+      <label for="residence" th:text="#{survey.residence}">Qual'é il tuo Comune di residenza?</label>
+      <select name="residence" id="residence" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="Trento" th:text="#{survey.residence.1}"></option>
+        <option value="Rovereto" th:text="#{survey.residence.2}"></option>
+        <option value="Other" th:text="#{survey.residence.3}"></option>
+      </select>
+    </div> 
+
+    <div class="form-group">
+      <label for="source" th:text="#{survey.source}">Come sei venuto a conoscenza di questo gioco?</label>
+      <select name="source" id="source" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="poster" th:text="#{survey.source.1}"></option>
+        <option value="magazine" th:text="#{survey.source.2}"></option>
+        <option value="tvradio" th:text="#{survey.source.3}"></option>
+        <option value="events" th:text="#{survey.source.4}"></option>
+        <option value="facebook" th:text="#{survey.source.5}"></option>
+        <option value="friends" th:text="#{survey.source.6}"></option>
+        <option value="other" th:text="#{survey.source.7}"></option>
+      </select>
+    </div> 
+    
+    <div class="form-group">
+      <label for="prev" th:text="#{survey.prev}">Hai partecipato a precedenti edizioni di Play&amp;Go?</label>
+      <select name="prev" id="prev" class="form-control" onchange="changePart()">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="yes" th:text="#{survey.prev.1}"></option>
+        <option value="no" th:text="#{survey.prev.2}"></option>
+      </select>
+    </div> 
+    
+    <div class="form-group" id="inflgroup" style="display:none;">
+      <label for="infl" th:text="#{survey.infl}">In caso affermativo, ritieni che Play&amp;Go abbia influenzato le tue abitudini di mobilità?</label>
+      <select name="infl" id="infl" class="form-control">
+        <option value="" th:text="#{survey.empty}"></option>
+        <option value="5" th:text="#{survey.infl.1}"></option>
+        <option value="4" th:text="#{survey.infl.2}"></option>
+        <option value="3" th:text="#{survey.infl.3}"></option>
+        <option value="2" th:text="#{survey.infl.4}"></option>
+        <option value="1" th:text="#{survey.infl.5}"></option>
+      </select>
+    </div>     
+    
+    <div class="form-group"><i th:text="#{survey.required}"></i></div>
+    
+    <div class="form-group">
+      <button id="send" type="button" class="btn btn-primary" th:text="#{survey.submit}" onclick="send()" >Submit</button>
+    </div> 
+     
+  </form>
+  </div>
+
+
+<script>
+/*<![CDATA[*/
+  function changePart() {
+    if ($('#prev').val() == 'yes') {
+        $('#inflgroup').show();     
+    } else {
+          $('#inflgroup').hide();      
+    }
+  }
+  
+  function send() {
+    if (checkData()) {
+      $('form').submit();     
+    }
+  }
+  
+  function checkData() {
+	  var disabled = false;
+    if (!$('#age').val() || !$('#mean').val() || !$('#kms').val() || !$('#residence').val() || !$('#source').val() || !$('#prev').val()) {
+        disabled = true;
+    }
+    if ($('#prev').val() == 'yes' && !$('#infl').val()) {
+        disabled = true;
+    }
+    $('#send').prop('disabled', disabled);
+    return disabled;
+  }
+  $('select').change(checkData);
+  checkData();
+/*]]>*/
+</script>
+</body>
+</html>

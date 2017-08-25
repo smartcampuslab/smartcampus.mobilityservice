@@ -121,23 +121,24 @@ public class GamificationWebController {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
-	// Method used to unsubscribe user to mailing list
-	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb")	///{socialId}
+	@RequestMapping(method = RequestMethod.GET, value = {"/gamificationweb","/gamificationweb/"})	///{socialId}
 	public 
 	ModelAndView web(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
-		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
-
-		ModelAndView model = new ModelAndView("web/index");
-		model.addObject("language", lang);
-		WeekConfData week = emailSender.getCurrentWeekConf();
-		if (week != null) {
-			model.addObject("week", week.getWeekNum());
-			model.addObject("weeklyPrizes", emailSender.getWeekPrizes(week.getWeekNum(), lang));
-		}
-		model.addObject("view", "prizes");
-		return model;
+		return new ModelAndView("redirect:/gamificationweb/rules");
 	}
-	// Method used to unsubscribe user to mailing list
+
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/cookie_license")	///{socialId}
+	public 
+	ModelAndView cookieLicense(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
+		return new ModelAndView("web/cookie_license");
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/cookie_info")	///{socialId}
+	public 
+	ModelAndView cookieInfo(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
+		return new ModelAndView("web/cookie_info");
+	}
+
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/{page}")	///{socialId}
 	public 
 	ModelAndView webPage(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang, @PathVariable String page) {
@@ -456,7 +457,8 @@ public class GamificationWebController {
 	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
-	ModelAndView survey(@PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
+	ModelAndView survey(HttpServletRequest request, HttpServletResponse response, @PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
+		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
 		ModelAndView model = new ModelAndView("web/survey/"+survey);
 		model.addObject("language", lang);
 		model.addObject("key", playerId);
