@@ -21,7 +21,7 @@
 		    cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
 		  }
       function goToApp(){
-    	  window.close();
+    	  window.location.href='../../';
       }
 		  /*]]>*/
 		</script>
@@ -77,20 +77,6 @@
       </div>
     </div>
   </div>
-
-<script type="text/javascript">
-  /* if(!cookieEnabled){
-    document.getElementById("cookies").innerHTML = "Il tuo browser sembra non avere i cookie attivi. E' necessario attivarli per utilizzare il portale. Clicca <a href='cookie_info'>QUI</a> per maggiori informazioni";
-    $("#btn_login_prod").attr("disabled", "disabled");
-    $("#btn_login_facebook").attr("disabled", "disabled");
-    $("#btn_login_test").attr("disabled", "disabled");
-  } else {
-    $("#btn_login_prod").removeAttr("disabled");
-    $("#btn_login_facebook").removeAttr("disabled");
-    $("#btn_login_test").removeAttr("disabled");
-  } */
-</script>
-
 <!-- Codice per accettazione cookie - Inizio -->
 <script src="../../js/cookiechoices.js"></script>
 <script>

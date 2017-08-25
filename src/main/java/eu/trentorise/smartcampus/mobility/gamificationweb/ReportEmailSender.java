@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.mail.MessagingException;
@@ -102,6 +105,9 @@ public class ReportEmailSender {
 
 	private static final Logger logger = Logger.getLogger(ReportEmailSender.class);
 
+	private Map<String, List<WeekPrizeData>> weekPrizeData = new HashMap<>();
+	private List<WeekConfData> weekConfData = null;
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
 	public synchronized void sendWeeklyNotification() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -156,31 +162,29 @@ public class ReportEmailSender {
 		logger.debug(String.format("Check Notification task. Cycle - %d", i++));
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
-		List<WeekConfData> mailConfigurationFileData = readWeekConfFile("mail/" + conf_directory + "/game_week_configuration.csv");
-		List<WeekPrizeData> mailPrizeFileData = readWeekPrizesFile("mail/" + conf_directory + "/game_week_prize.csv");
-		List<WeekPrizeData> mailPrizeFileDataEng = readWeekPrizesFile("mail/" + conf_directory + "/game_week_prize_en.csv");
+		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile("mail/" + conf_directory + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
-		String actual_week = "";
+		int actual_week = 0;
 		String actual_week_theme = "";
 		String actual_week_theme_it = "";
 		String actual_week_theme_eng = "";
-		String last_week = "";
+		int last_week = -1;
 		Boolean are_chall = false;
 		Boolean are_prizes = false;
 		Boolean are_prizes_last_week = false;
 		for (int i = 0; i < mailConfigurationFileData.size(); i++) {
 			WeekConfData tmpWConf = mailConfigurationFileData.get(i);
-			if (tmpWConf.isActual()) {
+			if (tmpWConf.currentWeek()) {
 				actual_week = tmpWConf.getWeekNum();
 				actual_week_theme_it = tmpWConf.getWeekTheme();
 				actual_week_theme_eng = tmpWConf.getWeekThemeEng();
-				last_week = Integer.toString(Integer.parseInt(actual_week) - 1);
+				last_week = actual_week - 1;
 				are_chall = tmpWConf.isChallenges();
 				are_prizes = tmpWConf.isPrizes();
 				are_prizes_last_week = tmpWConf.isPrizesLast();
-				mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
+				mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
 			}
 		}
 
@@ -190,6 +194,7 @@ public class ReportEmailSender {
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 			try {
+				// TODO FIXME
 				Thread.sleep(1500);
 			} catch (InterruptedException e1) {
 				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
@@ -218,11 +223,11 @@ public class ReportEmailSender {
 					if (language.compareTo(ENG_LANG) == 0) {
 						actual_week_theme = actual_week_theme_eng;
 						mailLoc = Locale.ENGLISH;
-						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileDataEng);
+						mailPrizeActualData = getWeekPrizes(actual_week, ENG_LANG);
 					} else {
 						actual_week_theme = actual_week_theme_it;
 						mailLoc = Locale.ITALIAN;
-						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
+						mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
 						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
@@ -351,32 +356,30 @@ public String getPlayerLang(Player p) {
 		logger.debug(String.format("Check Notification task. Cycle - %d", i++));
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
-		List<WeekConfData> mailConfigurationFileData = readWeekConfFile("mail/" + conf_directory + "/game_week_configuration.csv");
-		List<WeekPrizeData> mailPrizeFileData = readWeekPrizesFile("mail/" + conf_directory + "/game_week_prize.csv");
-		List<WeekPrizeData> mailPrizeFileDataEng = readWeekPrizesFile("mail/" + conf_directory + "/game_week_prize_en.csv");
+		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile("mail/" + conf_directory + "/game_week_winners.csv");		
 		
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
-		String actual_week = "";
+		int actual_week = 0;
 		String actual_week_theme = "";
 		String actual_week_theme_it = "";
 		String actual_week_theme_eng = "";
-		String last_week = "";
+		int last_week = -1;
 		Boolean are_chall = false;
 		Boolean are_prizes = false;
 		Boolean are_prizes_last_week = false;
 		for (int i = 0; i < mailConfigurationFileData.size(); i++) {
 			WeekConfData tmpWConf = mailConfigurationFileData.get(i);
-			if (tmpWConf.isActual()) {
+			if (tmpWConf.currentWeek()) {
 				actual_week = tmpWConf.getWeekNum();
 				actual_week_theme_it = tmpWConf.getWeekTheme();
 				actual_week_theme_eng = tmpWConf.getWeekThemeEng();
-				last_week = Integer.toString(Integer.parseInt(actual_week) - 1);
+				last_week = actual_week - 1;
 				are_chall = tmpWConf.isChallenges();
 				are_prizes = tmpWConf.isPrizes();
 				are_prizes_last_week = tmpWConf.isPrizesLast();
-				mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
+				mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
 			}
 		}
 		String gameId = getGameId(appId);
@@ -385,6 +388,7 @@ public String getPlayerLang(Player p) {
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 			try {
+				// TODO FIXME
 				Thread.sleep(1500);
 			} catch (InterruptedException e1) {
 				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
@@ -414,11 +418,11 @@ public String getPlayerLang(Player p) {
 					if (language.compareTo(ENG_LANG) == 0) {
 						actual_week_theme = actual_week_theme_eng;
 						mailLoc = Locale.ENGLISH;
-						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileDataEng);
+						mailPrizeActualData = getWeekPrizes(actual_week, ENG_LANG);
 					} else {
 						actual_week_theme = actual_week_theme_it;
 						mailLoc = Locale.ITALIAN;
-						mailPrizeActualData = readWeekPrizesFileData(actual_week, mailPrizeFileData);
+						mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
 						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
@@ -543,6 +547,7 @@ public String getPlayerLang(Player p) {
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 			try {
+				// TODO FIXME
 				Thread.sleep(1500);
 			} catch (InterruptedException e1) {
 				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
@@ -1090,48 +1095,60 @@ public String getPlayerLang(Player p) {
 	 */
 
 	// Method used to read a week conf data file and store all values in a list of WeekConfData object
-	public List<WeekConfData> readWeekConfFile(String src) throws Exception {
+	private List<WeekConfData> getWeekConfData() throws Exception {
+		if (weekConfData != null) return weekConfData;
+		
+		synchronized(this) {
+			if (weekConfData != null) return weekConfData;
+			
+			String src = "mail/conf_file/game_week_configuration.csv";
+			String cvsSplitBy = ",";
+			weekConfData = Lists.newArrayList();
 
-		String cvsSplitBy = ",";
-		List<WeekConfData> confWeekFileData = Lists.newArrayList();
+			List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
 
-		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
-
-		for (String line : lines) {
-			// use comma as separator
-			String[] weekConfValues = line.split(cvsSplitBy);
-			String weekNum = weekConfValues[0];
-			String weekTheme = weekConfValues[1];
-			String weekThemeEng = weekConfValues[2];
-			String areChallenges = weekConfValues[3];
-			String arePrizes = weekConfValues[4];
-			String arePrizesLast = weekConfValues[5];
-			String actualWeek = weekConfValues[6];
-			logger.debug(String.format("Week conf file: week num %s, theme %s, challenges %s, prizes %s, prizes last %s, actual week %s", weekNum, weekTheme, areChallenges, arePrizes, arePrizesLast,
-					actualWeek));
-			// value conversion from string to boolean
-			Boolean areChall = (areChallenges.compareTo("Y") == 0) ? true : false;
-			Boolean arePriz = (arePrizes.compareTo("Y") == 0) ? true : false;
-			Boolean arePrizLast = (arePrizesLast.compareTo("Y") == 0) ? true : false;
-			Boolean isActual = (actualWeek.compareTo("Y") == 0) ? true : false;
-			WeekConfData wconf = new WeekConfData(weekNum, weekTheme, weekThemeEng, areChall, arePriz, arePrizLast, isActual);
-			confWeekFileData.add(wconf);
+			for (int i = 1; i < lines.size(); i++) {
+				String line = lines.get(i);
+				if (line.trim().isEmpty()) continue;
+				
+				// use comma as separator
+				String[] weekConfValues = line.split(cvsSplitBy);
+				int weekNum = Integer.parseInt(weekConfValues[0]);
+				String weekTheme = weekConfValues[1];
+				String weekThemeEng = weekConfValues[2];
+				String areChallenges = weekConfValues[3];
+				String arePrizes = weekConfValues[4];
+				String arePrizesLast = weekConfValues[5];
+				String actualWeek = weekConfValues[6];
+				String actualWeekEnd = weekConfValues[7];
+				logger.debug(String.format("Week conf file: week num %s, theme %s, challenges %s, prizes %s, prizes last %s, actual week %s", weekNum, weekTheme, areChallenges, arePrizes, arePrizesLast,
+						actualWeek));
+				// value conversion from string to boolean
+				Boolean areChall = (areChallenges.compareTo("Y") == 0) ? true : false;
+				Boolean arePriz = (arePrizes.compareTo("Y") == 0) ? true : false;
+				Boolean arePrizLast = (arePrizesLast.compareTo("Y") == 0) ? true : false;
+				WeekConfData wconf = new WeekConfData(weekNum, weekTheme, weekThemeEng, areChall, arePriz, arePrizLast, actualWeek, actualWeekEnd);
+				weekConfData.add(wconf);
+			}
+			
+			return weekConfData;
 		}
-
-		return confWeekFileData;
 	}
 
 	// Method used to read a week prizes file and store all data in a list of WeekPrizeData object
-	public List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
+	private List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
 		String cvsSplitBy = ",";
 		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
 
 		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
 
-		for (String line : lines) {
+		for (int i = 1; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (line.trim().isEmpty()) continue;
+
 			// use comma as separator
 			String[] weekPrizeValues = line.split(cvsSplitBy);
-			String weekNum = weekPrizeValues[0];
+			int weekNum = Integer.parseInt(weekPrizeValues[0]);
 			String weekPrize = weekPrizeValues[1];
 			String target = weekPrizeValues[2];
 			String sponsor = weekPrizeValues[3];
@@ -1143,11 +1160,33 @@ public String getPlayerLang(Player p) {
 		return prizeWeekFileData;
 	}
 
+	public WeekConfData getCurrentWeekConf() {
+		try {
+			for (WeekConfData week : getWeekConfData()) {
+				if (week.currentWeek()) return week;
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
 	// Method used to read the week prizes data from conf file. More prizes for one week are allowed
-	public List<WeekPrizeData> readWeekPrizesFileData(String weeknum, List<WeekPrizeData> allPrizes) {
+	public List<WeekPrizeData> getWeekPrizes(int weeknum, String lang) {
+		List<WeekPrizeData> allPrizes = weekPrizeData.get(lang);
+		try {
+			if (allPrizes == null) {
+				allPrizes = readWeekPrizesFile("mail/conf_file/game_week_prize_"+lang+".csv");
+				weekPrizeData.put(lang, allPrizes);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+		
 		List<WeekPrizeData> prizeWeekData = Lists.newArrayList();
 		for (int i = 0; i < allPrizes.size(); i++) {
-			if (allPrizes.get(i).getWeekNum().compareTo(weeknum) == 0) {
+			if (allPrizes.get(i).getWeekNum() == weeknum) {
 				prizeWeekData.add(allPrizes.get(i));
 			}
 		}
@@ -1155,15 +1194,20 @@ public String getPlayerLang(Player p) {
 	}
 
 	public List<WeekWinnersData> readWeekWinnersFile(String src) throws Exception {
+		// TODO read from gamification engine ???
+		
 		String cvsSplitBy = ",";
 		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
 
 		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
 
-		for (String line : lines) {
+		for (int i = 1; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (line.trim().isEmpty()) continue;
+
 			// use comma as separator
 			String[] weekWinnerValues = line.split(cvsSplitBy);
-			String weekNum = weekWinnerValues[0];
+			int weekNum = Integer.parseInt(weekWinnerValues[0]);
 			String player = weekWinnerValues[1];
 			String prize = weekWinnerValues[2];
 			String target = weekWinnerValues[3];

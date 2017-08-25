@@ -1,13 +1,18 @@
-Settimana entrante,Tematica ,Tematica Eng,Presenza challenge,Presenza premi,Presenza premi precedenti,Attuale
-1,No,No,Y,Y,N,N
-2,Impatto zero,Zero Impact,Y,Y,Y,N
-3,No,No,Y,Y,Y,N
-4,Tutti in bici,Ride a bicycle,Y,Y,Y,N
-5,No,No,Y,Y,Y,N
-6,Porta i tuoi amici,Invite your friends,Y,Y,Y,N
-7,No,No,Y,Y,Y,N
-8,Salute e benessere,Health and wellness,Y,Y,Y,N
-9,No,No,Y,Y,Y,N
-10,Trasporto Pubblico,Public trasport,Y,Y,Y,N
-11,No,No,Y,Y,Y,N
-12,BATTI I TUOI RECORD,BEAT YOUR RECORDS,Y,Y,Y,Y
+Settimana entrante,Tematica ,Tematica Eng,Presenza challenge,Presenza premi,Presenza premi precedenti,From,To
+1,No,No,Y,Y,N,2017-09-09,2017-09-15
+2,Impatto zero,Zero Impact,Y,Y,Y,2017-09-16,2017-09-22
+3,No,No,Y,Y,Y,2017-09-23,2017-09-29
+4,Tutti in bici,Ride a bicycle,Y,Y,Y,2017-09-30,2017-10-06
+5,No,No,Y,Y,Y,2017-10-07,2017-10-13
+6,Porta i tuoi amici,Invite your friends,Y,Y,Y,2017-10-14,2017-10-20
+7,No,No,Y,Y,Y,2017-10-21,2017-10-27
+8,Salute e benessere,Health and wellness,Y,Y,Y,2017-10-07,2017-10-13
+9,No,No,Y,Y,Y,2017-10-28,2017-11-03
+10,Trasporto Pubblico,Public trasport,Y,Y,Y,2017-11-04,2017-11-10
+11,No,No,Y,Y,Y,2017-11-11,2017-11-17
+12,BATTI I TUOI RECORD,BEAT YOUR RECORDS,Y,Y,Y,2017-11-18,2017-11-24
+13,No,No,Y,Y,Y,2017-11-25,2017-12-01
+14,No,No,Y,Y,Y,2017-12-02,2017-12-08
+15,No,No,Y,Y,Y,2017-12-09,2017-12-15
+16,No,No,Y,Y,Y,2017-12-16,2017-12-22
+

@@ -777,7 +777,7 @@
     font-weight: bold;
   }
 
-  @media (min-width:1250px) {
+  @media (min-width:768px) {
     .nav-tabs.nav-justified > li { float: none; }
     /*.btn-default { width: 90% }*/
     .open > .dropdown-menu { width: 90% }

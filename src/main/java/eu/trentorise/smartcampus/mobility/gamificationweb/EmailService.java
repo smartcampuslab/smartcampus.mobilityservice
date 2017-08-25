@@ -45,7 +45,7 @@ public class EmailService {
     private static final Logger logger = Logger.getLogger(EmailService.class);
     
     public void sendMailGamification(final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
-            final String position, final String week_number, final String week_theme, final String last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
+            final String position, final Integer week_number, final String week_theme, final Integer last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
             final List<BadgesData> badges,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,
@@ -60,7 +60,7 @@ public class EmailService {
     	// Correct the winners:
     	List<WeekWinnersData> last_week_winners = Lists.newArrayList();
     	for(int i = 0; i < winners.size(); i++){
-    		if(winners.get(i).getWeekNum().compareTo(last_week_number) == 0){
+    		if(last_week_number != null && winners.get(i).getWeekNum() == last_week_number){
     			last_week_winners.add(winners.get(i));
     		}
     	}
@@ -188,7 +188,7 @@ public class EmailService {
     
     public void sendMailGamificationForWinners(
             final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
-            final String position, final String week_number, final String week_theme, final String last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
+            final String position, final Integer week_number, final String week_theme, final Integer last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
             final List<BadgesData> badges,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,
@@ -203,7 +203,7 @@ public class EmailService {
     	// Correct the winners:
     	List<WeekWinnersData> last_week_winners = Lists.newArrayList();
     	for(int i = 0; i < winners.size(); i++){
-    		if(winners.get(i).getWeekNum().compareTo(last_week_number) == 0){
+    		if(last_week_number != null && winners.get(i).getWeekNum() == last_week_number){
     			last_week_winners.add(winners.get(i));
     		}
     	}
@@ -317,7 +317,7 @@ public class EmailService {
     
     public void sendMailGamificationWithReport(
             final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
-            final String position, final String week_number, final String week_theme, final String last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
+            final String position, final Integer week_number, final String week_theme, final Integer last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
             final Boolean surveyCompiled, File reportFile,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,

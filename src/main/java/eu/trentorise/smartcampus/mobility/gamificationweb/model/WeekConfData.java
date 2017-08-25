@@ -1,16 +1,21 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class WeekConfData {
 
-	private String weekNum = "";
+	private int weekNum = 0;
 	private String weekTheme = "";
 	private String weekThemeEng = "";
 	private boolean challenges = false;
 	private boolean prizes = false;
 	private boolean prizesLast = false;
-	private boolean isActual = false;
+	private String weekStart, weekEnd;
 	
-	public String getWeekNum() {
+	private static final SimpleDateFormat SDF_WEEK_DATE = new SimpleDateFormat("yyyy-MM-dd");
+	
+	public int getWeekNum() {
 		return weekNum;
 	}
 
@@ -30,11 +35,7 @@ public class WeekConfData {
 		return prizesLast;
 	}
 
-	public boolean isActual() {
-		return isActual;
-	}
-
-	public void setWeekNum(String weekNum) {
+	public void setWeekNum(int weekNum) {
 		this.weekNum = weekNum;
 	}
 
@@ -54,10 +55,6 @@ public class WeekConfData {
 		this.prizesLast = prizesLast;
 	}
 
-	public void setActual(boolean isActual) {
-		this.isActual = isActual;
-	}
-
 	public String getWeekThemeEng() {
 		return weekThemeEng;
 	}
@@ -70,8 +67,8 @@ public class WeekConfData {
 		// TODO Auto-generated constructor stub
 	}
 
-	public WeekConfData(String weekNum, String weekTheme, String weekThemeEng, boolean challenges, boolean prizes, boolean prizesLast,
-			boolean isAcutal) {
+	public WeekConfData(int weekNum, String weekTheme, String weekThemeEng, boolean challenges, boolean prizes, boolean prizesLast,
+			String weekStart, String weekEnd) {
 		super();
 		this.weekNum = weekNum;
 		this.weekTheme = weekTheme;
@@ -79,14 +76,35 @@ public class WeekConfData {
 		this.challenges = challenges;
 		this.prizes = prizes;
 		this.prizesLast = prizesLast;
-		this.isActual = isAcutal;
+		this.weekStart = weekStart;
+		this.weekEnd = weekEnd;
+	}
+
+	public String getWeekStart() {
+		return weekStart;
+	}
+
+	public void setWeekStart(String weekStart) {
+		this.weekStart = weekStart;
+	}
+
+	public String getWeekEnd() {
+		return weekEnd;
+	}
+
+	public void setWeekEnd(String weekEnd) {
+		this.weekEnd = weekEnd;
 	}
 
 	@Override
 	public String toString() {
 		return "WeekConfData [weekNum=" + weekNum + ", weekTheme=" + weekTheme + ", challenges=" + challenges
-				+ ", prizes=" + prizes + ", prizesLast=" + prizesLast + ", isAcutal=" + isActual + "]";
+				+ ", prizes=" + prizes + ", prizesLast=" + prizesLast + ", weekStart=" + weekStart + "]";
 	}
 
+	public boolean currentWeek() {
+		String currDate = SDF_WEEK_DATE.format(new Date());
+		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
+	}
 
 }

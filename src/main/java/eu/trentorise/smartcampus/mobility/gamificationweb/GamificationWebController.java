@@ -56,6 +56,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassifica
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.UserCheck;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekConfData;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
@@ -107,6 +108,8 @@ public class GamificationWebController {
 
 	@Autowired
 	private WebLinkUtils linkUtils;
+	@Autowired
+	private ReportEmailSender emailSender;
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -116,6 +119,39 @@ public class GamificationWebController {
 	public void init() {
 		profileService = new BasicProfileService(aacURL);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
+	
+	// Method used to unsubscribe user to mailing list
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb")	///{socialId}
+	public 
+	ModelAndView web(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
+		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
+
+		ModelAndView model = new ModelAndView("web/index");
+		model.addObject("language", lang);
+		WeekConfData week = emailSender.getCurrentWeekConf();
+		if (week != null) {
+			model.addObject("week", week.getWeekNum());
+			model.addObject("weeklyPrizes", emailSender.getWeekPrizes(week.getWeekNum(), lang));
+		}
+		model.addObject("view", "prizes");
+		return model;
+	}
+	// Method used to unsubscribe user to mailing list
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/{page}")	///{socialId}
+	public 
+	ModelAndView webPage(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang, @PathVariable String page) {
+		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
+
+		ModelAndView model = new ModelAndView("web/index");
+		model.addObject("language", lang);
+		WeekConfData week = emailSender.getCurrentWeekConf();
+		if (week != null) {
+			model.addObject("week", week.getWeekNum());
+			model.addObject("weeklyPrizes", emailSender.getWeekPrizes(week.getWeekNum(), lang));
+		}
+		model.addObject("view", page);
+		return model;
 	}
 
 	// Method for mobile player registration (in mobile app)
@@ -421,18 +457,17 @@ public class GamificationWebController {
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
 	ModelAndView survey(@PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
-		Map<String, Object> model = new HashMap<>();
-		model.put("language", lang);
-		model.put("key", playerId);
-		return new ModelAndView("web/survey/"+survey, model);
+		ModelAndView model = new ModelAndView("web/survey/"+survey);
+		model.addObject("language", lang);
+		model.addObject("key", playerId);
+		return model;
 	}
 
 	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey")	///{socialId}
 	public 
 	ModelAndView sendSurvey() throws Exception {
-		Map<String, Object> model = new HashMap<>();
-		return new ModelAndView("web/survey_complete", model);
+		return new ModelAndView("web/survey_complete");
 	}
 	
 	// Method used to unsubscribe user to mailing list
@@ -441,7 +476,7 @@ public class GamificationWebController {
 		ModelAndView unsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
 			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
 			
-			Map<String, Object> model = new HashMap<String, Object>();
+			ModelAndView model = new ModelAndView("web/unsubscribe");
 			String user_language = "it";
 			Player p = null;
 			if(playerId != null && playerId.compareTo("") != 0) { // && playerId.length() >= 16){
@@ -462,10 +497,10 @@ public class GamificationWebController {
 				}
 			}
 			boolean res = (p != null) ? true : false;
-			model.put("wsresult", res);
+			model.addObject("wsresult", res);
 			
 			RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(user_language));
-			return new ModelAndView("web/unsubscribe", model);
+			return model;
 		}	
 	
 	

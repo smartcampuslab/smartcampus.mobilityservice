@@ -2,16 +2,17 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 public class WeekPrizeData {
 
-	private String weekNum = "";
+	private int weekNum = 0;
 	private String prize = "";
 	private String target = "";
 	private String sponsor = "";
 	
-	public String getWeekNum() {
+
+	public int getWeekNum() {
 		return weekNum;
 	}
 
-	public void setWeekNum(String weekNum) {
+	public void setWeekNum(int weekNum) {
 		this.weekNum = weekNum;
 	}
 
@@ -43,7 +44,7 @@ public class WeekPrizeData {
 		// TODO Auto-generated constructor stub
 	}
 
-	public WeekPrizeData(String weekNum, String prize, String target, String sponsor) {
+	public WeekPrizeData(int weekNum, String prize, String target, String sponsor) {
 		super();
 		this.weekNum = weekNum;
 		this.prize = prize;

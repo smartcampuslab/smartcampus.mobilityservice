@@ -2,7 +2,7 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 public class WeekWinnersData {
 
-	private String weekNum = "";
+	private int weekNum = 0;
 	private String nickPlayer = "";
 	private String prizesDesc = "";
 	private String prizesTarget = "";
@@ -11,7 +11,7 @@ public class WeekWinnersData {
 		super();
 	};
 
-	public WeekWinnersData(String weekNum, String nickPlayer, String prizesDesc, String prizesTarget) {
+	public WeekWinnersData(int weekNum, String nickPlayer, String prizesDesc, String prizesTarget) {
 		super();
 		this.weekNum = weekNum;
 		this.nickPlayer = nickPlayer;
@@ -19,7 +19,7 @@ public class WeekWinnersData {
 		this.prizesTarget = prizesTarget;
 	}
 
-	public String getWeekNum() {
+	public int getWeekNum() {
 		return weekNum;
 	}
 
@@ -35,7 +35,7 @@ public class WeekWinnersData {
 		return prizesTarget;
 	}
 
-	public void setWeekNum(String weekNum) {
+	public void setWeekNum(int weekNum) {
 		this.weekNum = weekNum;
 	}
 
