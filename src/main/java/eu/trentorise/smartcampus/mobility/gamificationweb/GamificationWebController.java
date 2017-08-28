@@ -526,10 +526,11 @@ public class GamificationWebController {
 				logger.info("Survey data. Found player : " + sId);
 					Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
 					String survey = formData.getFirst("survey");
-					if (p.getSurveys().containsKey(survey))
-					p.addSurvey(survey, toSurveyData(formData));
-					sendSurveyToGamification(sId, gameId, survey);
-					playerRepositoryDao.save(p);
+					if (!p.getSurveys().containsKey(survey)) {
+						p.addSurvey(survey, toSurveyData(formData));
+						sendSurveyToGamification(sId, gameId, survey);
+						playerRepositoryDao.save(p);
+					}
 					model.addObject("surveyComplete", true);
 			}
 			
