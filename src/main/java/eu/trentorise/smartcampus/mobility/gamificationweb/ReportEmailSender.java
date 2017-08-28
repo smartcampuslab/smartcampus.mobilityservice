@@ -605,7 +605,8 @@ public String getPlayerLang(Player p) {
 					if (mailto == null || mailto.compareTo("") == 0) {
 						mailto = mailTo;
 					}
-					Boolean surveyCompiled = (p.getSurveyData() != null) ? true : false;
+					// TODO FIXME !! should be dynamic but for which survey
+					Boolean surveyCompiled = false;// (p.getSurveyData() != null) ? true : false;
 
 					if (mailSend && playerName != null && !playerName.isEmpty()) { // && !noMailingPlayers.contains(p.getSocialId())
 						try {

@@ -22,7 +22,7 @@ public class Player {
 	private String language;
 	private boolean sendMail;
 	private Map<String, Object> personalData;
-	private SurveyData surveyData;
+	private Map<String,Map<String,Object>> surveys;
 	private boolean checkedRecommendation;
 	private List<Event> eventsCheckIn;
 	
@@ -32,7 +32,7 @@ public class Player {
 
 	public Player(String pid, String gameId, String name, String surname, String nickname,
 			//String mail, String language, boolean sendMail, PersonalData personalData, SurveyData surveyData, String type) {
-			String mail, String language, boolean sendMail, Map<String, Object> personalData, SurveyData surveyData, boolean checkRecommendation) {
+			String mail, String language, boolean sendMail, Map<String, Object> personalData, Map<String,Map<String,Object>> surveyData, boolean checkRecommendation) {
 		super();
 		this.id = pid;
 		this.gameId = gameId;
@@ -43,7 +43,7 @@ public class Player {
 		this.language = language;
 		this.sendMail = sendMail;
 		this.personalData = personalData;
-		this.surveyData = surveyData;
+		this.surveys = surveyData;
 		this.checkedRecommendation = checkRecommendation;
 	}
 
@@ -103,12 +103,12 @@ public class Player {
 		this.personalData = personalData;
 	}
 	
-	public SurveyData getSurveyData() {
-		return surveyData;
+	public Map<String, Map<String, Object>> getSurveys() {
+		return surveys;
 	}
 
-	public void setSurveyData(SurveyData surveyData) {
-		this.surveyData = surveyData;
+	public void setSurveys(Map<String, Map<String, Object>> surveys) {
+		this.surveys = surveys;
 	}
 
 	public boolean isSendMail() {

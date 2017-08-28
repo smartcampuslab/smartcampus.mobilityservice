@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -468,34 +470,43 @@ public class GamificationWebController {
 	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey")	///{socialId}
 	public 
-	ModelAndView sendSurvey() throws Exception {
-		return new ModelAndView("web/survey_complete");
+	ModelAndView sendSurvey(@RequestBody MultiValueMap<String,String> formData) throws Exception {
+		String playerId = formData.getFirst("key");
+		ModelAndView model =  new ModelAndView("web/survey_complete");
+		try {
+			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			model.addObject("surveyComplete", false);
+			
+		}
+		return model;
 	}
 	
 	// Method used to unsubscribe user to mailing list
 		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
 		public 
 		ModelAndView unsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
-			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
-			
 			ModelAndView model = new ModelAndView("web/unsubscribe");
 			String user_language = "it";
 			Player p = null;
-			if(playerId != null && playerId.compareTo("") != 0) { // && playerId.length() >= 16){
+			if(!StringUtils.isEmpty(playerId)) { // && playerId.length() >= 16){
 				logger.debug("WS-GET. Method unsubscribeMail. Passed data : " + playerId);
-				String sId = identity.playerId;
-				String gameId = identity.gameId;
-				if(sId != null && sId.compareTo("") != 0){	// case of incorrect encrypted string
-					logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
-					try {
-						p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
-						p.setSendMail(false);
-						playerRepositoryDao.save(p);
-						user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
-					} catch (Exception ex){
-						logger.error("Error in mail unsubscribtion " + ex.getMessage());
-						p = null;
+				try {
+					PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+					String sId = identity.playerId;
+					String gameId = identity.gameId;
+					if(sId != null && sId.compareTo("") != 0){	// case of incorrect encrypted string
+						logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
+							p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+							p.setSendMail(false);
+							playerRepositoryDao.save(p);
+							user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
 					}
+				} catch (Exception ex){
+					logger.error("Error in mail unsubscribtion " + ex.getMessage());
+					p = null;
 				}
 			}
 			boolean res = (p != null) ? true : false;
