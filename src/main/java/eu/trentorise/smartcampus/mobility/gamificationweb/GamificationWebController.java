@@ -513,10 +513,9 @@ public class GamificationWebController {
 	}
 
 	// Method used to unsubscribe user to mailing list
-	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey")	///{socialId}
+	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
-	ModelAndView sendSurvey(@RequestBody MultiValueMap<String,String> formData) throws Exception {
-		String playerId = formData.getFirst("key");
+	ModelAndView sendSurvey(@RequestBody MultiValueMap<String,String> formData, @PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
 		ModelAndView model =  new ModelAndView("web/survey_complete");
 		try {
 			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
@@ -525,7 +524,6 @@ public class GamificationWebController {
 			if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 				logger.info("Survey data. Found player : " + sId);
 					Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
-					String survey = formData.getFirst("survey");
 					if (!p.getSurveys().containsKey(survey)) {
 						p.addSurvey(survey, toSurveyData(formData));
 						sendSurveyToGamification(sId, gameId, survey);
@@ -548,9 +546,7 @@ public class GamificationWebController {
 	 */
 	private Map<String, Object> toSurveyData(MultiValueMap<String, String> formData) {
 		Map<String, Object> result = new HashMap<>();
-		formData.forEach((key, list) -> {
-			if (!"key".equals(key) && !"survey".equals(key)) result.put(key, formData.getFirst(key));
-		});
+		formData.forEach((key, list) -> result.put(key, formData.getFirst(key)));
 		return result;
 	}
 
