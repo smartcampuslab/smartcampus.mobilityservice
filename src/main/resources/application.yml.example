@@ -42,3 +42,6 @@ mail:
   send: false
   subject: Gamification Notification  
   redirectUrl: http://localhost:8010/core.mobility/gamificationweb
+  
+validation:
+  shapefolder:   

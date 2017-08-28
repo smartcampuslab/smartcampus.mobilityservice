@@ -16,14 +16,20 @@
 
 package eu.trentorise.smartcampus.mobility.gamification;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -60,13 +66,30 @@ public class GamificationValidator {
 
 	private static final List<TType> FAST_TRANSPORTS = Lists.newArrayList(TType.BUS, TType.CAR, TType.GONDOLA, TType.SHUTTLE, TType.TRAIN, TType.TRANSIT);
 	private static final Set<String> WALKLIKE = Sets.newHashSet(ON_FOOT, WALKING, RUNNING, UNKNOWN, EMPTY);
-	
+
 	@Autowired
 	private AppSetup appSetup;
 	
 	@Autowired
 	private GameSetup gameSetup;	
 
+	private List<List<Geolocation>> TRAIN_SHAPES = new ArrayList<>();
+
+	@Autowired
+	@Value("${validation.shapefolder}")
+	private String shapeFolder;	
+	
+	@PostConstruct
+	public void initValidationData() throws Exception{
+		final File[] trainFiles = (new File(shapeFolder+"/train")).listFiles();
+		if (trainFiles != null) {
+			for (File f : trainFiles) {
+				TRAIN_SHAPES.add(TrackValidator.parseShape(new FileInputStream(f)).get(0));
+			}
+		}
+	}
+	
+	
 	public Map<String, Object> computePlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
 //		if (geolocations != null) {
 //			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
@@ -476,7 +499,7 @@ public class GamificationValidator {
 			break;
 		case "train": 
 			// TODO reference shapes
-			vr.setValidationStatus(TrackValidator.validateFreeTrain(geolocations, null, game.getAreas()));
+			vr.setValidationStatus(TrackValidator.validateFreeTrain(geolocations, TRAIN_SHAPES, game.getAreas()));
 			break;
 		}
 		return vr;
