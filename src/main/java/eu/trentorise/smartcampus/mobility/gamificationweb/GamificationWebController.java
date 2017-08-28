@@ -51,6 +51,7 @@ import com.google.common.collect.Multimap;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
+import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
 import eu.trentorise.smartcampus.mobility.gamificationweb.WebLinkUtils.PlayerIdentity;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
@@ -65,6 +66,8 @@ import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
+import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import eu.trentorise.smartcampus.profileservice.model.AccountProfile;
 import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
@@ -323,6 +326,20 @@ public class GamificationWebController {
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}	
 	
+	//Method used to send the survey call to gamification engine (if user complete the survey the engine need to be updated with this call)
+	private void sendSurveyToGamification(String playerId, String gameId, String survey) throws Exception{
+
+		ExecutionDataDTO ed = new ExecutionDataDTO();
+		ed.setGameId(gameId);
+		ed.setPlayerId(playerId);
+		ed.setActionId(survey+"_survey_complete");
+		ed.setData(Collections.emptyMap());
+
+		String content = JsonUtils.toJSON(ed);
+		GameInfo game = gameSetup.findGameById(gameId);
+		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
+//		logger.info("Sent app survey data to gamification engine ");
+	}
 
 	// Method used to check if a user is registered or not to the system (by
 	// mobile app)
@@ -461,10 +478,38 @@ public class GamificationWebController {
 	public 
 	ModelAndView survey(HttpServletRequest request, HttpServletResponse response, @PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
 		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
-		ModelAndView model = new ModelAndView("web/survey/"+survey);
-		model.addObject("language", lang);
-		model.addObject("key", playerId);
-		return model;
+		
+		ModelAndView model = null;
+		try {
+			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+			String sId = identity.playerId;
+			String gameId = identity.gameId;
+			if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
+				logger.info("Survey data. Found player : " + sId);
+				Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+				if (p.getSurveys().containsKey(survey)) {
+					model = new ModelAndView("web/survey_complete");
+					model.addObject("surveyComplete", true);
+					return model;
+				}
+				model = new ModelAndView("web/survey/"+survey);
+				model.addObject("language", lang);
+				model.addObject("key", playerId);
+				model.addObject("survey", survey);
+				return model;
+			} else {
+				logger.error("Unkonwn user data:" + playerId);
+				model = new ModelAndView("web/survey_complete");
+				model.addObject("surveyComplete", false);
+				return model;
+			}
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			model = new ModelAndView("web/survey_complete");
+			model.addObject("surveyComplete", false);
+			return model;
+		}		
 	}
 
 	// Method used to unsubscribe user to mailing list
@@ -475,6 +520,18 @@ public class GamificationWebController {
 		ModelAndView model =  new ModelAndView("web/survey_complete");
 		try {
 			PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+			String sId = identity.playerId;
+			String gameId = identity.gameId;
+			if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
+				logger.info("Survey data. Found player : " + sId);
+					Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					String survey = formData.getFirst("survey");
+					if (p.getSurveys().containsKey(survey))
+					p.addSurvey(survey, toSurveyData(formData));
+					sendSurveyToGamification(sId, gameId, survey);
+					playerRepositoryDao.save(p);
+					model.addObject("surveyComplete", true);
+			}
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -484,6 +541,18 @@ public class GamificationWebController {
 		return model;
 	}
 	
+	/**
+	 * @param formData
+	 * @return
+	 */
+	private Map<String, Object> toSurveyData(MultiValueMap<String, String> formData) {
+		Map<String, Object> result = new HashMap<>();
+		formData.forEach((key, list) -> {
+			if (!"key".equals(key) && !"survey".equals(key)) result.put(key, formData.getFirst(key));
+		});
+		return result;
+	}
+
 	// Method used to unsubscribe user to mailing list
 		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
 		public 
@@ -497,7 +566,7 @@ public class GamificationWebController {
 					PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
 					String sId = identity.playerId;
 					String gameId = identity.gameId;
-					if(sId != null && sId.compareTo("") != 0){	// case of incorrect encrypted string
+					if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 						logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
 							p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
 							p.setSendMail(false);

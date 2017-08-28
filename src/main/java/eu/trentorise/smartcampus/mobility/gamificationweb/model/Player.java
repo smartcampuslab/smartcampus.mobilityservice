@@ -1,5 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -104,6 +105,9 @@ public class Player {
 	}
 	
 	public Map<String, Map<String, Object>> getSurveys() {
+		if (surveys == null) {
+			surveys = new HashMap<String, Map<String,Object>>();
+		}
 		return surveys;
 	}
 
@@ -146,6 +150,17 @@ public class Player {
 	public String toJSONString() {
 		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
 		return tsb.build();
+	}
+
+	/**
+	 * @param first
+	 * @param surveyData
+	 */
+	public void addSurvey(String key, Map<String, Object> surveyData) {
+		if (surveys == null) {
+			surveys = new HashMap<String, Map<String,Object>>();
+		}
+		surveys.put(key, surveyData);
 	}
 	
 }

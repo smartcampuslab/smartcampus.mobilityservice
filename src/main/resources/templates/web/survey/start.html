@@ -19,6 +19,7 @@
   <h3 th:text="#{survey.head}" style="text-align:center;">Questionario Play&amp;Go</h3>
   <form id="form" role="form" name="form" action="../../" method="POST" >
     <input type="hidden" name="key" th:value="${key}"/>
+    <input type="hidden" name="survey" th:value="${survey}"/>
     
     <div class="form-group">
       <label for="age" th:text="#{survey.age}">Seleziona una fascia di età</label>
