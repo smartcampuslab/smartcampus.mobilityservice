@@ -100,7 +100,7 @@ public class StatusUtils {
 						for (int j = 0; j < bc_badgesEarned.length(); j++) {
 							String b_name = bc_badgesEarned.getString(j);
 							String b_url = getUrlFromBadgeName(gamificationUrl, b_name);
-							// if(!b_url.contains("/img/gamification/pr/p&rLeaves.svg")){ //
+							// if(!b_url.contains("/img/gamification/pr/p&rLeaves.png")){ //
 							// not in default ParkAndRide badges
 							BadgeConcept badge = new BadgeConcept(b_name, b_url);
 							bc_badges.add(badge);
@@ -216,7 +216,7 @@ public class StatusUtils {
 				if (bcc.getName().compareTo(PARK_RIDE_PIONEER) == 0) {
 					List<BadgeConcept> badgeList = bcc.getBadgeEarned();
 					for (int i = badgeList.size() - 1; i >= 0; i--) {
-						if (badgeList.get(i).getUrl().contains("/img/gamification/pr/p&rLeaves.svg")) {
+						if (badgeList.get(i).getUrl().contains("/img/gamification/pr/p&rLeaves.png")) {
 							badgeList.remove(i);
 						}
 					}
@@ -224,7 +224,7 @@ public class StatusUtils {
 				if (bcc.getName().compareTo(BIKE_SHARING_PIONEER) == 0) {
 					List<BadgeConcept> badgeList = bcc.getBadgeEarned();
 					for (int i = badgeList.size() - 1; i >= 0; i--) {
-						if (badgeList.get(i).getUrl().contains("/img/gamification/bike_sharing/bikeSharingPioneer.svg")) {
+						if (badgeList.get(i).getUrl().contains("/img/gamification/bike_sharing/bikeSharingPioneer.png")) {
 							badgeList.remove(i);
 						}
 					}
@@ -567,324 +567,324 @@ public class StatusUtils {
 	private String getUrlFromBadgeName(String gamificationUrl, String b_name) {
 		// green leaves badges
 		if (b_name.compareTo("king_week_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenKingWeek.svg";
+			return gamificationUrl + "/img/gamification/green/greenKingWeek.png";
 		}
 		if (b_name.compareTo("50_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves50.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves50.png";
 		}
 		if (b_name.compareTo("100_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves100.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves100.png";
 		}
 		if (b_name.compareTo("200_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves200.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves200.png";
 		}
 		if (b_name.compareTo("400_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves400.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves400.png";
 		}
 		if (b_name.compareTo("800_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves800.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves800.png";
 		}
 		if (b_name.compareTo("1500_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves1500.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves1500.png";
 		}
 		if (b_name.compareTo("2500_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves2500.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves2500.png";
 		}
 		if (b_name.compareTo("5000_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves5000.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves5000.png";
 		}
 		if (b_name.compareTo("10000_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves10000.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves10000.png";
 		}
 		if (b_name.compareTo("20000_point_green") == 0) {
-			return gamificationUrl + "/img/gamification/green/greenLeaves20000.svg";
+			return gamificationUrl + "/img/gamification/green/greenLeaves20000.png";
 		}
 		if (b_name.compareTo("bronze-medal-green") == 0) {
-			return gamificationUrl + "/img/gamification/green/leaderboardGreen3.svg";
+			return gamificationUrl + "/img/gamification/green/leaderboardGreen3.png";
 		}
 		if (b_name.compareTo("silver-medal-green") == 0) {
-			return gamificationUrl + "/img/gamification/green/leaderboardGreen2.svg";
+			return gamificationUrl + "/img/gamification/green/leaderboardGreen2.png";
 		}
 		if (b_name.compareTo("gold-medal-green") == 0) {
-			return gamificationUrl + "/img/gamification/green/leaderboardGreen1.svg";
+			return gamificationUrl + "/img/gamification/green/leaderboardGreen1.png";
 		}
 		// badges for health
 		if (b_name.compareTo("king_week_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthKingWeek.svg";
+			return gamificationUrl + "/img/gamification/health/healthKingWeek.png";
 		}
 		if (b_name.compareTo("10_point_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthLeaves10.svg";
+			return gamificationUrl + "/img/gamification/health/healthLeaves10.png";
 		}
 		if (b_name.compareTo("25_point_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthLeaves25.svg";
+			return gamificationUrl + "/img/gamification/health/healthLeaves25.png";
 		}
 		if (b_name.compareTo("50_point_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthLeaves50.svg";
+			return gamificationUrl + "/img/gamification/health/healthLeaves50.png";
 		}
 		if (b_name.compareTo("100_point_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthLeaves100.svg";
+			return gamificationUrl + "/img/gamification/health/healthLeaves100.png";
 		}
 		if (b_name.compareTo("200_point_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthLeaves200.svg";
+			return gamificationUrl + "/img/gamification/health/healthLeaves200.png";
 		}
 		if (b_name.compareTo("bronze_medal_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthBronzeMedal.svg";
+			return gamificationUrl + "/img/gamification/health/healthBronzeMedal.png";
 		}
 		if (b_name.compareTo("silver_medal_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthSilverMedal.svg";
+			return gamificationUrl + "/img/gamification/health/healthSilverMedal.png";
 		}
 		if (b_name.compareTo("gold_medal_health") == 0) {
-			return gamificationUrl + "/img/gamification/health/healthGoldMedal.svg";
+			return gamificationUrl + "/img/gamification/health/healthGoldMedal.png";
 		}
 		// pr badges
 		if (b_name.compareTo("king_week_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prKingWeek.svg";
+			return gamificationUrl + "/img/gamification/pr/prKingWeek.png";
 		}
 		if (b_name.compareTo("10_point_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prLeaves10.svg";
+			return gamificationUrl + "/img/gamification/pr/prLeaves10.png";
 		}
 		if (b_name.compareTo("20_point_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prLeaves20.svg";
+			return gamificationUrl + "/img/gamification/pr/prLeaves20.png";
 		}
 		if (b_name.compareTo("50_point_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prLeaves50.svg";
+			return gamificationUrl + "/img/gamification/pr/prLeaves50.png";
 		}
 		if (b_name.compareTo("100_point_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prLeaves100.svg";
+			return gamificationUrl + "/img/gamification/pr/prLeaves100.png";
 		}
 		if (b_name.compareTo("200_point_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prLeaves200.svg";
+			return gamificationUrl + "/img/gamification/pr/prLeaves200.png";
 		}
 		if (b_name.compareTo("bronze_medal_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prBronzeMedal.svg";
+			return gamificationUrl + "/img/gamification/pr/prBronzeMedal.png";
 		}
 		if (b_name.compareTo("silver_medal_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prSilverMedal.svg";
+			return gamificationUrl + "/img/gamification/pr/prSilverMedal.png";
 		}
 		if (b_name.compareTo("gold_medal_pr") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prGoldMedal.svg";
+			return gamificationUrl + "/img/gamification/pr/prGoldMedal.png";
 		}
 		if (b_name.compareTo("Manifattura_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerManifattura.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerManifattura.png";
 		}
 		if (b_name.compareTo("Stadio_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerStadio.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerStadio.png";
 		}
 		// Real parking TN badges url
 		if (b_name.compareTo("Via Ragazzi del '99_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerRagazzi99.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerRagazzi99.png";
 		}
 		if (b_name.compareTo("Via Lidorno_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerLidorno.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerLidorno.png";
 		}
 		if (b_name.compareTo("Ghiaie via Fersina_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerViaFersina.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerViaFersina.png";
 		}
 		if (b_name.compareTo("Ex-Zuffo_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerAreaZuffo.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerAreaZuffo.png";
 		}
 		if (b_name.compareTo("Monte Baldo_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerMonteBaldo.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerMonteBaldo.png";
 		}
 		if (b_name.compareTo("Via Asiago, Stazione FS Villazzano_parking") == 0) {
-			return gamificationUrl + "/img/gamification/pr/prPioneerVillazzanoStazioneFS.svg";
+			return gamificationUrl + "/img/gamification/pr/prPioneerVillazzanoStazioneFS.png";
 		}
 		if (b_name.contains("parking")) {
-			return gamificationUrl + "/img/gamification/pr/p&rLeaves.svg";
+			return gamificationUrl + "/img/gamification/pr/p&rLeaves.png";
 		}
 
 		// badges for bike
 		if (b_name.compareTo("1_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado1.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado1.png";
 		}
 		if (b_name.compareTo("5_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado5.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado5.png";
 		}
 		if (b_name.compareTo("10_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado10.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado10.png";
 		}
 		if (b_name.compareTo("25_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado25.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado25.png";
 		}
 		if (b_name.compareTo("50_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado50.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado50.png";
 		}
 		if (b_name.compareTo("100_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado100.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado100.png";
 		}
 		if (b_name.compareTo("200_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado200.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado200.png";
 		}
 		if (b_name.compareTo("500_bike_trip") == 0) {
-			return gamificationUrl + "/img/gamification/bike/bikeAficionado500.svg";
+			return gamificationUrl + "/img/gamification/bike/bikeAficionado500.png";
 		}
 		// badges for bike sharing
 		if (b_name.compareTo("Brione - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBrione.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBrione.png";
 		}
 		if (b_name.compareTo("Lizzana - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerLizzana.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerLizzana.png";
 		}
 		if (b_name.compareTo("Marco - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMarco.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMarco.png";
 		}
 		if (b_name.compareTo("Municipio - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMunicipio.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMunicipio.png";
 		}
 		if (b_name.compareTo("Noriglio - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerNoriglio.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerNoriglio.png";
 		}
 		if (b_name.compareTo("Orsi - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerOrsi.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerOrsi.png";
 		}
 		if (b_name.compareTo("Ospedale - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerOspedale.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerOspedale.png";
 		}
 		if (b_name.compareTo("Via Paoli - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPaoli.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPaoli.png";
 		}
 		if (b_name.compareTo("P. Rosmini - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPRosmini.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPRosmini.png";
 		}
 		if (b_name.compareTo("Quercia - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerQuercia.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerQuercia.png";
 		}
 		if (b_name.compareTo("Sacco - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerSacco.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerSacco.png";
 		}
 		if (b_name.compareTo("Stazione FF.SS. - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerStazione.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerStazione.png";
 		}
 		if (b_name.compareTo("Zona Industriale - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerZonaIndustriale.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerZonaIndustriale.png";
 		}
 		if (b_name.compareTo("Mart - Rovereto_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMART.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMART.png";
 		}
 		// Real TN bike station url
 		if (b_name.compareTo("Stazione FFSS - Ospedale - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerFFSSOspedale.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerFFSSOspedale.png";
 		}
 		if (b_name.compareTo("Piazza Venezia - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaVenezia.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaVenezia.png";
 		}
 		if (b_name.compareTo("Piscina - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiscina.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiscina.png";
 		}
 		if (b_name.compareTo("Piazza della Mostra - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaMostra.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaMostra.png";
 		}
 		if (b_name.compareTo("Centro Santa Chiara - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerCentroSantaChiara.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerCentroSantaChiara.png";
 		}
 		if (b_name.compareTo("Piazza di Centa - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaCenta.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerPiazzaCenta.png";
 		}
 		if (b_name.compareTo("Biblioteca - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBiblioteca.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBiblioteca.png";
 		}
 		if (b_name.compareTo("Stazione Autocorriere - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerStazioneAutocorriere.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerStazioneAutocorriere.png";
 		}
 		if (b_name.compareTo("Università - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerUniversita.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerUniversita.png";
 		}
 		if (b_name.compareTo("Bezzi - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBezzi.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBezzi.png";
 		}
 		if (b_name.compareTo("Muse - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMuse.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerMuse.png";
 		}
 		if (b_name.compareTo("Azienda Sanitaria - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerAziendaSanitaria.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerAziendaSanitaria.png";
 		}
 		if (b_name.compareTo("Top Center - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerTopCenter.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerTopCenter.png";
 		}
 		if (b_name.compareTo("Bren Center - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBrenCenter.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerBrenCenter.png";
 		}
 		if (b_name.compareTo("Lidorno - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerLidorno.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerLidorno.png";
 		}
 		if (b_name.compareTo("Gardolo - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerGardolo.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerGardolo.png";
 		}
 		if (b_name.compareTo("Aeroporto - Trento_BSstation") == 0) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerAeroporto.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneerAeroporto.png";
 		}
 		if (b_name.contains("BSstation")) {
-			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneer.svg";
+			return gamificationUrl + "/img/gamification/bike_sharing/bikeSharingPioneer.png";
 		}
 		// badges for recommendation
 		if (b_name.compareTo("3_recommendations") == 0) {
-			return gamificationUrl + "/img/gamification/recommendation/inviteFriends3.svg";
+			return gamificationUrl + "/img/gamification/recommendation/inviteFriends3.png";
 		}
 		if (b_name.compareTo("5_recommendations") == 0) {
-			return gamificationUrl + "/img/gamification/recommendation/inviteFriends5.svg";
+			return gamificationUrl + "/img/gamification/recommendation/inviteFriends5.png";
 		}
 		if (b_name.compareTo("10_recommendations") == 0) {
-			return gamificationUrl + "/img/gamification/recommendation/inviteFriends10.svg";
+			return gamificationUrl + "/img/gamification/recommendation/inviteFriends10.png";
 		}
 		if (b_name.compareTo("25_recommendations") == 0) {
-			return gamificationUrl + "/img/gamification/recommendation/inviteFriends25.svg";
+			return gamificationUrl + "/img/gamification/recommendation/inviteFriends25.png";
 		}
 		// badges for public transport
 		if (b_name.compareTo("5_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado5.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado5.png";
 		}
 		if (b_name.compareTo("10_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado10.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado10.png";
 		}
 		if (b_name.compareTo("25_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado25.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado25.png";
 		}
 		if (b_name.compareTo("50_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado50.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado50.png";
 		}
 		if (b_name.compareTo("100_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado100.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado100.png";
 		}
 		if (b_name.compareTo("200_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado200.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado200.png";
 		}
 		if (b_name.compareTo("500_pt_trip") == 0) {
-			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado500.svg";
+			return gamificationUrl + "/img/gamification/public_transport/publicTransportAficionado500.png";
 		}
 		// badges for zero impact
 		if (b_name.compareTo("1_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact1.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact1.png";
 		}
 		if (b_name.compareTo("5_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact5.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact5.png";
 		}
 		if (b_name.compareTo("10_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact10.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact10.png";
 		}
 		if (b_name.compareTo("25_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact25.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact25.png";
 		}
 		if (b_name.compareTo("50_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact50.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact50.png";
 		}
 		if (b_name.compareTo("100_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact100.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact100.png";
 		}
 		if (b_name.compareTo("200_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact200.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact200.png";
 		}
 		if (b_name.compareTo("500_zero_impact_trip") == 0) {
-			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact500.svg";
+			return gamificationUrl + "/img/gamification/zero_impact/zeroImpact500.png";
 		}
 		// badges for leaderboard top 3
 		if (b_name.compareTo("1st_of_the_week") == 0) {
-			return gamificationUrl + "/img/gamification/leaderboard/leaderboard1.svg";
+			return gamificationUrl + "/img/gamification/leaderboard/leaderboard1.png";
 		}
 		if (b_name.compareTo("2nd_of_the_week") == 0) {
-			return gamificationUrl + "/img/gamification/leaderboard/leaderboard2.svg";
+			return gamificationUrl + "/img/gamification/leaderboard/leaderboard2.png";
 		}
 		if (b_name.compareTo("3rd_of_the_week") == 0) {
-			return gamificationUrl + "/img/gamification/leaderboard/leaderboard3.svg";
+			return gamificationUrl + "/img/gamification/leaderboard/leaderboard3.png";
 		}
 		return "";
 	}
