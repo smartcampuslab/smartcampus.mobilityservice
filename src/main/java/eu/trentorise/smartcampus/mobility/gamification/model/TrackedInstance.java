@@ -31,6 +31,8 @@ public class TrackedInstance {
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
 	
+	private String freeTrackingCertificate = null;
+	
 	private ScoreStatus scoreStatus = ScoreStatus.UNASSIGNED;
 	
 	private String time;
@@ -232,6 +234,32 @@ public class TrackedInstance {
 		return id;
 	}
 
+	public String getFreeTrackingCertificate() {
+		return freeTrackingCertificate;
+	}
+
+	public void setFreeTrackingCertificate(String freeTrackingCertificate) {
+		this.freeTrackingCertificate = freeTrackingCertificate;
+	}
+
+//	Boolean switchValidity;
+//	Long estimatedScore;
+//
+//	public Boolean getSwitchValidity() {
+//		return switchValidity;
+//	}
+//
+//	public void setSwitchValidity(Boolean switchValidity) {
+//		this.switchValidity = switchValidity;
+//	}
+//
+//	public Long getEstimatedScore() {
+//		return estimatedScore;
+//	}
+//
+//	public void setEstimatedScore(Long estimatedScore) {
+//		this.estimatedScore = estimatedScore;
+//	}
 
 	
 	

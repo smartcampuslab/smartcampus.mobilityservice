@@ -171,6 +171,7 @@ public class GamificationController {
 			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
 			Map<String, String> freeTracks = new HashMap<String, String>();
 			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
+			Map<String, String> certifiedTracks = new HashMap<String, String>();
 
 			if (geolocationsEvent.getLocation() != null && !geolocationsEvent.getLocation().isEmpty()) {
 				Location lastOk = geolocationsEvent.getLocation().get(geolocationsEvent.getLocation().size() - 1);
@@ -311,6 +312,9 @@ public class GamificationController {
 					if (StringUtils.hasText((String) location.getExtras().get("transportType"))) {
 						freeTracks.put(key, (String) location.getExtras().get("transportType"));
 					}
+					if (StringUtils.hasText((String) location.getExtras().get("btDeviceId"))) {
+						certifiedTracks.put(key, (String) location.getExtras().get("btDeviceId"));
+					}
 					freeTrackStarts.put(key, locationTs);
 
 					// storage.saveGeolocation(geolocation);
@@ -359,6 +363,10 @@ public class GamificationController {
 					res.getGeolocationEvents().add(geoloc);
 				}
 				
+				if (certifiedTracks.containsKey(key)) {
+					res.setFreeTrackingCertificate(certifiedTracks.get(key));
+				}
+				
 				// boolean canSave = true;
 				if (res.getItinerary() != null) {
 					if (!res.getComplete()) {
@@ -400,7 +408,7 @@ public class GamificationController {
 
 				res.setAppId(appId);
 				storage.saveTrackedInstance(res);
-
+				
 				logger.info("Saved geolocation events: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 			}
 
