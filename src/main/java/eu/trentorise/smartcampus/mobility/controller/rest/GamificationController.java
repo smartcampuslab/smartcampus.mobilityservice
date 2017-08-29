@@ -371,6 +371,7 @@ public class GamificationController {
 								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
 							trackingData.put("travelId", res.getId());
+							trackingData.put("startTime", getStartTime(res));
 							gamificationManager.sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary(), trackingData);
 							res.setScoreStatus(ScoreStatus.SENT);
 						}
@@ -387,6 +388,7 @@ public class GamificationController {
 								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
 							trackingData.put("travelId", res.getId());
+							trackingData.put("startTime", getStartTime(res));
 							gamificationManager.sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport(), trackingData);
 							res.setScoreStatus(ScoreStatus.SENT);
 						} else {
@@ -681,14 +683,17 @@ public class GamificationController {
 				instance.setScore((Long) trackingData.get("estimatedScore"));
 			}
 			trackingData.put("travelId", instance.getId());
+			trackingData.put("startTime", getStartTime(instance));
 			gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(), trackingData);
 			instance.setScoreStatus(ScoreStatus.SENT);
 		} else if (instance.getFreeTrackingTransport() != null) {
 			Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(instance.getAppId(), instance.getGeolocationEvents(), instance.getFreeTrackingTransport(), instance.getValidationResult().getValidationStatus());
 			trackingData.put("travelId", instance.getId());
+			trackingData.put("startTime", getStartTime(instance));
 			if (trackingData.containsKey("estimatedScore")) {
 				instance.setScore((Long) trackingData.get("estimatedScore"));
 			}
+			
 			gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(), instance.getFreeTrackingTransport(), trackingData);
 			instance.setScoreStatus(ScoreStatus.SENT);
 		}
@@ -751,6 +756,7 @@ public class GamificationController {
 					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
 				trackingData.put("travelId", instance.getId());
+				trackingData.put("startTime", getStartTime(instance));
 				gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(),
 						trackingData);
 				instance.setScoreStatus(ScoreStatus.SENT);
@@ -760,6 +766,7 @@ public class GamificationController {
 					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
 				trackingData.put("travelId", instance.getId());
+				trackingData.put("startTime", getStartTime(instance));
 				gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(),
 						instance.getFreeTrackingTransport(), trackingData);
 				instance.setScoreStatus(ScoreStatus.SENT);
@@ -1127,6 +1134,21 @@ public class GamificationController {
 		return sortedInstances;
 	}
 
+	private long getStartTime(TrackedInstance trackedInstance) throws ParseException {
+		long time = 0;
+		if (trackedInstance.getGeolocationEvents() != null && !trackedInstance.getGeolocationEvents().isEmpty()) {
+			Geolocation event = trackedInstance.getGeolocationEvents().stream().sorted().findFirst().get();
+//			Geolocation event = trackedInstance.getGeolocationEvents().iterator().next();
+			time = event.getRecorded_at().getTime();
+		} else if (trackedInstance.getDay() != null && trackedInstance.getTime() != null) {
+			String dt = trackedInstance.getDay() + " " + trackedInstance.getTime();
+			time = fullSdf.parse(dt).getTime();
+		} else if (trackedInstance.getDay() != null) {
+			time = shortSdf.parse(trackedInstance.getDay()).getTime();
+		}
+		return time;
+	}
+	
 	private String getGameId(String appId) {
 		if (appId != null) {
 			AppInfo ai = appSetup.findAppById(appId);
