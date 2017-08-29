@@ -164,10 +164,10 @@ public class GamificationValidator {
 
 		Double score = 0.0;
 		// score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10; Rovereto
-//		score += (walkDist < 0.25 ? 0 : Math.min(3.5, walkDist)) * 10;
-		score += (walkDist < 0.25 ? 0 : walkDist) * 15;
-//		score += Math.min(7, bikeDist) * 5;
-		score += bikeDist * 7;
+		score += (walkDist < 0.25 ? 0 : Math.min(10, walkDist)) * 10;
+//		score += (walkDist < 0.25 ? 0 : walkDist) * 15;
+		score += Math.min(30, bikeDist) * 5;
+//		score += bikeDist * 7;
 
 		double busTrainTransitDist = busDist + trainDist;
 //		if (busTrainTransitDist > 0) {
@@ -189,7 +189,7 @@ public class GamificationValidator {
 			score += 15;
 		}
 
-//		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
+		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
 //		Rovereto
 //		if (zeroImpact && itinerary.isPromoted()) {
 //			score *= 1.7;
@@ -207,9 +207,9 @@ public class GamificationValidator {
 //			score += 10;
 			score += 15;
 		}
-//		if (zeroImpact) {
-//			score *= 1.5;
-//		}
+		if (zeroImpact) {
+			score *= 1.5;
+		}
 
 		if (bikeDist > 0) {
 			data.put("bikeDistance", bikeDist);
