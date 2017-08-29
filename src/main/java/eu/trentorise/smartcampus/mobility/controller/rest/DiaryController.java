@@ -67,7 +67,6 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ErrorInfo;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Leg;
-import it.sayservice.platform.smartplanner.data.message.TType;
 
 @Controller
 public class DiaryController {
@@ -286,6 +285,7 @@ public class DiaryController {
 				de.setBadge(not.getBadge());
 				de.setBadgeText(badgesCache.getBadge(not.getBadge()).getText().get(player.getLanguage()));
 				de.setBadgeCollection(not.getCollectionName());
+				de.setEntityId(not.getBadge());
 				result.add(de);
 			}
 		}
