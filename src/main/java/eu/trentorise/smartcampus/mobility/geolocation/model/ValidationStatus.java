@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
-import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
@@ -80,7 +79,8 @@ public class ValidationStatus {
 	
 	private ERROR_TYPE error;
 	
-
+	private boolean certified;
+	
 	/**
 	 * Compute percentage of points with high accuracy
 	 * @param points
@@ -435,6 +435,12 @@ public class ValidationStatus {
 		this.accuracyRank = accuracyRank;
 	}
 
+	public boolean isCertified() {
+		return certified;
+	}
+	public void setCertified(boolean certified) {
+		this.certified = certified;
+	}
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

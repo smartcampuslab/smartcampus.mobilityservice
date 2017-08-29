@@ -202,9 +202,6 @@ public class DomainStorage {
 			if (tracked.getScore() != null) {
 				update.set("score", tracked.getScore());
 			}
-			if (tracked.getFreeTrackingCertificate() != null) {
-				update.set("freeTrackingCertificate", tracked.getFreeTrackingCertificate());
-			}
 			update.set("changedValidity", tracked.getChangedValidity());
 			update.set("scoreStatus", tracked.getScoreStatus());
 			update.set("approved", tracked.getApproved());

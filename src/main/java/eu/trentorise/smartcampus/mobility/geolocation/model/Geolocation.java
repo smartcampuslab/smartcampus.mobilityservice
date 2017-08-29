@@ -32,6 +32,8 @@ public class Geolocation implements Comparable<Geolocation> {
 	private Date recorded_at;
 	private Date created_at;
 
+	private String certificate;
+	
 	double[] geocoding;
 
 	public Geolocation() {
@@ -205,6 +207,14 @@ public class Geolocation implements Comparable<Geolocation> {
     public void setGeocoding(double[] geocoding) {
         this.geocoding = geocoding;
     }
+
+	public String getCertificate() {
+		return certificate;
+	}
+
+	public void setCertificate(String certificate) {
+		this.certificate = certificate;
+	}
 
 	@Override
 	public int hashCode() {

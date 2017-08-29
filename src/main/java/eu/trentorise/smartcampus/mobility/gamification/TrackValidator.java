@@ -164,6 +164,7 @@ public class TrackValidator {
 	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
 	 * @param track
 	 * @param referenceTracks
+	 * @param areas
 	 * @return
 	 */
 	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
@@ -179,6 +180,7 @@ public class TrackValidator {
 	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
 	 * @param track
 	 * @param referenceTracks
+	 * @param areas
 	 * @return
 	 */
 	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
@@ -210,10 +212,12 @@ public class TrackValidator {
 			return status;
 		}
 		
+		TravelValidity negativeValidity = TravelValidity.PENDING;
+		
 		// split track into pieces. For train consider 15km/h threshold
 		TrackSplit trackSplit = TrackSplit.fastSplit(points, speedThreshold, timeThreshold, minTrackThreshold);
 		if (trackSplit.getFastIntervals().isEmpty()) {
-			status.setValidationOutcome(TravelValidity.PENDING);
+			status.setValidationOutcome(negativeValidity);
 			status.setError(ERROR_TYPE.TOO_SLOW);
 			return status;
 		}
@@ -241,10 +245,10 @@ public class TrackValidator {
 				}
 			}
 			double coverage = 100.0 * matchedDistance / status.getDistance();
-			status.setValidationOutcome(coverage >= COVERAGE_THRESHOLD ? TravelValidity.VALID : TravelValidity.PENDING);
+			status.setValidationOutcome(coverage >= COVERAGE_THRESHOLD ? TravelValidity.VALID : negativeValidity);
 			return status;
 		} else {
-			status.setValidationOutcome(TravelValidity.PENDING);
+			status.setValidationOutcome(negativeValidity);
 			return status;
 		}
 	}

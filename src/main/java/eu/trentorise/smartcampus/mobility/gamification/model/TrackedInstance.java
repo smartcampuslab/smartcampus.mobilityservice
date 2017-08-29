@@ -31,8 +31,6 @@ public class TrackedInstance {
 	private Boolean started = Boolean.FALSE;
 	private Boolean complete = Boolean.FALSE;
 	
-	private String freeTrackingCertificate = null;
-	
 	private ScoreStatus scoreStatus = ScoreStatus.UNASSIGNED;
 	
 	private String time;
@@ -232,14 +230,6 @@ public class TrackedInstance {
 	@Override
 	public String toString() {
 		return id;
-	}
-
-	public String getFreeTrackingCertificate() {
-		return freeTrackingCertificate;
-	}
-
-	public void setFreeTrackingCertificate(String freeTrackingCertificate) {
-		this.freeTrackingCertificate = freeTrackingCertificate;
 	}
 
 //	Boolean switchValidity;
