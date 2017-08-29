@@ -34,7 +34,7 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private Map<String, Double> travelDistances;
 	private Date travelDate;
 	private Double travelLength;
-	private Long travelEstimatedScore;
+	private Long travelScore;
 	private ScoreStatus scoreStatus;
 	private TravelValidity travelValidity;
 	private String clientId;
@@ -120,12 +120,12 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 		this.travelLength = travelLength;
 	}
 
-	public Long getTravelEstimatedScore() {
-		return travelEstimatedScore;
+	public Long getTravelScore() {
+		return travelScore;
 	}
 
-	public void setTravelEstimatedScore(Long travelEstimatedScore) {
-		this.travelEstimatedScore = travelEstimatedScore;
+	public void setTravelScore(Long travelEstimatedScore) {
+		this.travelScore = travelEstimatedScore;
 	}
 
 
