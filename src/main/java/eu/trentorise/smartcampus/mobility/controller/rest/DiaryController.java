@@ -285,7 +285,7 @@ public class DiaryController {
 				de.setBadge(not.getBadge());
 				de.setBadgeText(badgesCache.getBadge(not.getBadge()).getText().get(player.getLanguage()));
 				de.setBadgeCollection(not.getCollectionName());
-				de.setEntityId(not.getBadge());
+				de.setEntityId(not.getCollectionName() + "_" + not.getBadge());
 				result.add(de);
 			}
 		}
