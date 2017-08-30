@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -9,7 +10,7 @@ public class GeolocationsEvent {
 	
 //	private String travelId;
 	
-	private Device device;
+	private Map<String, Object> device;
 
 	private ArrayList<Location> location;
 
@@ -21,15 +22,15 @@ public class GeolocationsEvent {
 //		this.travelId = travelId;
 //	}
 
-	public Device getDevice() {
-		return this.device;
-	}
-
 	public ArrayList<Location> getLocation() {
 		return this.location;
 	}
 
-	public void setDevice(Device device) {
+	public Map<String, Object> getDevice() {
+		return device;
+	}
+
+	public void setDevice(Map<String, Object> device) {
 		this.device = device;
 	}
 
