@@ -235,7 +235,7 @@ public class GamificationWebController {
 		return null;
 	}
 
-	@Scheduled(fixedRate = 30 * 60*1000) 
+	@Scheduled(fixedRate = 30 * 60 * 1000) 
 	public synchronized void checkRecommendations() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			try {
@@ -252,20 +252,22 @@ public class GamificationWebController {
 		Iterable<Player> players = playerRepositoryDao.findAllByCheckedRecommendationAndGameId(true, gameId);
 		for (Player player : players) {
 
-			String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
-			if (nickname != null) {
-				Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(nickname, gameId);
-				if (recommender != null) {
-					RestTemplate restTemplate = new RestTemplate();
-					ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
-							new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-					String data = res.getBody();
+			if (player.getPersonalData() != null) {
+				String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
+				if (nickname != null) {
+					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(nickname, gameId);
+					if (recommender != null) {
+						RestTemplate restTemplate = new RestTemplate();
+						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
+								new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+						String data = res.getBody();
 
-					if (getGreenLeavesPoints(data) > 0) {
-						logger.info("Sending recommendation to gamification engine: " + player.getId() + " -> " + recommender.getId());
-						sendRecommendationToGamification(recommender.getId(), gameId, appId);
-						player.setCheckedRecommendation(false);
-						playerRepositoryDao.save(player);
+						if (getGreenLeavesPoints(data) > 0) {
+							logger.info("Sending recommendation to gamification engine: " + player.getId() + " -> " + recommender.getId());
+							sendRecommendationToGamification(recommender.getId(), gameId, appId);
+							player.setCheckedRecommendation(false);
+							playerRepositoryDao.save(player);
+						}
 					}
 				}
 			}
