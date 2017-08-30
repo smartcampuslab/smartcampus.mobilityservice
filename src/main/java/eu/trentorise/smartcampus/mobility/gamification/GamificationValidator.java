@@ -280,29 +280,35 @@ public class GamificationValidator {
 //				distance += d; 
 //			}
 
+			boolean zeroImpact = false;
 			if ("walk".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.WALK)) {
 				distance = vs.getEffectiveDistances().get(MODE_TYPE.WALK) / 1000.0;
 				result.put("walkDistance", distance);
 //				score = (distance < 0.25 ? 0 : Math.min(3.5, distance)) * 10;
-				score = (distance < 0.25 ? 0 : distance) * 15;
+//				score = (distance < 0.25 ? 0 : distance) * 15;
+				score += (distance < 0.25 ? 0 : Math.min(10, distance)) * 10;
+				zeroImpact = true;
 			}
 			if ("bike".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.BIKE)) {
 				distance = vs.getEffectiveDistances().get(MODE_TYPE.BIKE) / 1000.0;
 				result.put("bikeDistance", distance);
 //				score += Math.min(7, distance) * 5;
-				score += distance * 7;
+//				score += distance * 7;
+				score += Math.min(30, distance) * 5;
+				zeroImpact = true;
 			} if ("bus".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.BUS)) {
 				distance = vs.getEffectiveDistances().get(MODE_TYPE.BUS) / 1000.0;
 				result.put("busDistance", distance);
-				result.put("transitDistance", distance);
+				score += (distance > 0 && distance < 1) ? 10 : ((distance > 1 && distance < 5) ? 15 : 20);
 			} if ("train".equals(ttype) && vs.getEffectiveDistances().containsKey(MODE_TYPE.TRAIN)) {
 				distance = vs.getEffectiveDistances().get(MODE_TYPE.TRAIN) / 1000.0;
 				result.put("trainDistance", distance);
-				result.put("transitDistance", distance);
+				score += (distance > 0 && distance < 1) ? 10 : ((distance > 1 && distance < 5) ? 15 : 20);
 			}
 			
-			// always zero impact
-			score *= 1.5;
+			if (zeroImpact) {
+				score *= 1.5;
+			}
 		}
 
 		result.put("estimatedScore", Math.round(score));
