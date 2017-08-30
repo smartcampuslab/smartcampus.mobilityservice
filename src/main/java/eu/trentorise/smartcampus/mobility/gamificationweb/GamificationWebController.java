@@ -75,7 +75,7 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 @Controller
 public class GamificationWebController {
 
-	private static final String NICK_RECOMMANDATION = "nick_recommandation";
+	private static final String NICK_RECOMMANDATION = "nicknameRecommendation";
 	private static final String TIMESTAMP = "timestamp";
 	
 //	private String[] pointConcepts = { "p+r", "green", "health"};
