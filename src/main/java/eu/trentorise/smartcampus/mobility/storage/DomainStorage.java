@@ -202,6 +202,9 @@ public class DomainStorage {
 			if (tracked.getScore() != null) {
 				update.set("score", tracked.getScore());
 			}
+			if (tracked.getDeviceInfo() != null && !tracked.getDeviceInfo().isEmpty()) {
+				update.set("deviceInfo", tracked.getDeviceInfo());
+			}
 			update.set("changedValidity", tracked.getChangedValidity());
 			update.set("scoreStatus", tracked.getScoreStatus());
 			update.set("approved", tracked.getApproved());
