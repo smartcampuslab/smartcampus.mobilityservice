@@ -150,7 +150,7 @@ public class DiaryController {
 			List<DiaryEntry> challenges = getChallenges(p, appId);
 			result.addAll(challenges);
 		}
-		if (types.contains(DiaryEntryType.CHALLENGE)) {
+		if (types.contains(DiaryEntryType.RECOMMENDED)) {
 			List<DiaryEntry> recommended = getFriendRegistered(p, appId);
 			result.addAll(recommended);
 		}
@@ -167,7 +167,7 @@ public class DiaryController {
 		List<DiaryEntry> result = Lists.newArrayList();
 
 		String gameId = appSetup.findAppById(appId).getGameId();
-		List<Player> rps = playerRepositoryDao.findByNicknameRecommandationAndGameId(p.getNickname(), gameId);
+		List<Player> rps = playerRepositoryDao.findByNicknameRecommendationAndGameId(p.getNickname(), gameId);
 		if (rps != null) {
 			for (Player rp : rps) {
 				long timestamp = (long) rp.getPersonalData().get("timestamp");
@@ -181,20 +181,21 @@ public class DiaryController {
 		return result;
 	}
 	
-	private void getRanking(Player p, String appId) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-		String gameId = appSetup.findAppById(appId).getGameId();
-//		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "state/" + gameId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "/model/game/" + gameId + "/classification", HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+//	private void getRanking(Player p, String appId) throws Exception {
+//		RestTemplate restTemplate = new RestTemplate();
+//		String gameId = appSetup.findAppById(appId).getGameId();
+////		ResponseEntity<String> res = restTemplate.exchange(gamificationConsoleUrl + "state/" + gameId, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+//		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "/data/game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8"), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+//
+//		String allData = res.getBody();		
+////		System.err.println(allData);
+//		
+//		Map<String, Object> map = mapper.readValue(allData, Map.class);
+//		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map));
+//		
+//	}
 
-		String allData = res.getBody();		
-//		System.err.println(allData);
-		
-		Map<String, Object> map = mapper.readValue(allData, Map.class);
-		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map));
-		
-	}
-
+	
 	private List<DiaryEntry> getChallenges(Player p, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
