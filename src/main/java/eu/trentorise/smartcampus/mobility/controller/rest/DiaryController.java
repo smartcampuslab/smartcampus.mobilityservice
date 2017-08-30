@@ -175,6 +175,7 @@ public class DiaryController {
 				de.setType(DiaryEntryType.RECOMMENDED);
 				de.setTimestamp(timestamp);
 				de.setRecommendedNickname(rp.getNickname());
+				de.setEntityId(p.getNickname() + "_" + rp.getNickname());
 				result.add(de);
 			}
 		}
