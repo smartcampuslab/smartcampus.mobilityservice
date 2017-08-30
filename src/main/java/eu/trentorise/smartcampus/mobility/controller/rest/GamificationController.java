@@ -314,6 +314,9 @@ public class GamificationController {
 					if (StringUtils.hasText((String) location.getExtras().get("transportType"))) {
 						freeTracks.put(key, (String) location.getExtras().get("transportType"));
 					}
+					if (StringUtils.hasText((String) location.getExtras().get("btDeviceId"))) {
+						geolocation.setCertificate((String) location.getExtras().get("btDeviceId"));
+					}
 					freeTrackStarts.put(key, locationTs);
 
 					// storage.saveGeolocation(geolocation);
@@ -404,7 +407,7 @@ public class GamificationController {
 				res.setAppId(appId);
 				res.setDeviceInfo(deviceInfo);
 				storage.saveTrackedInstance(res);
-
+				
 				logger.info("Saved geolocation events: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 			}
 

@@ -504,7 +504,6 @@ public class GamificationValidator {
 			vr.setValidationStatus(TrackValidator.validateFreeBus(geolocations, null, game.getAreas()));
 			break;
 		case "train": 
-			// TODO reference shapes
 			vr.setValidationStatus(TrackValidator.validateFreeTrain(geolocations, TRAIN_SHAPES, game.getAreas()));
 			break;
 		}

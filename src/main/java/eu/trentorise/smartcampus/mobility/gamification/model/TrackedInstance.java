@@ -232,6 +232,24 @@ public class TrackedInstance {
 		return id;
 	}
 
+//	Boolean switchValidity;
+//	Long estimatedScore;
+//
+//	public Boolean getSwitchValidity() {
+//		return switchValidity;
+//	}
+//
+//	public void setSwitchValidity(Boolean switchValidity) {
+//		this.switchValidity = switchValidity;
+//	}
+//
+//	public Long getEstimatedScore() {
+//		return estimatedScore;
+//	}
+//
+//	public void setEstimatedScore(Long estimatedScore) {
+//		this.estimatedScore = estimatedScore;
+//	}
 
 	
 	

@@ -170,9 +170,11 @@ public class GamificationHelper {
 		}
 		double[] lats = computeLats(p1, p2, distance);
 		double[] lngs = computeLngs(p1, p2, distance);
-		Date[] recordedAt = computeRecordedAt(p1, p2);
+//		Date[] recordedAt = computeRecordedAt(p1, p2);
 		Geolocation p1n = new Geolocation(lats[0], lngs[0], p1.getRecorded_at());
+		p1n.setCertificate(p1.getCertificate());
 		Geolocation p2n = new Geolocation(lats[1], lngs[1], p2.getRecorded_at());
+		p2n.setCertificate(p2.getCertificate());
 		result.add(p1n);
 		result.add(p2n);
 
