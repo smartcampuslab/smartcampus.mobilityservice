@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,6 +80,9 @@ public class ReportEmailSender {
 	@Autowired
 	@Value("${mail.redirectUrl}")
 	private String mailRedirectUrl;
+	@Autowired
+	@Value("${weeklyDataDir}")
+	private String weeklyDataDir;	
 
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
@@ -109,12 +113,18 @@ public class ReportEmailSender {
 	private List<WeekConfData> weekConfData = null;
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
+	public synchronized void sendNotification() throws Exception {
+		sendWeeklyNotification();
+		System.out.println("DONE");
+	}
+	
+	@Scheduled(cron="0 0 9 * * *")
 	public synchronized void sendWeeklyNotification() throws Exception {
+//		System.err.println("TIME " + new Date());
 		for (AppInfo appInfo : appSetup.getApps()) {
 			sendWeeklyNotification(appInfo.getAppId());
 		}
-		System.out.println("DONE");
-	}
+	}	
 	
 //	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test2")
 //	public synchronized void checkWinnersNotification() throws Exception {
@@ -163,7 +173,7 @@ public class ReportEmailSender {
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
-		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile("mail/" + conf_directory + "/game_week_winners.csv");
+		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
 		int actual_week = 0;
@@ -193,12 +203,6 @@ public class ReportEmailSender {
 
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
-			try {
-				// TODO FIXME
-				Thread.sleep(1500);
-			} catch (InterruptedException e1) {
-				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
-			}
 
 			if (p.isSendMail()) {
 				String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
@@ -328,10 +332,10 @@ public class ReportEmailSender {
 //		}
 		// }
 	}
-
-public String getPlayerLang(Player p) {
-	return p.getLanguage() != null ? p.getLanguage() : ITA_LANG;
-}
+	
+	public String getPlayerLang(Player p) {
+		return p.getLanguage() != null ? p.getLanguage() : ITA_LANG;
+	}
 
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 15 15 * * MON") // Repeat every Monday at 15:15
@@ -357,7 +361,7 @@ public String getPlayerLang(Player p) {
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
-		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile("mail/" + conf_directory + "/game_week_winners.csv");		
+		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");		
 		
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
@@ -387,12 +391,6 @@ public String getPlayerLang(Player p) {
 
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
-			try {
-				// TODO FIXME
-				Thread.sleep(1500);
-			} catch (InterruptedException e1) {
-				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
-			}
 
 			if (p.isSendMail()) {
 				String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
@@ -546,12 +544,6 @@ public String getPlayerLang(Player p) {
 
 		for (Player p : iter) {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
-			try {
-				// TODO FIXME
-				Thread.sleep(1500);
-			} catch (InterruptedException e1) {
-				logger.error(String.format("Errore in attesa thread: %s", e1.getMessage()));
-			}
 
 			if (p.isSendMail()) {
 				String moduleName = "mail/certificates-pdf/Certificato_TrentoPlayAndGo_" + p.getId() + ".pdf";
@@ -1200,7 +1192,7 @@ public String getPlayerLang(Player p) {
 		String cvsSplitBy = ",";
 		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
 
-		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
 
 		for (int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
