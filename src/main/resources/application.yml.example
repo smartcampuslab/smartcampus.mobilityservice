@@ -44,4 +44,6 @@ mail:
   redirectUrl: http://localhost:8010/core.mobility/gamificationweb
   
 validation:
-  shapefolder:   
+  shapefolder:
+  
+weeklyDataDir: 
