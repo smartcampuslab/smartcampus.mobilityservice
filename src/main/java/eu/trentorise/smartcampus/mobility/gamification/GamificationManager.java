@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import eu.trentorise.smartcampus.mobility.controller.rest.GamificationController;
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.MessageNotification;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -117,6 +119,9 @@ public class GamificationManager {
 			ed.setPlayerId(playerId);
 			ed.setActionId(SAVE_ITINERARY);
 			ed.setData(trackingData);
+			
+			Long time = (Long)trackingData.remove(GamificationController.START_TIME);
+			ed.setExecutionMoment(new Date(time));			
 
 			String content = JsonUtils.toJSON(ed);
 			
@@ -194,6 +199,9 @@ public class GamificationManager {
 			ed.setPlayerId(userId);
 			ed.setActionId(SAVE_ITINERARY);
 			ed.setData(trackingData);
+			
+			Long time = (Long)trackingData.remove(GamificationController.START_TIME);
+			ed.setExecutionMoment(new Date(time));
 
 			String content = JsonUtils.toJSON(ed);
 			
