@@ -18,6 +18,8 @@ package eu.trentorise.smartcampus.mobility.gamification;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +39,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
+import eu.trentorise.smartcampus.mobility.geolocation.model.TTDescriptor;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
@@ -73,7 +76,8 @@ public class GamificationValidator {
 	@Autowired
 	private GameSetup gameSetup;	
 
-	private List<List<Geolocation>> TRAIN_SHAPES = new ArrayList<>();
+	public List<List<Geolocation>> TRAIN_SHAPES = new ArrayList<>();
+	public TTDescriptor BUS_DESCRIPTOR = null;
 
 	@Autowired
 	@Value("${validation.shapefolder}")
@@ -87,9 +91,39 @@ public class GamificationValidator {
 				TRAIN_SHAPES.add(TrackValidator.parseShape(new FileInputStream(f)).get(0));
 			}
 		}
+		BUS_DESCRIPTOR = new TTDescriptor();
+		loadBusFolder(new File(shapeFolder+"/bus"));
+		BUS_DESCRIPTOR.build(100);
 	}
 	
 	
+	
+	/**
+	 * @param file
+	 * @throws FileNotFoundException 
+	 */
+	private void loadBusFolder(File file) throws Exception {
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			InputStream shapes = null, stops = null, trips = null, stopTimes = null;
+			
+			for (File f : files) {
+				if (f.isDirectory()) {
+					loadBusFolder(f);
+				} else {
+					if ("stops.txt".equals(f.getName())) stops = new FileInputStream(f);
+					if ("shapes.txt".equals(f.getName())) shapes = new FileInputStream(f);
+					if ("stop_times.txt".equals(f.getName())) stopTimes = new FileInputStream(f);
+					if ("trips.txt".equals(f.getName())) trips = new FileInputStream(f);
+				}
+			}
+			if (shapes != null && stops != null && stopTimes != null && trips != null) {
+				BUS_DESCRIPTOR.load(stops, trips, stopTimes, shapes);
+			}
+		}
+	}
+
+
 	public Map<String, Object> computePlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
 //		if (geolocations != null) {
 //			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
@@ -500,8 +534,7 @@ public class GamificationValidator {
 			vr.setValidationStatus(TrackValidator.validateFreeBike(geolocations, game.getAreas()));
 			break;
 		case "bus": 
-			// TODO reference shapes
-			vr.setValidationStatus(TrackValidator.validateFreeBus(geolocations, null, game.getAreas()));
+			vr.setValidationStatus(TrackValidator.validateFreeBus(geolocations, BUS_DESCRIPTOR.filterShapes(geolocations), game.getAreas()));
 			break;
 		case "train": 
 			vr.setValidationStatus(TrackValidator.validateFreeTrain(geolocations, TRAIN_SHAPES, game.getAreas()));

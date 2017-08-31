@@ -28,12 +28,16 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import eu.trentorise.smartcampus.mobility.util.TokenHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
@@ -51,12 +55,11 @@ import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
  * @author raman
  *
  */
-//@Configuration
 public class RemoteTestConfig {
 
 	@Bean(name="mongoTemplate")
 	public MongoTemplate getDomainMongo() throws UnknownHostException, MongoException {
-		return new MongoTemplate(new Mongo("127.0.0.1",37017), "mobility-domain");
+		return new MongoTemplate(new Mongo("127.0.0.1",17017), "mobility-domain");
 	}
 	
 	@Bean
@@ -73,6 +76,23 @@ public class RemoteTestConfig {
 	StatisticsBuilder getStatBuilder(){
 		return new StatisticsBuilder();
 	}
+	
+	@Bean
+	GamificationValidator getValidator(){
+		return new GamificationValidator();
+	}
+	
+	@Bean AppSetup getAppSetup(){
+		return new AppSetup();
+	}
+	@Bean GameSetup getGameSetup(){
+		return new GameSetup();
+	}
+	@Bean
+	TokenHelper getTokenHelper() {
+		return new TokenHelper();
+	}
+	
 	
 	@Bean
 	public AlertNotifier getAlertNotifier() {
@@ -141,32 +161,26 @@ public class RemoteTestConfig {
 			}
 			@Override
 			public String getTaxiStations(double latitude, double longitude, double radius) throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public String getAllTaxiStations() throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public String getAgencyTaxiStations(String agencyId) throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public Map<String, PlanningPolicy> getPolicies(Boolean draft) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public String getTaxiAgencyContacts() throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public String getTaxiAgencyContacts(String agencyId) throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
@@ -175,13 +189,10 @@ public class RemoteTestConfig {
 			}
 			@Override
 			public String bikeStations() throws Exception {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public void addBikeSharingStations(List<BikeStation> stations) throws Exception {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		};
