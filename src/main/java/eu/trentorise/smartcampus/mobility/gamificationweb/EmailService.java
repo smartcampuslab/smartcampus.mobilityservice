@@ -150,7 +150,7 @@ public class EmailService {
 //        if(isFirstMail){
 //        	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-startgame-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-startgame-tn-eng", ctx);
 //        } else {
-        	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-tn-eng", ctx);
+        	htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2017-tn", ctx) : this.templateEngine.process("mail/email-gamification2017-tn-eng", ctx);
 //        }
         message.setText(htmlContent, true /* isHtml */);
         
