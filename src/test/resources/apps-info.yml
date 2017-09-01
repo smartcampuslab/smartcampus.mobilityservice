@@ -1,0 +1,38 @@
+apps:
+  - appId: trento
+    password: pwd
+    messagingAppId : mobility.trento.test
+    gcmSenderApiKey : 
+    gcmSenderId : 453601816446
+    agencyIds : [5,6,10,12]
+    routesDB : trento
+    servicesUser : trento_service
+    servicesPassword : trento_service
+  - appId: rovereto
+    password: pwd
+    messagingAppId : mobility.rovereto.test
+    gcmSenderApiKey : 
+    gcmSenderId : 453601816446
+    agencyIds : [5,6,10,16,17]
+    gameId : 56fbd2cae4b0090bdacde8c2
+    routesDB : rovereto
+  - appId: alpecimbra
+    password: pwd
+    messagingAppId : mobility.alpecimbra.test
+    gcmSenderApiKey : 
+    gcmSenderId : 453601816446
+    agencyIds : [5,6,7,8,10,17]
+    routesDB : alpecimbra
+  - appId: trentoplaygo
+    password: pwd
+    messagingAppId : mobility.trentoplaygo.test
+    gcmSenderApiKey : 
+    gcmSenderId : 453601816446
+    agencyIds : [5,6,10,12]
+    gameId : 596e1b00e4b0004279fc0736
+    routesDB : trento
+    extra:
+        game:
+            poi : [46.064785, 11.116505]
+            from : 26/10/2016 9:00
+            to : 30/10/2016 19:00

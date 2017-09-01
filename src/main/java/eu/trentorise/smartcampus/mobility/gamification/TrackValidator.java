@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.TrackSplit;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
@@ -55,12 +57,16 @@ public class TrackValidator {
 
 	public static final double VALIDITY_THRESHOLD = 80; // %
 	public static final double ACCURACY_THRESHOLD = 150; // meters
+	
 	public static final int COVERAGE_THRESHOLD = 80; // %
+	private static final double CERTIFIED_COVERAGE_THRESHOLD = 50; // %
+
 	public static final double MIN_COVERAGE_THRESHOLD = 40; // %
 
-	public static final double DISTANCE_THRESHOLD = 0; // meters TODO change to 250
+	public static final double DISTANCE_THRESHOLD = 250; // meters TODO change to 250
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
-	public static final double BIKE_DISTANCE_THRESHOLD = 0;// meters TODO change to 100
+	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters TODO change to 100
+	private static final double MAX_AVG_SPEED_THRESHOLD = 100; // km/h
 	
 	/**
 	 * Preprocess tracked data: spline, remove outstanding points, remove potentially erroneous start / stop points 
@@ -175,7 +181,7 @@ public class TrackValidator {
 
 	/**
 	 * Validate free tracking: bus. Take reference bus shapes as input.
-	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 1 min fast track; 
+	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 30 sec fast track; 
 	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 80% of length is matched. If no
 	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
 	 * @param track
@@ -185,7 +191,7 @@ public class TrackValidator {
 	 */
 	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
 		MODE_TYPE mode = MODE_TYPE.BUS; 
-		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
+		double speedThreshold = 10, timeThreshold = 1*60*1000, minTrackThreshold = 30*1000; 
 		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold);
 	}
 	
@@ -212,47 +218,65 @@ public class TrackValidator {
 			return status;
 		}
 		
-		TravelValidity negativeValidity = TravelValidity.PENDING;
 		
 		// split track into pieces. For train consider 15km/h threshold
 		TrackSplit trackSplit = TrackSplit.fastSplit(points, speedThreshold, timeThreshold, minTrackThreshold);
 		if (trackSplit.getFastIntervals().isEmpty()) {
-			status.setValidationOutcome(negativeValidity);
+			status.setValidationOutcome(TravelValidity.PENDING);
 			status.setError(ERROR_TYPE.TOO_SLOW);
+			// for consistency, put the whole distance
+			status.getEffectiveDistances().put(mode, status.getDistance());
 			return status;
 		}
-		status.updateFastSplit(trackSplit);
+		status.updateFastSplit(trackSplit, MAX_AVG_SPEED_THRESHOLD);
 
 		if (referenceTracks != null && !referenceTracks.isEmpty()) {
 			// compute matches checking each fast fragment against available reference train tracks
 			// check max coverage for each fragment
 			// if overall distance coverage is high enough, set trip valid 
-			double matchedDistance = 0;
+			double matchedDistance = 0, transportDistance = 0.00000001, coveredDistance =  0;// to avoid division by 0
 			for (Interval interval: status.getIntervals()) {
 				List<Geolocation> subtrack = trackSplit.getTrack().subList(interval.getStart(), interval.getEnd());
 				int effectiveLength = subtrack.size();
 				int invalid = effectiveLength;
 				double subtrackPrecision = 0;
+				MatchModel subtrackModel = new MatchModel(subtrack, status.getMatchThreshold());
 				for (List<Geolocation> ref: referenceTracks) {
-					invalid = Math.min(trackMatch(subtrack, ref, status.getMatchThreshold()),invalid); 
+					invalid = Math.min(trackMatch(subtrackModel, ref),invalid); 
 					subtrackPrecision = 100.0 * (effectiveLength-invalid) / (effectiveLength);
 					if (subtrackPrecision >= status.getValidityThreshold()) break;
 				}
 				interval.setMatch(subtrackPrecision);
+				transportDistance = interval.getDistance();
 				if (subtrackPrecision >= status.getValidityThreshold()) {
 					status.setMatchedIntervals(status.getMatchedIntervals()+1);
 					matchedDistance += interval.getDistance();
 				}
+				coveredDistance += transportDistance * subtrackPrecision / 100.0;
 			}
-			double coverage = 100.0 * matchedDistance / status.getDistance();
-			status.setValidationOutcome(coverage >= COVERAGE_THRESHOLD ? TravelValidity.VALID : negativeValidity);
+			double coverage = 100.0 * matchedDistance / transportDistance;// status.getDistance();
+			if (coverage >= COVERAGE_THRESHOLD) {
+				status.setValidationOutcome(TravelValidity.VALID);
+			} else if (isCertifiedTrack(track) && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
+				status.setValidationOutcome(TravelValidity.VALID);				
+			} else {
+				status.setValidationOutcome(TravelValidity.PENDING);				
+			}
 			return status;
 		} else {
-			status.setValidationOutcome(negativeValidity);
+			status.setValidationOutcome(TravelValidity.PENDING);
 			return status;
 		}
 	}
 	
+	/**
+	 * @param track
+	 * @return true if the track contains certification markers in the points
+	 */
+	private static boolean isCertifiedTrack(Collection<Geolocation> track) {
+		return track.stream().anyMatch(g -> !StringUtils.isEmpty(g.getCertificate()));
+	}
+
 	/**
 	 * Validate free walk. Check track start/stop is within the areas,
 	 * consider only the piece with valid walk speed (if any) and is longer than 250 meters.
@@ -431,61 +455,37 @@ public class TrackValidator {
 	 * @return true if the Hausdorff distance is less than specified precision
 	 */
 	private static int trackMatch(List<Geolocation> track1, List<Geolocation> track2, double error) {
-		// normalize distance: in km and along coordinate
-		final double distance = error / 1000 / 2 / Math.sqrt(2);
-		
-		// consider track1 is shorter and is used as a reference for matrix construction
-		// identify matrix coordinates
-		double[] nw = new double[]{Double.MIN_VALUE, Double.MAX_VALUE}, se = new double[]{Double.MAX_VALUE, Double.MIN_VALUE};
-		track1.forEach(g -> {
-			nw[0] = Math.max(nw[0], g.getLatitude()); nw[1] = Math.min(nw[1], g.getLongitude());
-			se[0] = Math.min(se[0], g.getLatitude()); se[1] = Math.max(se[1], g.getLongitude());
-		});
-		
-		// add extra row/col to matrix 
-		int width = 2 + (int) Math.ceil(GamificationHelper.harvesineDistance(nw[0],nw[1], nw[0], se[1]) / distance);
-		int height = 2 + (int) Math.ceil(GamificationHelper.harvesineDistance(nw[0],nw[1], se[0], nw[1]) / distance);
-		
-//		System.err.println("nw = "+Arrays.toString(nw));
-//		System.err.println("se = "+Arrays.toString(se));
-//		System.err.println("width = "+width);
-//		System.err.println("height = "+height);
-		
-		
-		// represent the cells with values to avoid sparse matrix traversal
-		Map<Integer,Integer> matrix = new HashMap<>();
-		// fill in the matrix from test track
-		track1.forEach(g -> {
-			int row = row(se[0], g.getLatitude(), g.getLongitude(), distance);
-			int col = col(nw[1], g.getLatitude(), g.getLongitude(), distance);
-			if (row >= height || col >= width) return; // should never happen
-			matrix.put(row*width+col, matrix.getOrDefault(row*width+col,0)-1); // only first track present
-		});
+		return trackMatch(new MatchModel(track1, error), track2);
+	}
+	private static int trackMatch(MatchModel model, List<Geolocation> track2) {
+
 		int matching = 0;
+		Map<Integer,Integer> matrix = new HashMap<>(model.matrix);
+		
 		// fill in the matrix from reference track. include also additional cells
 		for (Geolocation g : track2) {
-			if (g.getLatitude() > nw[0] || g.getLatitude() < se[0] || g.getLongitude() < nw[1] || g.getLongitude() > se[1]) continue;
+			if (g.getLatitude() > model.nw[0] || g.getLatitude() < model.se[0] || g.getLongitude() < model.nw[1] || g.getLongitude() > model.se[1]) continue;
 			
-			int row = row(se[0], g.getLatitude(), g.getLongitude(), distance);
-			int col = col(nw[1], g.getLatitude(), g.getLongitude(), distance);
+			int row = row(model.se[0], g.getLatitude(), g.getLongitude(), model.distance);
+			int col = col(model.nw[1], g.getLatitude(), g.getLongitude(), model.distance);
 			
-			if (row >= height || col >= width) continue; // should never happen
+			if (row >= model.height || col >= model.width) continue; // should never happen
 						
-			int idx = row*width+col;
+			int idx = row*model.width+col;
 			if ( matrix.getOrDefault(idx, 0) == 0)  matrix.put(idx, 2); // only 2nd track present
 			else if ( matrix.getOrDefault(idx, 0) < 0)  matrix.put(idx, 3); // both present
 			matching++;
 		}
-		if (matching == 0) return track1.size();
+		if (matching == 0) return model.track.size();
 			
 		int invalidCount = 0;
 		
 		// check the cells with the test track items only: check 8 neighbors
 		for (Integer idx : matrix.keySet()) {
 			if (matrix.get(idx) < 0 &&
-				matrix.getOrDefault(idx-width, 0) < 2 && matrix.getOrDefault(idx+width, 0) < 2 &&
-				matrix.getOrDefault(idx-width-1, 0) < 2 && matrix.getOrDefault(idx+width-1, 0) < 2 &&
-				matrix.getOrDefault(idx-width+1, 0) < 2 && matrix.getOrDefault(idx+width+1, 0) < 2 &&
+				matrix.getOrDefault(idx-model.width, 0) < 2 && matrix.getOrDefault(idx+model.width, 0) < 2 &&
+				matrix.getOrDefault(idx-model.width-1, 0) < 2 && matrix.getOrDefault(idx+model.width-1, 0) < 2 &&
+				matrix.getOrDefault(idx-model.width+1, 0) < 2 && matrix.getOrDefault(idx+model.width+1, 0) < 2 &&
 				matrix.getOrDefault(idx-1, 0) < 2 && matrix.getOrDefault(idx+1, 0) < 2
 				) 
 			{
@@ -521,7 +521,7 @@ public class TrackValidator {
 		
 	}
 	
-	private static List<Geolocation> fillTrace(List<Geolocation> track, double distance) {
+	public static List<Geolocation> fillTrace(List<Geolocation> track, double distance) {
 		List<Geolocation> res = new LinkedList<>();
 		res.add(track.get(0));
 		// preprocess the reference track: add extra points 
@@ -534,11 +534,46 @@ public class TrackValidator {
 			}
 			res.add(track.get(i));
 		}
-//		String poly = GamificationHelper.encodePoly(res);
-//		System.err.println(poly);
 		
 		return res;
 	}
 
+	private static class MatchModel {
+		
+		private List<Geolocation> track;
+		private double distance;
+		private double[] nw = new double[]{Double.MIN_VALUE, Double.MAX_VALUE}, se = new double[]{Double.MAX_VALUE, Double.MIN_VALUE};
+		private int width = 0, height = 0;
+		private Map<Integer,Integer> matrix = new HashMap<>();
+
+		
+		public MatchModel(List<Geolocation> track, double error) {
+			super();
+			this.track = track;
+			distance = error / 1000 / 2 / Math.sqrt(2);
+			
+			// consider track1 is shorter and is used as a reference for matrix construction
+			// identify matrix coordinates
+			track.forEach(g -> {
+				nw[0] = Math.max(nw[0], g.getLatitude()); nw[1] = Math.min(nw[1], g.getLongitude());
+				se[0] = Math.min(se[0], g.getLatitude()); se[1] = Math.max(se[1], g.getLongitude());
+			});
+			
+			// add extra row/col to matrix 
+			width = 2 + (int) Math.ceil(GamificationHelper.harvesineDistance(nw[0],nw[1], nw[0], se[1]) / distance);
+			height = 2 + (int) Math.ceil(GamificationHelper.harvesineDistance(nw[0],nw[1], se[0], nw[1]) / distance);
+			
+			// represent the cells with values to avoid sparse matrix traversal
+			// fill in the matrix from test track
+			track.forEach(g -> {
+				int row = row(se[0], g.getLatitude(), g.getLongitude(), distance);
+				int col = col(nw[1], g.getLatitude(), g.getLongitude(), distance);
+				if (row >= height || col >= width) return; // should never happen
+				matrix.put(row*width+col, matrix.getOrDefault(row*width+col,0)-1); // only first track present
+			});		
+		}
+
+		
+	}
 
 }

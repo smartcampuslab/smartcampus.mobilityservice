@@ -144,7 +144,7 @@ public class ValidationStatus {
 	 * Update stats from split data considering fast tracks
 	 * @param trackSplit
 	 */
-	public void updateFastSplit(TrackSplit trackSplit) {
+	public void updateFastSplit(TrackSplit trackSplit, double maxSpeedThreshold) {
 		splitMinFastDurationThreshold = trackSplit.getMinTrackThreshold();
 		splitSpeedThreshold = trackSplit.getSpeedThreshold();
 		splitStopTimeThreshold = trackSplit.getTimeThreshold();
@@ -159,10 +159,15 @@ public class ValidationStatus {
 			for (int i = 1; i < subtrack.size(); i++) {
 				intervalDistance += 1000.0*GamificationHelper.harvesineDistance(subtrack.get(i), subtrack.get(i-1));
 			}
-			fastDistance += intervalDistance;
-			interval.setDistance(intervalDistance);
 			interval.setStartTime(subtrack.get(0).getRecorded_at().getTime());
 			interval.setEndTime(subtrack.get(subtrack.size()-1).getRecorded_at().getTime());
+			double speed = 3.6 * 1000.0 * intervalDistance / (interval.getEndTime() - interval.getStartTime()); 
+			if (speed > maxSpeedThreshold) {
+				continue;
+			}
+			
+			fastDistance += intervalDistance;
+			interval.setDistance(intervalDistance);
 			intervals.add(interval);
 		}
 		effectiveDistances = new HashMap<>();
