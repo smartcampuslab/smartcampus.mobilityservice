@@ -63,9 +63,9 @@ public class TrackValidator {
 
 	public static final double MIN_COVERAGE_THRESHOLD = 40; // %
 
-	public static final double DISTANCE_THRESHOLD = 0; // meters TODO change to 250
+	public static final double DISTANCE_THRESHOLD = 250; // meters TODO change to 250
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
-	public static final double BIKE_DISTANCE_THRESHOLD = 0;// meters TODO change to 100
+	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters TODO change to 100
 	private static final double MAX_AVG_SPEED_THRESHOLD = 100; // km/h
 	
 	/**
