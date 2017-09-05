@@ -207,7 +207,9 @@ public class DomainStorage {
 			}
 			update.set("changedValidity", tracked.getChangedValidity());
 			update.set("scoreStatus", tracked.getScoreStatus());
-			update.set("approved", tracked.getApproved());
+			if (tracked.getApproved() != null) {
+				update.set("approved", tracked.getApproved());
+			}
 			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
 			
