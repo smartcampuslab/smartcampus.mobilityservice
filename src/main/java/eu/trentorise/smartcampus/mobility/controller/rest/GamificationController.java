@@ -354,7 +354,16 @@ public class GamificationController {
 						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getRecorded_at()));
 					}
 					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
-						res.setFreeTrackingTransport(freeTracks.get(key));
+						String ftt = freeTracks.get(key);
+						if (ftt == null) {
+							String[] cid = travelId.split("_");
+							if (cid != null && cid.length > 1) {
+								ftt = cid[0];
+							} else {
+								logger.error("Cannot find transport type for " + key);
+							}
+						}
+						res.setFreeTrackingTransport(ftt);
 						if (freeTrackStarts.containsKey(key)) {
 							res.setTime(timeSdf.format(new Date(freeTrackStarts.get(key))));
 						}
@@ -1027,6 +1036,8 @@ public class GamificationController {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}	
+			
+			userId = "25354";
 			
 			long start = 0;
 			AppInfo ai = appSetup.findAppById(appId);
