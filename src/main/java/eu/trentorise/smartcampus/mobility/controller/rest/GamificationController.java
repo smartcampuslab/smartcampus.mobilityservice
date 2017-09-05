@@ -880,174 +880,186 @@ public class GamificationController {
 			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws Exception {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
-		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
-		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
-			criteria = criteria.and("estimatedScore").gt(0);
-		}
-		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
-			criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
-		}
-		if (toCheck != null && toCheck.booleanValue()) {
-			criteria = criteria.and("toCheck").is(true);
-		}		
-
-//		if (fromDate != null) {
-//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
-//		}
-//		if (toDate != null) {
-//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-//		}
-		
-		if (fromDate != null) {
-			String fd = shortSdf.format(new Date(fromDate));
-			criteria = criteria.and("day").gte(fd);
-		}
-		
-		if (toDate != null) {
-			String td = shortSdf.format(new Date(toDate));
-			criteria = criteria.andOperator(new Criteria("day").lte(td));
-		}
-		
-		Query query = new Query(criteria);
-
-		logger.debug("Start itinerary query for " + userId);
-		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
-		logger.debug("End itinerary query for " + userId);
-
-		Map<String, Double> scores = gamificationManager.getScoreNotification(appId, userId);
-		
-		if (instances != null) {
-			for (TrackedInstance o : instances) {
-				List<Geolocation> geo = Lists.newArrayList(o.getGeolocationEvents());
-				Collections.sort(geo);
-				o.setGeolocationEvents(geo);
-				
-				if (scores.containsKey(o.getId()) && ! ScoreStatus.ASSIGNED.equals(o.getScoreStatus())) {
-					o.setScore(scores.get(o.getId()).longValue());
-					o.setScoreStatus(ScoreStatus.ASSIGNED);
-					storage.saveTrackedInstance(o);
-				}				
+		try {
+			Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
+			if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
+				criteria = criteria.and("estimatedScore").gt(0);
+			}
+			if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
+				criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
+			}
+			if (toCheck != null && toCheck.booleanValue()) {
+				criteria = criteria.and("toCheck").is(true);
 			}
 
-//			instances = aggregateFollowingTrackedInstances(instances);
-			for (TrackedInstance o : instances) {
-				ItineraryDescriptor descr = new ItineraryDescriptor();
-				if (o.getUserId() != null) {
-					descr.setUserId(o.getUserId());
-				} else {
-					ItineraryObject itinerary = storage.searchDomainObject(Collections.<String, Object> singletonMap("clientId", o.getClientId()), ItineraryObject.class);
-					if (itinerary != null) {
-						descr.setUserId(itinerary.getUserId());
-					} else {
-						continue;
+			// if (fromDate != null) {
+			// criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			// }
+			// if (toDate != null) {
+			// criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+			// }
+
+			if (fromDate != null) {
+				String fd = shortSdf.format(new Date(fromDate));
+				criteria = criteria.and("day").gte(fd);
+			}
+
+			if (toDate != null) {
+				String td = shortSdf.format(new Date(toDate));
+				criteria = criteria.andOperator(new Criteria("day").lte(td));
+			}
+
+			Query query = new Query(criteria);
+
+			logger.debug("Start itinerary query for " + userId);
+			List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
+			logger.debug("End itinerary query for " + userId);
+
+			Map<String, Double> scores = gamificationManager.getScoreNotification(appId, userId);
+
+			if (instances != null) {
+				for (TrackedInstance o : instances) {
+					List<Geolocation> geo = Lists.newArrayList(o.getGeolocationEvents());
+					Collections.sort(geo);
+					o.setGeolocationEvents(geo);
+
+					if (scores.containsKey(o.getId()) && !ScoreStatus.ASSIGNED.equals(o.getScoreStatus())) {
+						o.setScore(scores.get(o.getId()).longValue());
+						o.setScoreStatus(ScoreStatus.ASSIGNED);
+						storage.saveTrackedInstance(o);
 					}
 				}
-				descr.setTripId(o.getClientId());
 
-				if (o.getGeolocationEvents() != null && !o.getGeolocationEvents().isEmpty()) {
-					Geolocation event = o.getGeolocationEvents().iterator().next();
-					descr.setStartTime(event.getRecorded_at().getTime());
-				} else if (o.getDay() != null && o.getTime() != null) {
-					String dt = o.getDay() + " " + o.getTime();
-					descr.setStartTime(fullSdf.parse(dt).getTime());
-				} else if (o.getDay() != null) {
-					descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
-				}
+				// instances = aggregateFollowingTrackedInstances(instances);
+				for (TrackedInstance o : instances) {
+					ItineraryDescriptor descr = new ItineraryDescriptor();
+					if (o.getUserId() != null) {
+						descr.setUserId(o.getUserId());
+					} else {
+						ItineraryObject itinerary = storage.searchDomainObject(Collections.<String, Object>singletonMap("clientId", o.getClientId()), ItineraryObject.class);
+						if (itinerary != null) {
+							descr.setUserId(itinerary.getUserId());
+						} else {
+							continue;
+						}
+					}
+					descr.setTripId(o.getClientId());
 
-				if (o.getItinerary() != null) {
-					descr.setEndTime(o.getItinerary().getData().getEndtime());
-					descr.setTripName(o.getItinerary().getName() + " (" + o.getId() + ")");
-					descr.setRecurrency(o.getItinerary().getRecurrency());
-				} else {
-					descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
-					descr.setTripName(o.getId());
+					if (o.getGeolocationEvents() != null && !o.getGeolocationEvents().isEmpty()) {
+						Geolocation event = o.getGeolocationEvents().iterator().next();
+						descr.setStartTime(event.getRecorded_at().getTime());
+					} else if (o.getDay() != null && o.getTime() != null) {
+						String dt = o.getDay() + " " + o.getTime();
+						descr.setStartTime(fullSdf.parse(dt).getTime());
+					} else if (o.getDay() != null) {
+						descr.setStartTime(shortSdf.parse(o.getDay()).getTime());
+					}
+
+					if (o.getItinerary() != null) {
+						descr.setEndTime(o.getItinerary().getData().getEndtime());
+						descr.setTripName(o.getItinerary().getName() + " (" + o.getId() + ")");
+						descr.setRecurrency(o.getItinerary().getRecurrency());
+					} else {
+						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
+						descr.setTripName(o.getId());
+					}
+					descr.setInstance(o);
+					list.add(descr);
 				}
-				descr.setInstance(o);
-				list.add(descr);
 			}
+
+			Collections.sort(list);
+			Collections.reverse(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
-
-		Collections.sort(list);
-		Collections.reverse(list);
-
 		return list;
 	}
 
 	@RequestMapping("/console/users")
 	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
-			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean toCheck) throws ParseException {
-		Map<String, UserDescriptor> users = new HashMap<String, UserDescriptor>();
+			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly,
+			@RequestParam(required = false) Boolean toCheck) throws ParseException {
+		List<UserDescriptor> userList = null;
 
-		Set<String> keys = new HashSet<String>();
-		keys.add("userId");
-		keys.add("validationResult");
-		keys.add("approved");
-		keys.add("changedValidity");
+		try {
+			Map<String, UserDescriptor> users = new HashMap<String, UserDescriptor>();
+			Set<String> keys = new HashSet<String>();
+			keys.add("userId");
+			keys.add("validationResult");
+			keys.add("approved");
+			keys.add("changedValidity");
 
-		Criteria criteria = new Criteria("appId").is(appId);
-		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
-			criteria = criteria.and("estimatedScore").gt(0);
-		}
-		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
-			criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
-		}
-		if (toCheck != null && toCheck.booleanValue()) {
-			criteria = criteria.and("toCheck").is(true);
-		}			
-//		if (fromDate != null) {
-//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
-//		}
-//		if (toDate != null) {
-//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-//		}
-		
-		if (fromDate != null) {
-			String fd = shortSdf.format(new Date(fromDate));
-			criteria = criteria.and("day").gte(fd);
-		}
-		
-		if (toDate != null) {
-			String td = shortSdf.format(new Date(toDate));
-			criteria = criteria.andOperator(new Criteria("day").lte(td));
-		}		
-		
-		Query query = new Query(criteria);
+			Criteria criteria = new Criteria("appId").is(appId);
+			if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
+				criteria = criteria.and("estimatedScore").gt(0);
+			}
+			if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
+				criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
+			}
+			if (toCheck != null && toCheck.booleanValue()) {
+				criteria = criteria.and("toCheck").is(true);
+			}
+			// if (fromDate != null) {
+			// criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			// }
+			// if (toDate != null) {
+			// criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+			// }
 
-		List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
-		
-		for (TrackedInstance ti : tis) {
-			String userId = ti.getUserId();
-			if (userId == null) {
-				continue;
+			if (fromDate != null) {
+				String fd = shortSdf.format(new Date(fromDate));
+				criteria = criteria.and("day").gte(fd);
 			}
-			UserDescriptor ud = users.get(userId);
-			if (ud == null) {
-				ud = new UserDescriptor();
-				ud.setUserId(userId);
-				ud.setValid(0);
-				ud.setTotal(0);
-				users.put(userId, ud);
+
+			if (toDate != null) {
+				String td = shortSdf.format(new Date(toDate));
+				criteria = criteria.andOperator(new Criteria("day").lte(td));
 			}
-			ud.setTotal(ud.getTotal() + 1);
-			TravelValidity validity = ti.getValidationResult().getTravelValidity();
-			if (ti.getApproved() != null && ti.getApproved().booleanValue() && ti.getChangedValidity() != null) {
-				validity = ti.getChangedValidity();
+
+			Query query = new Query(criteria);
+
+			List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
+
+			for (TrackedInstance ti : tis) {
+				String userId = ti.getUserId();
+				if (userId == null) {
+					continue;
+				}
+				UserDescriptor ud = users.get(userId);
+				if (ud == null) {
+					ud = new UserDescriptor();
+					ud.setUserId(userId);
+					ud.setValid(0);
+					ud.setTotal(0);
+					users.put(userId, ud);
+				}
+				ud.setTotal(ud.getTotal() + 1);
+				TravelValidity validity = ti.getValidationResult().getTravelValidity();
+				if (ti.getApproved() != null && ti.getApproved().booleanValue() && ti.getChangedValidity() != null) {
+					validity = ti.getChangedValidity();
+				}
+				switch (validity) {
+				case VALID:
+					ud.setValid(ud.getValid() + 1);
+					break;
+				case INVALID:
+					ud.setInvalid(ud.getInvalid() + 1);
+					break;
+				case PENDING:
+					ud.setPending(ud.getPending() + 1);
+					break;
+				}
 			}
-			switch (validity) {
-			case VALID:
-				ud.setValid(ud.getValid() + 1);
-				break;
-			case INVALID:
-				ud.setInvalid(ud.getInvalid() + 1);
-				break;
-			case PENDING:
-				ud.setPending(ud.getPending() + 1);
-				break;				
-			}
+
+			userList = new ArrayList<UserDescriptor>(users.values());
+			Collections.sort(userList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
 
-		List<UserDescriptor> userList = new ArrayList<UserDescriptor>(users.values());
-		Collections.sort(userList);
 		return userList;
 	}
 
