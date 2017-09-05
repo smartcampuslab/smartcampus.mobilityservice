@@ -850,7 +850,7 @@ public class JourneyPlannerController {
 		case DELAY:
 			alert = mapper.convertValue(contentMap, AlertDelay.class);
 			if (userId != null)
-				logger.info("-" + userId + "~AppProsume~delay=" + ((AlertDelay) alert).getTransport().getAgencyId());
+				logger.debug("-" + userId + "~AppProsume~delay=" + ((AlertDelay) alert).getTransport().getAgencyId());
 			break;
 		case PARKING:
 			alert = mapper.convertValue(contentMap, AlertParking.class);

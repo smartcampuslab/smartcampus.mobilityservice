@@ -620,8 +620,6 @@ public class GamificationController {
 		return result;
 	}	
 	
-	
-
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 
