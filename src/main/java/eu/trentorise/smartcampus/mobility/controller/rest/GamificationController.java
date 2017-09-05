@@ -1037,8 +1037,6 @@ public class GamificationController {
 				return null;
 			}	
 			
-			userId = "25354";
-			
 			long start = 0;
 			AppInfo ai = appSetup.findAppById(appId);
 			if (ai == null) {
