@@ -15,9 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -45,6 +42,8 @@ import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingCache;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.util.ConnectorException;
 import eu.trentorise.smartcampus.network.JsonUtils;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
 @Controller
 public class OTPController  {
@@ -74,7 +73,7 @@ public class OTPController  {
 			//String routes = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String routes = smartPlannerHelper.routes(agencyId);
 
-			logger.info("-"+getUserId()  + "~AppConsume~routes=" + agencyId);
+			logger.debug("-"+getUserId()  + "~AppConsume~routes=" + agencyId);
 	
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(routes);
@@ -93,7 +92,7 @@ public class OTPController  {
 //			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId;
 //			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String stops = smartPlannerHelper.stops(agencyId, routeId);
-			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
+			logger.debug("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
 
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(stops);
@@ -111,7 +110,7 @@ public class OTPController  {
 		try {
 //			String address =  otpURL + OTP + "getstops/" + agencyId + "/" + routeId + "/" + latitude + "/" + longitude + "/" + radius;
 //			String stops = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
-			logger.info("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
+			logger.debug("-"+getUserId()  + "~AppConsume~stops=" + agencyId);
 			String stops = smartPlannerHelper.stops(agencyId, routeId, latitude, longitude, radius);
 
 			response.setContentType("application/json; charset=utf-8");
@@ -160,7 +159,7 @@ public class OTPController  {
 //			String address =  otpURL + OTP + "gettimetable/" + agencyId + "/" + routeId + "/" + stopId;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, null);
 			String timetable = smartPlannerHelper.stopTimetable(agencyId, routeId, stopId);
-			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
+			logger.debug("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
 
 			response.setContentType("application/json; charset=utf-8");
 			response.getWriter().write(timetable);
@@ -176,7 +175,7 @@ public class OTPController  {
 	public @ResponseBody
 	void getLimitedTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String stopId, @PathVariable Integer maxResults) throws Exception{
 		try {
-			logger.info("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
+			logger.debug("-"+getUserId()  + "~AppConsume~timetable=" + agencyId);
 //			String address =  otpURL + OTP + "getlimitedtimetable/" + agencyId + "/" + stopId + "/" + maxResults;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON, "UTF-8");
 			String timetable = smartPlannerHelper.stopTimetable(agencyId, stopId, maxResults);
@@ -247,7 +246,7 @@ public class OTPController  {
 	public @ResponseBody
 	void getTransitDelays(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
-			logger.info("-"+getUserId()  + "~AppConsume~delays=" + routeId);
+			logger.debug("-"+getUserId()  + "~AppConsume~delays=" + routeId);
 //			String address =  otpURL + OTP + "getTransitDelays/" + routeId + "/" + from + "/" + to;
 //			String timetable = HTTPConnector.doGet(address, null, null, MediaType.APPLICATION_JSON,  "UTF-8");
 			String timetable = smartPlannerHelper.delays(agencyId, routeId, from, to);
