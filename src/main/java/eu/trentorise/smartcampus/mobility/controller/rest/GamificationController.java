@@ -640,12 +640,23 @@ public class GamificationController {
 		if (toCheck != null && toCheck.booleanValue()) {
 			criteria = criteria.and("toCheck").is(true);
 		}	
+//		if (fromDate != null) {
+//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+//		}
+//		if (toDate != null) {
+//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+//		}
+		
 		if (fromDate != null) {
-			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			String fd = shortSdf.format(new Date(fromDate));
+			criteria = criteria.and("day").gte(fd);
 		}
+		
 		if (toDate != null) {
-			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+			String td = shortSdf.format(new Date(toDate));
+			criteria = criteria.andOperator(new Criteria("day").lte(td));
 		}
+		
 		Query query = new Query(criteria);		
 		
 		List<TrackedInstance> result = storage.searchDomainObjects(query, TrackedInstance.class);
@@ -747,12 +758,23 @@ public class GamificationController {
 		if (toCheck != null && toCheck.booleanValue()) {
 			criteria = criteria.and("toCheck").is(true);
 		}	
+//		if (fromDate != null) {
+//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+//		}
+//		if (toDate != null) {
+//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+//		}
+		
 		if (fromDate != null) {
-			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			String fd = shortSdf.format(new Date(fromDate));
+			criteria = criteria.and("day").gte(fd);
 		}
+		
 		if (toDate != null) {
-			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
-		}
+			String td = shortSdf.format(new Date(toDate));
+			criteria = criteria.andOperator(new Criteria("day").lte(td));
+		}		
+		
 		Query query = new Query(criteria);
 
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
@@ -798,14 +820,27 @@ public class GamificationController {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String fileName = "report";
 
+//		if (fromDate != null) {
+//			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+//			fileName += "_" + sdf.format(new Date(fromDate));
+//		}
+//		if (toDate != null) {
+//			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+//			fileName += "_" + sdf.format(new Date(toDate));
+//		}
+		
 		if (fromDate != null) {
-			criteria = criteria.and("geolocationEvents.recorded_at").gte(new Date(fromDate));
+			String fd = shortSdf.format(new Date(fromDate));
+			criteria = criteria.and("day").gte(fd);
 			fileName += "_" + sdf.format(new Date(fromDate));
 		}
+		
 		if (toDate != null) {
-			criteria = criteria.andOperator(new Criteria("geolocationEvents.recorded_at").lte(new Date(toDate)));
+			String td = shortSdf.format(new Date(toDate));
+			criteria = criteria.andOperator(new Criteria("day").lte(td));
 			fileName += "_" + sdf.format(new Date(toDate));
-		}
+		}		
+		
 		Query query = new Query(criteria).with(new Sort(Direction.DESC, "userId"));
 
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
