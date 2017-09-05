@@ -142,7 +142,7 @@ public class StatisticsBuilder {
 				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport");
+		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
