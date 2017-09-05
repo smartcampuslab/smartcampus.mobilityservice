@@ -238,7 +238,7 @@ public class StatisticsBuilder {
 //					}
 					
 				}
-				if (ti.getValidationResult() != null) {
+				if (ti.getItinerary() != null) {
 					dist = computePlannedJourneyDistances(ti.getValidationResult().getValidationStatus());
 //					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {					
