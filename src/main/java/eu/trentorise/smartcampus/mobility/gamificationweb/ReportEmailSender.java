@@ -118,7 +118,7 @@ public class ReportEmailSender {
 		System.out.println("DONE");
 	}
 	
-	@Scheduled(cron="15 0 * * * *")
+	@Scheduled(cron="20 0 * * * *")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
