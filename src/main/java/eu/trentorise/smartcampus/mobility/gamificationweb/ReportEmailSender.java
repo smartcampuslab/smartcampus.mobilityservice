@@ -191,7 +191,7 @@ public class ReportEmailSender {
 		Boolean are_chall = false;
 		Boolean are_prizes = false;
 		Boolean are_prizes_last_week = false;
-		logger.info("Getting prizes");
+
 		for (int i = 0; i < mailConfigurationFileData.size(); i++) {
 			WeekConfData tmpWConf = mailConfigurationFileData.get(i);
 			if (tmpWConf.currentWeek()) {
@@ -1105,11 +1105,12 @@ public class ReportEmailSender {
 		synchronized(this) {
 			if (weekConfData != null) return weekConfData;
 			
-			String src = "mail/conf_file/game_week_configuration.csv";
+			String src = weeklyDataDir + "/game_week_configuration.csv";
 			String cvsSplitBy = ",";
 			weekConfData = Lists.newArrayList();
 
-			List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+//			List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+			List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
 
 			for (int i = 1; i < lines.size(); i++) {
 				String line = lines.get(i);
@@ -1144,7 +1145,8 @@ public class ReportEmailSender {
 		String cvsSplitBy = ",";
 		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
 
-		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+//		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
 
 		for (int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
@@ -1180,7 +1182,7 @@ public class ReportEmailSender {
 		List<WeekPrizeData> allPrizes = weekPrizeData.get(lang);
 		try {
 			if (allPrizes == null) {
-				allPrizes = readWeekPrizesFile("mail/conf_file/game_week_prize_"+lang+".csv");
+				allPrizes = readWeekPrizesFile(weeklyDataDir + "/game_week_prize_"+lang+".csv");
 				weekPrizeData.put(lang, allPrizes);
 			}
 		} catch (Exception e) {
