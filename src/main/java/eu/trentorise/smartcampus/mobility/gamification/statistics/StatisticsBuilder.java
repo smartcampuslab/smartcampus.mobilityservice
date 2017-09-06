@@ -229,7 +229,9 @@ public class StatisticsBuilder {
 			for (TrackedInstance ti: group.get(groupKey)) {
 				Map<String, Double> dist = null;
 				Double val = ti.getValidationResult().getDistance();
-				if (val == null) val = 0.0;
+				if (val == null) {
+					val = 0.0;
+				}
 				if (ti.getFreeTrackingTransport() != null) {
 					dist = computeFreeTrackingDistances(val, ti.getFreeTrackingTransport());
 //					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
@@ -245,9 +247,11 @@ public class StatisticsBuilder {
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
 //					}
 				}
-				for (String key: dist.keySet()) {
-					statByRange.put(key, statByRange.getOrDefault(key, 0.0) + dist.get(key));
-//					statByRange.put("max " + key, Math.max(statByRange.getOrDefault("max " + key, 0.0),dist.get(key)));
+				if (dist != null) {
+					for (String key : dist.keySet()) {
+						statByRange.put(key, statByRange.getOrDefault(key, 0.0) + dist.get(key));
+						// statByRange.put("max " + key, Math.max(statByRange.getOrDefault("max " + key, 0.0),dist.get(key)));
+					}
 				}
 			}
 			result.put(groupKey, statByRange);
