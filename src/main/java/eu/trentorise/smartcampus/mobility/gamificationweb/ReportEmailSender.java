@@ -118,7 +118,7 @@ public class ReportEmailSender {
 		System.out.println("DONE");
 	}
 	
-	@Scheduled(cron="20 0 * * * *")
+	@Scheduled(cron="0 0 * * * *")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
@@ -151,7 +151,7 @@ public class ReportEmailSender {
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 0 17 * * FRI") // Repeat every Friday at 17:00 PM
 	public void sendWeeklyNotification(String appId) throws Exception {
-		logger.info("Start sending");
+//		logger.info("Start sending");
 		
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of one week //long millis = 1415660400000L; //(for test)
@@ -163,13 +163,14 @@ public class ReportEmailSender {
 		
 		List<MailImage> standardImages = Lists.newArrayList();
 
-		logger.info("Reading images");
-		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie03.png")).read(), "image/png"));
-		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie04.png")).read(), "image/png"));
-		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("./public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("healthScore", Resources.asByteSource(Resources.getResource("./public/img/mail/health/healthLeavesBase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("./public/img/mail/pr/prLeaves.png")).read(), "image/png"));
-		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("./public/img/mail/templateMail.png")).read(), "image/png"));
+//		logger.info("Reading images");
+		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("public/img/mail/foglie03.png")).read(), "image/png"));
+		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("public/img/mail/foglie04.png")).read(), "image/png"));
+		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
+		standardImages.add(new MailImage("healthScore", Resources.asByteSource(Resources.getResource("public/img/mail/health/healthLeavesBase.png")).read(), "image/png"));
+		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("public/img/mail/pr/prLeaves.png")).read(), "image/png"));
+		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("public/img/mail/templateMail.png")).read(), "image/png"));
+//		logger.info("Read images");
 
 		// List<BadgesData> allBadgeTest = getAllBadges(path);
 		// try {
@@ -183,7 +184,7 @@ public class ReportEmailSender {
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
 		
-		logger.info("Reading winners");
+//		logger.info("Reading winners");
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
