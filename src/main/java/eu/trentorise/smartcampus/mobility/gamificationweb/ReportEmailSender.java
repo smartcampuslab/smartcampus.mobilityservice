@@ -118,7 +118,7 @@ public class ReportEmailSender {
 		System.out.println("DONE");
 	}
 	
-	@Scheduled(cron="0 0 * * * *")
+	@Scheduled(cron="15 0 * * * *")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
@@ -151,6 +151,8 @@ public class ReportEmailSender {
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 0 17 * * FRI") // Repeat every Friday at 17:00 PM
 	public void sendWeeklyNotification(String appId) throws Exception {
+		logger.info("Start sending");
+		
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of one week //long millis = 1415660400000L; //(for test)
 
@@ -161,6 +163,7 @@ public class ReportEmailSender {
 		
 		List<MailImage> standardImages = Lists.newArrayList();
 
+		logger.info("Reading images");
 		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie03.png")).read(), "image/png"));
 		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie04.png")).read(), "image/png"));
 		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("./public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
@@ -179,6 +182,8 @@ public class ReportEmailSender {
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
+		
+		logger.info("Reading winners");
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
@@ -190,6 +195,7 @@ public class ReportEmailSender {
 		Boolean are_chall = false;
 		Boolean are_prizes = false;
 		Boolean are_prizes_last_week = false;
+		logger.info("Getting prizes");
 		for (int i = 0; i < mailConfigurationFileData.size(); i++) {
 			WeekConfData tmpWConf = mailConfigurationFileData.get(i);
 			if (tmpWConf.currentWeek()) {
