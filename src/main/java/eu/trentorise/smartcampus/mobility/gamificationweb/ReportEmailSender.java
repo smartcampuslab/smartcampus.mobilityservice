@@ -124,7 +124,11 @@ public class ReportEmailSender {
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
 			logger.info("Sending notifications for " + appInfo.getAppId());
-			sendWeeklyNotification(appInfo.getAppId());
+			try {
+				sendWeeklyNotification(appInfo.getAppId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}	
 	
