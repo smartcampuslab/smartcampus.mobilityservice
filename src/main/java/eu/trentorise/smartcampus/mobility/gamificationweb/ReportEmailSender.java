@@ -119,7 +119,7 @@ public class ReportEmailSender {
 	}
 	
 	@Scheduled(cron="0 0 * * * *")
-	public synchronized void sendWeeklyNotification() throws Exception {
+	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -150,7 +150,7 @@ public class ReportEmailSender {
 	// Here I insert a task that invoke the WS notification
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 0 17 * * FRI") // Repeat every Friday at 17:00 PM
-	public synchronized void sendWeeklyNotification(String appId) throws Exception {
+	public void sendWeeklyNotification(String appId) throws Exception {
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of one week //long millis = 1415660400000L; //(for test)
 
