@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -339,6 +340,7 @@ public class GamificationController {
 					res.setClientId(travelId);
 					res.setDay(day);
 					res.setUserId(userId);
+					res.setId(ObjectId.get().toString());
 					pars.remove("day");
 					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
 					if (res2 == null) {
@@ -385,7 +387,7 @@ public class GamificationController {
 							if (trackingData.containsKey("estimatedScore")) {
 								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
-							trackingData.put(TRAVEL_ID, res.getClientId());
+							trackingData.put(TRAVEL_ID, res.getId());
 							trackingData.put(START_TIME, getStartTime(res));
 							gamificationManager.sendIntineraryDataToGamificationEngine(appId, userId, travelId + "_" + day, res.getItinerary(), trackingData);
 							res.setScoreStatus(ScoreStatus.SENT);
@@ -402,7 +404,7 @@ public class GamificationController {
 							if (trackingData.containsKey("estimatedScore")) {
 								res.setScore((Long) trackingData.get("estimatedScore"));
 							}
-							trackingData.put(TRAVEL_ID, res.getClientId());
+							trackingData.put(TRAVEL_ID, res.getId());
 							trackingData.put(START_TIME, getStartTime(res));
 							gamificationManager.sendFreeTrackingDataToGamificationEngine(appId, userId, travelId, res.getGeolocationEvents(), res.getFreeTrackingTransport(), trackingData);
 							res.setScoreStatus(ScoreStatus.SENT);
@@ -707,13 +709,13 @@ public class GamificationController {
 			if (trackingData.containsKey("estimatedScore")) {
 				instance.setScore((Long) trackingData.get("estimatedScore"));
 			}
-			trackingData.put(TRAVEL_ID, instance.getClientId());
+			trackingData.put(TRAVEL_ID, instance.getId());
 			trackingData.put(START_TIME, getStartTime(instance));
 			gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(), trackingData);
 			instance.setScoreStatus(ScoreStatus.SENT);
 		} else if (instance.getFreeTrackingTransport() != null) {
 			Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(instance.getAppId(), instance.getGeolocationEvents(), instance.getFreeTrackingTransport(), instance.getValidationResult().getValidationStatus());
-			trackingData.put(TRAVEL_ID, instance.getClientId());
+			trackingData.put(TRAVEL_ID, instance.getId());
 			trackingData.put(START_TIME, getStartTime(instance));
 			if (trackingData.containsKey("estimatedScore")) {
 				instance.setScore((Long) trackingData.get("estimatedScore"));
@@ -791,7 +793,7 @@ public class GamificationController {
 				if (trackingData.containsKey("estimatedScore")) {
 					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
-				trackingData.put(TRAVEL_ID, instance.getClientId());
+				trackingData.put(TRAVEL_ID, instance.getId());
 				trackingData.put(START_TIME, getStartTime(instance));
 				gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(),
 						trackingData);
@@ -801,7 +803,7 @@ public class GamificationController {
 				if (trackingData.containsKey("estimatedScore")) {
 					instance.setScore((Long) trackingData.get("estimatedScore"));
 				}
-				trackingData.put(TRAVEL_ID, instance.getClientId());
+				trackingData.put(TRAVEL_ID, instance.getId());
 				trackingData.put(START_TIME, getStartTime(instance));
 				gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(),
 						instance.getFreeTrackingTransport(), trackingData);
