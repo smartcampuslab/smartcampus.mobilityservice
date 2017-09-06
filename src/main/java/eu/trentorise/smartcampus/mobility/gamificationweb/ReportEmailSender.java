@@ -123,7 +123,7 @@ public class ReportEmailSender {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
-			logger.info("Sending notifications for " + appInfo.getAppId());
+			logger.info("Sending notifications for app " + appInfo.getAppId());
 			try {
 				sendWeeklyNotification(appInfo.getAppId());
 			} catch (Exception e) {
@@ -207,7 +207,7 @@ public class ReportEmailSender {
 		String gameId = getGameId(appId);
 		Iterable<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
 
-		logger.info("Sending notifications for " + gameId);
+		logger.info("Sending notifications for game " + gameId);
 		
 		for (Player p : iter) {
 			logger.info("Sending notifications to " + p.getNickname());
