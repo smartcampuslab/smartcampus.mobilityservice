@@ -118,10 +118,12 @@ public class ReportEmailSender {
 		System.out.println("DONE");
 	}
 	
-	@Scheduled(cron="0 0 9 * * *")
+	@Scheduled(cron="0 0 * * * *")
 	public synchronized void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
+		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
+			logger.info("Sending notifications for " + appInfo.getAppId());
 			sendWeeklyNotification(appInfo.getAppId());
 		}
 	}	
@@ -201,7 +203,10 @@ public class ReportEmailSender {
 		String gameId = getGameId(appId);
 		Iterable<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
 
+		logger.info("Sending notifications for " + gameId);
+		
 		for (Player p : iter) {
+			logger.info("Sending notifications to " + p.getNickname());
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 
 			if (p.isSendMail()) {
