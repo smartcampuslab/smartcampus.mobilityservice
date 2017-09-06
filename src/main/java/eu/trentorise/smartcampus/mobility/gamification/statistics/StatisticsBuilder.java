@@ -27,7 +27,6 @@ import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus;
-import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 
 @Component
 public class StatisticsBuilder {
@@ -301,7 +300,7 @@ public class StatisticsBuilder {
 	
 	private Map<String, Double> computeFreeTrackingDistances(Double distance, String ttype) {
 		Map<String, Double> result = Maps.newTreeMap();
-		result.put(GamificationHelper.convertFreetrackingType(ttype), distance);
+		result.put(ttype, distance);
 		return result;
 	}	
 	
