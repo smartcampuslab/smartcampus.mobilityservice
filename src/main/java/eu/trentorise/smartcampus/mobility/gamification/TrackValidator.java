@@ -405,13 +405,6 @@ public class TrackValidator {
 	 * @return
 	 */
 	public static String toModeString(MODE_TYPE key) {
-//		String mode = key.name().toLowerCase();
-		switch (key) {
-		case BUS:
-		case TRAIN:
-			return "transit";
-			
-		}
 		return key.name().toLowerCase();
 	}
 	public static MODE_TYPE toModeType(String key) {
