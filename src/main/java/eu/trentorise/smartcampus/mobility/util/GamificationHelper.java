@@ -352,9 +352,15 @@ public class GamificationHelper {
 			return "transit";
 		}
 		return "";
-
 	}
 
+	public static String convertFreetrackingType(String tt) {
+		if ("bus".equals(tt) || "train".equals(tt)) {
+			return "transit";
+		}
+		return tt;
+	}	
+	
 	public static boolean inAreas(List<Circle> circles, Geolocation point) {
 		if (circles != null) {
 			for (Circle circle : circles) {

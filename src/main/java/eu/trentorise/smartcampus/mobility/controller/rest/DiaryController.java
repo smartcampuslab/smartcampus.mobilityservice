@@ -123,6 +123,8 @@ public class DiaryController {
 			return null;
 		}	
 		
+		userId = "17741";
+		
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
 
@@ -349,11 +351,11 @@ public class DiaryController {
 				if (instance.getValidationResult() != null && instance.getValidationResult().getValidationStatus().getEffectiveDistances().containsKey(type)) {
 					val = instance.getValidationResult().getValidationStatus().getEffectiveDistances().get(type);
 				}
-				Map<String, Double> distances = Collections.singletonMap(instance.getFreeTrackingTransport(), val);
+				Map<String, Double> distances = Collections.singletonMap(GamificationHelper.convertFreetrackingType(instance.getFreeTrackingTransport()), val);
 				de.setTravelDistances(distances);
 				
 				// TODO: remove
-				de.setTravelModes(Sets.newHashSet(instance.getFreeTrackingTransport()));
+				de.setTravelModes(Sets.newHashSet(GamificationHelper.convertFreetrackingType(instance.getFreeTrackingTransport())));
 			}
 			if (instance.getChangedValidity() != null) {
 				de.setTravelValidity(instance.getChangedValidity());	
