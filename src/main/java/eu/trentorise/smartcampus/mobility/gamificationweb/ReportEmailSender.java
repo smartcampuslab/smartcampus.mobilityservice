@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.crypto.NoSuchPaddingException;
 import javax.mail.MessagingException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,9 @@ public class ReportEmailSender {
 	@Autowired
 	@Value("${weeklyDataDir}")
 	private String weeklyDataDir;	
+	@Autowired
+	@Value("${imageDir}")	
+	private String imageDir;
 
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
@@ -118,7 +122,7 @@ public class ReportEmailSender {
 		System.out.println("DONE");
 	}
 	
-	@Scheduled(cron="0 0 * * * *")
+	@Scheduled(cron="0 30 * * * *")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
@@ -164,12 +168,14 @@ public class ReportEmailSender {
 		List<MailImage> standardImages = Lists.newArrayList();
 
 //		logger.info("Reading images");
-		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("public/img/mail/foglie03.png")).read(), "image/png"));
-		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("public/img/mail/foglie04.png")).read(), "image/png"));
-		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("healthScore", Resources.asByteSource(Resources.getResource("public/img/mail/health/healthLeavesBase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("public/img/mail/pr/prLeaves.png")).read(), "image/png"));
-		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("public/img/mail/templateMail.png")).read(), "image/png"));
+//		standardImages.add(new MailImage(foglie03.getName(), FileUtils.readFileToByteArray(foglie03), "image/png"));
+		
+		standardImages.add(new MailImage("foglie03", readImage("foglie03.png"), "image/png"));
+		standardImages.add(new MailImage("foglie04", readImage("foglie04.png"), "image/png"));
+		standardImages.add(new MailImage("greenScore", readImage("green/greenLeavesbase.png"), "image/png"));
+		standardImages.add(new MailImage("healthScore", readImage("health/healthLeavesBase.png"), "image/png"));
+		standardImages.add(new MailImage("prScore", readImage("pr/prLeaves.png"), "image/png"));
+		standardImages.add(new MailImage("footer", readImage("templateMail.png"), "image/png"));
 //		logger.info("Read images");
 
 		// List<BadgesData> allBadgeTest = getAllBadges(path);
@@ -1238,6 +1244,11 @@ public class ReportEmailSender {
 			return gameId;
 		}
 		return null;
+	}
+	
+	private byte[] readImage(String file) throws Exception {
+		File f = new File(imageDir + "/mail/" + file);
+		return FileUtils.readFileToByteArray(f);
 	}
 
 }
