@@ -215,14 +215,14 @@ public class DiaryController {
 //			String longDescription = challengeManager.fillLongDescription(challengeConcept, language);
 			
 			DiaryEntry de = new DiaryEntry();
-			de.setEntityId(challengeConcept.getName());
+			de.setEntityId(challengeConcept.getName() + "_assigned");
 			de.setType(DiaryEntryType.CHALLENGE);
 			de.setTimestamp(challengeConcept.getStart().getTime());
 			de.setChallengeName(description);
 			de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
 			if (challengeConcept.isCompleted()) {
 				DiaryEntry de2 = new DiaryEntry();
-				de2.setEntityId(challengeConcept.getName());
+				de2.setEntityId(challengeConcept.getName() + "_won");
 				de2.setType(DiaryEntryType.CHALLENGE_WON);
 				de2.setChallengeName(description);
 				de2.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());					
