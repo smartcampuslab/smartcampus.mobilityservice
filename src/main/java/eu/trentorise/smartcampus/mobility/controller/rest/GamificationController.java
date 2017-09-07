@@ -77,6 +77,8 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.TType;
 
 @Controller
 @RequestMapping(value = "/gamification")
@@ -557,7 +559,7 @@ public class GamificationController {
 	
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/temporary")
-	public @ResponseBody void startTemporaryItinerary(@RequestBody(required=false) ItineraryObject itinerary, @RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = false, value = "device") String device, HttpServletResponse response)
+	public @ResponseBody void startTemporaryItinerary(@RequestBody(required=true) ItineraryObject itinerary, @RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = false, value = "device") String device, HttpServletResponse response)
 			throws Exception {
 		logger.info("Starting journey for gamification, device = " + device);
 		try {
@@ -576,10 +578,13 @@ public class GamificationController {
 			Date date = new Date(System.currentTimeMillis());
 			String day = shortSdf.format(date);
 			TrackedInstance ti = new TrackedInstance();
+
 			ti.setClientId(itinerary.getClientId());
 			ti.setDay(day);
 			ti.setUserId(userId);
 			ti.setTime(timeSdf.format(date));
+			
+			convertParkWalk(itinerary);
 			ti.setItinerary(itinerary);
 
 			if (device != null) {
@@ -595,6 +600,13 @@ public class GamificationController {
 		}
 	}	
 	
+	private void convertParkWalk(ItineraryObject itinerary) {
+		for (Leg leg: itinerary.getData().getLeg()) {
+			if (leg.getTransport() != null && TType.PARKWALK.equals(leg.getTransport().getType())) {
+				leg.getTransport().setType(TType.WALK);
+			}
+		}
+	}
 	
 	@RequestMapping("/traveldetails/{id}")
 	public @ResponseBody TravelDetails getTravelDetails(@PathVariable String id, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws ParseException {
