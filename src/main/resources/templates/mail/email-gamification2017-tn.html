@@ -17,12 +17,12 @@
 				    				<img src="img/foglie03.png" th:src="'cid:' + ${imageRNFoglie03}" width="60px" alt="" title="" />
 				    			</td>
 				    			<td rowspan="2" valign="middle" align="center">
+									<h2>
+										<font face="Raleway">Trento e Rovereto</font>
+									</h2>				    			
 									<h1>
 										<font face="Raleway-bold" size="48" color="gray"><strong>Play&amp;Go</strong></font>
 									</h1>
-									<h2>
-										<font face="Raleway">con ViaggiaTrentino</font>
-									</h2>
 								</td>
 				    			<td></td>
 				    		</tr>
@@ -61,8 +61,8 @@
 						       	<td><strong> - </strong></td>
 						    	<td>
 						    		<div>
-						    			<font size="2"><strong><span th:text="${ch.challDesc}">Descrizione challenge</span></strong><br/>
-						       				<span th:text="${ch.challCompleteDesc}">Descrizione lunga challenge</span>
+						    			<font size="2"><strong><span th:utext="${ch.challDesc}">Descrizione challenge</span></strong><br/>
+						       				<span th:utext="${ch.challCompleteDesc}">Descrizione lunga challenge</span>
 						       			</font>
 						    		</div>
 						       	</td>
@@ -153,11 +153,11 @@
         	<br />
         	<br />
         	<br />
-        	<div class="row">
+<!--         	<div class="row">
 	    		<div class="col-md-6 col-md-offset-1">
 					<img src="img/footer.png" width="650px" th:src="'cid:' + ${imageResourceName}" alt="" title="" />
 				</div>
-			</div>
+			</div> -->
 		</footer>
     </body>
 </html>
