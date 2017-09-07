@@ -355,7 +355,7 @@ public class GamificationController {
 						res.setItinerary(res2);
 						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getRecorded_at()));
 					}
-					if (res.getItinerary() == null && freeTracks.containsKey(key)) {
+					if (res.getItinerary() == null) {
 						String ftt = freeTracks.get(key);
 						if (ftt == null) {
 							String[] cid = travelId.split("_");
