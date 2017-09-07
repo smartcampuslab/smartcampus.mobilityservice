@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -132,6 +134,9 @@ public class ValidationStatus {
 				prevDist = 0;
 			} else {
 				prevDist = d;
+			}
+			if (!StringUtils.isEmpty(points.get(i).getCertificate())) {
+				setCertified(true);
 			}
 		}
 		realTime = realTime * 0.001;
