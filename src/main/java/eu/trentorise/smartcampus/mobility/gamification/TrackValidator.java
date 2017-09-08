@@ -53,13 +53,15 @@ public class TrackValidator {
 	private static final int BIKE_SPEED_THRESHOLD = 65; // km/h
 
 	private static final int WALK_AVG_SPEED_THRESHOLD = 15; // km/h
+	private static final double WALK_GUARANTEED_AVG_SPEED_THRESHOLD = 7; // km/h
 	private static final int BIKE_AVG_SPEED_THRESHOLD = 27; // km/h
+	private static final double BIKE_GUARANTEED_AVG_SPEED_THRESHOLD = 18; // km/h
 
 	public static final double VALIDITY_THRESHOLD = 80; // %
 	public static final double ACCURACY_THRESHOLD = 150; // meters
 	
 	public static final int COVERAGE_THRESHOLD = 80; // %
-	private static final double CERTIFIED_COVERAGE_THRESHOLD = 50; // %
+	private static final double CERTIFIED_COVERAGE_THRESHOLD = 60; // %
 
 	public static final double MIN_COVERAGE_THRESHOLD = 40; // %
 
@@ -162,7 +164,7 @@ public class TrackValidator {
 		
 		return points;
 	}
-	
+
 	/**
 	 * Validate free tracking: train. Take reference train shapes as input.
 	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 1 min fast track; 
@@ -176,14 +178,14 @@ public class TrackValidator {
 	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
 		MODE_TYPE mode = MODE_TYPE.TRAIN; 
 		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
-		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold);
+		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, true);
 	}
 
 	/**
 	 * Validate free tracking: bus. Take reference bus shapes as input.
 	 * Preprocess track data; check if contains more than 2 points; split into blocks with 15km/h - 3 mins for stop - at least 30 sec fast track; 
-	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 80% of length is matched. If no
-	 * fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
+	 * match fragments against reference trac with 150m error and 80% coverage. Consider VALID if at least 80% of length is matched and is certified. 
+	 * If no fast fragment found consider PENDING with TOO_SLOW error. Otherwise consider PENDING.
 	 * @param track
 	 * @param referenceTracks
 	 * @param areas
@@ -192,7 +194,7 @@ public class TrackValidator {
 	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
 		MODE_TYPE mode = MODE_TYPE.BUS; 
 		double speedThreshold = 10, timeThreshold = 1*60*1000, minTrackThreshold = 30*1000; 
-		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold);
+		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, true);
 	}
 	
 	private static ValidationStatus validateFreePTMode(
@@ -202,7 +204,8 @@ public class TrackValidator {
 			MODE_TYPE mode, 
 			double speedThreshold, 
 			double timeThreshold, 
-			double minTrackThreshold) 
+			double minTrackThreshold,
+			boolean checkCertificate) 
 	{
 		ValidationStatus status = new ValidationStatus();
 		// set parameters
@@ -255,12 +258,21 @@ public class TrackValidator {
 				coveredDistance += transportDistance * subtrackPrecision / 100.0;
 			}
 			double coverage = 100.0 * matchedDistance / transportDistance;// status.getDistance();
-			if (coverage >= COVERAGE_THRESHOLD) {
-				status.setValidationOutcome(TravelValidity.VALID);
-			} else if (isCertifiedTrack(track) && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
-				status.setValidationOutcome(TravelValidity.VALID);				
+			if (checkCertificate) {
+				boolean certified = isCertifiedTrack(track); 
+				if (certified && coverage >= COVERAGE_THRESHOLD) {
+					status.setValidationOutcome(TravelValidity.VALID);
+				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
+					status.setValidationOutcome(TravelValidity.VALID);				
+				} else {
+					status.setValidationOutcome(TravelValidity.PENDING);				
+				}
 			} else {
-				status.setValidationOutcome(TravelValidity.PENDING);				
+				if (coverage >= COVERAGE_THRESHOLD) {
+					status.setValidationOutcome(TravelValidity.VALID);
+				} else {
+					status.setValidationOutcome(TravelValidity.PENDING);				
+				}
 			}
 			return status;
 		} else {
@@ -287,10 +299,10 @@ public class TrackValidator {
 	public static ValidationStatus validateFreeWalk(Collection<Geolocation> track, List<Circle> areas) {
 
 		MODE_TYPE mode = MODE_TYPE.WALK; 
-		double speedThreshold = WALK_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = WALK_AVG_SPEED_THRESHOLD; 
+		double speedThreshold = WALK_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = WALK_AVG_SPEED_THRESHOLD, guaranteedAvgSpeedThreshold = WALK_GUARANTEED_AVG_SPEED_THRESHOLD; 
 
 		
-		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, DISTANCE_THRESHOLD);
+		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, guaranteedAvgSpeedThreshold, DISTANCE_THRESHOLD);
 	}
 
 	/**
@@ -303,13 +315,21 @@ public class TrackValidator {
 	public static ValidationStatus validateFreeBike(Collection<Geolocation> track, List<Circle> areas) {
 
 		MODE_TYPE mode = MODE_TYPE.BIKE; 
-		double speedThreshold = BIKE_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = BIKE_AVG_SPEED_THRESHOLD; 
-		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, BIKE_DISTANCE_THRESHOLD);
+		double speedThreshold = BIKE_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = BIKE_AVG_SPEED_THRESHOLD, guaranteedAvgSpeedThreshold = BIKE_GUARANTEED_AVG_SPEED_THRESHOLD; 
+		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, guaranteedAvgSpeedThreshold, BIKE_DISTANCE_THRESHOLD);
 	}
 
 	
-	private static ValidationStatus validateFreeMode(Collection<Geolocation> track, List<Circle> areas, MODE_TYPE mode,
-			double speedThreshold, double timeThreshold, double minTrackThreshold, double avgSpeedThreshold, double distanceThreshold) {
+	private static ValidationStatus validateFreeMode(
+			Collection<Geolocation> track,
+			List<Circle> areas, 
+			MODE_TYPE mode,
+			double speedThreshold, 
+			double timeThreshold, 
+			double minTrackThreshold, 
+			double avgSpeedThreshold,
+			double guaranteedAvgSpeedThreshold,
+			double distanceThreshold) {
 		ValidationStatus status = new ValidationStatus();
 		// set parameters
 		status.setTripType(TRIP_TYPE.FREE);
@@ -346,7 +366,7 @@ public class TrackValidator {
 				return status;
 			}
 		}
-		status.setValidationOutcome(TravelValidity.VALID);
+		status.setValidationOutcome(status.getAverageSpeed() >= guaranteedAvgSpeedThreshold ? TravelValidity.VALID: TravelValidity.PENDING);
 		
 		return status;
 	}
