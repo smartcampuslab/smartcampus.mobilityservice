@@ -123,6 +123,8 @@ public class DiaryController {
 			return null;
 		}	
 		
+		logger.info("Reading diary for user " + userId);
+		
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
 
@@ -139,20 +141,36 @@ public class DiaryController {
 		}
 
 		if (types.contains(DiaryEntryType.BADGE)) {
+			try {
 			List<DiaryEntry> badges = getBadgeNotifications(p, appId);
 			result.addAll(badges);
+			} catch (Exception e) {
+				logger.error("Error for BADGE", e);
+			}
 		}
 		if (types.contains(DiaryEntryType.TRAVEL)) {
+			try {
 			List<DiaryEntry> travels = getTrackedInstances(userId, appId, fromTime, toTime);
 			result.addAll(travels);
+			} catch (Exception e) {
+				logger.error("Error for TRAVEL", e);
+			}			
 		}
 		if (types.contains(DiaryEntryType.CHALLENGE)) {
+			try {
 			List<DiaryEntry> challenges = getChallenges(p, appId);
 			result.addAll(challenges);
+			} catch (Exception e) {
+				logger.error("Error for CHALLENGE", e);
+			}			
 		}
 		if (types.contains(DiaryEntryType.RECOMMENDED)) {
+			try {
 			List<DiaryEntry> recommended = getFriendRegistered(p, appId);
 			result.addAll(recommended);
+			} catch (Exception e) {
+				logger.error("Error for RECOMMENDED", e);
+			}			
 		}
 
 		result = result.stream().filter(x -> x.getTimestamp() >= fromTime && x.getTimestamp() <= toTime).sorted().collect(Collectors.toList());
@@ -204,8 +222,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
-				String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		String allData = res.getBody();
 
@@ -274,8 +291,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
-				String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		List nots = mapper.readValue(res.getBody(), List.class);
 		for (Object o : nots) {
