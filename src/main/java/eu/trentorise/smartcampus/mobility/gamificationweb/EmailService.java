@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -21,6 +22,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
@@ -154,29 +156,35 @@ public class EmailService {
 //        }
         message.setText(htmlContent, true /* isHtml */);
         
-        // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
-        final InputStreamSource imageSourceFoglia03 = new ByteArrayResource(standardImages.get(0).getImageByte());
-        message.addInline(standardImages.get(0).getImageName(), imageSourceFoglia03, standardImages.get(0).getImageType());
-        final InputStreamSource imageSourceFoglia04 = new ByteArrayResource(standardImages.get(1).getImageByte());
-        message.addInline(standardImages.get(1).getImageName(), imageSourceFoglia04, standardImages.get(1).getImageType());
+//        // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
+//        final InputStreamSource imageSourceFoglia03 = new ByteArrayResource(standardImages.get(0).getImageByte());
+//        message.addInline(standardImages.get(0).getImageName(), imageSourceFoglia03, standardImages.get(0).getImageType());
+//        final InputStreamSource imageSourceFoglia04 = new ByteArrayResource(standardImages.get(1).getImageByte());
+//        message.addInline(standardImages.get(1).getImageName(), imageSourceFoglia04, standardImages.get(1).getImageType());
+//        
+//        // Add the inline score image, referenced from the HTML code as "cid:${imageResourceName}"
+//        final InputStreamSource imageSourceGreen = new ByteArrayResource(standardImages.get(2).getImageByte());
+//        message.addInline(standardImages.get(2).getImageName(), imageSourceGreen, standardImages.get(2).getImageType());
+//        /*final InputStreamSource imageSourceHealth = new ByteArrayResource(standardImages.get(3).getImageByte());
+//        message.addInline(standardImages.get(3).getImageName(), imageSourceHealth, standardImages.get(3).getImageType());
+//        final InputStreamSource imageSourcePr = new ByteArrayResource(standardImages.get(4).getImageByte());
+//        message.addInline(standardImages.get(4).getImageName(), imageSourcePr, standardImages.get(4).getImageType());*/
+//        
+//        // Add the inline footer image, referenced from the HTML code as "cid:${imageResourceName}"
+//        final InputStreamSource imageSourceFooter = new ByteArrayResource(standardImages.get(5).getImageByte());
+//        message.addInline(standardImages.get(5).getImageName(), imageSourceFooter, standardImages.get(5).getImageType());
         
-        // Add the inline score image, referenced from the HTML code as "cid:${imageResourceName}"
-        final InputStreamSource imageSourceGreen = new ByteArrayResource(standardImages.get(2).getImageByte());
-        message.addInline(standardImages.get(2).getImageName(), imageSourceGreen, standardImages.get(2).getImageType());
-        /*final InputStreamSource imageSourceHealth = new ByteArrayResource(standardImages.get(3).getImageByte());
-        message.addInline(standardImages.get(3).getImageName(), imageSourceHealth, standardImages.get(3).getImageType());
-        final InputStreamSource imageSourcePr = new ByteArrayResource(standardImages.get(4).getImageByte());
-        message.addInline(standardImages.get(4).getImageName(), imageSourcePr, standardImages.get(4).getImageType());*/
-        
-        // Add the inline footer image, referenced from the HTML code as "cid:${imageResourceName}"
-        final InputStreamSource imageSourceFooter = new ByteArrayResource(standardImages.get(5).getImageByte());
-        message.addInline(standardImages.get(5).getImageName(), imageSourceFooter, standardImages.get(5).getImageType());
-        
+        Set<String> badgeImages = Sets.newHashSet();
         if(badges != null){
         	// Add the inline images for badges
 	        for(int i = 0; i < badges.size(); i++){
+	        	String imgName = badges.get(i).getImageName();
+	        	if (badgeImages.contains(imgName)) {
+	        		continue;
+	        	}
 	        	final InputStreamSource tmp = new ByteArrayResource(badges.get(i).getImageByte());
-	            message.addInline(badges.get(i).getImageName(), tmp, badges.get(i).getImageType());
+	            message.addInline(imgName, tmp, badges.get(i).getImageType());
+	            badgeImages.add(imgName);
 	        }
         }
         
