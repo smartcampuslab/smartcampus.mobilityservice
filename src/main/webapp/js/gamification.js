@@ -175,6 +175,11 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 //		}
 //	}	
 
+	$scope.openSwitchValidity = function(instance) {
+		$scope.selectInstance(instance);
+		$('#confirmModal1').modal();
+	}	
+	
 	$scope.switchCurrentValidity = function() {
 		console.log("SV -> " + $scope.selectedInstance.changedValidity);
 		$http.post("console/itinerary/changeValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {

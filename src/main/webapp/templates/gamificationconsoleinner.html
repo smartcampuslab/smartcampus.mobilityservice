@@ -105,14 +105,16 @@
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
 												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
 											> </label> -->
-											<label class="itinerary-switch"><b>{{'Change validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <select 
-												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
-												<option ng-repeat="x in validities" >{{x}}</option></select>
+											<label class="itinerary-switch"><b>{{'Change validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> 
+											<select 
+												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
+												<option ng-repeat="x in validities" >{{x}}</option>
+											</select>
 											</label>
-											<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal1" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'">Update validity</button>											
+											<button class="btn btn-danger btn-sm" ng-click="openSwitchValidity(itinerary.instance)" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'  || itinerary.instance.id !== selectedInstance.id">Update validity</button>											
 
 											
-											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'" type="checkbox"
+											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id" type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>										
 											
@@ -214,7 +216,7 @@
 						<form id="notification-form">
 							<div class="form-group">
 								<button class="btn btn-primary" type="button" ng-click="switchCurrentValidity()" data-dismiss="modal">Yes</button>
-								<button class="btn btn-primary right" type="button" ng-click="switchCurrentValidity()" data-dismiss="modal">No</button>
+								<button class="btn btn-primary right" type="button" data-dismiss="modal">No</button>
 							</div>
 						</form>
 					</div>
