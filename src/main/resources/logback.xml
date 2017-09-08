@@ -20,10 +20,26 @@
 		</rollingPolicy>
 	</appender>	
 	
+	<appender name="FILE_GC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/home/dev/logs/mobility_gc.log</file>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+ 
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/home/dev/logs/mobility_console.%d.log</fileNamePattern>
+		</rollingPolicy>
+	</appender>		
 
 	<logger name="eu.trentorise.smartcampus.mobility" level="INFO" additivity="false">
             <appender-ref ref="STDOUT" />
             <appender-ref ref="FILE" />
 	</logger>	
+	
+	<logger name="eu.trentorise.smartcampus.mobility.controller.rest" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE_GC" />
+	</logger>		
 
 </configuration>
+

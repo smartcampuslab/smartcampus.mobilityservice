@@ -165,7 +165,7 @@ public class GamificationController {
 				return "";
 			}
 
-			logger.info("UserId: " + userId);
+			logger.info("Storing geolocations for " + userId);
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
@@ -561,7 +561,7 @@ public class GamificationController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/temporary")
 	public @ResponseBody void startTemporaryItinerary(@RequestBody(required=true) ItineraryObject itinerary, @RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = false, value = "device") String device, HttpServletResponse response)
 			throws Exception {
-		logger.info("Starting journey for gamification, device = " + device);
+		logger.info("Starting temporary journey for gamification, device = " + device);
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -679,6 +679,7 @@ public class GamificationController {
 		for (TrackedInstance ti : result) {
 			try {
 				if (ti.getItinerary() != null) {
+					logger.info("Validating planned " + ti.getId());
 					ValidationResult vr = gamificationValidator.validatePlannedJourney(ti.getItinerary(), ti.getGeolocationEvents(), appId);
 					ti.setValidationResult(vr);
 					Map<String, Object> data = gamificationValidator.computePlannedJourneyScore(appId, ti.getItinerary().getData(), ti.getGeolocationEvents(), false);
@@ -689,6 +690,7 @@ public class GamificationController {
 					storage.saveTrackedInstance(ti);
 
 				} else {
+					logger.info("Validating free tracking " + ti.getId());
 					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), appId);
 					ti.setValidationResult(vr);
 					Map<String, Object> data = gamificationValidator.computeFreeTrackingScore(appId, ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), vr.getValidationStatus());
@@ -749,6 +751,7 @@ public class GamificationController {
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
 		instance.setChangedValidity(value);
 		storage.saveTrackedInstance(instance);
+		logger.info("Changed validity for " + instanceId + " to " + value);
 		return instance;
 	}
 	
@@ -759,6 +762,7 @@ public class GamificationController {
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
 		instance.setToCheck(value);
 		storage.saveTrackedInstance(instance);
+		logger.info("Changed \"to check\" for " + instanceId + " to " + value);
 		return instance;
 	}	
 
@@ -793,6 +797,7 @@ public class GamificationController {
 
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		for (TrackedInstance ti : instances) {
+			logger.info("ApproveAndSendScore for " + ti.getId());
 			approveAndSendScore(ti);
 		}
 	}
