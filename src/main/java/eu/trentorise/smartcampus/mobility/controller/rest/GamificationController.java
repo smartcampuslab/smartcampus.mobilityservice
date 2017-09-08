@@ -165,7 +165,7 @@ public class GamificationController {
 				return "";
 			}
 
-			logger.info("Storing geolocations for " + userId);
+			logger.info("Storing geolocations for " + userId + ", " + geolocationsEvent.getDevice());
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
