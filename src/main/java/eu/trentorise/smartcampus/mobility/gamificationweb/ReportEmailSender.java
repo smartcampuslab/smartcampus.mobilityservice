@@ -26,6 +26,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -110,13 +112,13 @@ public class ReportEmailSender {
 	private Map<String, List<WeekPrizeData>> weekPrizeData = new HashMap<>();
 	private List<WeekConfData> weekConfData = null;
 	
-//	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
-//	public synchronized void sendNotification() throws Exception {
-//		sendWeeklyNotification();
-//		System.out.println("DONE");
-//	}
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
+	public synchronized void sendNotification() throws Exception {
+		sendWeeklyNotification();
+		System.out.println("DONE");
+	}
 	
-	@Scheduled(cron="0 45 16 * * *")
+	@Scheduled(cron="0 10 10 * * *")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
