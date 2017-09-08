@@ -218,6 +218,53 @@ public class SecurityConfig {
     
     
     @Configuration
+    @Order(26)
+	public static class OAuthSecurityConfig7 extends WebSecurityConfigurerAdapter {
+    	
+        @Bean(name="resourceFilter")
+        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+        	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
+        	rf.setStateless(false);
+        	return rf;
+        }      	
+    	
+    	@Override
+    	public void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    		
+    		http.antMatcher("/gamification/temporary/**").authorizeRequests().antMatchers("/gamification/temporary/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
+    	}        	
+    }    
+    
+    @Configuration
+    @Order(27)
+	public static class OAuthSecurityConfig8 extends WebSecurityConfigurerAdapter {
+    	
+        @Bean(name="resourceFilter")
+        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+        	rf.setAuthenticationManager(authenticationManager());
+        	rf.setTokenExtractor(new CustomTokenExtractor());
+        	rf.setStateless(false);
+        	return rf;
+        }      	
+    	
+    	@Override
+    	public void configure(HttpSecurity http) throws Exception {
+    		http.csrf().disable();
+    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    		
+    		http.antMatcher("/gamification/geolocations/**").authorizeRequests().antMatchers("/gamification/geolocations/**").fullyAuthenticated().and()
+    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
+    	}        	
+    }        
+    
+    
+    @Configuration
     @Order(30)                                                        
     public static class HttpSecurityConfig1 extends WebSecurityConfigurerAdapter {
     
