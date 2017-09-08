@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title th:text="#{unsubscribe.title}">PlayGo - disiscrizione mail</title>
+		<title th:text="#{unsubscribe.title}">Play&amp;Go - Disattivazione Notifiche via Mail</title>
 		
 		<!-- Bootstrap core CSS -->
 		<link href="../../css/bootstrap.min.css" rel="stylesheet"/>
@@ -21,7 +21,7 @@
 		    cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
 		  }
       function goToApp(){
-    	  window.location.href='../../';
+    	  window.location.href='../../gamificationweb';
       }
 		  /*]]>*/
 		</script>
@@ -47,23 +47,23 @@
                   <font face="Raleway-bold" size="48" color="gray"><strong>Viaggia Play&amp;Go</strong></font>
                 </h1>
                 <p class="big-text" align="left">
-                <span th:text="#{unsubscribe.p1}">La tua richiesta di disattivazione delle notifiche via mail</span>&nbsp;
+                <span th:utext="#{unsubscribe.p1}">La tua richiesta di disattivazione delle notifiche via mail</span>&nbsp;
                  
-                <strong th:if="${wsresult}" th:text="#{unsubscribe.oktext1}"> &egrave; andata a buon fine</strong>&nbsp; 
-                <span th:if="${wsresult}" th:text="#{unsubscribe.oktext2}">Per tanto non riceverai pi&ugrave; alcuna notifica.</span><br />
+                <strong th:if="${wsresult}" th:utext="#{unsubscribe.oktext1}"> &egrave; andata a buon fine</strong>&nbsp; 
+                <span th:if="${wsresult}" th:utext="#{unsubscribe.oktext2}">Per tanto non riceverai pi&ugrave; alcuna notifica.</span><br />
 
-                <strong th:if="${!wsresult}" th:text="#{unsubscribe.kotext1}">non &egrave; andata a buon fine</strong>&nbsp; 
-                <span th:if="${!wsresult}" th:text="#{unsubscribe.kotext2}">Riprova pi&ugrave; tardi.</span><br />
+                <strong th:if="${!wsresult}" th:utext="#{unsubscribe.kotext1}">non &egrave; andata a buon fine</strong>&nbsp; 
+                <span th:if="${!wsresult}" th:utext="#{unsubscribe.kotext2}">Riprova pi&ugrave; tardi.</span><br />
 
-                <span th:text="#{unsubscribe.p2}">Grazie per la tua partecipazione al gioco ViaggiaTrento Play&amp;Go, continua a muoverti in modo green e ad usare la app!</span><br /><br />
+                <span th:utext="#{unsubscribe.p2}">Grazie per la tua partecipazione al gioco ViaggiaTrento Play&amp;Go, continua a muoverti in modo green e ad usare la app!</span><br /><br />
                 &emsp;
-                <em th:text="#{unsubscribe.p3}">Lo staff di Play&amp;Go</em>
+                <em th:utext="#{unsubscribe.p3}">Lo staff di Play&amp;Go</em>
                 </p>
               </div>
               
               <div class="row" style="margin-right: 10px" align="right">
                 &nbsp;
-                <a id="btn_login_test" href="enter" class="btn btn-success btn-lg" onclick="goToApp()" role="button"><font face="Raleway" size="4"><strong>OK</strong></font></a>
+                <a id="btn_login_test" class="btn btn-success btn-lg" onclick="goToApp()" role="button"><font face="Raleway" size="4"><strong>OK</strong></font></a>
               </div>
             </div>
           </div>

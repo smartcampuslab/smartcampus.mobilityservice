@@ -76,7 +76,7 @@ public class WebLinkUtils {
 	 * @throws Exception
 	 */
 	public  String createUnsubscribeUrl(String playerId, String gameId) throws Exception {
-		String id = cryptUtils.encrypt(playerId);
+		String id = cryptUtils.encrypt(playerId + ":" + gameId);
 		String compileSurveyUrl = String.format(UNSUBSCRIBE_URL, mobilityUrl, id);
 		return compileSurveyUrl;
 	}
