@@ -366,7 +366,7 @@ public class TrackValidator {
 				return status;
 			}
 		}
-		status.setValidationOutcome(status.getAverageSpeed() >= guaranteedAvgSpeedThreshold ? TravelValidity.VALID: TravelValidity.PENDING);
+		status.setValidationOutcome(status.getAverageSpeed() <= guaranteedAvgSpeedThreshold ? TravelValidity.VALID: TravelValidity.PENDING);
 		
 		return status;
 	}
