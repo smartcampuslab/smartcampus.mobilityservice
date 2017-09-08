@@ -339,8 +339,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerRagazzi99.png",
-	"imageName": "prPioneerRagazzi99.png",
+	"path": "img/mail/pr/park_ride-ragazzi99.png",
+	"imageName": "park_ride-ragazzi99.png",
 	"imageType": "image/png",
 	"textId": "Via Ragazzi del '99_parking",
 	"text": {
@@ -349,8 +349,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerLidorno.png",
-	"imageName": "prPioneerLidorno.png",
+	"path": "img/mail/pr/park_ride-lidorno.png",
+	"imageName": "park_ride-lidorno.png",
 	"imageType": "image/png",
 	"textId": "Via Lidorno_parking",
 	"text": {
@@ -359,8 +359,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerViaFersina.png",
-	"imageName": "prPioneerViaFersina.png",
+	"path": "img/mail/pr/park_ride-via-fersina.png",
+	"imageName": "park_ride-via-fersina.png",
 	"imageType": "image/png",
 	"textId": "Ghiaie via Fersina_parking",
 	"text": {
@@ -369,8 +369,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerAreaZuffo.png",
-	"imageName": "prPioneerAreaZuffo.png",
+	"path": "img/mail/pr/park_ride-area-zuffo.png",
+	"imageName": "park_ride-area-zuffo.png",
 	"imageType": "image/png",
 	"textId": "Ex-Zuffo_parking",
 	"text": {
@@ -379,8 +379,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerMonteBaldo.png",
-	"imageName": "prPioneerMonteBaldo.png",
+	"path": "img/mail/pr/park_ride-monte-baldo.png",
+	"imageName": "park_ride-monte-baldo.png",
 	"imageType": "image/png",
 	"textId": "Monte Baldo_parking",
 	"text": {
@@ -389,8 +389,8 @@
 	}
 },
 {
-	"path": "img/mail/pr/prPioneerVillazzanoStazioneFS.png",
-	"imageName": "prPioneerVillazzanoStazioneFS.png",
+	"path": "img/mail/pr/park_ride-villazzano-stazioneFS.png",
+	"imageName": "park_ride-villazzano-stazioneFS.png",
 	"imageType": "image/png",
 	"textId": "Via Asiago, Stazione FS Villazzano_parking",
 	"text": {
@@ -1077,4 +1077,29 @@
 		"it": "Terzo della settimana",
 		"en": "Third of the Week"
 	}
-}]
+},
+
+
+{
+	"path": "img/mail/pr/park_ride_manzoni.png",
+	"imageName": "park_ride_manzoni.png",
+	"imageType": "image/png",
+	"textId": "Parcheggio Centro_parking",
+	"text": {
+		"it": "Parcheggio Centro",
+		"en": "Centro Park"
+	}
+},
+
+{
+	"path": "img/mail/pr/park_ride_municipio.png",
+	"imageName": "park_ride_municipio.png",
+	"imageType": "image/png",
+	"textId": "Parcheggio Municipio_parking",
+	"text": {
+		"it": "Parcheggio Municipio",
+		"en": "Municipio Park"
+	}
+}
+
+]
