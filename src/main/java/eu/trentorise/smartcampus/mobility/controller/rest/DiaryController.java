@@ -281,6 +281,12 @@ public class DiaryController {
 		for (Object o : nots) {
 			if (((Map) o).containsKey("badge")) {
 				BadgeNotification not = mapper.convertValue(o, BadgeNotification.class);
+				
+				if (badgesCache.getBadge(not.getBadge()) == null) {
+					logger.error("Badge not found: " + not.getBadge());
+					continue;
+				}				
+				
 				DiaryEntry de = new DiaryEntry();
 				de.setType(DiaryEntryType.BADGE);
 				de.setTimestamp(not.getTimestamp());
