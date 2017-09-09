@@ -161,6 +161,7 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
+				// TODO log problem
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return "";
 			}
@@ -169,6 +170,7 @@ public class GamificationController {
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
+				// TODO log problem
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return "";
 			}
@@ -426,7 +428,6 @@ public class GamificationController {
 
 		} catch (Exception e) {
 			logger.error("Failed storing events: "+e.getMessage(),e);
-			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return "{\"storeResult\":\"FAIL\"}";
 		}
@@ -459,6 +460,7 @@ public class GamificationController {
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
+				// TODO report problem
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -487,6 +489,7 @@ public class GamificationController {
 			storage.saveTrackedInstance(res2);
 
 		} catch (Exception e) {
+			// TODO correct log
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -521,6 +524,7 @@ public class GamificationController {
 			}
 			if (res == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				// TODO report problem better
 				logger.info("Bad request.");
 				return;
 			}
@@ -552,6 +556,7 @@ public class GamificationController {
 			storage.saveTrackedInstance(res2);
 
 		} catch (Exception e) {
+			// TODO correct log, report relevant info
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -571,6 +576,7 @@ public class GamificationController {
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
+				// TODO report problem
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -595,6 +601,7 @@ public class GamificationController {
 			storage.saveTrackedInstance(ti);
 
 		} catch (Exception e) {
+			// TODO improve log
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -701,6 +708,7 @@ public class GamificationController {
 					storage.saveTrackedInstance(ti);
 				}
 			} catch (Exception e) {
+				// TODO fix log
 				logger.error("Failed to validate tracked itinerary: " + ti.getId());
 				e.printStackTrace();
 			}
