@@ -449,16 +449,16 @@ public class GamificationWebController {
 		PlayerClassification pc = null;
 		if (board != null) {
 			computeRanking(board);
-			
+
 			Query query = new Query();
 			query.fields().include("socialId").include("nickname");
-			
+
 			List<Player> players = template.find(query, Player.class, "player");
 			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
 
 			pc = new PlayerClassification();
 			List<ClassificationData> classificationList = Lists.newArrayList();
-			for (ClassificationPosition pos: board.getBoard()) {
+			for (ClassificationPosition pos : board.getBoard()) {
 				if (nicknames.containsKey(pos.getPlayerId())) {
 					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
 					classificationList.add(cd);
@@ -468,7 +468,11 @@ public class GamificationWebController {
 				}
 			}
 			pc.setClassificationList(classificationList);
-			
+
+		} else {
+			pc = new PlayerClassification();
+			List<ClassificationData> cd = Lists.newArrayList();
+			pc.setClassificationList(cd);
 		}
 		
 		return pc;
