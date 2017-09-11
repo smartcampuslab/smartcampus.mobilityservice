@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
@@ -44,6 +47,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -66,6 +72,7 @@ import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.ConfigUtils;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
@@ -73,6 +80,7 @@ import eu.trentorise.smartcampus.profileservice.model.AccountProfile;
 import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 
 @Controller
+@EnableScheduling
 public class GamificationWebController {
 
 	private static final String NICK_RECOMMANDATION = "nicknameRecommendation";
@@ -116,14 +124,70 @@ public class GamificationWebController {
 	@Autowired
 	private ReportEmailSender emailSender;
 	
+	@Autowired
+	private ConfigUtils configUtils;
+	
 	private ObjectMapper mapper = new ObjectMapper();
 	
 	private CustomTokenExtractor tokenExtractor = new CustomTokenExtractor();
+	
+	private LoadingCache<String, List<ClassificationData>> currentIncClassification;
+	private LoadingCache<String, List<ClassificationData>> previousIncClassification;
+	private LoadingCache<String, List<ClassificationData>> globalClassification;
 	
 	@PostConstruct
 	public void init() {
 		profileService = new BasicProfileService(aacURL);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		
+		currentIncClassification = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+				.build(new CacheLoader<String, List<ClassificationData>>() {
+					@Override
+					public List<ClassificationData> load(String appId) throws Exception {
+						String gameId = getGameId(appId);
+						if (gameId != null) {
+							try {
+								return getFullIncClassification(gameId, appId, System.currentTimeMillis());
+							} catch (Exception e) {
+								logger.error("Error populating current classification cache.", e);
+							}
+						}
+						return Collections.EMPTY_LIST;
+					}
+				});
+		
+		previousIncClassification = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
+				.build(new CacheLoader<String, List<ClassificationData>>() {
+					@Override
+					public List<ClassificationData> load(String appId) throws Exception {
+						String gameId = getGameId(appId);
+						if (gameId != null) {
+							try {
+								return getFullIncClassification(gameId, appId, System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L);
+							} catch (Exception e) {
+								logger.error("Error populating previous classification cache.", e);
+							}								
+						}
+						return Collections.EMPTY_LIST;
+					}
+				});	
+		
+		globalClassification = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+				.build(new CacheLoader<String, List<ClassificationData>>() {
+					@Override
+					public List<ClassificationData> load(String appId) throws Exception {
+						String gameId = getGameId(appId);
+						if (gameId != null) {
+							try {
+								return getFullClassification(gameId, appId);
+							} catch (Exception e) {
+								logger.error("Error populating previous classification cache.", e);
+							}								
+						}
+						return Collections.EMPTY_LIST;
+					}
+				});			
+		
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = {"/gamificationweb","/gamificationweb/"})	///{socialId}
@@ -151,7 +215,7 @@ public class GamificationWebController {
 
 		ModelAndView model = new ModelAndView("web/index");
 		model.addObject("language", lang);
-		WeekConfData week = emailSender.getCurrentWeekConf();
+		WeekConfData week = configUtils.getCurrentWeekConf();
 		if (week != null) {
 			model.addObject("week", week.getWeekNum());
 			model.addObject("weeklyPrizes", emailSender.getWeekPrizes(week.getWeekNum(), lang));
@@ -417,68 +481,191 @@ public class GamificationWebController {
 		String userId = user.getUserId();
 		String gameId = getGameId(appId);
 		
-		PlayerClassification pc = getPlayerClassification(gameId, userId, timestamp, start, end, appId);
+//		PlayerClassification pc = getPlayerClassification(gameId, userId, timestamp, start, end, appId);
+		PlayerClassification pc = getCachedPlayerClassification(userId, appId, timestamp, start, end);
 		
 		return pc;
 	}		
 	
-	
-	private PlayerClassification getPlayerClassification(String gameId, String playerId, Long timestamp, Integer start, Integer end, String appId) throws Exception {
+	private List<ClassificationData> getFullIncClassification(String gameId, String appId, Long timestamp) throws Exception {
+		String url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp;
+		ClassificationBoard board = getClassification(url, appId);
+		if (board != null) {
+			computeRanking(board);
+		}
 		
-		int size = -1;
+		Query query = new Query();
+		query.fields().include("socialId").include("nickname");
+
+		List<Player> players = template.find(query, Player.class, "player");
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));		
+		
+		List<ClassificationData> classificationList = Lists.newArrayList();
+		for (ClassificationPosition pos : board.getBoard()) {
+				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+				classificationList.add(cd);
+			}
+		
+		return classificationList;
+	}
+	
+	private List<ClassificationData> getFullClassification(String gameId, String appId) throws Exception {
+		String url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8");
+		ClassificationBoard board = getClassification(url, appId);
+		if (board != null) {
+			computeRanking(board);
+		}
+		
+		Query query = new Query();
+		query.fields().include("socialId").include("nickname");
+
+		List<Player> players = template.find(query, Player.class, "player");
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));		
+		
+		List<ClassificationData> classificationList = Lists.newArrayList();
+		for (ClassificationPosition pos : board.getBoard()) {
+				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+				classificationList.add(cd);
+			}
+		
+		return classificationList;
+	}	
+	
+	private PlayerClassification getCachedPlayerClassification(String playerId, String appId, Long timestamp, Integer start, Integer end) throws ExecutionException {
+		List<ClassificationData> data = null;
+
+		if (timestamp != null) {
+		WeekConfData wcd = configUtils.getWeek(timestamp);
+		WeekConfData wcdnow = configUtils.getCurrentWeekConf();
+		if (wcd != null && wcdnow != null) {
+			if (wcd.getWeekNum() == wcdnow.getWeekNum()) {
+				data = currentIncClassification.get(appId);
+			} else if (wcd.getWeekNum() == wcdnow.getWeekNum() - 1) {
+				data = previousIncClassification.get(appId);
+			}
+		}
+		} else {
+			data = globalClassification.get(appId);
+		}
+		
+		PlayerClassification pc = new PlayerClassification();
+		if (data == null) {
+			return pc;
+		}
+
+		Query query = new Query();
+		query.fields().include("socialId").include("nickname");
+
+		List<Player> players = template.find(query, Player.class, "player");
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
+
+		pc.setClassificationList(data);
+		for (ClassificationData cd : data) {
+			if (playerId.equals(cd.getPlayerId())) {
+				pc.setActualUser(cd);
+				break;
+			}
+		}
+		
+		int size = 0;
 		if (end != null) {
 			if (start != null) {
-				size = end - start;
+				size = end - start + 1;
 			} else {
 				size = end;
 			}
-		}
-		String paging = ((start != null) ? ("start=" + start + ((size != -1) ? "&" : "") ) : "")
-				+ ((size != -1) ? ("size=" + size) : "");
-		ClassificationBoard board;
-		String url;
-		if (timestamp == null) {
-			url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8")
-			+ ((paging != null) ? ("?" + paging) : "");
-		} else {
-			url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp
-					+ ((paging != null) ? ("&" + paging) : "");
-		}
+		}		
 		
-		board = getClassification(url, appId);
-		PlayerClassification pc = null;
-		if (board != null) {
-			computeRanking(board);
-
-			Query query = new Query();
-			query.fields().include("socialId").include("nickname");
-
-			List<Player> players = template.find(query, Player.class, "player");
-			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
-
-			pc = new PlayerClassification();
-			List<ClassificationData> classificationList = Lists.newArrayList();
-			for (ClassificationPosition pos : board.getBoard()) {
-				if (nicknames.containsKey(pos.getPlayerId())) {
-					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-					classificationList.add(cd);
-					if (playerId.equals(pos.getPlayerId())) {
-						pc.setActualUser(cd);
-					}
-				}
-			}
-			pc.setClassificationList(classificationList);
-
-		} else {
-			pc = new PlayerClassification();
-			List<ClassificationData> cd = Lists.newArrayList();
-			pc.setClassificationList(cd);
-		}
+		data = data.stream().skip(start != null ? (start - 1) : 0).limit(size != 0 ? size : data.size()).collect(Collectors.toList());
+		pc.setClassificationList(data);
 		
 		return pc;
+	}		
+	
+//	private PlayerClassification getPlayerClassification(String gameId, String playerId, Long timestamp, Integer start, Integer end, String appId) throws Exception {
+//		
+//		int size = -1;
+//		int page = 1;
+//		if (end != null) {
+//			if (start != null) {
+//				size = end - start + 1;
+//				page = start / size + 1;
+//			} else {
+//				size = end;
+//			}
+//		}
+//		System.err.println(start + " / " + end + " => " + page + " / " + size);
+//		
+//		String paging = ((start != null) ? ("page=" + page + ((size != -1) ? "&" : "") ) : "")
+//				+ ((size != -1) ? ("size=" + size) : "");
+//		ClassificationBoard board;
+//		String url;
+//		if (timestamp == null) {
+//			url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8")
+//			+ ((paging != null) ? ("?" + paging) : "");
+//		} else {
+//			url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp
+//					+ ((paging != null) ? ("&" + paging) : "");
+//		}
+//		System.err.println(url);
+//		
+//		
+//		board = getClassification(url, appId);
+//		PlayerClassification pc = null;
+//		if (board != null) {
+//			computeRanking(board);
+//
+//			Query query = new Query();
+//			query.fields().include("socialId").include("nickname");
+//
+//			List<Player> players = template.find(query, Player.class, "player");
+//			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
+//
+//			pc = new PlayerClassification();
+//			List<ClassificationData> classificationList = Lists.newArrayList();
+//			for (ClassificationPosition pos : board.getBoard()) {
+//				if (nicknames.containsKey(pos.getPlayerId())) {
+//					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+//					classificationList.add(cd);
+//					if (playerId.equals(pos.getPlayerId())) {
+//						pc.setActualUser(cd);
+//					}
+//				}
+//			}
+//			pc.setClassificationList(classificationList);
+//
+//		} else {
+//			pc = new PlayerClassification();
+//			List<ClassificationData> cd = Lists.newArrayList();
+//			pc.setClassificationList(cd);
+//		}
+//		
+//		return pc;
+//		
+//	}
+	
+//	@Scheduled(cron="*/20 * * * * *")
+//	private void getCurrentIncClassification() throws Exception {
+//		for (AppInfo appInfo : appSetup.getApps()) {
+//			String appId = appInfo.getAppId();
+//			String gameId = getGameId(appId);
+//			if (gameId != null) {
+//				getFullIncClassification(gameId, appId, System.currentTimeMillis());				
+//			}
+//		}
+//
+//	}
+	
+//	@Scheduled(cron="*/20 * * * * *")
+//	private void getCurrentIncClassification() throws Exception {
+//		for (AppInfo appInfo : appSetup.getApps()) {
+//			String appId = appInfo.getAppId();
+//			System.err.println(appId + " = " + currentIncClassification.get(appId));
+//		}
+//
+//	}	
+	
 		
-	}
-
 	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
