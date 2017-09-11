@@ -51,6 +51,7 @@ import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.ConfigUtils;
 
 @Controller
 @EnableScheduling
@@ -104,6 +105,9 @@ public class ReportEmailSender {
 	
 	@Autowired
 	private BadgesCache badgesCache;
+	
+	@Autowired
+	private ConfigUtils configUtils;
 
 	private static final Logger logger = Logger.getLogger(ReportEmailSender.class);
 
@@ -177,7 +181,7 @@ public class ReportEmailSender {
 		logger.debug(String.format("Check Notification task. Cycle - %d", i++));
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
-		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
+		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(configUtils.getWeekConfData());
 		
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
@@ -370,7 +374,7 @@ public class ReportEmailSender {
 		logger.debug(String.format("Check Notification task. Cycle - %d", i++));
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
-		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(getWeekConfData());
+		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(configUtils.getWeekConfData());
 		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");		
 		
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
@@ -1097,47 +1101,6 @@ public class ReportEmailSender {
 	 * private List<State> orderState(List<State> toOrder){ List<State> orderedList = new List<State>(); // I order the list with green score at the first, health score at the second and pr at the third for(int i = 0; i < toOrder.size(); i++){ if(toOrder.get(i).getName().compareTo("green leaves") == 0){ orderedList.add(toOrder.get(i)); break; } } for(int i = 0; i < toOrder.size(); i++){ if(toOrder.get(i).getName().compareTo("health") == 0){ orderedList.add(toOrder.get(i)); break; } } for(int i = 0; i < toOrder.size(); i++){ if(toOrder.get(i).getName().compareTo("p+r") == 0){ orderedList.add(toOrder.get(i)); break; } } return orderedList; }
 	 */
 
-	// Method used to read a week conf data file and store all values in a list of WeekConfData object
-	private List<WeekConfData> getWeekConfData() throws Exception {
-		if (weekConfData != null) return weekConfData;
-		
-		synchronized(this) {
-			if (weekConfData != null) return weekConfData;
-			
-			String src = weeklyDataDir + "/game_week_configuration.csv";
-			String cvsSplitBy = ",";
-			weekConfData = Lists.newArrayList();
-
-//			List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
-			List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
-
-			for (int i = 1; i < lines.size(); i++) {
-				String line = lines.get(i);
-				if (line.trim().isEmpty()) continue;
-				
-				// use comma as separator
-				String[] weekConfValues = line.split(cvsSplitBy);
-				int weekNum = Integer.parseInt(weekConfValues[0]);
-				String weekTheme = weekConfValues[1];
-				String weekThemeEng = weekConfValues[2];
-				String areChallenges = weekConfValues[3];
-				String arePrizes = weekConfValues[4];
-				String arePrizesLast = weekConfValues[5];
-				String actualWeek = weekConfValues[6];
-				String actualWeekEnd = weekConfValues[7];
-				logger.debug(String.format("Week conf file: week num %s, theme %s, challenges %s, prizes %s, prizes last %s, actual week %s", weekNum, weekTheme, areChallenges, arePrizes, arePrizesLast,
-						actualWeek));
-				// value conversion from string to boolean
-				Boolean areChall = (areChallenges.compareTo("Y") == 0) ? true : false;
-				Boolean arePriz = (arePrizes.compareTo("Y") == 0) ? true : false;
-				Boolean arePrizLast = (arePrizesLast.compareTo("Y") == 0) ? true : false;
-				WeekConfData wconf = new WeekConfData(weekNum, weekTheme, weekThemeEng, areChall, arePriz, arePrizLast, actualWeek, actualWeekEnd);
-				weekConfData.add(wconf);
-			}
-			
-			return weekConfData;
-		}
-	}
 
 	// Method used to read a week prizes file and store all data in a list of WeekPrizeData object
 	private List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
@@ -1165,17 +1128,6 @@ public class ReportEmailSender {
 		return prizeWeekFileData;
 	}
 
-	public WeekConfData getCurrentWeekConf() {
-		try {
-			for (WeekConfData week : getWeekConfData()) {
-				if (week.currentWeek()) return week;
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-		return null;
-	}
-	
 	// Method used to read the week prizes data from conf file. More prizes for one week are allowed
 	public List<WeekPrizeData> getWeekPrizes(int weeknum, String lang) {
 		List<WeekPrizeData> allPrizes = weekPrizeData.get(lang);
