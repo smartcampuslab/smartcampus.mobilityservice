@@ -61,4 +61,9 @@ public class ClassificationData implements Comparable<ClassificationData> {
 		return (this.score).compareTo(player.score);
 	}
 
+	@Override
+	public String toString() {
+		return position + ":" + score + ":" + playerId;
+	}
+	
 }
