@@ -102,9 +102,19 @@ public class WeekConfData {
 				+ ", prizes=" + prizes + ", prizesLast=" + prizesLast + ", weekStart=" + weekStart + "]";
 	}
 
+	public boolean isWeek(long timestamp) {
+		String currDate = SDF_WEEK_DATE.format(new Date(timestamp));
+		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
+	}	
+	
 	public boolean currentWeek() {
 		String currDate = SDF_WEEK_DATE.format(new Date());
 		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
 	}
 
+	public boolean previousWeek() {
+		String currDate = SDF_WEEK_DATE.format(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 7));
+		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
+	}	
+	
 }
