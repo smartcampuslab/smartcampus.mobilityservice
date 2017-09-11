@@ -161,7 +161,7 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
-				// TODO log problem
+				logger.warn("Storing geolocations, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return "";
 			}
@@ -170,7 +170,7 @@ public class GamificationController {
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				// TODO log problem
+				logger.warn("Storing geolocations, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return "";
 			}
@@ -427,7 +427,7 @@ public class GamificationController {
 			}
 
 		} catch (Exception e) {
-			logger.error("Failed storing events: "+e.getMessage(),e);
+			logger.error("Failed storing events: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return "{\"storeResult\":\"FAIL\"}";
 		}
@@ -454,13 +454,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
+				logger.warn("Start freetracking, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				// TODO report problem
+				logger.warn("Start freetracking, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -489,8 +490,7 @@ public class GamificationController {
 			storage.saveTrackedInstance(res2);
 
 		} catch (Exception e) {
-			// TODO correct log
-			e.printStackTrace();
+			logger.error("Error in start freetracking: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -502,12 +502,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
+				logger.warn("Start planned journey, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
+				logger.warn("Start planned journey, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -525,7 +527,7 @@ public class GamificationController {
 			if (res == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				// TODO report problem better
-				logger.info("Bad request.");
+				logger.info("Start planned journey, itinerary not found.");
 				return;
 			}
 
@@ -557,7 +559,7 @@ public class GamificationController {
 
 		} catch (Exception e) {
 			// TODO correct log, report relevant info
-			e.printStackTrace();
+			logger.error("Error in start planned journey: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -570,13 +572,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
+				logger.warn("Start temporary journey, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				// TODO report problem
+				logger.warn("Start temporary journey, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -601,8 +604,7 @@ public class GamificationController {
 			storage.saveTrackedInstance(ti);
 
 		} catch (Exception e) {
-			// TODO improve log
-			e.printStackTrace();
+			logger.error("Error in start temporary journey: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}	
@@ -709,8 +711,7 @@ public class GamificationController {
 				}
 			} catch (Exception e) {
 				// TODO fix log
-				logger.error("Failed to validate tracked itinerary: " + ti.getId());
-				e.printStackTrace();
+				logger.error("Failed to validate tracked itinerary: " + ti.getId(), e);
 			}
 
 		}
