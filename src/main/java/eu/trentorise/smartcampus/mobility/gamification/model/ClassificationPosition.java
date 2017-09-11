@@ -41,5 +41,10 @@ public class ClassificationPosition implements Comparable<ClassificationPosition
 	public int compareTo(ClassificationPosition o) {
 		return (position - o.position);
 	}
+	
+	@Override
+	public String toString() {
+		return position + ":" + score;
+	}
 
 }

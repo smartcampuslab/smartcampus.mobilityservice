@@ -41,5 +41,10 @@ public class ClassificationBoard {
 	public void setUpdateTime(long updateTime) {
 		this.updateTime = updateTime;
 	}
+	
+	@Override
+	public String toString() {
+		return board.toString();
+	}
 
 }
