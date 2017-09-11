@@ -593,16 +593,18 @@ public class GamificationWebController {
 
 		int position = 1;
 		for (Double score : scores.descendingSet()) {
-			final int pos = position;
-			ranking.get(score).stream().forEach(x -> x.setPosition(pos));
-			position++;
+			int ex = 0;
+			for (ClassificationPosition exaequo : ranking.get(score)) {
+				exaequo.setPosition(position);
+				ex++;
+			}
+			position += ex;
 		}
 		board.setBoard(Lists.newArrayList(ranking.values()));
 		Collections.sort(board.getBoard());
 
 		board.setUpdateTime(System.currentTimeMillis());
 	}
-	
 	
 	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
