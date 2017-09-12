@@ -315,7 +315,7 @@ public class GamificationWebController {
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Iterable<Player> players = playerRepositoryDao.findAllByCheckedRecommendationAndGameId(true, gameId);
 		for (Player player : players) {
-			logger.info("Checking recommendation for " + player.getId());
+			logger.debug("Checking recommendation for " + player.getId());
 			if (player.getPersonalData() != null) {
 				String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
 				if (nickname != null && !nickname.isEmpty()) {
@@ -332,15 +332,15 @@ public class GamificationWebController {
 							player.setCheckedRecommendation(false);
 							playerRepositoryDao.save(player);
 						} else {
-							logger.info("Not Sending recommendation for " + player.getId() + " -> " + recommender.getId() + ", no points yet.");
+							logger.debug("Not Sending recommendation for " + player.getId() + " -> " + recommender.getId() + ", no points yet.");
 						}
 					} else {
-						logger.info("Recommender not found for " + player.getId());
+						logger.debug("Recommender not found for " + player.getId());
 						player.setCheckedRecommendation(false);
 						playerRepositoryDao.save(player);
 					}
 				} else {
-					logger.info("No recommender for " + player.getId());
+					logger.debug("No recommender for " + player.getId());
 					player.setCheckedRecommendation(false);
 					playerRepositoryDao.save(player);
 				}

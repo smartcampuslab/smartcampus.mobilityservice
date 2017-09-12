@@ -103,7 +103,7 @@ public class JourneyPlannerController {
 
 			String userFromToken = getUserId();
 			statLogger.log(journeyRequest, userFromToken);
-			logger.info("-" + userId + "~AppConsume~plan");
+			logger.debug("-" + userId + "~AppConsume~plan");
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, policyId);
 			for (Itinerary itinerary : results) {
