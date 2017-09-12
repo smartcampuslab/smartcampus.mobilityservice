@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.util;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -12,6 +13,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekConfData;
 
 @Component
@@ -22,6 +24,7 @@ public class ConfigUtils {
 	private String weeklyDataDir;		
 	
 	private List<WeekConfData> weekConfData = null;
+	private List<Event> checkinEvents = null;
 	
 	private static final Logger logger = Logger.getLogger(ConfigUtils.class);
 	
@@ -107,5 +110,9 @@ public class ConfigUtils {
 		}
 		return null;
 	}		
+	
+	public List<String> getActiveCheckinEvents(){
+		return Collections.emptyList();
+	}
 	
 }

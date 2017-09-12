@@ -51,8 +51,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 59_12,22045x,Gardolo D.Milani "Piscina",,46.106686,11.114327,10110,2
 60_12,22045z,Gardolo D.Milani "Piscina",,46.106749,11.114389,10110,2
 61_12,22040x,Gardolo Don Milani 8 Marzo,,46.104204,11.117281,10110,2
-62_12,22070z,Gardolo S.Anna Carpenedi,,46.113320,11.107854,10110,2
-63_12,22070x,Gardolo S.Anna Carpenedi,,46.113459,11.107399,10110,2
+62_12,22070z,Gardolo S.Anna Carpenedi,,46.113320,11.107854,10110,1
+63_12,22070x,Gardolo S.Anna Carpenedi,,46.113459,11.107399,10110,1
 64_12,22075x,Gardolo Svincolo Ss.12,,46.106227,11.109072,10110,1
 65_12,23215z,Gazzadina Strada Vecchia,,46.130109,11.126043,10110,2
 66_12,23210z,Gazzadina Al Pontat,,46.128445,11.129219,10110,2
@@ -74,7 +74,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 85_12,21210z,Centochiavi Dalla Fior,,46.094611,11.120675,10110,2
 86_12,21205x,Centochiavi Chiocchetti,,46.093993,11.120699,10110,2
 87_12,22410x,Melta "Case Itea",,46.102271,11.118109,10110,1
-88_12,22405x,Parco di Melta,,46.097274,11.119767,10110,2
+88_12,22405x,Parco di Melta,,46.097274,11.119767,10110,1
 89_12,22415z,Melta Centro,,46.099443,11.119089,10110,2
 90_12,22415x,Melta Centro,,46.100104,11.118730,10110,2
 91_12,22405z,Parco di Melta,,46.097239,11.119901,10110,1
@@ -83,10 +83,10 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 94_12,26040z,Ss 12 "Casteller",,46.025284,11.132751,10110,2
 95_12,26040x,Ss 12 "Casteller",,46.025707,11.132791,10110,2
 96_12,21465x,Madonna Bianca "S.Gaetano",,46.038012,11.130695,10110,2
-97_12,21695x,Stella Marighetto,,46.034256,11.131509,10110,2
+97_12,21695x,Stella Marighetto,,46.034256,11.131509,10110,1
 98_12,21460z,Madonna Bianca "Man",,46.040293,11.130341,10110,2
 99_12,26045z,Ss 12 "Le Caverne",,46.030862,11.132677,10110,2
-100_12,26045x,Ss 12 "Le Caverne",,46.030338,11.132911,10110,2
+100_12,26045x,Ss 12 "Le Caverne",,46.030338,11.132911,10110,1
 101_12,24335z,Martignano Formigheta,,46.089121,11.133090,10110,1
 102_12,24335x,Martignano Formigheta,,46.089134,11.133216,10110,1
 103_12,24305z,Martignano "Chiesa",,46.088732,11.130604,10110,2
@@ -176,12 +176,12 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 191_12,25020x,Povo "Polo Sociale",,46.065632,11.157936,10110,1
 192_12,27035n,Ravina Masere,,46.039165,11.111935,10110,2
 193_12,27035s,Ravina Masere,,46.039202,11.112293,10110,1
-194_12,27010z,Ravina "Case Itea",,46.037329,11.114043,10110,2
+194_12,27010z,Ravina "Case Itea",,46.037329,11.114043,10110,1
 195_12,27010x,Ravina "Case Itea",,46.037940,11.114062,10110,2
 196_12,27020-,Ravina Chiesa,,46.037726,11.107755,10110,2
 197_12,27045-,Ravina Piazza,,46.037878,11.108509,10110,1
 198_12,27040z,Ravina Per Belvedere,,46.041292,11.106159,10110,2
-199_12,27040x,Ravina Per Belvedere,,46.041001,11.106237,10110,2
+199_12,27040x,Ravina Per Belvedere,,46.041001,11.106237,10110,1
 200_12,27025z,Ravina Del Ponte,,46.043295,11.112317,10110,2
 201_12,27025x,Ravina Del Ponte,,46.041069,11.113117,10110,2
 202_12,20120c,Piazza Dante "Pal. Regione",,46.071711,11.121389,10110,1
@@ -193,8 +193,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 208_12,27220c,Romagnano Piazza Condini,,46.017751,11.105818,10110,1
 209_12,27230z,Romagnano Sud,,46.012857,11.105449,10110,2
 210_12,27230x,Romagnano Sud,,46.012091,11.104952,10110,2
-211_12,27225z,Romagnano Rimoni,,46.016782,11.108221,10110,2
-212_12,27225x,Romagnano Rimoni,,46.016488,11.108269,10110,2
+211_12,27225z,Romagnano Rimoni,,46.016782,11.108221,10110,1
+212_12,27225x,Romagnano Rimoni,,46.016488,11.108269,10110,1
 213_12,22505c,Roncafort,,46.101271,11.101583,10110,2
 214_12,22230x,Ss 12 "Zona Ind.Le Ftm",,46.120242,11.105822,10110,2
 215_12,25040z,Povo Salé,,46.062029,11.151722,10110,1
@@ -243,11 +243,11 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 260_12,21055x,Adamello Gorizia,,46.059853,11.132395,10110,2
 261_12,22020-,Gardolo "Stazione Ftm",,46.107233,11.103861,10110,2
 262_12,22305n,M. Rossi "Stella D.Mattino",,46.107384,11.101204,10110,1
-263_12,22305s,M. Rossi "Stella D.Mattino",,46.107331,11.100406,10110,1
+263_12,22305s,M. Rossi "Stella D.Mattino",,46.107331,11.100406,10110,2
 264_12,21060x,Al Desert Muredei,,46.051409,11.117370,10110,2
-265_12,21060z,Al Desert Muredei,,46.050987,11.117056,10110,2
-266_12,21065x,Al Desert Ragazzi Del '99,,46.046952,11.115704,10110,2
-267_12,21065z,Al Desert Ragazzi Del '99,,46.047147,11.115661,10110,2
+265_12,21060z,Al Desert Muredei,,46.050987,11.117056,10110,1
+266_12,21065x,Al Desert Ragazzi Del '99,,46.046952,11.115704,10110,1
+267_12,21065z,Al Desert Ragazzi Del '99,,46.047147,11.115661,10110,1
 269_12,21075z,Apuleio "Case Degasperi",,46.073284,11.115482,10110,1
 270_12,21080z,Apuleio "Ponte S.Giorgio",,46.076220,11.115030,10110,2
 271_12,21090z,Asiago "Cernidor",,46.050242,11.137200,10110,2
@@ -255,12 +255,12 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 273_12,21085x,Asiago "Bellevue",,46.053209,11.136495,10110,2
 274_12,21090x,Asiago "Cernidor",v.Asiago fr.civ. 6 ang.v.de la Toresela,46.049550,11.137273,10110,2
 275_12,21005z,Castello Buonconsiglio,,46.070312,11.126964,10110,2
-276_12,21645x,Sanzio "Castello",,46.071906,11.126021,10110,2
-277_12,21110-,Barbacovi "Itg Pozzo",,46.064329,11.129974,10110,2
+276_12,21645x,Sanzio "Castello",,46.071906,11.126021,10110,1
+277_12,21110-,Barbacovi "Itg Pozzo",,46.064329,11.129974,10110,1
 278_12,21680z,Ss 47 Muralta,,46.077059,11.131773,10110,2
 279_12,24315z,Martignano Capitel,,46.082132,11.127158,10110,2
 280_12,24315x,Martignano Capitel,,46.081762,11.126874,10110,1
-281_12,21120z,Bettini "Nido Mad. Bianca",,46.040477,11.135351,10110,2
+281_12,21120z,Bettini "Nido Mad. Bianca",,46.040477,11.135351,10110,1
 282_12,21120x,Bettini "Nido Mad. Bianca",,46.040082,11.135431,10110,1
 283_12,21125x,Bezzi Filzi,,46.058467,11.119271,10110,1
 284_12,21130z,Bolghera "S.Antonio",,46.058155,11.131199,10110,1
@@ -278,8 +278,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 296_12,21145x,Brennero "Magnete",,46.089442,11.116527,10110,1
 297_12,21140z,Brennero "Ex Scalo Filzi",,46.079982,11.122133,10110,1
 298_12,21140x,Brennero "Ex Scalo Filzi",,46.079590,11.122150,10110,1
-300_12,21155z,Brennero "Tridente",,46.086479,11.118447,10110,2
-301_12,21190x,Brigata Acqui "Itc Tambosi",,46.065346,11.128400,10110,2
+300_12,21155z,Brennero "Tridente",,46.086479,11.118447,10110,1
+301_12,21190x,Brigata Acqui "Itc Tambosi",,46.065346,11.128400,10110,1
 302_12,20505z,Calepina Roccabruna,,46.066833,11.122735,10110,2
 303_12,22510z,Roncafort Bettine,,46.097530,11.102648,10110,2
 304_12,21040z,Caneppele Goio,,46.094476,11.105228,10110,2
@@ -312,7 +312,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 331_12,21030x,Ponte S.Giorgio,,46.076974,11.114129,10110,2
 333_12,21300z,F.Lli Fontana Gen. Cantore,,46.076988,11.118892,10110,1
 334_12,21295z,F.Lli Fontana Oberziner,,46.077461,11.116749,10110,1
-335_12,21310z,Fermi La Clarina,,46.048733,11.128986,10110,2
+335_12,21310z,Fermi La Clarina,,46.048733,11.128986,10110,1
 338_12,21315z,Fogazzaro "Piscina",,46.056279,11.130465,10110,1
 339_12,21315x,Fogazzaro "Piscina",,46.055966,11.129610,10110,1
 340_12,25815z,Ss 349 Pozzata,,46.039534,11.144070,10110,2
@@ -352,13 +352,13 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 377_12,25630x,Villazzano Marzola,,46.046549,11.149058,10110,2
 378_12,25625z,Villazzano Giordano,,46.050678,11.148464,10110,2
 379_12,25625x,Villazzano Giordano,,46.050736,11.148327,10110,2
-380_12,21480x,Mattioli Vittorio Veneto,,46.058838,11.122521,10110,2
+380_12,21480x,Mattioli Vittorio Veneto,,46.058838,11.122521,10110,1
 382_12,21490z,Menguzzato Al Casteller,,46.038222,11.134508,10110,2
 383_12,21485z,Menguzzato "Centro Civico",,46.040449,11.131690,10110,1
 384_12,21485x,Menguzzato "Centro Civico",,46.040107,11.132070,10110,1
-385_12,21490x,Menguzzato Al Casteller,,46.038106,11.134135,10110,2
+385_12,21490x,Menguzzato Al Casteller,,46.038106,11.134135,10110,1
 386_12,21495x,Milano A Prato,,46.060791,11.127602,10110,2
-387_12,21495z,Milano A Prato,,46.060723,11.127671,10110,2
+387_12,21495z,Milano A Prato,,46.060723,11.127671,10110,1
 388_12,21500z,Missioni Africane,,46.076760,11.128229,10110,2
 389_12,21035z,Quattro Strade,,46.075587,11.128243,10110,2
 390_12,21035x,Quattro Strade,,46.076150,11.128131,10110,2
@@ -371,7 +371,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 400_12,21525x,Pasubio Adamello,,46.060030,11.133381,10110,1
 401_12,21305x,F.Lli Perini 3 Novembre,,46.060903,11.124400,10110,1
 402_12,21535z,Piave "Parco S.Chiara",,46.064151,11.127563,10110,2
-403_12,21580x,Romagnosi Vannetti,,46.072993,11.122651,10110,2
+403_12,21580x,Romagnosi Vannetti,,46.072993,11.122651,10110,1
 404_12,21585z,Rosmini "Cimitero" / Muse,,46.064185,11.119431,10110,1
 405_12,21585x,Rosmini "Cimitero",,46.063745,11.119596,10110,1
 406_12,21590x,Rosmini S.Maria Maggiore,,46.067846,11.118867,10110,1
@@ -380,12 +380,12 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 409_12,21045x,3 Nov. "Centro S.Chiara",,46.062181,11.123931,10110,1
 410_12,21595z,S.Francesco Porta Nuova,,46.067075,11.126226,10110,1
 411_12,20530x,S.Pietro Degli Orbi,,46.069404,11.124511,10110,2
-412_12,21615x,S.Pio X Matteotti,,46.056396,11.119944,10110,2
+412_12,21615x,S.Pio X Matteotti,,46.056396,11.119944,10110,1
 413_12,21610z,S.Pio X Largo Prati,,46.056862,11.119124,10110,1
 414_12,21605z,S.Pio X Benevoli,,46.053951,11.120497,10110,1
 415_12,21605x,S.Pio X Benevoli,,46.053806,11.120736,10110,1
-416_12,21635x,Sanseverino S.Nicolò,,46.052351,11.112016,10110,2
-417_12,21635z,Sanseverino S.Nicolò,,46.051036,11.111609,10110,2
+416_12,21635x,Sanseverino S.Nicolò,,46.052351,11.112016,10110,1
+417_12,21635z,Sanseverino S.Nicolò,,46.051036,11.111609,10110,1
 420_12,21650x,Segantini Centa,,46.075601,11.122399,10110,1
 421_12,21655x,Segantini Dogana,,46.074211,11.121460,10110,2
 422_12,21665z,Solteri "Piazzina",,46.085489,11.122562,10110,1
@@ -408,7 +408,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 439_12,27050z,Sp 90 "Maso Prudenza",,46.028867,11.111521,10110,2
 440_12,27050x,Sp 90 "Maso Prudenza",,46.029290,11.111771,10110,2
 441_12,22315o,Maso Rossi Aichner,,46.105159,11.100565,10110,2
-443_12,21700z,Torre Verde Galasso,,46.070658,11.122787,10110,2
+443_12,21700z,Torre Verde Galasso,,46.070658,11.122787,10110,
 444_12,21710z,Travai Al Nuoto / Muse,,46.064556,11.120926,10110,1
 446_12,21790z,Vittorio Veneto "S.Giuseppe",,46.057772,11.119307,10110,1
 447_12,21795z,Vittorio Veneto Lorenzoni,,46.058577,11.123837,10110,1
@@ -475,7 +475,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 2406_12,21340x,Ghiaie "Giardinerie",,46.052906,11.117029,10110,1
 2407_12,21345x,Ghiaie Monte Baldo,,46.056336,11.116202,10110,2
 2408_12,21020-,Parcheggio Zuffo,,46.075042,11.109713,11015,2
-2409_12,20105-,Cavalcavia S.Lorenzo,,46.070352,11.119107,10110,2
+2409_12,20105-,Cavalcavia S.Lorenzo,,46.070352,11.119107,10110,1
+2410_12,21015-,Parcheggio Monte Baldo,,46.057088,11.113414,11015,1
 2412_12,21565x,Piazzale A22,,46.077383,11.111236,10110,2
 2418_12,22710z,Ss 12 "Pioppeto",,46.108623,11.108717,10110,1
 2419_12,22730z,Ss 12 S.Anna,,46.112409,11.107438,10110,2
@@ -506,7 +507,7 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 2488_12,21570x,Pranzelores "Top Center",,46.089853,11.118524,10110,1
 2489_12,21575x,Pranzelores "Tridente",,46.086557,11.120064,10110,1
 2490_12,25025z,Povo Pantè,,46.064013,11.150940,10110,2
-2491_12,22520x,Roncafort Caproni,,46.100115,11.099708,10110,2
+2491_12,22520x,Roncafort Caproni,,46.100115,11.099708,10110,1
 2492_12,22510x,Roncafort Bettine,,46.097544,11.102220,10110,1
 2497_12,27005z,Ponte di Ravina,,46.045489,11.113301,10110,2
 2498_12,27005x,Ponte di Ravina,,46.045520,11.113603,10110,2
@@ -536,8 +537,8 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 2663_12,22022z,Gardolo 4 Nov. 2 Giugno,,46.101253,11.112956,10110,1
 2664_12,22635x,Spini Loghét,,46.120499,11.091086,10110,1
 2665_12,22635z,Spini Loghét,,46.120567,11.091220,10110,1
-2667_12,27505-,Fersina "Campi Da Tennis",,46.044826,11.122297,10110,2
-2668_12,27510-,Fersina "Zona Artigianale",,46.038207,11.124589,11015,2
+2667_12,27505-,Fersina "Campi Da Tennis",,46.044826,11.122297,10110,1
+2668_12,27510-,Fersina "Zona Artigianale",,46.038207,11.124589,11015,1
 2669_12,27515-,Fersina "Zona Sportiva",,46.041683,11.123711,10110,2
 2670_12,24910-,Piazza Cappuccini,,46.073078,11.128449,10110,2
 2671_12,24915-,Avancini Laste,,46.071422,11.130842,10110,2
@@ -603,13 +604,10 @@ stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,wheelchair_board
 2953_12,26070z,Mattarello Ex Stazione,,46.007524,11.126760,10110,2
 2954_12,26075c,Mattarello Sud,,46.002729,11.126221,10110,1
 2957_12,21705-,Piazza Centa,,46.076208,11.123764,10110,1
-2958_12,21555x,Quartiere Albere,,46.061431,11.115642,10110,2
-2959_12,21557x,Muse,,46.062519,11.114422,10110,2
 2961_12,21707-,Centa Brennero,,46.075664,11.124036,10110,1
 2970_12,23405x,Vigo Meano Don Perugini,,46.133144,11.133835,10110,2
 2971_12,22410z,Melta "Case Itea",,46.102287,11.118256,10110,1
 2972_12,22420z,Melta 25 Aprile,,46.098900,11.115858,10110,2
 2973_12,21187c,Piazzale Divisioni Alpine,,46.071069,11.109927,10110,1
-2977_12,21550x,Park Monte Baldo "Albere",,46.057088,11.113414,11015,2
-2990_12,27525-,Parcheggio Via Lidorno,,46.033496,11.125867,11015,2
-2991_12,27530-,Parcheggio Area Camper,,46.034263,11.127218,11015,2
+2990_12,27525-,Parcheggio Via Lidorno,,46.033496,11.125867,11015,1
+2991_12,27530-,Parcheggio Area Camper,,46.034263,11.127218,11015,1

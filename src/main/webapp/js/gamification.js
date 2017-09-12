@@ -645,7 +645,80 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	}
 	
 	$scope.initMap();
-}).directive('toggle', function() {
+})
+
+gamificationConsole.controller('UsersCtrl', function($scope, $timeout, $http) {
+	$http.get('console/players').success(function(data){
+		if (data) {
+			data.sort(function(a,b){
+				return parseInt(a.id) - parseInt(b.id);
+			});
+		}
+		$scope.users = data;
+	});
+	
+})
+gamificationConsole.controller('CheckinCtrl', function($scope, $timeout, $http) {
+	$scope.event = 'checkin';
+	
+	$http.get('console/checkin/events').success(function(data){
+		$scope.events = data;
+		if (data) {
+			$scope.event = data[0];
+			$http.get('console/players').success(function(data) {
+				if (data) {
+					data.sort(function(a,b){
+						return parseInt(a.id) - parseInt(b.id);
+					});
+				}
+				$scope.updateCheckIn(data);
+				$scope.users = data;
+			});
+		}		
+	});
+	
+	$scope.updateCheckIn = function(data){
+		data.forEach(function(p) {
+			p.checkedIn = false;
+			if (p.eventsCheckIn) {
+				p.eventsCheckIn.forEach(function(e) {
+					if(e.name === $scope.event) {
+						p.checkedIn = true;
+					} 
+				});
+			}
+		});		
+	}
+	
+	$scope.changeEvent = function() {
+		$scope.updateCheckIn($scope.users);
+	}
+	$scope.checkIn = function(p) {
+		$scope.currentPlayer = p;
+		$('#confirmModalCheckin').modal();
+	}
+	
+	$scope.doCheckIn = function() {
+		var p = $scope.currentPlayer;
+		$http.put('console/players/'+p.id+'/checkin/'+$scope.event,{}).success(function(data) {
+			var checkedIn = false;
+			if (data.eventsCheckIn) {
+				data.eventsCheckIn.forEach(function(e) {
+					if(e.name === $scope.event) {
+						checkedIn = true;
+					} 
+				});
+			}
+			p.eventsCheckIn = data.eventsCheckIn;
+			p.checkedIn = checkedIn;
+			$scope.currentPlayer = null;
+		});
+	}
+	
+})
+
+
+.directive('toggle', function() {
 	return {
 		span : function(scope, element, attrs) {
 			if (attrs.toggle == "tooltip") {

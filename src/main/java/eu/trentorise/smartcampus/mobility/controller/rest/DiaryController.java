@@ -124,7 +124,7 @@ public class DiaryController {
 			return null;
 		}
 
-		logger.info("Reading diary for user " + userId);
+		logger.debug("Reading diary for user " + userId);
 
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);

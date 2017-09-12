@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +60,8 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGra
 import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Coords;
@@ -74,6 +77,7 @@ import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -94,7 +98,10 @@ public class GamificationController {
 
 	@Autowired
 	private DomainStorage storage;
-
+	@Autowired
+	private PlayerRepositoryDao playerRepo;
+	
+	
 	@Autowired
 	@Value("${geolocations.db.dir}")
 	private String geolocationsDBDir;
@@ -910,6 +917,45 @@ public class GamificationController {
 	public String viewConsole() {
 		return "gamificationconsole";
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/console/players")
+	public @ResponseBody Iterable<Player> getPlayers(HttpServletResponse response) throws IOException {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		AppInfo ai = appSetup.findAppById(appId);
+		if (ai == null) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		return playerRepo.findAllByGameId(ai.getGameId());
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/console/checkin/events")
+	public @ResponseBody List<String> getCheckingEvents(HttpServletResponse response) throws IOException {
+		List<String> list = new LinkedList<>();
+		list.add("event1");
+		list.add("event2");
+		return list;
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/console/players/{playerId}/checkin/{event}")
+	public @ResponseBody Player checkin(@PathVariable String playerId, @PathVariable String event, HttpServletResponse response) throws IOException {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		AppInfo ai = appSetup.findAppById(appId);
+		if (ai == null) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		Player p = playerRepo.findByIdAndGameId(playerId, ai.getGameId());
+		List<Event> checkIn = p.getEventsCheckIn();
+		if (checkIn == null) checkIn = new LinkedList<>();
+		if (!checkIn.stream().anyMatch(e -> event.equals(e.getName()))) {
+			Event e = new Event(event, event, System.currentTimeMillis());
+			checkIn.add(e);
+			p.setEventsCheckIn(checkIn);
+			playerRepo.save(p);
+		}
+		return p;	
+	}
+	
 
 	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	public @ResponseBody String getAppId(HttpServletResponse response) throws Exception {

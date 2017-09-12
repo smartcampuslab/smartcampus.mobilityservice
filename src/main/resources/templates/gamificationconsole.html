@@ -27,7 +27,7 @@
 <script src="lib/ie-emulation-modes-warning.js"></script>
 <style type="text/css">
 .console {
-	padding: 20px;
+	padding: 73px 20px 20px 20px;
 }
 
 .user-row {
@@ -122,7 +122,30 @@ body {
 </style>
 </head>
 <body>
+  <div id="myBody">
+    <div id="my-big-menu" class="navbar navbar-default navbar-fixed-top"
+      role="navigation">
+      <div class="container">
+        <div class="row" align="center">
+          <div class="col-md-12">
+            <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a> <img height="22" src="../img/foglia.svg"/> </a></li>
+                <li><a href="#/" >Console</a></li>
+                <li><a href="#/users" >Users</a></li>
+                <li><a href="#/checkin">Checkin</a></li>
+
+              </ul>
+            </div>
+            <!-- /.nav-collapse -->
+          </div>
+        </div>
+      </div>
+      <!-- /.container -->
+    </div>
    <div ng-view=""></div>
+   
+  </div>   
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
