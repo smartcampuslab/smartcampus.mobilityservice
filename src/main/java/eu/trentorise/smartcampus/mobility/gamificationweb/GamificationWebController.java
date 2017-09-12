@@ -578,6 +578,9 @@ public class GamificationWebController {
 		}
 		
 		int size = 0;
+		if (start == null || start < 1) {
+			start = 1;
+		}
 		if (end != null) {
 			if (start != null) {
 				size = end - start + 1;
