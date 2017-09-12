@@ -83,7 +83,7 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 @EnableScheduling
 public class GamificationWebController {
 
-	private static final String NICK_RECOMMANDATION = "nicknameRecommendation";
+	private static final String NICK_RECOMMANDATION = "nick_recommandation";
 	private static final String TIMESTAMP = "timestamp";
 	
 //	private String[] pointConcepts = { "p+r", "green", "health"};
@@ -299,7 +299,7 @@ public class GamificationWebController {
 		return null;
 	}
 
-	@Scheduled(fixedRate = 30 * 60 * 1000) 
+	@Scheduled(fixedRate = 1 * 60 * 1000) 
 	public synchronized void checkRecommendations() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			try {
@@ -315,10 +315,10 @@ public class GamificationWebController {
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Iterable<Player> players = playerRepositoryDao.findAllByCheckedRecommendationAndGameId(true, gameId);
 		for (Player player : players) {
-
+			logger.info("Checking recommendation for " + player.getId());
 			if (player.getPersonalData() != null) {
 				String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
-				if (nickname != null) {
+				if (nickname != null && !nickname.isEmpty()) {
 					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(nickname, gameId);
 					if (recommender != null) {
 						RestTemplate restTemplate = new RestTemplate();
@@ -331,8 +331,18 @@ public class GamificationWebController {
 							sendRecommendationToGamification(recommender.getId(), gameId, appId);
 							player.setCheckedRecommendation(false);
 							playerRepositoryDao.save(player);
+						} else {
+							logger.info("Not Sending recommendation for " + player.getId() + " -> " + recommender.getId() + ", no points yet.");
 						}
+					} else {
+						logger.info("Recommender not found for " + player.getId());
+						player.setCheckedRecommendation(false);
+						playerRepositoryDao.save(player);
 					}
+				} else {
+					logger.info("No recommender for " + player.getId());
+					player.setCheckedRecommendation(false);
+					playerRepositoryDao.save(player);
 				}
 			}
 		}
