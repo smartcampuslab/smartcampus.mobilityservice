@@ -114,7 +114,7 @@
 											<button class="btn btn-danger btn-sm" ng-click="openSwitchValidity(itinerary.instance)" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'  || itinerary.instance.id !== selectedInstance.id">Update validity</button>											
 
 											
-											<label class="itinerary-switch"><b>To check</b> <input ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id" type="checkbox"
+											<label class="itinerary-switch"><b>To check</b> <input type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
 											> </label>										
 											
