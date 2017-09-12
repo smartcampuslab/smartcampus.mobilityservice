@@ -105,7 +105,7 @@
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
 												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
 											> </label> -->
-											<label class="itinerary-switch"><b>{{'Change validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> 
+											<label class="itinerary-switch"><b>{{'Change ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> 
 											<select 
 												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
 												<option ng-repeat="x in validities" >{{x}}</option>
