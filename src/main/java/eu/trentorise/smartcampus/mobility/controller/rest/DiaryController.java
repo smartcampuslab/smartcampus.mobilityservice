@@ -116,68 +116,73 @@ public class DiaryController {
 			@RequestParam(required = false) Long to, @RequestParam(required = false) String typeFilter, HttpServletResponse response) throws Exception {
 		String userId = null;
 		try {
-			userId = (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//			userId = getUserId();
+			userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			// userId = getUserId();
 		} catch (SecurityException e) {
+			logger.error("Unauthorized user.", e);
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
-		}	
-		
+		}
+
 		logger.info("Reading diary for user " + userId);
-		
+
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
 
 		List<DiaryEntry> result = Lists.newArrayList();
 
-		long fromTime = from != null ? from : 0;
-		long toTime = to != null ? to : System.currentTimeMillis();
-
-		List<DiaryEntryType> types;
-		if (typeFilter != null) {
-			types = Splitter.on(",").splitToList(typeFilter).stream().map(x -> DiaryEntryType.valueOf(x)).collect(Collectors.toList());
+		if (p == null) {
+			logger.error("Player " + userId + " not found");
 		} else {
-			types = Arrays.asList(DiaryEntryType.values());
-		}
 
-		if (types.contains(DiaryEntryType.BADGE)) {
-			try {
-			List<DiaryEntry> badges = getBadgeNotifications(p, appId);
-			result.addAll(badges);
-			} catch (Exception e) {
-				logger.error("Error for BADGE", e);
+			long fromTime = from != null ? from : 0;
+			long toTime = to != null ? to : System.currentTimeMillis();
+
+			List<DiaryEntryType> types;
+			if (typeFilter != null) {
+				types = Splitter.on(",").splitToList(typeFilter).stream().map(x -> DiaryEntryType.valueOf(x)).collect(Collectors.toList());
+			} else {
+				types = Arrays.asList(DiaryEntryType.values());
 			}
-		}
-		if (types.contains(DiaryEntryType.TRAVEL)) {
-			try {
-			List<DiaryEntry> travels = getTrackedInstances(userId, appId, fromTime, toTime);
-			result.addAll(travels);
-			} catch (Exception e) {
-				logger.error("Error for TRAVEL", e);
-			}			
-		}
-		if (types.contains(DiaryEntryType.CHALLENGE)) {
-			try {
-			List<DiaryEntry> challenges = getChallenges(p, appId);
-			result.addAll(challenges);
-			} catch (Exception e) {
-				logger.error("Error for CHALLENGE", e);
-			}			
-		}
-		if (types.contains(DiaryEntryType.RECOMMENDED)) {
-			try {
-			List<DiaryEntry> recommended = getFriendRegistered(p, appId);
-			result.addAll(recommended);
-			} catch (Exception e) {
-				logger.error("Error for RECOMMENDED", e);
-			}			
+
+			if (types.contains(DiaryEntryType.BADGE)) {
+				try {
+					List<DiaryEntry> badges = getBadgeNotifications(p, appId);
+					result.addAll(badges);
+				} catch (Exception e) {
+					logger.error("Error for BADGE", e);
+				}
+			}
+			if (types.contains(DiaryEntryType.TRAVEL)) {
+				try {
+					List<DiaryEntry> travels = getTrackedInstances(userId, appId, fromTime, toTime);
+					result.addAll(travels);
+				} catch (Exception e) {
+					logger.error("Error for TRAVEL", e);
+				}
+			}
+			if (types.contains(DiaryEntryType.CHALLENGE)) {
+				try {
+					List<DiaryEntry> challenges = getChallenges(p, appId);
+					result.addAll(challenges);
+				} catch (Exception e) {
+					logger.error("Error for CHALLENGE", e);
+				}
+			}
+			if (types.contains(DiaryEntryType.RECOMMENDED)) {
+				try {
+					List<DiaryEntry> recommended = getFriendRegistered(p, appId);
+					result.addAll(recommended);
+				} catch (Exception e) {
+					logger.error("Error for RECOMMENDED", e);
+				}
+			}
+
+			result = result.stream().filter(x -> x.getTimestamp() >= fromTime && x.getTimestamp() <= toTime).sorted().collect(Collectors.toList());
 		}
 
-		result = result.stream().filter(x -> x.getTimestamp() >= fromTime && x.getTimestamp() <= toTime).sorted().collect(Collectors.toList());
+		// getRanking(p, appId);
 
-		
-//		getRanking(p, appId);
-		
 		return result;
 	}
 
