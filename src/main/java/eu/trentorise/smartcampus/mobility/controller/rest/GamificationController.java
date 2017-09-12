@@ -216,6 +216,8 @@ public class GamificationController {
 				geolocationsEvent.setLocation(toKeep);
 
 				Collections.sort(geolocationsEvent.getLocation());
+			} else {
+				logger.info("No geolocations found.");
 			}
 
 			long now = System.currentTimeMillis();
@@ -255,6 +257,7 @@ public class GamificationController {
 
 					// discard event older than 2 days
 					if (now - 2 * 24 * 3600 * 1000 > location.getTimestamp().getTime()) {
+						logger.warn("Timestamp too old, skipping.");
 						continue;
 					}
 
@@ -328,6 +331,10 @@ public class GamificationController {
 				}
 			}
 
+			if (geolocationsByItinerary.keySet() == null || geolocationsByItinerary.keySet().isEmpty()) {
+				logger.warn("No geolocationsByItinerary set.");
+			}
+			
 			for (String key : geolocationsByItinerary.keySet()) {
 
 				String splitKey[] = key.split("@");
@@ -340,6 +347,7 @@ public class GamificationController {
 				pars.put("userId", userId);
 				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
 				if (res == null) {
+					logger.warn("No existing TrackedInstance found.");
 					res = new TrackedInstance();
 					res.setClientId(travelId);
 					res.setDay(day);
@@ -348,12 +356,15 @@ public class GamificationController {
 					pars.remove("day");
 					ItineraryObject res2 = storage.searchDomainObject(pars, ItineraryObject.class);
 					if (res2 == null) {
+						logger.warn("No existing ItineraryObject found.");
 						pars = new TreeMap<String, Object>();
 						pars.put("itinerary.clientId", travelId);
 						pars.put("itinerary.userId", userId);
 						SavedTrip res3 = storage.searchDomainObject(pars, SavedTrip.class);
 						if (res3 != null) {
 							res.setItinerary(res3.getItinerary());
+						} else {
+							logger.warn("No existing SavedTrip found.");
 						}
 					} else {
 						res.setItinerary(res2);
@@ -362,6 +373,7 @@ public class GamificationController {
 					if (res.getItinerary() == null) {
 						String ftt = freeTracks.get(key);
 						if (ftt == null) {
+							logger.error("No freetracking transport found, extracting from clientId.");
 							String[] cid = travelId.split("_");
 							if (cid != null && cid.length > 1) {
 								ftt = cid[0];
@@ -376,6 +388,9 @@ public class GamificationController {
 					}
 				}
 
+				if (geolocationsByItinerary.get(key) != null) {
+					logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to result.");
+				}
 				for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
 					res.getGeolocationEvents().add(geoloc);
 				}
