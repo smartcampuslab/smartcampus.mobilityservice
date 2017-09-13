@@ -1324,7 +1324,8 @@ public class GamificationController {
 		}
 		if (pendingOnly) {
 			criteria = criteria.orOperator(new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.PENDING).and("changedValidity").is(null),
-					new Criteria("changedValidity").is(TravelValidity.PENDING));
+					new Criteria("changedValidity").is(TravelValidity.PENDING),
+					new Criteria("validationResult.validationStatus.validationOutcome").is(null));
 		}
 		
 		return criteria;
