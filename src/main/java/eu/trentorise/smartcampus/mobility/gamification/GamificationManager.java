@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -249,6 +250,29 @@ public class GamificationManager {
 				set("Authorization", authHeader);
 			}
 		};
+	}
+
+	/**
+	 * @param event
+	 * @param id
+	 * @param gameId
+	 * @throws Exception 
+	 */
+	public void sendCheckin(String event, String id, String appId) throws Exception {
+		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
+
+		ExecutionDataDTO ed = new ExecutionDataDTO();
+		ed.setGameId(game.getId());
+		ed.setPlayerId(id);
+		ed.setActionId("checkin_"+event);
+		ed.setData(Collections.singletonMap("checkinType",event));
+
+		String content = JsonUtils.toJSON(ed);
+		
+		logger.debug("Sending to " + gamificationUrl + "/gengine/execute ('checkin') = " + content);
+		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+		
 	}	
 	
 }

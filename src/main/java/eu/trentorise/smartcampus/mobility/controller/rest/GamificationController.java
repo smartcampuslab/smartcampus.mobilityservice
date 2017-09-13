@@ -2,9 +2,6 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -939,6 +936,13 @@ public class GamificationController {
 		List<Event> checkIn = p.getEventsCheckIn();
 		if (checkIn == null) checkIn = new LinkedList<>();
 		if (!checkIn.stream().anyMatch(e -> event.equals(e.getName()))) {
+			
+			try {
+				gamificationManager.sendCheckin(event, p.getId(), p.getGameId());
+			} catch (Exception e1) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return null;
+			}
 			Event e = new Event(event, event, System.currentTimeMillis());
 			checkIn.add(e);
 			p.setEventsCheckIn(checkIn);
