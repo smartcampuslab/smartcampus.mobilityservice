@@ -987,6 +987,7 @@ public class GamificationController {
 					o.setGeolocationEvents(geo);
 
 					if (scores.containsKey(o.getId()) && !ScoreStatus.ASSIGNED.equals(o.getScoreStatus())) {
+						logger.info("Set assigned status to trip " + o.getId());
 						o.setScore(scores.get(o.getId()).longValue());
 						o.setScoreStatus(ScoreStatus.ASSIGNED);
 						storage.saveTrackedInstance(o);
@@ -1028,14 +1029,15 @@ public class GamificationController {
 					}
 					descr.setInstance(o);
 					
-					Map<String, Object> map = mapper.readValue(o.getDeviceInfo(), Map.class);
-					map.remove("uuid");
-					map.remove("cordova");
-					map.remove("available");
-					map.remove("manufacturer");
-					map.remove("serial");
-					
-					o.setDeviceInfo(mapper.writeValueAsString(map));
+					if (o.getDeviceInfo() != null) {
+						Map<String, Object> map = mapper.readValue(o.getDeviceInfo(), Map.class);
+						map.remove("uuid");
+						map.remove("cordova");
+						map.remove("available");
+						map.remove("manufacturer");
+						map.remove("serial");
+						o.setDeviceInfo(mapper.writeValueAsString(map));
+					}
 					list.add(descr);
 				}
 			}
