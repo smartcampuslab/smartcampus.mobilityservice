@@ -64,7 +64,7 @@ public class TrackValidator {
 	private static final double CERTIFIED_COVERAGE_THRESHOLD = 60; // %
 	private static final double GUARANTEED_COVERAGE_THRESHOLD = 90; // %
 
-	public static final double MIN_COVERAGE_THRESHOLD = 40; // %
+	public static final double MIN_COVERAGE_THRESHOLD = 30; // %
 
 	public static final double DISTANCE_THRESHOLD = 250; // meters TODO change to 250
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
@@ -416,7 +416,7 @@ public class TrackValidator {
 				if (subtrackPrecision > COVERAGE_THRESHOLD) {
 					matchedLength += legLength;
 				}
-				minMatchedLength += legLength * subtrackPrecision;
+				minMatchedLength += legLength * subtrackPrecision / 100.0;
 				totalLength += legLength;
 			}
 			if ((100.0 * matchedLength / totalLength) > COVERAGE_THRESHOLD) {
