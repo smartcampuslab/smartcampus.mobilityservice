@@ -218,6 +218,8 @@ public class GamificationManager {
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
+		logger.info("Get score notifications for " + userId);
+		
 		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification";
 		
 		RestTemplate restTemplate = new RestTemplate();
@@ -232,6 +234,8 @@ public class GamificationManager {
 			Map data = msg.getData();
 			result.put((String)data.get("travelId"), (Double)data.get("score"));
 		}		
+		
+		logger.info("Got scores: " + result);
 		
 		return result;
 		
@@ -249,6 +253,29 @@ public class GamificationManager {
 				set("Authorization", authHeader);
 			}
 		};
+	}
+
+	/**
+	 * @param event
+	 * @param id
+	 * @param gameId
+	 * @throws Exception 
+	 */
+	public void sendCheckin(String event, String id, String appId) throws Exception {
+		AppInfo app = appSetup.findAppById(appId);
+		GameInfo game = gameSetup.findGameById(app.getGameId());
+
+		ExecutionDataDTO ed = new ExecutionDataDTO();
+		ed.setGameId(game.getId());
+		ed.setPlayerId(id);
+		ed.setActionId("checkin_"+event);
+		ed.setData(Collections.singletonMap("checkinType",event));
+
+		String content = JsonUtils.toJSON(ed);
+		
+		logger.debug("Sending to " + gamificationUrl + "/gengine/execute ('checkin') = " + content);
+		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+		
 	}	
 	
 }
