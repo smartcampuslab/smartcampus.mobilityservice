@@ -1,8 +1,13 @@
 package eu.trentorise.smartcampus.mobility.util;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.CheckinData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekConfData;
 
 @Component
@@ -24,9 +32,44 @@ public class ConfigUtils {
 	private String weeklyDataDir;		
 	
 	private List<WeekConfData> weekConfData = null;
-	private List<Event> checkinEvents = null;
 	
+	private LoadingCache<String, List<CheckinData>> checkinEvents;
+
 	private static final Logger logger = Logger.getLogger(ConfigUtils.class);
+	
+	@PostConstruct
+	public void init(){
+		checkinEvents = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
+				.build(new CacheLoader<String, List<CheckinData>>() {
+					@Override
+					public List<CheckinData> load(String any) throws Exception {
+						String cvsSplitBy = ",";
+						List<CheckinData> checkinDataList = Lists.newLinkedList();
+
+						List<String> lines = Resources.readLines(new File(weeklyDataDir + "/checkin_configuration.csv").toURI().toURL(), Charsets.UTF_8);
+
+						for (int i = 1; i < lines.size(); i++) {
+							String line = lines.get(i);
+							if (line.trim().isEmpty()) continue;
+
+							// use comma as separator
+							String[] checkinValues = line.split(cvsSplitBy);
+							LocalDate from = null, to = null;
+							from = LocalDate.parse(checkinValues[1]);
+							to = LocalDate.parse(checkinValues[2]);
+							CheckinData event = new CheckinData();
+							event.setFrom(from);
+							event.setTo(to);
+							event.setName(checkinValues[0]);
+							
+							logger.debug(String.format("Checkin file: checkin name %s, from %s, to %s", checkinValues[0], from, to));
+							checkinDataList.add(event);
+						}
+
+						return checkinDataList;
+					}
+				});		
+	}
 	
 	// Method used to read a week conf data file and store all values in a list of WeekConfData object
 	public List<WeekConfData> getWeekConfData() throws Exception {
@@ -111,8 +154,15 @@ public class ConfigUtils {
 		return null;
 	}		
 	
-	public List<String> getActiveCheckinEvents(){
-		return Collections.emptyList();
+	public List<String> getActiveCheckinEvents() {
+		final LocalDate now = LocalDate.now();
+		
+		try{
+			return checkinEvents.get("").stream().filter(e -> !e.getFrom().isAfter(now) && !e.getTo().isBefore(now)).map(e -> e.getName()).collect(Collectors.toList());
+		} catch (Exception e){
+			logger.error("Error reading checkin list", e);
+			return Collections.emptyList();
+		}
 	}
 	
 }

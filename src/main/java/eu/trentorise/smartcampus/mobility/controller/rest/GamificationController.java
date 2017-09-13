@@ -78,6 +78,7 @@ import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.ConfigUtils;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -131,15 +132,14 @@ public class GamificationController {
 	@Autowired
 	private GamificationManager gamificationManager;	
 
+	@Autowired
+	private ConfigUtils config;
+	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
-
-	private Connection connection;
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
-	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -149,13 +149,6 @@ public class GamificationController {
 		if (!f.exists()) {
 			f.mkdir();
 		}
-
-		Class.forName("org.sqlite.JDBC");
-		connection = DriverManager.getConnection("jdbc:sqlite:" + geolocationsDBDir + "/" + geolocationsDB);
-
-		Statement statement = connection.createStatement();
-		statement.setQueryTimeout(30);
-		statement.executeUpdate(CREATE_DB);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
@@ -930,9 +923,7 @@ public class GamificationController {
 	}
 	@RequestMapping(method = RequestMethod.GET, value = "/console/checkin/events")
 	public @ResponseBody List<String> getCheckingEvents(HttpServletResponse response) throws IOException {
-		List<String> list = new LinkedList<>();
-		list.add("event1");
-		list.add("event2");
+		List<String> list = config.getActiveCheckinEvents();
 		return list;
 	}
 
