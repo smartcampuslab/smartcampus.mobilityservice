@@ -62,8 +62,9 @@ public class TrackValidator {
 	
 	public static final int COVERAGE_THRESHOLD = 80; // %
 	private static final double CERTIFIED_COVERAGE_THRESHOLD = 60; // %
+	private static final double GUARANTEED_COVERAGE_THRESHOLD = 90; // %
 
-	public static final double MIN_COVERAGE_THRESHOLD = 40; // %
+	public static final double MIN_COVERAGE_THRESHOLD = 30; // %
 
 	public static final double DISTANCE_THRESHOLD = 250; // meters TODO change to 250
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
@@ -178,7 +179,7 @@ public class TrackValidator {
 	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
 		MODE_TYPE mode = MODE_TYPE.TRAIN; 
 		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
-		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, true);
+		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, false);
 	}
 
 	/**
@@ -264,9 +265,18 @@ public class TrackValidator {
 					status.setValidationOutcome(TravelValidity.VALID);
 				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);				
-				} else {
+				} else if (!certified && coverage >= GUARANTEED_COVERAGE_THRESHOLD) {
+					status.setValidationOutcome(TravelValidity.VALID);				
+				} else {	
 					status.setValidationOutcome(TravelValidity.PENDING);				
 				}
+//				if (certified && coverage >= COVERAGE_THRESHOLD) {
+//					status.setValidationOutcome(TravelValidity.VALID);
+//				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
+//					status.setValidationOutcome(TravelValidity.VALID);				
+//				} else {
+//					status.setValidationOutcome(TravelValidity.PENDING);				
+//				}
 			} else {
 				if (coverage >= COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);
@@ -406,7 +416,7 @@ public class TrackValidator {
 				if (subtrackPrecision > COVERAGE_THRESHOLD) {
 					matchedLength += legLength;
 				}
-				minMatchedLength += legLength * subtrackPrecision;
+				minMatchedLength += legLength * subtrackPrecision / 100.0;
 				totalLength += legLength;
 			}
 			if ((100.0 * matchedLength / totalLength) > COVERAGE_THRESHOLD) {

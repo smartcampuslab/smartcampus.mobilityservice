@@ -127,7 +127,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 143_17,Valle,,46.238605,11.351281,1135
 144_17,Montalbiano,,46.234426,11.355133,1135
 145_17,Sicina,,46.230004,11.358752,1135
-532_17,Trento-V.Giusti-L. Da Vinci,,46.063168,11.119074,0001
+532_17,Trento-Via Giusti,,46.063168,11.119074,0001
 533_17,Trento-Via V.Veneto,,46.057701,11.119291,0001
 535_17,Trento-Via Lorenzoni,,46.058380,11.122963,0001
 537_17,Trento-Via S.Francesco,,46.066636,11.126202,0001
@@ -166,7 +166,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 584_17,Madrano,,46.085924,11.214313,4022
 585_17,Madrano-Via Della Vizza,,46.091338,11.212180,4022
 586_17,Nogare',,46.103925,11.211299,4023
-587_17,S.Mauro-Bivio,,46.116607,11.222363,4029
+587_17,S.Mauro-Bivio,,46.116607,11.222363,4024
 588_17,Tressilla,,46.128796,11.237227,4024
 589_17,Baselga P.-Municipio,,46.130017,11.243841,4025
 590_17,Baselga di Pine'-Lago,,46.135502,11.249837,4025
@@ -351,7 +351,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 792_17,Madonna di C.-Hotel Betulla,,46.220872,10.822457,0957
 793_17,Madonna di Campiglio-Vvff,,46.224540,10.825264,0957
 794_17,Madonna di C.-Laghetto,,46.226019,10.827868,0957
-795_17,M. Campiglio,,46.230343,10.827885,0957
+795_17,Madonna di Campiglio,,46.230343,10.827885,0957
 796_17,Madonna di C.-Fun. Pradalago,,46.234031,10.826079,0957
 797_17,Madonna di C.-Hotel Dahu,,46.234409,10.823829,0957
 798_17,M.Campiglio-P.Brenta Alta,,46.231942,10.826145,0957
@@ -384,7 +384,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 833_17,Covelo,,46.098290,11.019005,2023
 834_17,Maso Ariol,,46.106105,11.026542,2023
 836_17,Monte Terlago-P.Zza,,46.109656,11.037895,2023
-837_17,Monte Terlago-Loc.Vallene,,46.109037,11.042854,2023
+837_17,Monte Terlago Vallene,,46.109037,11.042854,2023
 838_17,Monte Terlago-H. 2 Laghi,,46.112079,11.046119,2023
 839_17,Cadine,,46.088855,11.064513,2010
 841_17,Trento-Maso Pedrotti,,46.075560,11.098223,0001
@@ -422,9 +422,9 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 885_17,Bolbeno,,46.032567,10.737551,2270
 887_17,Coltura,,46.058271,10.793851,2240
 889_17,Preore Bivio Montagne,,46.046119,10.756556,2240
-890_17,Montagne-Cort,,46.050723,10.753627,2280
-891_17,Montagne-Larzana,,46.058445,10.751304,2280
-892_17,Montagne-Binio,,46.065609,10.755140,2280
+890_17,Montagne Cort,,46.050723,10.753627,2280
+891_17,Montagne Larzana,,46.058445,10.751304,2280
+892_17,Montagne Binio,,46.065609,10.755140,2280
 894_17,Zuclo,,46.034087,10.747095,2270
 895_17,Pinzolo,,46.157196,10.764400,2450
 896_17,Fraveggio Bivio,,46.078617,10.993865,2040
@@ -435,7 +435,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 901_17,Margone,,46.068219,10.963864,2045
 903_17,Ciago-Sp. 18 Civ.1,,46.089161,11.008008,2040
 905_17,Margone Bivio,,46.068021,10.973815,2045
-906_17,Lon-Ris. Fior di Roccia,,46.084858,10.991606,2040
+906_17,Lon-Rist. Fior di Roccia,,46.084858,10.991606,2040
 909_17,Borgo V.-C.Intermodale,,46.052460,11.463496,4400
 910_17,Borgo Vals.-Ospedale,,46.056441,11.464242,4400
 911_17,Borgo Vals.-Valli,,46.055483,11.469823,4400
@@ -732,7 +732,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 1234_17,Zortea-Loc. Mureri,,46.164872,11.757456,5116
 1235_17,Barbine,,46.157837,11.754333,5127
 1236_17,P.Sso Gobbera-F.Mazuca,,46.150300,11.751120,5112
-1237_17,Passo Gobbera,,46.147663,11.758202,5112
+1237_17,Passo Gobbera,,46.148011,11.756872,5112
 1238_17,Passo Gobbera,,46.147632,11.757656,5112
 1239_17,Canal S.Bovo,,46.154704,11.733040,5117
 1240_17,Caoria-Ponte Valsorda,,46.197181,11.678532,5120
@@ -887,7 +887,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 1593_17,Cimego-Centrale Enel,,45.924618,10.632708,2310
 1594_17,Ponte Cimego,,45.915356,10.621384,2310
 1595_17,Cimego,,45.911927,10.614400,2310
-1596_17,Cimego-Loc.Quartinago,,45.910622,10.611835,2310
+1596_17,Cimego Quartinago,,45.910622,10.611835,2310
 1597_17,Cimego-Bar Porte,,45.904469,10.608408,2310
 1598_17,Condino-Alb.Condino,,45.891406,10.601560,2311
 1599_17,Condino,,45.889021,10.599610,2311
@@ -900,8 +900,8 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 1609_17,Darzo-Stork Club,,45.849192,10.559670,2320
 1610_17,Darzo,,45.841241,10.549702,2320
 1611_17,Darzo-Zona Ind.Le,,45.834353,10.542857,2320
-1612_17,Lodrone,,45.828655,10.536607,2321
-1613_17,Ponte Caffaro Bivio,,45.824232,10.533485,2323
+1612_17,Lodrone,,45.829192,10.535456,2321
+1613_17,Ponte Caffaro Bivio,,45.825079,10.531114,2323
 1614_17,Ponte Caffaro-Mobilif.,,45.820924,10.539249,2323
 1615_17,Ponte Caffaro-Pescicoltura,,45.817692,10.544283,2323
 1616_17,Baitoni-Via Lago,,45.810328,10.543379,2323
@@ -927,6 +927,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 1637_17,Storo,,45.848889,10.578160,2314
 1638_17,Darzo,,45.842292,10.550493,2320
 1639_17,Darzo-Zona Ind.Le,,45.834080,10.542728,2320
+1640_17,Lodrone,,45.829324,10.535700,2321
 1641_17,Ponte Caffaro-Mobilif.,,45.821142,10.538882,2323
 1643_17,Poia,,46.028668,10.880072,2171
 1645_17,Comano,,46.034769,10.891022,2173
@@ -951,7 +952,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 1665_17,Lago Nembia,,46.096096,10.932585,2220
 1666_17,Lago Nembia-Casa Enel,,46.107358,10.943027,2220
 1669_17,Molveno-Centro,,46.142420,10.963759,0956
-1670_17,Molveno-Lido Lago,,46.140431,10.963727,0956
+1670_17,Molveno,,46.140431,10.963727,0956
 1671_17,Molveno-Hotel Du Lac,,46.141236,10.965607,0956
 1672_17,Molveno-Grand Hotel,,46.134919,10.970224,0956
 1673_17,Lago Nembia,,46.095952,10.933324,2220
@@ -1383,14 +1384,14 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2254_17,Aldeno-Maso Canova,,45.964223,11.092597,3640
 2255_17,Valmesta Bivio Rif.Dismoni,,46.222916,11.808835,5170
 2256_17,Strigno-Via Roma,,46.063333,11.523678,4520
-2257_17,Roncogno--Maso Raot,,46.067440,11.209973,4137
+2257_17,Roncogno-Maso Raot,,46.067440,11.209973,4137
 2258_17,Zivignago-Al Ponte,,46.072253,11.261136,4111
 2259_17,Viarago-Via Montegian,,46.079285,11.259876,4112
 2260_17,Passo Rolle-Albergo Venezia,,46.296223,11.782408,1224
 2261_17,Zava,,46.042112,11.251018,4282
 2263_17,Masetti-Paese,,46.051334,11.248911,4280
 2264_17,Ss.12 S.Ilario/Via Stroperi,,45.913228,11.044675,3100
-2265_17,Terlago-Centro Sportivo,,46.088960,11.047688,2021
+2265_17,Terlago Centro Sportivo,,46.088960,11.047688,2021
 2266_17,Vason-Sp85 Al Km 17,,46.042742,11.061772,2650
 2267_17,Terlago-Via Fies,,46.099087,11.042564,2021
 2269_17,S.Antonio di Mav.-Loc. Pozze,,46.183791,10.777007,2470
@@ -1596,10 +1597,10 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2544_17,Andalo-Via Trento,,46.166961,11.003857,6137
 2545_17,Genzianella,,46.151466,10.980892,0956
 2546_17,Molveno Nord,,46.144090,10.966110,0956
-2547_17,Molveno Htl Excelsior,,46.142605,10.962445,0956
+2547_17,Molveno Htl Excelsior,,46.142590,10.962794,0956
 2548_17,Trento-L.Go N. Sauro,,46.074839,11.125033,0001
 2550_17,Maso Daldoss,,46.182711,11.019719,6134
-2551_17,Fai Paganella,,46.179005,11.070116,6135
+2551_17,Fai Della Paganella,,46.179005,11.070116,6135
 2552_17,Fai Paganella-Sud,,46.183826,11.072533,6135
 2553_17,Fai Paganella,,46.177583,11.069132,6135
 2554_17,Cortalta-Fai Della Paganella,,46.175510,11.065073,6135
@@ -1608,9 +1609,9 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2558_17,Andalo-Maso Toscana,,46.169857,11.017019,6137
 2559_17,Andalo-Nord,,46.168088,11.008341,6137
 2560_17,Andalo-Via Paganella,,46.164957,11.007217,6137
-2561_17,Rallo Bivio,,46.350029,11.051765,6211
-2562_17,Rallo,,46.342731,11.046707,6213
-2563_17,Sanzenone,,46.335328,11.044682,6213
+2561_17,Rallo Bivio,,46.350029,11.051765,6210
+2562_17,Rallo,,46.342731,11.046707,6210
+2563_17,Sanzenone,,46.335328,11.044682,6210
 2566_17,Tuenno,,46.325965,11.022364,6155
 2568_17,Portolo,,46.303254,11.059854,6216
 2569_17,Cles-Piazza Chiesa,,46.364641,11.036415,6220
@@ -1682,7 +1683,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2679_17,Terres,,46.309982,11.022795,6154
 2680_17,Tuenno-Sud,,46.321470,11.021827,6155
 2681_17,Mechel Bivio,,46.352206,11.027089,6220
-2683_17,Santa Giustina,,46.346039,11.060428,6199
+2683_17,Santa Giustina,,46.346039,11.060428,6210
 2684_17,Dermulo,,46.337645,11.062917,6200
 2685_17,Coredo,,46.348752,11.088969,6501
 2686_17,Smarano,,46.341949,11.107755,6503
@@ -1764,13 +1765,13 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2786_17,S.Giacomo di Brentonico,,45.798773,10.919616,3408
 2787_17,Passo S.Valentino,,45.783110,10.912169,3409
 2788_17,Arco S.Caterina Poli Reg.,,45.909505,10.870503,3520
-2790_17,Arco S.Caterina Poli Reg.,,45.909916,10.870985,3520
+2790_17,Arco S.Caterina Poli Regina,,45.909916,10.870985,3520
 2792_17,Dro-Ss.45-Hotel Eden,,45.970063,10.923463,2127
 2794_17,Masi di Mezzo,,46.028019,11.227058,4250
 2795_17,Maso Canela,,46.022087,11.227065,4250
 2796_17,Canale di Pergine V.,,46.043635,11.227039,4200
 2798_17,Vignola,,46.044539,11.277071,4135
-2799_17,M.Terlago-Inc. V. Paganella,,46.110766,11.038259,2023
+2799_17,M.Terlago Inc.V.Paganella,,46.110766,11.038259,2023
 2800_17,Vigo Cavedine-V.Capitello,,45.981509,10.977915,2054
 2801_17,Montesover-Tornante,,46.219136,11.325826,4070
 2803_17,Sornello-Piazzale Ex Dogana,,46.182122,11.122684,0944
@@ -1805,7 +1806,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 2871_17,Assizzi,,46.050572,11.257424,4127
 2894_17,Canale di Pergine Valsugana,,46.042118,11.229602,4200
 2899_17,Trento Nord,,46.095106,11.116921,0001
-2918_17,Stabilimento Whirlpool,,46.118254,11.096919,0937
+2918_17,Zona Industriale Spini,,46.118254,11.096919,0937
 2941_17,S.Michele A/A.-Ist. Agrario,,46.194089,11.135444,6110
 3002_17,Cembra-Polo Scolastico,,46.172897,11.223458,1078
 3019_17,Pian Del Gac,,46.130680,11.204216,1111
@@ -1849,13 +1850,14 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 3437_17,Mori-Sc.Medie,,45.852589,10.984853,3310
 3490_17,Taio-Plesso Scolastico,,46.322115,11.069508,6190
 3494_17,Brentonico-Via Calzolari,,45.819109,10.956539,3407
+3497_17,Polsa,,45.781205,10.940804,3410
 3555_17,Parlo,,46.180634,11.251654,1115
 3558_17,Roncafort,,46.101275,11.101580,0001
 3576_17,Baselga di Pinè-Sc.Medie,,46.128335,11.244239,4025
 3597_17,Pergine V. Bivio Via Industria,,46.069437,11.237763,4100
 3606_17,Pergine V.-Scuole Andreatta,,46.068639,11.245424,4100
 3623_17,S.Vito di Pergine,,46.035145,11.220262,4130
-3628_17,Pergine-Loc. Buss,,46.088307,11.225966,4134
+3628_17,Buss,,46.088307,11.225966,4134
 3645_17,Levico T.-Ex Scuole Medie,,46.009370,11.305503,4300
 3655_17,Marter Via Nazionale 24,,46.037113,11.398467,4370
 3659_17,Maso Rozza,,46.063889,11.402756,4425
@@ -1870,9 +1872,9 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 3689_17,Maso Zanorgi,,46.055116,11.398768,4433
 3690_17,Molini di Roncegno,,46.054166,11.397305,4433
 3691_17,Maso Cadenzi,,46.051761,11.401260,4433
+3716_17,Arsiè,,45.978698,11.756945,5030
 3746_17,Feltre Boscariz,,46.030415,11.902424,5010
 3758_17,Imer-Loc. Casa Bianca 10,,46.147268,11.803997,5110
-3760_17,Imer Zona Sportiva,,46.148666,11.796557,5110
 3767_17,Revedea,,46.152845,11.745976,5115
 3776_17,Tonadico-Scuole Elementari,,46.179527,11.835660,5140
 3779_17,Malè-Ex Stazione Ftm,,46.352922,10.914909,6300
@@ -1904,7 +1906,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 3939_17,Tuenno-Bivio Val di Tovel,,46.325236,11.021363,6155
 3942_17,Tamburello,,46.290963,10.974556,6161
 3943_17,Glare,,46.280241,10.963734,6161
-3944_17,Vezzano-Apt,,46.075558,10.996341,2040
+3944_17,Vezzano Apt,,46.075558,10.996341,2040
 3946_17,Ala-Stazione Fs,,45.759057,10.996513,3346
 3947_17,Vò Sinistro-Passaggio Livello,,45.734317,10.957314,3358
 3950_17,Lausen P.Le Impresa Grisotto,,46.150588,11.735762,5117
@@ -1988,7 +1990,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4164_17,Zivignago-Paese,,46.066737,11.255123,4100
 4165_17,Molina di Fiemme-Via Cembra 47,,46.268508,11.410247,1088
 4167_17,S.Antonio.Di Mav. Maso Mistrin,,46.193516,10.792873,2470
-4178_17,Rovereto Zona Ind."Luxottica",,45.864912,11.017706,3100
+4178_17,Zona Industriale "Luxottica",,45.864912,11.017706,3100
 4179_17,Rov.Z.Ind. "Viale Industria",,45.871712,11.020613,3100
 4180_17,Mori-Terranera-Farmacia,,45.850002,10.980961,3310
 4181_17,Romeno Via Alla Piena Civ. 12,,46.397222,11.124342,6550
@@ -1996,8 +1998,8 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4192_17,Rov.Z.Ind. "Rovercenter",,45.863789,11.027037,3100
 4194_17,Terlago Via Per Vezzano 9,,46.099436,11.032602,2021
 4195_17,Dietrobeseno-Chiesetta,,45.925137,11.120464,3041
-4198_17,Rallo-Via S.Gioan,,46.345334,11.048564,6213
-4199_17,Sfruz Loc. Credai,,46.342544,11.127381,6503
+4198_17,Rallo-Via S.Gioan,,46.345334,11.048564,6210
+4199_17,Credai,,46.342544,11.127381,6503
 4200_17,Vervo'-Via Trento Civ. 8,,46.308437,11.116045,6191
 4213_17,Ronzone Nord,,46.426364,11.159405,6600
 4216_17,Cles-Negozio Mascotti,,46.361669,11.037271,6220
@@ -2058,13 +2060,13 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4302_17,Folgaria-Palasport,,45.913508,11.173611,3045
 4303_17,Olle-Via Per Olle Civ. 55,,46.044314,11.460639,4410
 4304_17,Fornaci Via Cimirlo 2/4,,46.061772,11.227006,4137
-4307_17,Smarano Loc. Merlonga,,46.349288,11.110746,6503
+4307_17,Merlonga,,46.349288,11.110746,6503
 4308_17,Smarano Via Schwarz,,46.345071,11.111494,6503
 4309_17,Ruffre'-Cimitero,,46.414688,11.180441,6610
 4310_17,Preore-Loc. Molina,,46.047774,10.764534,2240
 4311_17,Condino-Loc. Mon,,45.865415,10.578113,2311
 4312_17,Vigo di Fassa-Museo Ladino,,46.423145,11.679969,1280
-4314_17,Ronzo Chienis-Pra Da Lac,,45.894612,10.962039,3389
+4314_17,Pra Da Lac,,45.894612,10.962039,3389
 4319_17,Sarnonico-Sc. Elementari,,46.419829,11.138403,6570
 4323_17,S.Cristoforo-Fs,,46.039761,11.234173,4200
 4325_17,Roncegno-Staz. Fs,,46.036514,11.398673,4370
@@ -2078,7 +2080,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4337_17,Maso Eccher,,46.021358,11.217837,4250
 4338_17,Campi,,45.911134,10.811283,2189
 4340_17,Maso Beberi,,46.061469,11.419769,4425
-4341_17,Fiave'-Loc. Doss,,45.996897,10.840787,2185
+4341_17,Doss,,45.996897,10.840787,2185
 4344_17,Tezze Via Nazionale,,45.987386,11.674140,4457
 4346_17,Pergine-Via Dell'angi,,46.049161,11.234423,4100
 4348_17,Serso Centrale Idroelettrica,,46.072714,11.247788,4120
@@ -2126,7 +2128,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4460_17,Rovereto "Liceo Rosmini",,45.895066,11.043407,3100
 4461_17,Castelfondo-Castello,,46.448768,11.123872,6686
 4466_17,Cavareno Via Roma Civ. 20,,46.405818,11.135391,6560
-4467_17,Rallo-Via Nuova Civ. 103,,46.341089,11.045511,6213
+4467_17,Rallo-Via Nuova Civ. 103,,46.341089,11.045511,6210
 4481_17,Pergine Vals. Susà-V.Pomarol,,46.054240,11.230620,4100
 4482_17,Nosellari-Via Prati,,45.928233,11.253485,3830
 4483_17,Tonale-Colonia Vigili,,46.252686,10.538942,6416
@@ -2153,6 +2155,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4613_17,Sorne-Troticoltura,,45.806259,10.952151,3413
 4616_17,Povo Via Mesiano,,46.064943,11.141679,0001
 4640_17,Campo Tassullo,,46.331168,11.052569,6210
+4653_17,Fraveggio Bivio Loc.Castin,,46.077934,10.994306,2040
 4664_17,Nomi-Sp 90 Tre.Cur.T.,,45.935963,11.088317,3105
 4666_17,Moena-Via Lowy 14-16,,46.375484,11.657830,1250
 4670_17,Breguzzo-Loc. Fass Civ. 210,,46.011300,10.701938,2293
@@ -2193,7 +2196,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4743_17,Riva V.Rovereto Dif. Coop,,45.881612,10.854462,0960
 4746_17,Arco Via Mantova Dif.Cimitero,,45.911738,10.881409,3520
 4747_17,Riva D/Garda V.Le Dei Tigli 11,,45.890639,10.842853,0960
-4748_17,Pavillo-Via De Le Bas Cere,,46.329184,11.042764,6214
+4748_17,Pavillo-Via De Le Bas Cere,,46.329184,11.042764,6210
 4749_17,Riva Del G Vle Dante Alighieri,,45.886213,10.844356,0960
 4758_17,Riva Del G. Via E. Modl,,45.893901,10.852615,0960
 4765_17,Riva Del G. Via Oleandri 24,,45.899534,10.844359,0960
@@ -2211,7 +2214,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4796_17,Costasavina Via S.Martino,,46.061224,11.220028,4137
 4797_17,Costasavina Via S.Martino 27,,46.060681,11.225682,4137
 4801_17,Coredo-Segheria Biasi,,46.351546,11.098083,6501
-4802_17,Trento "Forte Bus De Vela",,46.084939,11.070058,2010
+4802_17,Trento Forte Bus De Vela,,46.084939,11.070058,2010
 4803_17,Cagno'-Via Nazionale 58,,46.392655,11.044131,6650
 4805_17,Segno Via Sonora Civ. 34,,46.304725,11.072060,6180
 4806_17,Denno Via Colle Verde,,46.272809,11.048208,6151
@@ -2234,6 +2237,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4844_17,Taio Via Roma. 62,,46.316919,11.069182,6190
 4845_17,Taio Via Roma. 122,,46.315062,11.069839,6190
 4847_17,S.Barbara,,45.896161,10.940914,3389
+4850_17,Imer Via Meatoli,,46.148666,11.796557,5110
 4852_17,Villini-Via Mendola 5,,46.417827,11.195583,6630
 4856_17,Castelletto "Ponte Rinassico",,46.247843,11.062196,6123
 4857_17,Centa Fraz. Valle,,45.964834,11.232628,3790
@@ -2243,8 +2247,8 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4862_17,Predazzo-Loc. Fol,,46.322330,11.597912,1220
 4863_17,Preghena-Sp 68 Bivio,,46.407458,11.011754,6720
 4865_17,Croviana-Via Nazionale 174,,46.341182,10.900305,6310
-4867_17,Loc. Canè,,46.119116,11.260806,4038
-4868_17,Loc. Fiorè,,46.120680,11.265439,4038
+4867_17,Canè,,46.119116,11.260806,4038
+4868_17,Fiorè,,46.120680,11.265439,4038
 4870_17,Tres Via Nazionale 12,,46.320661,11.093017,6191
 4871_17,Romeno-Via S.Romedio,,46.391671,11.117453,6550
 4874_17,S.Martino di C.-Via Pezgaiard,,46.259430,11.808832,0961
@@ -2281,10 +2285,11 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 4961_17,Calliano Sp 49 "Cimitero",,45.936629,11.098121,3040
 4963_17,Lago di Terlago-Hotel Lillà,,46.097411,11.058247,2021
 4964_17,Lago di Terlago-Ponte,,46.095602,11.055256,2021
+4965_17,Salorno-Trenitalia,,46.245539,11.202524,1030
 4967_17,Ora-Stazione Fstrenitalia,,46.360976,11.297562,1167
 4970_17,Montagna,,46.333021,11.299352,
 4971_17,Ponte Aldino,,46.342951,11.336949,
-4972_17,Fraveggio Loc. Vernisi,,46.080553,10.995849,2040
+4972_17,Fraveggio Vernisi,,46.080553,10.995849,2040
 4973_17,S. Michele A/Adige-Sc.Elem.,,46.189874,11.134127,6110
 4979_17,Pergine-Via S.Pietro Asl,,46.063213,11.244429,4100
 4980_17,Pergine V.S.Pietro Parch.Curie,,46.063433,11.245601,4100
@@ -2293,7 +2298,6 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5010_17,Morganti-Maso Romina,,45.930745,11.224036,3053
 5013_17,Ponzolotti,,45.738779,11.070718,3337
 5014_17,Revedea Sp 79 Civ. 18,,46.152752,11.747616,5115
-5017_17,Massimeno,,46.141960,10.773446,2440
 5018_17,Vigolo Baselga-Paese,,46.081576,11.044892,2030
 5025_17,Sardagna Civ.20,,46.073125,11.093579,2620
 5035_17,Noriglio Loc. Masi Brenta,,45.878437,11.084034,3198
@@ -2316,7 +2320,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5077_17,S.Michele "Fondazione-Mensa",,46.194907,11.135489,6110
 5080_17,Cogolo Polo Scolastico,,46.347399,10.696840,6405
 5082_17,Strigno Via Colle Civ. 6,,46.067170,11.519093,4520
-5087_17,M.Do Sc. Sup.Martini,,46.217566,11.093386,6120
+5087_17,Mezz.Do Via Perlasca "Martini",,46.217566,11.093386,6120
 5088_17,Sabbionara Via De Gasperi,,45.738765,10.952482,3349
 5090_17,Gionghi-Polo Scolastico,,45.940038,11.268658,3851
 5091_17,Tobia-Gionghi,,45.940362,11.262788,3851
@@ -2333,11 +2337,11 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5131_17,Spiazzo Rend. Colarin Civ. 147,,46.109170,10.746099,2400
 5133_17,Transacqua-Via Delle Fonti,,46.172998,11.829300,5140
 5134_17,Masi-Via Micelette Civ. 4,,46.281815,11.499285,1070
-5135_17,Masi di Cavedine-Maso Reigl,,45.972251,10.980800,2055
-5136_17,Masi di Cavedine-Maso Samuele,,45.967937,10.979949,2055
-5137_17,Masi di Cavedine-Maso Silvio,,45.966582,10.978171,2055
-5138_17,Masi di Cavedine-Incr V.Zurlon,,45.964407,10.976932,2055
-5139_17,Masi di Cavedine Sotto Civ. 6,,45.966510,10.973483,2055
+5135_17,Maso Reigl,,45.972251,10.980800,2055
+5136_17,Maso Samuele,,45.967937,10.979949,2055
+5137_17,Maso Del Silvio,,45.966582,10.978171,2055
+5138_17,Masi-Incrocio Via Zurlon,,45.964407,10.976932,2055
+5139_17,Masi di Sotto,,45.966510,10.973483,2055
 5141_17,Coredo Via Zambaroni 12,,46.349177,11.088842,6501
 5144_17,Torchio Bivio Cogatti,,46.091010,11.196994,1001
 5146_17,Ossana Scuola Elementare,,46.307678,10.739560,6398
@@ -2354,7 +2358,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5185_17,Mezzano-Sc.Elementare,,46.156586,11.808305,5130
 5190_17,Centa Bv Tiecheri-Frisanchi,,45.965305,11.224658,3790
 5196_17,Primolano-Staz. Fs,,45.965535,11.702533,4490
-5201_17,Rov.Z.Ind. Difr."Luxottica" R,,45.865303,11.018506,3100
+5201_17,Zona Industriale"Luxottica" R,,45.865303,11.018506,3100
 5202_17,Romagnano Loc.Torricella Sft,,45.993002,11.098521,3620
 5203_17,Sardagna Civ. 22,,46.069494,11.095252,2620
 5204_17,Frassilongo-Maso Pinterstoll,,46.080380,11.285129,4113
@@ -2363,12 +2367,6 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5213_17,Mezzano-Via Molaren 27,,46.160760,11.817183,5130
 5214_17,Carano Via Coltura,,46.290493,11.440489,1070
 5215_17,Pian Dei Casoni,,46.321572,11.778875,1223
-5217_17,Villa Rendena-Conad,,46.062272,10.711986,2340
-5218_17,Carisolo-Palestra,,46.166301,10.757389,2460
-5219_17,Carisolo-Hotel Orso Grigio,,46.165112,10.758621,2460
-5220_17,Pinzolo-Palazzo Del Ghiaccio,,46.156772,10.760181,2450
-5221_17,Pinzolo-V.Battaglione Cavento,,46.159874,10.761536,2450
-5222_17,Giustino,,46.146227,10.769310,2440
 5231_17,Barbine Sp 239 Km. 0.500,,46.157203,11.753757,5127
 5234_17,.,,45.883525,10.807601,0960
 5236_17,Favrio Civ. 65,,45.999626,10.852372,2185
@@ -2392,7 +2390,7 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5276_17,Aldeno Viale Europa,,45.982499,11.093579,3640
 5277_17,Aldeno-Via Florida,,45.977966,11.092905,3640
 5278_17,Serrada Via Pasubio,,45.888655,11.153269,3047
-5280_17,Brustolotti Loc. Rocca,,45.753211,11.026404,3335
+5280_17,Rocca,,45.753211,11.026404,3335
 5297_17,Speccheri Sp 219 Km 1.100,,45.774515,11.122089,3165
 5302_17,Stenico-Loc. Ca' Bianca,,46.052009,10.871109,2213
 5352_17,Castello-Bivio di Stavel,,46.321463,10.782423,6389
@@ -2467,6 +2465,8 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5703_17,Riva Del G.-Via Ardaro 43,,45.891649,10.838259,0960
 5704_17,Campi Bv 37 Dir-X Loc Parisi,,45.911475,10.809102,2189
 5705_17,Campi Loc.Zumiani,,45.904194,10.815853,2189
+5706_17,Polsa Bivio,,45.784295,10.944359,3410
+5707_17,Prada Bivio Per La Polsa,,45.800632,10.955918,3411
 5708_17,Trento-Via Segantini,,46.075474,11.122352,0001
 5716_17,Cimego Piazza,,45.912153,10.613053,2310
 5717_17,Cimego Chiesa,,45.912842,10.612673,2310
@@ -2480,7 +2480,6 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5732_17,Mezzana-Parco Giochi,,46.316587,10.796696,6380
 5734_17,Fornace-Scuole,,46.117675,11.205600,1111
 5736_17,Pieve Tesino Bv Val Malene,,46.067589,11.612977,4550
-5737_17,Ponte Caffaro-P.Zza Mercato,,45.820117,10.528918,2323
 5743_17,Cavalese Via Mendini,,46.289875,11.460897,1070
 5746_17,Civezzano-Via Fersina Avisio,,46.088597,11.184390,1100
 5747_17,Civezzano-Via Fersina Avisio,,46.086806,11.183439,1100
@@ -2494,19 +2493,17 @@ stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id
 5762_17,Lover Via Lovernatico 94,,46.247098,11.016193,6144
 5785_17,Canazei H.Lupo Bianco,,46.491136,11.781838,1362
 5786_17,Canazei Bivio Passo Pordoi,,46.495763,11.787352,1362
-5788_17,Canazei Pian Del Schiavaneis,,46.498601,11.790938,1360
-5789_17,Passo Sella,,46.508321,11.767972,1362
 5791_17,Canazei Loc. Pecol,,46.481795,11.788097,1367
 5792_17,Canazei H. Pordoi,,46.487198,11.800492,1370
 5794_17,Passo Pordoi,,46.487828,11.811834,1370
-5795_17,Sanzenone Via Belvedere 39,,46.338958,11.044284,6213
-5796_17,Sanzenone Via Belvedere 9,,46.337232,11.044142,6213
+5795_17,Sanzenone Via Belvedere 39,,46.338958,11.044284,6210
+5796_17,Sanzenone Via Belvedere 9,,46.337232,11.044142,6210
 5797_17,Pavillo.,,46.331334,11.040788,6155
 5798_17,Tuenno Nord R,,46.332295,11.025508,6155
 5800_17,Nanno-Via Bergamo Civ. 5. R,,46.319385,11.046685,6210
 5801_17,Nanno.,,46.314835,11.047438,6210
 5809_17,Monte Terlago-Bivio,,46.108167,11.035614,2023
-5810_17,Monte Terlago-Loc. Boccari,,46.107772,11.033516,2023
+5810_17,Monte Terlago Boccari,,46.107772,11.033516,2023
 5813_17,Mezzana,,46.315615,10.801833,6380
 5814_17,Mezzana-Est,,46.317140,10.806690,6380
-5817_17,Passo Sella,,46.509481,11.757603,1362
+5821_17,Molveno Difr.Hotel Panorama,,46.142689,10.963264,0956

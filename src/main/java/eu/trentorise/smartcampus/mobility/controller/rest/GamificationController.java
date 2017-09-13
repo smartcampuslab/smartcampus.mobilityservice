@@ -2,9 +2,6 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +10,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +57,8 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGra
 import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Battery;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Coords;
@@ -74,6 +74,8 @@ import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.ConfigUtils;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
@@ -94,7 +96,10 @@ public class GamificationController {
 
 	@Autowired
 	private DomainStorage storage;
-
+	@Autowired
+	private PlayerRepositoryDao playerRepo;
+	
+	
 	@Autowired
 	@Value("${geolocations.db.dir}")
 	private String geolocationsDBDir;
@@ -124,15 +129,14 @@ public class GamificationController {
 	@Autowired
 	private GamificationManager gamificationManager;	
 
+	@Autowired
+	private ConfigUtils config;
+	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
-
-	private Connection connection;
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
-	private final static String CREATE_DB = "CREATE TABLE IF NOT EXISTS geolocations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid TEXT, device_id TEXT, device_model TEXT, latitude REAL,  longitude REAL, accuracy INTEGER, altitude REAL, speed REAL, heading REAL, activity_type TEXT, activity_confidence INTEGER, battery_level REAL, battery_is_charging BOOLEAN, is_moving BOOLEAN, geofence TEXT, recorded_at DATETIME, created_at DATETIME, userId TEXT, travelId TEXT)";
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -142,13 +146,6 @@ public class GamificationController {
 		if (!f.exists()) {
 			f.mkdir();
 		}
-
-		Class.forName("org.sqlite.JDBC");
-		connection = DriverManager.getConnection("jdbc:sqlite:" + geolocationsDBDir + "/" + geolocationsDB);
-
-		Statement statement = connection.createStatement();
-		statement.setQueryTimeout(30);
-		statement.executeUpdate(CREATE_DB);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
@@ -893,6 +890,50 @@ public class GamificationController {
 	public String viewConsole() {
 		return "gamificationconsole";
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/console/players")
+	public @ResponseBody Iterable<Player> getPlayers(HttpServletResponse response) throws IOException {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		AppInfo ai = appSetup.findAppById(appId);
+		if (ai == null) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		return playerRepo.findAllByGameId(ai.getGameId());
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/console/checkin/events")
+	public @ResponseBody List<String> getCheckingEvents(HttpServletResponse response) throws IOException {
+		List<String> list = config.getActiveCheckinEvents();
+		return list;
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/console/players/{playerId}/checkin/{event}")
+	public @ResponseBody Player checkin(@PathVariable String playerId, @PathVariable String event, HttpServletResponse response) throws IOException {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		AppInfo ai = appSetup.findAppById(appId);
+		if (ai == null) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		Player p = playerRepo.findByIdAndGameId(playerId, ai.getGameId());
+		List<Event> checkIn = p.getEventsCheckIn();
+		if (checkIn == null) checkIn = new LinkedList<>();
+		if (!checkIn.stream().anyMatch(e -> event.equals(e.getName()))) {
+			
+			try {
+				gamificationManager.sendCheckin(event, p.getId(), p.getGameId());
+			} catch (Exception e1) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return null;
+			}
+			Event e = new Event(event, event, System.currentTimeMillis());
+			checkIn.add(e);
+			p.setEventsCheckIn(checkIn);
+			playerRepo.save(p);
+		}
+		return p;	
+	}
+	
 
 	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	public @ResponseBody String getAppId(HttpServletResponse response) throws Exception {
