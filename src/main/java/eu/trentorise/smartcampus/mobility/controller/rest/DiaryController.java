@@ -368,6 +368,10 @@ public class DiaryController {
 				}
 				de.setTravelModes(modes);					
 			} else if (instance.getFreeTrackingTransport() != null) {
+				if (MODE_TYPE.OTHER.equals(TrackValidator.toModeType(instance.getFreeTrackingTransport()))) {
+					logger.warn("OTHER transport type found for " + instance.getId());
+					continue;
+				}
 				de.setTravelType(TravelType.FREETRACKING);
 
 				logger.debug("DATA: "+instance+", "+ instance.getValidationResult()+", "+ instance.getValidationResult().getDistance());
