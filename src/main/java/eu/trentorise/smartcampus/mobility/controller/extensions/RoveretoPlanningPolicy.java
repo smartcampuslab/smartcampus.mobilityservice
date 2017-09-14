@@ -1,11 +1,5 @@
 package eu.trentorise.smartcampus.mobility.controller.extensions;
 
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.Leg;
-import it.sayservice.platform.smartplanner.data.message.RType;
-import it.sayservice.platform.smartplanner.data.message.TType;
-import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +14,11 @@ import com.google.common.collect.Sets;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 import eu.trentorise.smartcampus.mobility.util.PlanningPolicyHelper;
+import it.sayservice.platform.smartplanner.data.message.Itinerary;
+import it.sayservice.platform.smartplanner.data.message.Leg;
+import it.sayservice.platform.smartplanner.data.message.RType;
+import it.sayservice.platform.smartplanner.data.message.TType;
+import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
 public class RoveretoPlanningPolicy implements PlanningPolicy {
 
@@ -62,7 +61,7 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 					allTypes.add(TType.TRANSIT);
 				}
 				
-				if (!allTypes.contains(TType.SHAREDBIKE)) {
+				if (!allTypes.contains(TType.SHAREDBIKE) && !pr.isWheelChair()) {
 //					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg1b);
 					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, pr.isWheelChair(), true, prg1b);
 					result.add(npr);
@@ -80,7 +79,7 @@ public class RoveretoPlanningPolicy implements PlanningPolicy {
 					allTypes.add(TType.TRAIN);
 				}	
 				
-				if (!allTypes.contains(TType.SHAREDBIKE)) {
+				if (!allTypes.contains(TType.SHAREDBIKE) && !pr.isWheelChair()) {
 //					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, true, prg2);
 					PlanningRequest npr = PlanningPolicyHelper.buildDefaultDerivedRequest(journeyRequest, pr, TType.SHAREDBIKE, null, null, null, pr.isWheelChair(), true, prg2);
 					result.add(npr);
