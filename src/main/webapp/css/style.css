@@ -266,6 +266,10 @@ body {
   top:33% !important;
 }
 
+.incomplete {
+  color: #999999
+}
+
 .tooltip-wide + .tooltip > .tooltip-inner {
     width: 320px;
 }

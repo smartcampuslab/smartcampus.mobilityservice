@@ -23,6 +23,7 @@
 								</label>							
 								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
 								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
+								</label> <label class="form-check"> <input type="checkbox" ng-click="pendingOnly=!pendingOnly" class="navbar-btn btn-sm">Pending only
 								</label>
 								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check 
 							</div>
@@ -75,7 +76,7 @@
 							</div>
 							<div ng-if="selectedUser == user">
 								<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
-									<div>
+									<div ng-class="{'incomplete': itinerary.instance.complete == false}">
 										<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
 											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}"
 										>
@@ -107,7 +108,7 @@
 											> </label> -->
 											<label class="itinerary-switch"><b>{{'Change ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> 
 											<select 
-												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
+												ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED' || itinerary.instance.id !== selectedInstance.id || itinerary.instance.complete == false" ng-model="itinerary.instance.changedValidity" class="navbar-btn btn-sm" >
 												<option ng-repeat="x in validities" >{{x}}</option>
 											</select>
 											</label>
@@ -134,7 +135,10 @@
 					>&nbsp;Fix paths {{scores}}</label></span>					
 				<span ng-hide="!selectedInstance"><label class="navbar-btn">
 				<button class="btn btn-danger btn-sm" ng-click="showAllPoints()">Show all points</button>
-				</span>					
+				</span>
+				<div>
+				<span>{{selectedInstance.deviceInfo}}</span>
+				</div>									
 					<div id="right-scrollable" style="width: 100%; height: 100%;">
 						<div class="row" ng-if="selectedInstance != null">
 							<div class="col-md-4">

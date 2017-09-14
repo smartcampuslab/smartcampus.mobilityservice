@@ -35,7 +35,7 @@
 	"counterName": "Recommendations",
 	"description": {
 		"it": "Raccomanda la App ad almeno <target> utenti e guadagni <bonusScore> punti <bonusPointType>.",
-		"en": "Recommend the app at least <target> users and you will gain a bonus of <bonusScore> <bonusPointType> points."
+		"en": "Recommend the app to at least <target> users and you will gain a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
