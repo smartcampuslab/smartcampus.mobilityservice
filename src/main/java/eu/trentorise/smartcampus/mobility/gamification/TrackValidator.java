@@ -265,7 +265,7 @@ public class TrackValidator {
 					status.setValidationOutcome(TravelValidity.VALID);
 				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);				
-				} else if (!certified && coverage >= GUARANTEED_COVERAGE_THRESHOLD) {
+				} else if (!certified && 100.0 * coveredDistance / transportDistance >= GUARANTEED_COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);				
 				} else {	
 					status.setValidationOutcome(TravelValidity.PENDING);				
