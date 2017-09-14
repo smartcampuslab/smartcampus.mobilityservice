@@ -26,11 +26,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
@@ -81,7 +82,7 @@ public class ReportEmailSender {
 	private String mailRedirectUrl;
 	@Autowired
 	@Value("${weeklyDataDir}")
-	private String weeklyDataDir;	
+	private String weeklyDataDirx;	
 
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
@@ -114,11 +115,11 @@ public class ReportEmailSender {
 	private Map<String, List<WeekPrizeData>> weekPrizeData = new HashMap<>();
 	private List<WeekConfData> weekConfData = null;
 	
-//	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
-//	public synchronized void sendNotification() throws Exception {
-//		sendWeeklyNotification();
-//		System.out.println("DONE");
-//	}
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test1")
+	public synchronized void sendNotification() throws Exception {
+		sendWeeklyNotification();
+		System.out.println("DONE");
+	}
 	
 //	@Scheduled(cron="0 10 10 * * *")
 	@Scheduled(cron="0 0 17 * * FRI")
@@ -183,7 +184,7 @@ public class ReportEmailSender {
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(configUtils.getWeekConfData());
 		
-		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
+		List<WeekWinnersData> mailWinnersFileData = configUtils.getWeekWinnersData(); // readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
 		int actual_week = 0;
@@ -197,7 +198,7 @@ public class ReportEmailSender {
 
 		for (int i = 0; i < mailConfigurationFileData.size(); i++) {
 			WeekConfData tmpWConf = mailConfigurationFileData.get(i);
-			if (tmpWConf.currentWeek()) {
+			if (tmpWConf.nextWeek()) {
 				actual_week = tmpWConf.getWeekNum();
 				actual_week_theme_it = tmpWConf.getWeekTheme();
 				actual_week_theme_eng = tmpWConf.getWeekThemeEng();
@@ -205,7 +206,7 @@ public class ReportEmailSender {
 				are_chall = tmpWConf.isChallenges();
 				are_prizes = tmpWConf.isPrizes();
 				are_prizes_last_week = tmpWConf.isPrizesLast();
-				mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
+				mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 			}
 		}
 
@@ -241,11 +242,11 @@ public class ReportEmailSender {
 					if (language.compareTo(ENG_LANG) == 0) {
 						actual_week_theme = actual_week_theme_eng;
 						mailLoc = Locale.ENGLISH;
-						mailPrizeActualData = getWeekPrizes(actual_week, ENG_LANG);
+						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ENG_LANG);
 					} else {
 						actual_week_theme = actual_week_theme_it;
 						mailLoc = Locale.ITALIAN;
-						mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
+						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
 						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
@@ -375,7 +376,7 @@ public class ReportEmailSender {
 		// Here I have to read the mail conf file data
 		String conf_directory = "conf_file";
 		List<WeekConfData> mailConfigurationFileData = new ArrayList<>(configUtils.getWeekConfData());
-		List<WeekWinnersData> mailWinnersFileData = readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");		
+		List<WeekWinnersData> mailWinnersFileData = configUtils.getWeekWinnersData(); // readWeekWinnersFile(weeklyDataDir + "/game_week_winners.csv");		
 		
 		List<WeekPrizeData> mailPrizeActualData = Lists.newArrayList();
 		// here I have to add the new mail parameters readed from csv files
@@ -397,7 +398,7 @@ public class ReportEmailSender {
 				are_chall = tmpWConf.isChallenges();
 				are_prizes = tmpWConf.isPrizes();
 				are_prizes_last_week = tmpWConf.isPrizesLast();
-				mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
+				mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 			}
 		}
 		String gameId = getGameId(appId);
@@ -430,11 +431,11 @@ public class ReportEmailSender {
 					if (language.compareTo(ENG_LANG) == 0) {
 						actual_week_theme = actual_week_theme_eng;
 						mailLoc = Locale.ENGLISH;
-						mailPrizeActualData = getWeekPrizes(actual_week, ENG_LANG);
+						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ENG_LANG);
 					} else {
 						actual_week_theme = actual_week_theme_it;
 						mailLoc = Locale.ITALIAN;
-						mailPrizeActualData = getWeekPrizes(actual_week, ITA_LANG);
+						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
 						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
@@ -1103,78 +1104,78 @@ public class ReportEmailSender {
 
 
 	// Method used to read a week prizes file and store all data in a list of WeekPrizeData object
-	private List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
-		String cvsSplitBy = ",";
-		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
-
-//		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
-		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
-
-		for (int i = 1; i < lines.size(); i++) {
-			String line = lines.get(i);
-			if (line.trim().isEmpty()) continue;
-
-			// use comma as separator
-			String[] weekPrizeValues = line.split(cvsSplitBy);
-			int weekNum = Integer.parseInt(weekPrizeValues[0]);
-			String weekPrize = weekPrizeValues[1];
-			String target = weekPrizeValues[2];
-			String sponsor = weekPrizeValues[3];
-			logger.debug(String.format("Week prize file: week num %s, prize %s, target %s, sponsor %s", weekNum, weekPrize, target, sponsor));
-			WeekPrizeData wPrize = new WeekPrizeData(weekNum, weekPrize, target, sponsor);
-			prizeWeekFileData.add(wPrize);
-		}
-
-		return prizeWeekFileData;
-	}
-
-	// Method used to read the week prizes data from conf file. More prizes for one week are allowed
-	public List<WeekPrizeData> getWeekPrizes(int weeknum, String lang) {
-		List<WeekPrizeData> allPrizes = weekPrizeData.get(lang);
-		try {
-			if (allPrizes == null) {
-				allPrizes = readWeekPrizesFile(weeklyDataDir + "/game_week_prize_"+lang+".csv");
-				weekPrizeData.put(lang, allPrizes);
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return null;
-		}
-		
-		List<WeekPrizeData> prizeWeekData = Lists.newArrayList();
-		for (int i = 0; i < allPrizes.size(); i++) {
-			if (allPrizes.get(i).getWeekNum() == weeknum) {
-				prizeWeekData.add(allPrizes.get(i));
-			}
-		}
-		return prizeWeekData;
-	}
-
-	public List<WeekWinnersData> readWeekWinnersFile(String src) throws Exception {
-		// TODO read from gamification engine ???
-		
-		String cvsSplitBy = ",";
-		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
-
-		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
-
-		for (int i = 1; i < lines.size(); i++) {
-			String line = lines.get(i);
-			if (line.trim().isEmpty()) continue;
-
-			// use comma as separator
-			String[] weekWinnerValues = line.split(cvsSplitBy);
-			int weekNum = Integer.parseInt(weekWinnerValues[0]);
-			String player = weekWinnerValues[1];
-			String prize = weekWinnerValues[2];
-			String target = weekWinnerValues[3];
-			logger.debug(String.format("Week winner file: week num %s, player %s, prize %s, target %s", weekNum, player, prize, target));
-			WeekWinnersData wWinners = new WeekWinnersData(weekNum, player, prize, target);
-			winnerWeekFileData.add(wWinners);
-		}
-
-		return winnerWeekFileData;
-	}
+//	private List<WeekPrizeData> readWeekPrizesFile(String src) throws Exception {
+//		String cvsSplitBy = ",";
+//		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
+//
+////		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+//		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
+//
+//		for (int i = 1; i < lines.size(); i++) {
+//			String line = lines.get(i);
+//			if (line.trim().isEmpty()) continue;
+//
+//			// use comma as separator
+//			String[] weekPrizeValues = line.split(cvsSplitBy);
+//			int weekNum = Integer.parseInt(weekPrizeValues[0]);
+//			String weekPrize = weekPrizeValues[1];
+//			String target = weekPrizeValues[2];
+//			String sponsor = weekPrizeValues[3];
+//			logger.debug(String.format("Week prize file: week num %s, prize %s, target %s, sponsor %s", weekNum, weekPrize, target, sponsor));
+//			WeekPrizeData wPrize = new WeekPrizeData(weekNum, weekPrize, target, sponsor);
+//			prizeWeekFileData.add(wPrize);
+//		}
+//
+//		return prizeWeekFileData;
+//	}
+//
+//	// Method used to read the week prizes data from conf file. More prizes for one week are allowed
+//	public List<WeekPrizeData> getWeekPrizes(int weeknum, String lang) {
+//		List<WeekPrizeData> allPrizes = weekPrizeData.get(lang);
+//		try {
+//			if (allPrizes == null) {
+//				allPrizes = readWeekPrizesFile(weeklyDataDir + "/game_week_prize_"+lang+".csv");
+//				weekPrizeData.put(lang, allPrizes);
+//			}
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//			return null;
+//		}
+//		
+//		List<WeekPrizeData> prizeWeekData = Lists.newArrayList();
+//		for (int i = 0; i < allPrizes.size(); i++) {
+//			if (allPrizes.get(i).getWeekNum() == weeknum) {
+//				prizeWeekData.add(allPrizes.get(i));
+//			}
+//		}
+//		return prizeWeekData;
+//	}
+//
+//	public List<WeekWinnersData> readWeekWinnersFile(String src) throws Exception {
+//		// TODO read from gamification engine ???
+//		
+//		String cvsSplitBy = ",";
+//		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
+//
+//		List<String> lines = Resources.readLines(new File(src).toURI().toURL(), Charsets.UTF_8);
+//
+//		for (int i = 1; i < lines.size(); i++) {
+//			String line = lines.get(i);
+//			if (line.trim().isEmpty()) continue;
+//
+//			// use comma as separator
+//			String[] weekWinnerValues = line.split(cvsSplitBy);
+//			int weekNum = Integer.parseInt(weekWinnerValues[0]);
+//			String player = weekWinnerValues[1];
+//			String prize = weekWinnerValues[2];
+//			String target = weekWinnerValues[3];
+//			logger.debug(String.format("Week winner file: week num %s, player %s, prize %s, target %s", weekNum, player, prize, target));
+//			WeekWinnersData wWinners = new WeekWinnersData(weekNum, player, prize, target);
+//			winnerWeekFileData.add(wWinners);
+//		}
+//
+//		return winnerWeekFileData;
+//	}
 
 	private String getGameId(String appId) {
 		if (appId != null) {

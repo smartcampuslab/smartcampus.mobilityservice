@@ -115,6 +115,11 @@ public class WeekConfData {
 	public boolean previousWeek() {
 		String currDate = SDF_WEEK_DATE.format(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 7));
 		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
+	}
+	
+	public boolean nextWeek() {
+		String currDate = SDF_WEEK_DATE.format(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7));
+		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
 	}	
 	
 }

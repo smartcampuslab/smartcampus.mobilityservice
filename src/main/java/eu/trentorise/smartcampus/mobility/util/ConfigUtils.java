@@ -23,6 +23,8 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.CheckinData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekConfData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekPrizeData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekWinnersData;
 
 @Component
 public class ConfigUtils {
@@ -33,52 +35,122 @@ public class ConfigUtils {
 	
 	private List<WeekConfData> weekConfData = null;
 	
-	private LoadingCache<String, List<CheckinData>> checkinEvents;
+//	private LoadingCache<String, List<CheckinData>> checkinEvents;
 
+	public enum ConfigDataType {
+		WEEK_DATA, CHECKIN_EVENT_DATA, WEEK_WINNERS_DATA;
+	}
+	
+	private LoadingCache<ConfigDataType, List<?>> configData;
+	
+	private LoadingCache<String, List<WeekPrizeData>> prizesData;
+	
 	private static final Logger logger = Logger.getLogger(ConfigUtils.class);
 	
 	@PostConstruct
 	public void init(){
-		checkinEvents = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
-				.build(new CacheLoader<String, List<CheckinData>>() {
+//		checkinEvents = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
+//				.build(new CacheLoader<String, List<CheckinData>>() {
+//					@Override
+//					public List<CheckinData> load(String any) throws Exception {
+//						String cvsSplitBy = ",";
+//						List<CheckinData> checkinDataList = Lists.newLinkedList();
+//
+//						List<String> lines = Resources.readLines(new File(weeklyDataDir + "/checkin_configuration.csv").toURI().toURL(), Charsets.UTF_8);
+//
+//						for (int i = 1; i < lines.size(); i++) {
+//							String line = lines.get(i);
+//							if (line.trim().isEmpty()) continue;
+//
+//							// use comma as separator
+//							String[] checkinValues = line.split(cvsSplitBy);
+//							LocalDate from = null, to = null;
+//							from = LocalDate.parse(checkinValues[1]);
+//							to = LocalDate.parse(checkinValues[2]);
+//							CheckinData event = new CheckinData();
+//							event.setFrom(from);
+//							event.setTo(to);
+//							event.setName(checkinValues[0]);
+//							
+//							logger.debug(String.format("Checkin file: checkin name %s, from %s, to %s", checkinValues[0], from, to));
+//							checkinDataList.add(event);
+//						}
+//
+//						return checkinDataList;
+//					}
+//				});		
+		
+		
+		configData = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
+				.build(new CacheLoader<ConfigDataType, List<?>>() {
 					@Override
-					public List<CheckinData> load(String any) throws Exception {
-						String cvsSplitBy = ",";
-						List<CheckinData> checkinDataList = Lists.newLinkedList();
-
-						List<String> lines = Resources.readLines(new File(weeklyDataDir + "/checkin_configuration.csv").toURI().toURL(), Charsets.UTF_8);
-
-						for (int i = 1; i < lines.size(); i++) {
-							String line = lines.get(i);
-							if (line.trim().isEmpty()) continue;
-
-							// use comma as separator
-							String[] checkinValues = line.split(cvsSplitBy);
-							LocalDate from = null, to = null;
-							from = LocalDate.parse(checkinValues[1]);
-							to = LocalDate.parse(checkinValues[2]);
-							CheckinData event = new CheckinData();
-							event.setFrom(from);
-							event.setTo(to);
-							event.setName(checkinValues[0]);
-							
-							logger.debug(String.format("Checkin file: checkin name %s, from %s, to %s", checkinValues[0], from, to));
-							checkinDataList.add(event);
+					public List<?> load(ConfigDataType key) {
+						try {
+						switch (key) {
+						case WEEK_DATA:
+							return loadWeekConfFile();
+						case CHECKIN_EVENT_DATA:
+							return loadCheckinFile();
+						case WEEK_WINNERS_DATA:
+							return loadWeekWinnersFile();
 						}
-
-						return checkinDataList;
+						} catch (Exception e) {
+							logger.error("Error reading " + key, e);
+						}
+						
+						return Collections.EMPTY_LIST;
 					}
-				});		
+				});	
+		
+		
+		prizesData = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
+				.build(new CacheLoader<String, List<WeekPrizeData>>() {
+					@Override
+					public List<WeekPrizeData> load(String lang) {
+						try {
+							return loadWeekPrizesFile(lang);
+						} catch (Exception e) {
+							logger.error("Error reading week prizes " + lang, e);
+						}
+						return Collections.EMPTY_LIST;
+					}
+				});			
+		
 	}
 	
-	// Method used to read a week conf data file and store all values in a list of WeekConfData object
+	
 	public List<WeekConfData> getWeekConfData() throws Exception {
-		if (weekConfData != null) {
-			return weekConfData;
-		}
+		return (List<WeekConfData>)configData.get(ConfigDataType.WEEK_DATA);
+	}
+	
+	public List<CheckinData> getCheckinEventData() throws Exception {
+		return (List<CheckinData>)configData.get(ConfigDataType.WEEK_DATA);
+	}	
+	
+	public List<WeekWinnersData> getWeekWinnersData() throws Exception {
+		return (List<WeekWinnersData>)configData.get(ConfigDataType.WEEK_WINNERS_DATA);
+	}	
+	
+	public List<WeekPrizeData> getWeekPrizes(int weeknum, String lang) {
+		List<WeekPrizeData> prizeWeekData = Lists.newArrayList();
 		
+		try {
+		List<WeekPrizeData> allPrizes = prizesData.get(lang);
+		
+		for (int i = 0; i < allPrizes.size(); i++) {
+			if (allPrizes.get(i).getWeekNum() == weeknum) {
+				prizeWeekData.add(allPrizes.get(i));
+			}
+		}
+		} catch (Exception e) {
+			logger.error("Error getting week prizes " + lang + " for week " + weeknum, e);
+		}
+		return prizeWeekData;
+	}	
+	
+	// Method used to read a week conf data file and store all values in a list of WeekConfData object
+	private List<WeekConfData> loadWeekConfFile() throws Exception {
 		synchronized(this) {
-			if (weekConfData != null) return weekConfData;
 			
 			String src = weeklyDataDir + "/game_week_configuration.csv";
 			String cvsSplitBy = ",";
@@ -115,6 +187,82 @@ public class ConfigUtils {
 		}
 	}	
 	
+	private List<CheckinData> loadCheckinFile() throws Exception {
+		String cvsSplitBy = ",";
+		List<CheckinData> checkinDataList = Lists.newLinkedList();
+
+		List<String> lines = Resources.readLines(new File(weeklyDataDir + "/checkin_configuration.csv").toURI().toURL(), Charsets.UTF_8);
+
+		for (int i = 1; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (line.trim().isEmpty()) continue;
+
+			// use comma as separator
+			String[] checkinValues = line.split(cvsSplitBy);
+			LocalDate from = null, to = null;
+			from = LocalDate.parse(checkinValues[1]);
+			to = LocalDate.parse(checkinValues[2]);
+			CheckinData event = new CheckinData();
+			event.setFrom(from);
+			event.setTo(to);
+			event.setName(checkinValues[0]);
+			
+			logger.debug(String.format("Checkin file: checkin name %s, from %s, to %s", checkinValues[0], from, to));
+			checkinDataList.add(event);
+		}
+
+		return checkinDataList;
+	}
+	
+	public List<WeekWinnersData> loadWeekWinnersFile() throws Exception {
+		String cvsSplitBy = ",";
+		List<WeekWinnersData> winnerWeekFileData = Lists.newArrayList();
+
+		List<String> lines = Resources.readLines(new File(weeklyDataDir + "/game_week_winners.csv").toURI().toURL(), Charsets.UTF_8);
+
+		for (int i = 1; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (line.trim().isEmpty()) continue;
+
+			// use comma as separator
+			String[] weekWinnerValues = line.split(cvsSplitBy);
+			int weekNum = Integer.parseInt(weekWinnerValues[0]);
+			String player = weekWinnerValues[1];
+			String prize = weekWinnerValues[2];
+			String target = weekWinnerValues[3];
+			logger.debug(String.format("Week winner file: week num %s, player %s, prize %s, target %s", weekNum, player, prize, target));
+			WeekWinnersData wWinners = new WeekWinnersData(weekNum, player, prize, target);
+			winnerWeekFileData.add(wWinners);
+		}
+
+		return winnerWeekFileData;
+	}	
+	
+	private List<WeekPrizeData> loadWeekPrizesFile(String lang) throws Exception {
+		String cvsSplitBy = ",";
+		List<WeekPrizeData> prizeWeekFileData = Lists.newArrayList();
+
+//		List<String> lines = Resources.readLines(Resources.getResource(src), Charsets.UTF_8);
+		List<String> lines = Resources.readLines(new File(weeklyDataDir + "/game_week_prize_" + lang + ".csv").toURI().toURL(), Charsets.UTF_8);
+
+		for (int i = 1; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (line.trim().isEmpty()) continue;
+
+			// use comma as separator
+			String[] weekPrizeValues = line.split(cvsSplitBy);
+			int weekNum = Integer.parseInt(weekPrizeValues[0]);
+			String weekPrize = weekPrizeValues[1];
+			String target = weekPrizeValues[2];
+			String sponsor = weekPrizeValues[3];
+			logger.debug(String.format("Week prize file: week num %s, prize %s, target %s, sponsor %s", weekNum, weekPrize, target, sponsor));
+			WeekPrizeData wPrize = new WeekPrizeData(weekNum, weekPrize, target, sponsor);
+			prizeWeekFileData.add(wPrize);
+		}
+
+		return prizeWeekFileData;
+	}
+
 	public WeekConfData getWeek(long timestamp) {
 		try {
 			for (WeekConfData week : getWeekConfData()) {
@@ -158,7 +306,7 @@ public class ConfigUtils {
 		final LocalDate now = LocalDate.now();
 		
 		try{
-			return checkinEvents.get("").stream().filter(e -> !e.getFrom().isAfter(now) && !e.getTo().isBefore(now)).map(e -> e.getName()).collect(Collectors.toList());
+			return getCheckinEventData().stream().filter(e -> !e.getFrom().isAfter(now) && !e.getTo().isBefore(now)).map(e -> e.getName()).collect(Collectors.toList());
 		} catch (Exception e){
 			logger.error("Error reading checkin list", e);
 			return Collections.emptyList();

@@ -218,7 +218,7 @@ public class GamificationWebController {
 		WeekConfData week = configUtils.getCurrentWeekConf();
 		if (week != null) {
 			model.addObject("week", week.getWeekNum());
-			model.addObject("weeklyPrizes", emailSender.getWeekPrizes(week.getWeekNum(), lang));
+			model.addObject("weeklyPrizes", configUtils.getWeekPrizes(week.getWeekNum(), lang));
 		}
 		model.addObject("view", page);
 		return model;
