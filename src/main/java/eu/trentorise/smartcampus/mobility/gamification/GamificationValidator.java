@@ -123,8 +123,7 @@ public class GamificationValidator {
 		}
 	}
 
-
-	public Map<String, Object> computePlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
+	public Map<String, Object> computeEstimatedPlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
 //		if (geolocations != null) {
 //			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
 //			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
@@ -283,6 +282,179 @@ public class GamificationValidator {
 		data.put("estimatedScore", Math.round(score));
 
 		return data;
+	}	
+	
+
+	public Map<String, Object> computePlannedJourneyScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, ValidationStatus vs, boolean log) {
+		boolean asFreetracking = false;
+		if (geolocations != null) {
+			String ttype = GamificationHelper.getFreetrackingTransportForItinerary(itinerary);
+			if (ttype != null && "walk".equals(ttype) || "bike".equals(ttype)) {
+				logger.info("Planned has single ttype: " + ttype + ", computing as freetracking");
+				asFreetracking = true;
+			}
+		}
+
+		Map<String, Object> data = Maps.newTreeMap();
+
+		String parkName = null; // name of the parking
+		String startBikesharingName = null; // name of starting bike sharing
+											// station
+		String endBikesharingName = null; // name of ending bike sharing station
+		boolean pnr = false; // (park-n-ride)
+		boolean bikeSharing = false;
+		double bikeDist = 0; // km
+		double walkDist = 0; // km
+		double trainDist = 0; // km
+		double busDist = 0; // km
+		double carDist = 0; // km
+		double transitDist = 0;
+
+		logger.debug("Analyzing itinerary for gamification.");
+		if (itinerary != null) {
+			for (Leg leg : itinerary.getLeg()) {
+				if (leg.getTransport().getType().equals(TType.CAR)) {
+					carDist += leg.getLength() / 1000;
+					if (leg.getTo().getStopId() != null) {
+						if (leg.getTo().getStopId().getExtra() != null) {
+							if (leg.getTo().getStopId().getExtra().containsKey("parkAndRide")) {
+								pnr |= (Boolean) leg.getTo().getStopId().getExtra().get("parkAndRide");
+							}
+						}
+						parkName = leg.getTo().getStopId().getId();
+					}
+				} else if (leg.getTransport().getType().equals(TType.BICYCLE)) {
+					if (!asFreetracking) {
+						bikeDist += leg.getLength() / 1000;
+					}
+					if (leg.getFrom().getStopId() != null && leg.getFrom().getStopId().getAgencyId() != null) {
+						if (leg.getFrom().getStopId().getAgencyId().startsWith("BIKE_SHARING")) {
+							bikeSharing = true;
+							startBikesharingName = leg.getFrom().getStopId().getId();
+						}
+					}
+					if (leg.getTo().getStopId() != null && leg.getTo().getStopId().getAgencyId() != null) {
+						if (leg.getTo().getStopId().getAgencyId().startsWith("BIKE_SHARING")) {
+							bikeSharing = true;
+							endBikesharingName = leg.getTo().getStopId().getId();
+						}
+					}
+				} else if (leg.getTransport().getType().equals(TType.WALK) && !asFreetracking) {
+					walkDist += leg.getLength() / 1000;
+				} else if (leg.getTransport().getType().equals(TType.TRAIN)) {
+					trainDist += leg.getLength() / 1000;
+				} else if (leg.getTransport().getType().equals(TType.BUS)) {
+					busDist += leg.getLength() / 1000;
+				} else if (leg.getTransport().getType().equals(TType.TRANSIT)) {
+					transitDist += leg.getLength() / 1000;
+				}
+			}
+		}
+
+		if (asFreetracking) {
+			if (vs.getEffectiveDistances().containsKey(MODE_TYPE.WALK)) {
+				logger.info("Effective walk distance: " + (vs.getEffectiveDistances().get(MODE_TYPE.WALK) / 1000.0));
+				walkDist = vs.getEffectiveDistances().get(MODE_TYPE.WALK) / 1000.0;
+			}
+			if (vs.getEffectiveDistances().containsKey(MODE_TYPE.BIKE)) {
+				logger.info("Effective bike distance: " + (vs.getEffectiveDistances().get(MODE_TYPE.BIKE) / 1000.0));
+				bikeDist = vs.getEffectiveDistances().get(MODE_TYPE.BIKE) / 1000.0;
+			}
+		}
+
+		if (log) {
+			logger.debug("Analysis results:");
+			logger.debug("Distances [walk = " + walkDist + ", bike = " + bikeDist + ", train = " + trainDist + ", bus = " + busDist + ", car = " + carDist + "]");
+			logger.debug("Park and ride = " + pnr + " , Bikesharing = " + bikeSharing);
+			logger.debug("Park = " + parkName);
+			logger.debug("Bikesharing = " + startBikesharingName + " / " + endBikesharingName);
+		}
+
+		Double score = 0.0;
+		// score += (walkDist < 0.1 ? 0 : Math.min(3.5, walkDist)) * 10; Rovereto
+		score += (walkDist < 0.25 ? 0 : Math.min(10, walkDist)) * 10;
+		// score += (walkDist < 0.25 ? 0 : walkDist) * 15;
+		score += Math.min(30, bikeDist) * 5;
+		// score += bikeDist * 7;
+
+		double busTrainTransitDist = busDist + trainDist;
+		// if (busTrainTransitDist > 0) {
+		// score += (busTrainTransitDist > 0 && busTrainTransitDist < 1) ? 10 : ((busTrainTransitDist > 1 && busTrainTransitDist < 5) ? 15 : (busTrainTransitDist >= 5 && busTrainTransitDist < 10) ? 20
+		// : (busTrainTransitDist >= 10 && busTrainTransitDist < 30) ? 30 : 40);
+		// }
+
+		if (busDist > 0) {
+			score += (busDist > 0 && busDist < 1) ? 10 : ((busDist > 1 && busDist < 5) ? 15 : 20);
+		}
+		if (trainDist > 0) {
+			score += (trainDist > 0 && trainDist < 1) ? 10 : ((trainDist > 1 && trainDist < 5) ? 15 : 20);
+		}
+
+		// Trento only
+		if (transitDist > 0) {
+			// score += 25;
+			score += 15;
+		}
+
+		boolean zeroImpact = (busDist + carDist + trainDist + transitDist == 0 && walkDist + bikeDist > 0);
+		// Rovereto
+		// if (zeroImpact && itinerary.isPromoted()) {
+		// score *= 1.7;
+		// } else {
+		// if (zeroImpact) {
+		// score *= 1.5;
+		// }
+		// if (itinerary.isPromoted()) {
+		// score *= 1.2;
+		// }
+		// }
+
+		if (pnr) {
+			// score += 10;
+			score += 15;
+		}
+		if (zeroImpact) {
+			score *= 1.5;
+		}
+
+		if (bikeDist > 0) {
+			data.put("bikeDistance", bikeDist);
+		}
+		if (walkDist > 0) {
+			data.put("walkDistance", walkDist);
+		}
+		if (busDist > 0) {
+			data.put("busDistance", busDist);
+		}
+		if (trainDist > 0) {
+			data.put("trainDistance", trainDist);
+		}
+		if (transitDist > 0) {
+			data.put("transitDistance", transitDist);
+		}
+		if (carDist > 0) {
+			data.put("carDistance", carDist);
+		}
+		if (bikeSharing) {
+			data.put("bikesharing", bikeSharing);
+		}
+		if (parkName != null) {
+			data.put("park", parkName);
+		}
+		if (startBikesharingName != null) {
+			data.put("startBike", startBikesharingName);
+		}
+		if (endBikesharingName != null) {
+			data.put("endBike", endBikesharingName);
+		}
+		if (pnr) {
+			data.put("p+r", pnr);
+		}
+		data.put("sustainable", itinerary.isPromoted());
+		// data.put("zeroimpact", zeroImpact);
+		data.put("estimatedScore", Math.round(score));
+
+		return data;
 	}
 	
 	public Map<String, Object> computeFreeTrackingScore(String appId, Collection<Geolocation> geolocationEvents, String ttype, ValidationStatus vs) throws Exception {
@@ -352,7 +524,7 @@ public class GamificationValidator {
 
 	// TODO: remove?
 	public long computeEstimatedGameScore(String appId, Itinerary itinerary, Collection<Geolocation> geolocations, boolean log) {
-		Long score = (Long) (computePlannedJourneyScore(appId, itinerary, geolocations, log).get("estimatedScore"));
+		Long score = (Long) (computeEstimatedPlannedJourneyScore(appId, itinerary, geolocations, log).get("estimatedScore"));
 		itinerary.getCustomData().put("estimatedScore", score);
 		return score;
 	}
