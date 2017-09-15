@@ -369,6 +369,10 @@ public class GamificationController {
 						res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getRecorded_at()));
 					}
 					if (res.getItinerary() == null) {
+						if (travelId.contains("_temporary_")) {
+							logger.error("Orphan temporary, skipping clientId: " + travelId);
+							continue;
+						}						
 						String ftt = freeTracks.get(key);
 						if (ftt == null) {
 							logger.warn("No freetracking transport found, extracting from clientId: " + travelId);
@@ -779,6 +783,7 @@ public class GamificationController {
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("id", instanceId);
 		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
+		
 		instance.setOverriddenDistances(value);
 		storage.saveTrackedInstance(instance);
 		logger.info("Changed distances for " + instanceId + " to " + value);
