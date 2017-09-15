@@ -370,7 +370,7 @@ public class GamificationController {
 					if (res.getItinerary() == null) {
 						String ftt = freeTracks.get(key);
 						if (ftt == null) {
-							logger.error("No freetracking transport found, extracting from clientId.");
+							logger.warn("No freetracking transport found, extracting from clientId: " + travelId);
 							String[] cid = travelId.split("_");
 							if (cid != null && cid.length > 1) {
 								ftt = cid[0];
@@ -772,6 +772,17 @@ public class GamificationController {
 		logger.info("Changed validity for " + instanceId + " to " + value);
 		return instance;
 	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/overrideDistances/{instanceId}")
+	public @ResponseBody TrackedInstance overrideDistances(@PathVariable String instanceId, @RequestBody Map<String, Double> value) {
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("id", instanceId);
+		TrackedInstance instance = storage.searchDomainObject(pars, TrackedInstance.class);
+		instance.setOverriddenDistances(value);
+		storage.saveTrackedInstance(instance);
+		logger.info("Changed distances for " + instanceId + " to " + value);
+		return instance;
+	}	
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/console/itinerary/toCheck/{instanceId}")
 	public @ResponseBody TrackedInstance toCheck(@PathVariable String instanceId, @RequestParam(required = true) boolean value) {
