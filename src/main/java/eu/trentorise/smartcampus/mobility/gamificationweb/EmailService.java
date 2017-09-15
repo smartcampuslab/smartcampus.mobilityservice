@@ -156,21 +156,21 @@ public class EmailService {
 //        }
         message.setText(htmlContent, true /* isHtml */);
         
-//        // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
-//        final InputStreamSource imageSourceFoglia03 = new ByteArrayResource(standardImages.get(0).getImageByte());
-//        message.addInline(standardImages.get(0).getImageName(), imageSourceFoglia03, standardImages.get(0).getImageType());
-//        final InputStreamSource imageSourceFoglia04 = new ByteArrayResource(standardImages.get(1).getImageByte());
-//        message.addInline(standardImages.get(1).getImageName(), imageSourceFoglia04, standardImages.get(1).getImageType());
-//        
-//        // Add the inline score image, referenced from the HTML code as "cid:${imageResourceName}"
-//        final InputStreamSource imageSourceGreen = new ByteArrayResource(standardImages.get(2).getImageByte());
-//        message.addInline(standardImages.get(2).getImageName(), imageSourceGreen, standardImages.get(2).getImageType());
-//        /*final InputStreamSource imageSourceHealth = new ByteArrayResource(standardImages.get(3).getImageByte());
-//        message.addInline(standardImages.get(3).getImageName(), imageSourceHealth, standardImages.get(3).getImageType());
-//        final InputStreamSource imageSourcePr = new ByteArrayResource(standardImages.get(4).getImageByte());
-//        message.addInline(standardImages.get(4).getImageName(), imageSourcePr, standardImages.get(4).getImageType());*/
-//        
-//        // Add the inline footer image, referenced from the HTML code as "cid:${imageResourceName}"
+        // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
+        final InputStreamSource imageSourceFoglia03 = new ByteArrayResource(standardImages.get(0).getImageByte());
+        message.addInline(standardImages.get(0).getImageName(), imageSourceFoglia03, standardImages.get(0).getImageType());
+        final InputStreamSource imageSourceFoglia04 = new ByteArrayResource(standardImages.get(1).getImageByte());
+        message.addInline(standardImages.get(1).getImageName(), imageSourceFoglia04, standardImages.get(1).getImageType());
+        
+        // Add the inline score image, referenced from the HTML code as "cid:${imageResourceName}"
+        final InputStreamSource imageSourceGreen = new ByteArrayResource(standardImages.get(2).getImageByte());
+        message.addInline(standardImages.get(2).getImageName(), imageSourceGreen, standardImages.get(2).getImageType());
+        /*final InputStreamSource imageSourceHealth = new ByteArrayResource(standardImages.get(3).getImageByte());
+        message.addInline(standardImages.get(3).getImageName(), imageSourceHealth, standardImages.get(3).getImageType());
+        final InputStreamSource imageSourcePr = new ByteArrayResource(standardImages.get(4).getImageByte());
+        message.addInline(standardImages.get(4).getImageName(), imageSourcePr, standardImages.get(4).getImageType());*/
+        
+        // Add the inline footer image, referenced from the HTML code as "cid:${imageResourceName}"
 //        final InputStreamSource imageSourceFooter = new ByteArrayResource(standardImages.get(5).getImageByte());
 //        message.addInline(standardImages.get(5).getImageName(), imageSourceFooter, standardImages.get(5).getImageType());
         
