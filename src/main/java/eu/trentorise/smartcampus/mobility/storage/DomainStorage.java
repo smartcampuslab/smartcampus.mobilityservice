@@ -173,6 +173,15 @@ public class DomainStorage {
 		}
 	}
 	
+	public void deleteTrackedInstance(TrackedInstance tracked) {
+		Query query = new Query(
+				new Criteria("clientId").is(tracked.getClientId())
+				.and("day").is(tracked.getDay())
+				.and("userId").is(tracked.getUserId()));
+		TrackedInstance trackedDB = searchDomainObject(query, TrackedInstance.class);
+		template.remove(query, TrackedInstance.class, TRACKED);
+	}
+	
 	public void saveTrackedInstance(TrackedInstance tracked) {
 		Query query = new Query(
 				new Criteria("clientId").is(tracked.getClientId())
@@ -210,6 +219,9 @@ public class DomainStorage {
 			if (tracked.getApproved() != null) {
 				update.set("approved", tracked.getApproved());
 			}
+			if (tracked.getOverriddenDistances() != null) {
+				update.set("overriddenDistances", tracked.getOverriddenDistances());
+			}			
 			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
 			

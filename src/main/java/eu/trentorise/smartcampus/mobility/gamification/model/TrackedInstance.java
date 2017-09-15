@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.gamification.model;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -51,6 +52,8 @@ public class TrackedInstance {
 	private Boolean toCheck;
 	
 	private int groupId;
+	
+	private Map<String, Double> overriddenDistances;
 	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
@@ -225,6 +228,14 @@ public class TrackedInstance {
 
 	public void setGroupId(int groupId) {
 		this.groupId = groupId;
+	}
+
+	public Map<String, Double> getOverriddenDistances() {
+		return overriddenDistances;
+	}
+
+	public void setOverriddenDistances(Map<String, Double> overriddenDistances) {
+		this.overriddenDistances = overriddenDistances;
 	}
 
 	@Override
