@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -49,6 +50,9 @@ public class TTDescriptor {
 	
 	private Map<Integer, List<Geolocation>> shapeMap = new HashMap<>();
 	private Map<Integer, Geolocation> stopMap = new HashMap<>();
+	
+	// map shapes to set of time 
+	private ArrayListMultimap<Integer, int[]> shapeTimeMap = ArrayListMultimap.create();
 	// map stopId to set of descriptors
 	private Multimap<Integer, TTLineDescriptor> stopDescriptors = LinkedHashMultimap.create();
 	// map matrix index to stopIds. Represent the cells with values to avoid sparse matrix traversal
@@ -190,10 +194,35 @@ public class TTDescriptor {
 		for (String[] str : stopTimes) {
 			if (tripMap.get(str[0]) != null) {
 				stopDescriptors.put(stopIDMap.get(str[3]), tripMap.get(str[0]));
-			} else {
-				continue;
+//				updateShapeTime(str[1], tripMap.get(str[0]));
+//			} else {
+//				continue;
 			}
 		}
+	}
+
+	/**
+	 * @param string
+	 * @param ttLineDescriptor
+	 */
+	private void updateShapeTime(String time, TTLineDescriptor ttLineDescriptor) {
+		if (ttLineDescriptor == null) return;
+		int shapeId = ttLineDescriptor.shape;
+		int timeValue = timeToInt(time);
+		List<int[]> intervals = shapeTimeMap.get(shapeId);
+		if (intervals == null) {
+//			intervals.p
+		}
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * @param time
+	 * @return
+	 */
+	private int timeToInt(String time) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	public Map<String, TTLineDescriptor> loadTrips(InputStream tripSrc) {

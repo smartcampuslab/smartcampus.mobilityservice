@@ -158,16 +158,17 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
-				logger.warn("Storing geolocations, user not found.");
+				logger.error("Storing geolocations, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return "";
 			}
-
-			logger.info("Storing geolocations for " + userId + ", " + geolocationsEvent.getDevice());
+			int pointCount = 0;
+			if (geolocationsEvent.getLocation() != null) pointCount = geolocationsEvent.getLocation().size(); 
+			logger.info("Storing "+pointCount+" geolocations for " + userId + ", " + geolocationsEvent.getDevice());
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				logger.warn("Storing geolocations, gameId not found.");
+				logger.error("Storing geolocations, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return "";
 			}
@@ -234,7 +235,7 @@ public class GamificationController {
 						// locations with empty idTrip are possible only upon
 						// initialization/synchronization.
 						// we skip them here
-						// logger.info("location without idTrip, user: "+userId);
+						logger.warn("location without idTrip, user: "+userId);
 						continue;
 						// if (lastTravelId != null) {
 						// locationTravelId = lastTravelId;
@@ -329,7 +330,7 @@ public class GamificationController {
 			}
 
 			if (geolocationsByItinerary.keySet() == null || geolocationsByItinerary.keySet().isEmpty()) {
-				logger.warn("No geolocationsByItinerary set.");
+				logger.error("No geolocationsByItinerary set.");
 			}
 			
 			for (String key : geolocationsByItinerary.keySet()) {
@@ -344,7 +345,7 @@ public class GamificationController {
 				pars.put("userId", userId);
 				TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
 				if (res == null) {
-					logger.warn("No existing TrackedInstance found.");
+					logger.error("No existing TrackedInstance found.");
 					res = new TrackedInstance();
 					res.setClientId(travelId);
 					res.setDay(day);
@@ -466,14 +467,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
-				logger.warn("Start freetracking, user not found.");
+				logger.error("Start freetracking, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				logger.warn("Start freetracking, gameId not found.");
+				logger.error("Start freetracking, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -514,14 +515,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
-				logger.warn("Start planned journey, user not found.");
+				logger.error("Start planned journey, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				logger.warn("Start planned journey, gameId not found.");
+				logger.error("Start planned journey, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
@@ -584,14 +585,14 @@ public class GamificationController {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
-				logger.warn("Start temporary journey, user not found.");
+				logger.error("Start temporary journey, user not found.");
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
 
 			String gameId = getGameId(appId);
 			if (gameId == null) {
-				logger.warn("Start temporary journey, gameId not found.");
+				logger.error("Start temporary journey, gameId not found.");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
