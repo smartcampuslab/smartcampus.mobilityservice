@@ -66,10 +66,10 @@ public class TrackValidator {
 
 	public static final double MIN_COVERAGE_THRESHOLD = 30; // %
 
-	public static final double DISTANCE_THRESHOLD = 250; // meters TODO change to 250
+	public static final double DISTANCE_THRESHOLD = 250; // meters 
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
-	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters TODO change to 100
-	private static final double MAX_AVG_SPEED_THRESHOLD = 100; // km/h
+	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters 
+	private static final double MAX_AVG_SPEED_THRESHOLD = 200; // km/h
 	
 	/**
 	 * Preprocess tracked data: spline, remove outstanding points, remove potentially erroneous start / stop points 
