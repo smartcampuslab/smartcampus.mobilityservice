@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.mail.MessagingException;
@@ -254,6 +255,9 @@ public class ReportEmailSender {
 						// List<List> challLists = challUtils.correctCustomData(completeState, 0);
 						if (challLists != null) {
 							challenges = challLists.getActiveChallengeData();
+							if (challenges != null) {
+								challenges = challenges.stream().filter(x -> !x.getSuccess().booleanValue()).collect(Collectors.toList());
+							}
 							lastWeekChallenges = challLists.getOldChallengeData();
 						}
 					} catch (JSONException e) {
