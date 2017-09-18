@@ -181,6 +181,10 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$('#confirmModal1').modal();
 	}	
 	
+	$scope.openChangeDistances = function(instance) {
+		$('#distancesModal').modal();
+	}		
+	
 	$scope.switchCurrentValidity = function() {
 		console.log("SV -> " + $scope.selectedInstance.changedValidity);
 		$http.post("console/itinerary/changeValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
@@ -196,6 +200,13 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 //		$scope.selectedInstance.changedValidity = !$scope.selectedInstance.changedValidity;
 //	}
 }	
+	
+	$scope.overrideDistances = function(instance) {
+		console.log(instance);
+		var distances = instance.overriddenDistances != null && instance.overriddenDistances.length != 0 ? instance.overriddenDistances : {}
+		$http.post("console/itinerary/overrideDistances/" + instance.id, distances, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+	});		
+	}
 	
 	
 	$scope.toggleToCheck = function(instance) {

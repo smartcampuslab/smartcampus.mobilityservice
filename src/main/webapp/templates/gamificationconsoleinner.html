@@ -113,7 +113,7 @@
 											</select>
 											</label>
 											<button class="btn btn-danger btn-sm" ng-click="openSwitchValidity(itinerary.instance)" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'  || itinerary.instance.id !== selectedInstance.id">Update validity</button>											
-
+											<button class="btn btn-danger btn-sm" ng-click="openChangeDistances()" ng-disabled="itinerary.instance.approved || itinerary.instance.scoreStatus == 'ASSIGNED'  || itinerary.instance.id !== selectedInstance.id">Change distances</button>
 											
 											<label class="itinerary-switch"><b>To check</b> <input type="checkbox"
 												ng-checked="itinerary.instance.toCheck" ng-click="toggleToCheck(itinerary.instance)" class="navbar-btn btn-sm"
@@ -260,5 +260,63 @@
 					</div>
 				</div>
 			</div>
-		</div>				
+		</div>		
+		
+		<div id="distancesModal" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Distances (in meters)</h3>
+						<!-- <h4 class="modal-title">{{selectedInstance.freeTrackingTransport == null}}</h3> -->
+					</div>
+					<div class="modal-body">
+					<form  id="notification-form">
+						<div class="form-group">
+							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'walk' || selectedInstance.freeTrackingTransport == null">
+								<div class="col-md-8 text-right"><label>Walk</label></div>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="customWalk"
+										ng-model="selectedInstance.overriddenDistances.walk">
+								</div>
+							</div>
+							
+							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'bike' || selectedInstance.freeTrackingTransport == null">
+								<div class="col-md-8 text-right"><label>Bike</label></div>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="customBike"
+										ng-model="selectedInstance.overriddenDistances.bike">
+								</div>
+							</div>							
+							
+							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'bus' || selectedInstance.freeTrackingTransport == null">
+								<div class="col-md-8 text-right"><label>Bus</label></div>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="customBus"
+										ng-model="selectedInstance.overriddenDistances.bus">
+								</div>
+							</div>							
+							
+							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'train' || selectedInstance.freeTrackingTransport == null">
+								<div class="col-md-8 text-right"><label>Train</label></div>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="customTrain"
+										ng-model="selectedInstance.overriddenDistances.train">
+								</div>
+							</div>							
+							
+						<div class="form-group">
+							<button class="btn btn-primary" type="button" ng-click="overrideDistances(selectedInstance)" data-dismiss="modal">Save</button>
+							<button class="btn btn-primary right" type="button" data-dismiss="modal">Cancel</button>
+						</div>								
+							
+					</form>					
+					
+					
+				</div>
+				</div>
+			</div>
+		</div>			
+		
+		
+				
 	</div>
