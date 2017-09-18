@@ -221,7 +221,8 @@ public class DomainStorage {
 			}
 			if (tracked.getOverriddenDistances() != null) {
 				update.set("overriddenDistances", tracked.getOverriddenDistances());
-			}			
+				
+			}
 			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
 			

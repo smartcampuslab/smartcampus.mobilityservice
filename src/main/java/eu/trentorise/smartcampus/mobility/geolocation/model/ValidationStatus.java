@@ -451,6 +451,7 @@ public class ValidationStatus {
 	public void setCertified(boolean certified) {
 		this.certified = certified;
 	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
