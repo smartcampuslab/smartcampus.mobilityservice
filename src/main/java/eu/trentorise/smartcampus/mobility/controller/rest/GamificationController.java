@@ -657,6 +657,7 @@ public class GamificationController {
 			result.setItinerary(instance.getItinerary());
 			if (instance.getGeolocationEvents() != null && !instance.getGeolocationEvents().isEmpty()) {
 				List<Geolocation> geo = Lists.newArrayList(instance.getGeolocationEvents());
+				geo = GamificationHelper.optimize(geo);
 				Collections.sort(geo);				
 				result.setGeolocationPolyline(GamificationHelper.encodePoly(geo));
 			}
