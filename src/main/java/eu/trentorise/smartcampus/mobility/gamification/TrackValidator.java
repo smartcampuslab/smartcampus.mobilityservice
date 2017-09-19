@@ -251,12 +251,12 @@ public class TrackValidator {
 					if (subtrackPrecision >= status.getValidityThreshold()) break;
 				}
 				interval.setMatch(subtrackPrecision);
-				transportDistance = interval.getDistance();
+				transportDistance += interval.getDistance();
 				if (subtrackPrecision >= status.getValidityThreshold()) {
 					status.setMatchedIntervals(status.getMatchedIntervals()+1);
 					matchedDistance += interval.getDistance();
 				}
-				coveredDistance += transportDistance * subtrackPrecision / 100.0;
+				coveredDistance += interval.getDistance() * subtrackPrecision / 100.0;
 			}
 			double coverage = 100.0 * matchedDistance / transportDistance;// status.getDistance();
 			if (checkCertificate) {

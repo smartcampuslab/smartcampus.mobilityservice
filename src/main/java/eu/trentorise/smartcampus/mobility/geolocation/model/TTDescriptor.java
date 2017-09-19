@@ -20,14 +20,23 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
@@ -43,6 +52,10 @@ import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
  */
 public class TTDescriptor {
 
+	private static final Pattern TIME_REG = Pattern.compile("(\\d{2}):(\\d{2}):\\d{2}");
+	
+	private static final Logger logger = LoggerFactory.getLogger(TTDescriptor.class);
+	
 	private Map<Integer, String> routeMap = new HashMap<>();
 	private Map<String, Integer> routeIDMap = new HashMap<>();
 	private Map<String, Integer> shapeIDMap = new HashMap<>();
@@ -150,6 +163,14 @@ public class TTDescriptor {
 			set.clear();
 		}
 		Collection<TTLineDescriptor> descriptors = null;
+		// filter occurrences for time of shapes
+		Set<TTLineDescriptor> keys = new HashSet<>(occurences.keySet());
+		for(TTLineDescriptor d : keys) {
+			if (!validTime(d.shape, points.get(0).getRecorded_at(), points.get(points.size()-1).getRecorded_at())) {
+				occurences.remove(d);
+			}
+		} 
+		
 		if (occurences.size() > 5) {
 			List<TTLineDescriptor> list = new ArrayList<>(occurences.keySet());
 			list.sort((a,b) -> {
@@ -177,6 +198,21 @@ public class TTDescriptor {
 		return descriptors.stream().map(d -> shapeMap.get(d.shape)).collect(Collectors.toList());
 	}
 	
+	/**
+	 * @param shape
+	 * @param recorded_at
+	 * @param recorded_at2
+	 * @return true if tracked time interval overlaps with the shape intervals
+	 */
+	private boolean validTime(int shape, Date from, Date to) {
+		List<int[]> intervals = shapeTimeMap.get(shape);
+		int[] passInterval = new int[]{timeToInt(from)-30, timeToInt(to)+30};
+		for (int[] interval: intervals) {
+			if (passInterval[1] >= interval[0] && passInterval[0] <= interval[1]) return true;
+		}
+		return false;
+	}
+
 	private static int col(double w, double lat, double lon, double distance) {
 		return (int) Math.ceil(GamificationHelper.harvesineDistance(lat, w, lat, lon) / distance);
 	}
@@ -191,38 +227,89 @@ public class TTDescriptor {
 		.map(s -> s.split(","))
 		.filter(a -> !a[0].isEmpty() && !a[0].equals("trip_id"))
 		.collect(Collectors.toList());
+		
+		Map<String, Integer> minMap = new HashMap<>();
+		Map<String, Integer> maxMap = new HashMap<>();
+		
 		for (String[] str : stopTimes) {
 			if (tripMap.get(str[0]) != null) {
 				stopDescriptors.put(stopIDMap.get(str[3]), tripMap.get(str[0]));
-//				updateShapeTime(str[1], tripMap.get(str[0]));
+				int time = 0;
+				try {
+					time = timeToInt(str[1]);
+				} catch (Exception e) {
+					logger.error("Incorrect stop time string: "+ Arrays.toString(str));
+					continue;
+				}
+				minMap.put(str[0], Math.min(time, minMap.getOrDefault(str[0], Integer.MAX_VALUE)));
+				maxMap.put(str[0], Math.max(time, maxMap.getOrDefault(str[0], Integer.MIN_VALUE)));
 //			} else {
 //				continue;
 			}
 		}
+		updateShapeTimes(minMap, maxMap, tripMap);
 	}
 
 	/**
-	 * @param string
-	 * @param ttLineDescriptor
+	 * Populate shape time map using trip times. The overlapping trips for the same shape are merged
+	 * @param minMap
+	 * @param maxMap
+	 * @param tripMap
 	 */
-	private void updateShapeTime(String time, TTLineDescriptor ttLineDescriptor) {
-		if (ttLineDescriptor == null) return;
-		int shapeId = ttLineDescriptor.shape;
-		int timeValue = timeToInt(time);
-		List<int[]> intervals = shapeTimeMap.get(shapeId);
-		if (intervals == null) {
-//			intervals.p
+	private void updateShapeTimes(Map<String, Integer> minMap, Map<String, Integer> maxMap, Map<String, TTLineDescriptor> tripMap) {
+		// raw data: start/stop times of all the trips corresponding to a shape
+		ArrayListMultimap<Integer, int[]> rawIntervals = ArrayListMultimap.create();
+		minMap.keySet().forEach(t -> {
+			rawIntervals.put(tripMap.get(t).shape, new int[]{minMap.get(t), maxMap.get(t)});
+		});
+		// process each shape
+		for (int shape: rawIntervals.keySet()) {
+			List<int[]> intervals = rawIntervals.get(shape);
+			// sort ascending
+			intervals.sort((ia,ib) -> {
+				return 	  ia[0] != ib[0] 
+						? ia[0] - ib[0]
+						: ia[1] - ib[1];
+			});
+			List<int[]> newIntervals = new ArrayList<>();
+			// merge intervals 
+			int[] prev = intervals.get(0);
+			for (int i = 1; i < intervals.size(); i++) {
+				int[] curr = intervals.get(i);
+				if (curr[0] <= prev[1]) {
+					prev[1] = curr[1];
+				} else {
+					newIntervals.add(prev);
+					prev = curr;
+				}
+			}
+			newIntervals.add(prev);
+			shapeTimeMap.putAll(shape, newIntervals);
 		}
-		// TODO Auto-generated method stub
 	}
 
 	/**
 	 * @param time
-	 * @return
+	 * @return minutes of the day
 	 */
 	private int timeToInt(String time) {
-		// TODO Auto-generated method stub
-		return 0;
+		// use regexp as hours can go beyond 23 
+		Matcher matcher = TIME_REG.matcher(time);
+		matcher.find();
+		return Integer.parseInt(matcher.group(1)) * 60 + Integer.parseInt(matcher.group(2));
+		
+//		LocalTime lt = LocalTime.parse(time);
+//		return lt.getHour() * 60 + lt.getMinute();
+	}
+
+	/**
+	 * @param to
+	 * @return
+	 */
+	private int timeToInt(Date d) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		return c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);
 	}
 
 	public Map<String, TTLineDescriptor> loadTrips(InputStream tripSrc) {
