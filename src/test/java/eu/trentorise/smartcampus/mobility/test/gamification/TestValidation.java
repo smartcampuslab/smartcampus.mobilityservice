@@ -16,16 +16,14 @@
 
 package eu.trentorise.smartcampus.mobility.test.gamification;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.AssertTrue;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +50,7 @@ import it.sayservice.platform.smartplanner.data.message.TType;
  * @author raman
  *
  */
-@Ignore
+//@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource(locations="classpath:application.properties")
 @ContextConfiguration(classes = {RemoteTestConfig.class})
@@ -188,10 +186,10 @@ public class TestValidation {
 	@Test
 	public void validateTrains() throws Exception {
 		Query q = Query.query(Criteria
-				.where("itinerary").exists(true)
+				.where("itinerary").exists(false)
 				.and("day").gte("2016/09/10")
-				.and("itinerary.data.leg.transport.type").is("TRAIN")
-//				.and("id").is("5812c801e4b0b729cf3837fa")
+//				.and("itinerary.data.leg.transport.type").is("TRAIN")
+				.and("id").is("59bb5be79045ea160d8aed8e")
 				);
 		q.fields().include("id");
 		List<TrackedInstance> planned = template.find(q, TrackedInstance.class, "trackedInstances");
@@ -201,11 +199,11 @@ public class TestValidation {
 		
 		for (TrackedInstance t : planned) {
 			ExtTrackedInstance track = template.findOne(Query.query(Criteria.where("id").is(t.getId())), ExtTrackedInstance.class, "trackedInstances");
-			if (!isSinglePT(track)) continue;
+//			if (!isSinglePT(track)) continue;
 			
 			ValidationStatus result = validator.validateFreeTracking(track.getGeolocationEvents(), "train", APP_ID).getValidationStatus();
 //			System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getSwitchValidity()));
-//			System.err.print(result);
+			System.err.print(result);
 			
 			if (result.getValidationOutcome().equals(TravelValidity.PENDING) && track.getValidationResult().isValid()) {
 				System.err.println("---------NEGATIVE--------\n");
@@ -297,10 +295,9 @@ public class TestValidation {
 	@Test
 	public void validateBuses() throws Exception {
 		Query q = Query.query(Criteria
-				.where("itinerary").exists(true)
-				.and("day").gte("2016/09/10")
-				.and("itinerary.data.leg.transport.type").is("BUS")
-				.and("id").is("5837e606e4b0f7196487ee9f")
+				.where("freeTrackingTransport").is("bus")
+				.and("day").gte("2017/09/09")
+//				.and("id").is("59b987f59045ea472f1892b8")
 				);
 		q.fields().include("id");
 		List<TrackedInstance> planned = template.find(q, TrackedInstance.class, "trackedInstances");
@@ -310,32 +307,21 @@ public class TestValidation {
 		
 		for (TrackedInstance t : planned) {
 			ExtTrackedInstance track = template.findOne(Query.query(Criteria.where("id").is(t.getId())), ExtTrackedInstance.class, "trackedInstances");
-			if (!isSinglePT(track)) continue;
+			if (!Boolean.TRUE.equals(track.getComplete())) continue;
 			
 			ValidationStatus result = validator.validateFreeTracking(track.getGeolocationEvents(), "bus", APP_ID).getValidationStatus();
-//			System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getSwitchValidity()));
-//			System.err.print(result);
 			
-			if (result.getValidationOutcome().equals(TravelValidity.PENDING) && track.getValidationResult().isValid() && !Boolean.TRUE.equals(track.getSwitchValidity())) {
-				track.getItinerary().getData().getLeg().forEach(leg -> {
-					if (leg.getTransport().getType().equals(TType.BUS)) {
-						System.err.println("ROUTE = "+ leg.getTransport().getRouteId());
-					}
-				});
-				
+			if (result.getValidationOutcome().equals(TravelValidity.PENDING) && track.getValidationResult().getValidationStatus().equals(TravelValidity.VALID) && (track.getValidationResult().isValid() || TravelValidity.VALID.equals(track.getChangedValidity()))) {
 				System.err.println("---------NEGATIVE--------");
-				System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getSwitchValidity()));
+				System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getChangedValidity()));
 				System.err.println(result);
 				falseNegative++;
 			}
-			if (result.getValidationOutcome().equals(TravelValidity.VALID) && !track.getValidationResult().isValid() && !Boolean.TRUE.equals(track.getSwitchValidity())) {
-//				track.getItinerary().getData().getLeg().forEach(leg -> {
-//					if (leg.getTransport().getType().equals(TType.BUS)) System.err.println("ROUTE = "+ leg.getTransport().getRouteId());
-//				});
-//				
-//				System.err.println("---------POSITIVE--------");
-//				System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getSwitchValidity()));
-//				System.err.println(result);
+			if (result.getValidationOutcome().equals(TravelValidity.VALID) && (TravelValidity.INVALID.equals(track.getChangedValidity()))) {
+				
+				System.err.println("---------POSITIVE--------");
+				System.err.println(String.format("%s - %s - %s: validated as (%s /%s)", track.getUserId(), track.getDay(), track.getId(), track.getValidationResult().isValid(), ""+track.getChangedValidity()));
+				System.err.println(result);
 				falsePositive++;
 			}
 		}
@@ -355,7 +341,7 @@ public class TestValidation {
 		Query q = Query.query(Criteria
 				.where("itinerary").exists(true)
 				.and("day").gte("2016/09/10")
-//				.and("id").is("57d63f64e4b068f5e614e988")
+				.and("id").is("59b8c0ad9045ea472f18912b")
 				);
 		q.fields().include("id");
 		List<TrackedInstance> planned = template.find(q, TrackedInstance.class, "trackedInstances");
