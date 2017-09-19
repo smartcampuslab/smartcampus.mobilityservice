@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
@@ -56,6 +58,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -111,6 +114,11 @@ public class DiaryController {
 	
 	private ObjectMapper mapper = new ObjectMapper();
 
+	@PostConstruct
+	public void init() {
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/diary")
 	public @ResponseBody List<DiaryEntry> getNotifications(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long from,
 			@RequestParam(required = false) Long to, @RequestParam(required = false) String typeFilter, HttpServletResponse response) throws Exception {
@@ -193,17 +201,45 @@ public class DiaryController {
 		List<Player> rps = playerRepositoryDao.findByNicknameRecommendationIgnoreCaseAndGameId(p.getNickname(), gameId);
 		if (rps != null) {
 			for (Player rp : rps) {
-				long timestamp = (long) rp.getPersonalData().get("timestamp");
-				DiaryEntry de = new DiaryEntry();
-				de.setType(DiaryEntryType.RECOMMENDED);
-				de.setTimestamp(timestamp);
-				de.setRecommendedNickname(rp.getNickname());
-				de.setEntityId(p.getNickname() + "_" + rp.getNickname());
-				result.add(de);
+				RestTemplate restTemplate = new RestTemplate();
+				ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + rp.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+						String.class);
+				String data = res.getBody();
+
+				int gl = getGreenLeavesPoints(data);
+				if (gl > 0) {
+					logger.info("Found recommended player " + rp.getId() + " with points: " + gl);
+					long timestamp = (long) rp.getPersonalData().get("timestamp");
+					DiaryEntry de = new DiaryEntry();
+					de.setType(DiaryEntryType.RECOMMENDED);
+					de.setTimestamp(timestamp);
+					de.setRecommendedNickname(rp.getNickname());
+					de.setEntityId(p.getNickname() + "_" + rp.getNickname());
+					result.add(de);
+				}
 			}
 		}
 		return result;
 	}
+	
+	@SuppressWarnings("rawtypes")
+	private int getGreenLeavesPoints(String data) throws Exception {
+		Map playerMap = mapper.readValue(data, Map.class);
+		if (playerMap.containsKey("state")) {
+			Map stateMap = mapper.convertValue(playerMap.get("state"), Map.class);
+			if (stateMap.containsKey("PointConcept")) {
+				List conceptList = mapper.convertValue(stateMap.get("PointConcept"), List.class);
+				for (Object o : conceptList) {
+					PointConcept concept = mapper.convertValue(o, PointConcept.class);
+					if ("green leaves".equals(concept.getName())) {
+						return concept.getScore();
+					}
+				}
+			}
+		}
+		return 0;
+	}	
+	
 	
 //	private void getRanking(Player p, String appId) throws Exception {
 //		RestTemplate restTemplate = new RestTemplate();
