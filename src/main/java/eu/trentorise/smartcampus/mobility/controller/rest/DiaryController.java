@@ -190,7 +190,7 @@ public class DiaryController {
 		List<DiaryEntry> result = Lists.newArrayList();
 
 		String gameId = appSetup.findAppById(appId).getGameId();
-		List<Player> rps = playerRepositoryDao.findByNicknameRecommendationAndGameId(p.getNickname(), gameId);
+		List<Player> rps = playerRepositoryDao.findByNicknameRecommendationIgnoreCaseAndGameId(p.getNickname(), gameId);
 		if (rps != null) {
 			for (Player rp : rps) {
 				long timestamp = (long) rp.getPersonalData().get("timestamp");
