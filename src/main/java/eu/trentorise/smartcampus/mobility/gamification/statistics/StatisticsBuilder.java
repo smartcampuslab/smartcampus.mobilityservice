@@ -304,7 +304,7 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private Range buildRanges(String day, AggregationGranularity granularity, String from, String to) throws Exception {
+	private static Range buildRanges(String day, AggregationGranularity granularity, String from, String to) throws Exception {
 		switch (granularity) {
 			case day:
 				return new Range(day, day);
@@ -314,8 +314,11 @@ public class StatisticsBuilder {
 				c.setFirstDayOfWeek(Calendar.MONDAY);
 				c.setTimeInMillis(sdf.parse(day).getTime());
 				c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+				c.add(Calendar.DAY_OF_YEAR, -2); // past saturday
 				range.from = sdf.format(new Date(c.getTimeInMillis()));
+				c.setTimeInMillis(sdf.parse(day).getTime());
 				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+				c.add(Calendar.DAY_OF_YEAR, -2); // next friday
 				range.to = sdf.format(new Date(c.getTimeInMillis()));
 				return range;
 			}	
@@ -386,6 +389,10 @@ public class StatisticsBuilder {
 			return true;
 		}
 		
+		@Override
+		public String toString() {
+			return "[" + from + "," + to + "]";
+		}
 		
 	}
 
