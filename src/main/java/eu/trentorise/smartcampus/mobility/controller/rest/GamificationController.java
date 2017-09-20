@@ -673,7 +673,7 @@ public class GamificationController {
 	}	
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
-	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
+	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 
 //		Criteria criteria = new Criteria("appId").is(appId);
 //
@@ -695,7 +695,7 @@ public class GamificationController {
 //		}
 //		
 		
-		Criteria criteria = generateFilterCriteria(appId, null, fromDate, toDate, excludeZeroPoints, false, toCheck, pendingOnly);
+		Criteria criteria = generateFilterCriteria(appId, filterUserId, filterTravelId, fromDate, toDate, excludeZeroPoints, false, toCheck, pendingOnly);
 		Query query = new Query(criteria);	
 		
 		List<TrackedInstance> result = storage.searchDomainObjects(query, TrackedInstance.class);
@@ -807,7 +807,7 @@ public class GamificationController {
 	}	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/console/approveFiltered")
-	public @ResponseBody void approveFiltered(@RequestHeader(required = false, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly) throws Exception {
+	public @ResponseBody void approveFiltered(@RequestHeader(required = false, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws Exception {
 //		Criteria criteria = new Criteria("changedValidity").ne(null).and("approved").ne(true);
 //
 //		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
@@ -828,7 +828,7 @@ public class GamificationController {
 //		}		
 //
 		
-		Criteria criteria = generateFilterCriteria(appId, null, fromDate, toDate, excludeZeroPoints, true, toCheck, pendingOnly);
+		Criteria criteria = generateFilterCriteria(appId, filterUserId, filterTravelId, fromDate, toDate, excludeZeroPoints, true, toCheck, pendingOnly);
 		Query query = new Query(criteria);	
 		
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
@@ -969,7 +969,8 @@ public class GamificationController {
 	@RequestMapping("/console/useritinerary/{userId}")
 	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
 			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
-			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) Boolean toCheck) throws Exception {
+			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) Boolean toCheck,
+			@RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws Exception {
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
 		try {
@@ -993,8 +994,10 @@ public class GamificationController {
 //				String td = shortSdf.format(new Date(toDate));
 //				criteria = criteria.andOperator(new Criteria("day").lte(td));
 //			}
+			
+			String actualUserId = (filterUserId == null || filterUserId.isEmpty()) ? userId : filterUserId;
 
-			Criteria criteria = generateFilterCriteria(appId, userId, fromDate, toDate, excludeZeroPoints, unapprovedOnly, toCheck, pendingOnly);
+			Criteria criteria = generateFilterCriteria(appId, actualUserId, filterTravelId, fromDate, toDate, excludeZeroPoints, unapprovedOnly, toCheck, pendingOnly);
 			Query query = new Query(criteria);	
 
 			logger.debug("Start itinerary query for " + userId);
@@ -1079,7 +1082,7 @@ public class GamificationController {
 	@RequestMapping("/console/users")
 	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
 			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly,
-			@RequestParam(required = false) Boolean toCheck) throws ParseException {
+			@RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws ParseException {
 		List<UserDescriptor> userList = null;
 
 		try {
@@ -1111,7 +1114,7 @@ public class GamificationController {
 //				criteria = criteria.andOperator(new Criteria("day").lte(td));
 //			}
 
-			Criteria criteria = generateFilterCriteria(appId, null, fromDate, toDate, excludeZeroPoints, unapprovedOnly, toCheck, pendingOnly);
+			Criteria criteria = generateFilterCriteria(appId, filterUserId, filterTravelId, fromDate, toDate, excludeZeroPoints, unapprovedOnly, toCheck, pendingOnly);
 			Query query = new Query(criteria);
 
 			List<TrackedInstance> tis = storage.searchDomainObjects(query, keys, TrackedInstance.class);
@@ -1321,36 +1324,41 @@ public class GamificationController {
 		return principal;
 	}
 	
-	private Criteria generateFilterCriteria(String appId, String userId, Long fromDate, Long toDate, Boolean excludeZeroPoints, Boolean unapprovedOnly, Boolean toCheck, Boolean pendingOnly) {
+	private Criteria generateFilterCriteria(String appId, String userId, String travelId, Long fromDate, Long toDate, Boolean excludeZeroPoints, Boolean unapprovedOnly, Boolean toCheck, Boolean pendingOnly) {
 		Criteria criteria = new Criteria("appId").is(appId);
 		
-		if (userId != null) {
+		if (userId != null && !userId.isEmpty()) {
 			criteria = criteria.and("userId").is(userId);
 		}
-		if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
-			criteria = criteria.and("estimatedScore").gt(0);
-		}
-		if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
-			criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
-//			Criteria("changedValidity").ne(null).and("approved").ne(true);
-		}
-		if (toCheck != null && toCheck.booleanValue()) {
-			criteria = criteria.and("toCheck").is(true);
-		}
+		
+		if (travelId != null && !travelId.isEmpty()) {
+			criteria = criteria.and("_id").is(travelId.trim());
+		} else {
 
-		if (fromDate != null) {
-			String fd = shortSdf.format(new Date(fromDate));
-			criteria = criteria.and("day").gte(fd);
-		}
+			if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
+				criteria = criteria.and("estimatedScore").gt(0);
+			}
+			if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
+				criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
+				// Criteria("changedValidity").ne(null).and("approved").ne(true);
+			}
+			if (toCheck != null && toCheck.booleanValue()) {
+				criteria = criteria.and("toCheck").is(true);
+			}
 
-		if (toDate != null) {
-			String td = shortSdf.format(new Date(toDate));
-			criteria = criteria.andOperator(new Criteria("day").lte(td));
-		}
-		if (pendingOnly) {
-			criteria = criteria.orOperator(new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.PENDING).and("changedValidity").is(null),
-					new Criteria("changedValidity").is(TravelValidity.PENDING),
-					new Criteria("validationResult.validationStatus.validationOutcome").is(null));
+			if (fromDate != null) {
+				String fd = shortSdf.format(new Date(fromDate));
+				criteria = criteria.and("day").gte(fd);
+			}
+
+			if (toDate != null) {
+				String td = shortSdf.format(new Date(toDate));
+				criteria = criteria.andOperator(new Criteria("day").lte(td));
+			}
+			if (pendingOnly) {
+				criteria = criteria.orOperator(new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.PENDING).and("changedValidity").is(null),
+						new Criteria("changedValidity").is(TravelValidity.PENDING), new Criteria("validationResult.validationStatus.validationOutcome").is(null));
+			}
 		}
 		
 		return criteria;
