@@ -44,19 +44,26 @@
               
               <div style="margin: 50px 5px 5px 5px" align="center">
                 <h1>
-                  <font face="Raleway-bold" size="48" color="gray"><strong th:text="#{unsubscribe.title}">Viaggia Play&amp;Go</strong></font>
+                  <font face="Raleway-bold" size="48" color="gray"><strong>Viaggia Play&amp;Go</strong></font>
                 </h1>
-                <p th:text="#{unsubscribe.req1}">
-                </p>
-                <p th:text="#{unsubscribe.req2}">
+                <p class="big-text" align="left">
+                <span th:utext="#{unsubscribe.p1}">La tua richiesta di disattivazione delle notifiche via mail</span>&nbsp;
+                 
+                <strong th:if="${wsresult}" th:utext="#{unsubscribe.oktext1}"> &egrave; andata a buon fine</strong>&nbsp; 
+                <span th:if="${wsresult}" th:utext="#{unsubscribe.oktext2}">Per tanto non riceverai pi&ugrave; alcuna notifica.</span><br />
+
+                <strong th:if="${!wsresult}" th:utext="#{unsubscribe.kotext1}">non &egrave; andata a buon fine</strong>&nbsp; 
+                <span th:if="${!wsresult}" th:utext="#{unsubscribe.kotext2}">Riprova pi&ugrave; tardi.</span><br />
+
+                <span th:utext="#{unsubscribe.p2}">Grazie per la tua partecipazione al gioco ViaggiaTrento Play&amp;Go, continua a muoverti in modo green e ad usare la app!</span><br /><br />
+                &emsp;
+                <em th:utext="#{unsubscribe.p3}">Lo staff di Play&amp;Go</em>
                 </p>
               </div>
               
               <div class="row" style="margin-right: 10px" align="right">
-                <form method="post">
                 &nbsp;
-                <button class="btn btn-success btn-lg" role="button"><font face="Raleway" size="4"><strong th:text="#{unsubscribe.do}">Conferma</strong></font></button>
-                </form>
+                <a id="btn_login_test" class="btn btn-success btn-lg" onclick="goToApp()" role="button"><font face="Raleway" size="4"><strong>OK</strong></font></a>
               </div>
             </div>
           </div>

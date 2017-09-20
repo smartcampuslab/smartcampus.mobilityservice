@@ -757,37 +757,64 @@ public class GamificationWebController {
 	}
 
 	// Method used to unsubscribe user to mailing list
-		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
-		public 
-		ModelAndView unsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
-			ModelAndView model = new ModelAndView("web/unsubscribe");
-			String user_language = "it";
-			Player p = null;
-			if(!StringUtils.isEmpty(playerId)) { // && playerId.length() >= 16){
-				logger.debug("WS-GET. Method unsubscribeMail. Passed data : " + playerId);
-				try {
-					PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
-					String sId = identity.playerId;
-					String gameId = identity.gameId;
-					if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
-						logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
-							p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
-							p.setSendMail(false);
-							playerRepositoryDao.save(p);
-							user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
-					}
-				} catch (Exception ex){
-					logger.error("Error in mail unsubscribtion " + ex.getMessage());
-					p = null;
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
+	public 
+	ModelAndView unsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
+		ModelAndView model = new ModelAndView("web/unsubscribe");
+		String user_language = "it";
+		Player p = null;
+		if(!StringUtils.isEmpty(playerId)) { // && playerId.length() >= 16){
+			logger.debug("WS-GET. Method unsubscribeMail. Passed data : " + playerId);
+			try {
+				PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+				String sId = identity.playerId;
+				String gameId = identity.gameId;
+				if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
+					logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
+					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
 				}
+			} catch (Exception ex){
+				logger.error("Error in mail unsubscribtion " + ex.getMessage());
+				p = null;
 			}
-			boolean res = (p != null) ? true : false;
-			model.addObject("wsresult", res);
-			
-			RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(user_language));
-			return model;
-		}	
-	
+		}
+		boolean res = (p != null) ? true : false;
+		model.addObject("wsresult", res);
+		
+		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(user_language));
+		return model;
+	}	
+	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/unsubscribeMail/{playerId:.*}")	///{socialId}
+	public 
+	ModelAndView sendUnsubscribeMail(HttpServletRequest request, HttpServletResponse response, @PathVariable String playerId) throws Exception {
+		ModelAndView model = new ModelAndView("web/unsubscribesuccess");
+		String user_language = "it";
+		Player p = null;
+		if(!StringUtils.isEmpty(playerId)) { // && playerId.length() >= 16){
+			logger.debug("WS-GET. Method sendUnsubscribeMail. Passed data : " + playerId);
+			try {
+				PlayerIdentity identity = linkUtils.decryptIdentity(playerId);
+				String sId = identity.playerId;
+				String gameId = identity.gameId;
+				if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
+					logger.info("WS-GET. Method sendUnsubscribeMail. Found player : " + sId);
+					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					p.setSendMail(false);
+					playerRepositoryDao.save(p);
+					user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
+				}
+			} catch (Exception ex){
+				logger.error("Error in mail unsubscribtion " + ex.getMessage());
+				p = null;
+			}
+		}
+		boolean res = (p != null) ? true : false;
+		model.addObject("wsresult", res);
+		
+		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(user_language));
+		return model;
+	}	
 	
 	
 	private void computeRanking(ClassificationBoard board) {
