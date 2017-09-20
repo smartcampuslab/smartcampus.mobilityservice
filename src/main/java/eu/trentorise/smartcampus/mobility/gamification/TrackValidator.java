@@ -219,6 +219,10 @@ public class TrackValidator {
 		// basic validation
 		List<Geolocation> points = prevalidate(track, status, areas, DISTANCE_THRESHOLD);
 		if (status.getValidationOutcome() != null) {
+			// no too short error for PT trips. Replace with DOES_NOT_MATCH error. 
+			if (ERROR_TYPE.TOO_SHORT.equals(status.getError())) {
+				status.setError(ERROR_TYPE.DOES_NOT_MATCH);
+			}
 			return status;
 		}
 		
