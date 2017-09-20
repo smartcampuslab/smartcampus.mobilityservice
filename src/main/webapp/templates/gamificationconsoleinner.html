@@ -1,7 +1,7 @@
 	<div id="console" class="console" ng-controller="GameCtrl">
 		<div class="row">
 			<div class="col-md-4">
-				<form>
+				<form id="parsForm" name="parsForm" dl-enter-key="reload()">
 					<div class="panel panel-default padding">
 						<div class="row">
 							<div class="col-md-3">
@@ -15,19 +15,23 @@
 					</div>
 					<div class="panel panel-default padding">
 						<div class="row">
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>
+								<button class="btn btn-primary btn-sm" ng-click="clearFilter(parsForm)">Clear filter</button>
 							</div>
-							<div class="col-md-9 text-right">
+							
+							<div class="col-md-8 text-right">
 								<label class="form-check"  style="color: red;"> <input type="checkbox" ng-click="allDates=!allDates" class="navbar-btn btn-sm">All dates
 								</label>							
 								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
 								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
 								</label> <label class="form-check"> <input type="checkbox" ng-click="pendingOnly=!pendingOnly" class="navbar-btn btn-sm">Pending only
 								</label>
-								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check 
+								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check</label>
 							</div>
+
 						</div>
+						
 						<div class="row padding">
 							<div class="col-md-3 text-right">
 								<label>From:</label>
@@ -59,6 +63,18 @@
 									</span>
 								</div>
 							</div>
+
+							<div class="padding row pull-right col-md-12">
+								<div class="col-md-2 text-right"><label>User Id</label></div>
+								<div class="col-md-2">
+									<input type="text" class="form-control" id="userId" ng-model="filterUserId">
+								</div>
+								<div class="col-md-2 text-right"><label>Travel Id</label></div>
+								<div class="col-md-6">
+									<input type="text" class="form-control" id="travelId" ng-model="filterTravelId">
+								</div>								
+							</div>	
+
 						</div>
 					</div>
 				</form>

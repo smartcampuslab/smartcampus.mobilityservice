@@ -1,5 +1,19 @@
 var gamificationConsole = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable']);
 
+gamificationConsole.directive('dlEnterKey', function() {
+    return function(scope, element, attrs) {
+        element.bind("keydown keypress", function(event) {
+            var keyCode = event.which || event.keyCode;
+            if (keyCode === 13) {
+                scope.$apply(function() {
+                    scope.$eval(attrs.dlEnterKey);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+});
+
 gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.users = [];
 	$scope.userMap = {};
@@ -24,6 +38,9 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.scores = "";
 	
 	$scope.validities = ['', 'PENDING', 'INVALID', 'VALID'];
+	
+	$scope.filterUserId = ""
+	$scope.filterTravelId = ""
 	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
@@ -64,7 +81,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
 			spinner.spin(target);
-			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
 				data.data.forEach(function(descr) {
@@ -95,7 +112,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			if (!$scope.userMap[user]) {
 				spinner.spin(target);
 				console.log($scope.allDates);
-				$http.get("console/useritinerary/" + user + "?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+				$http.get("console/useritinerary/" + user + "?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 					spinner.stop();
 				});
@@ -159,7 +176,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.revalidate = function() {
 		spinner.spin(target);
 //		$http.post("console/validate?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-		$http.post("console/validate?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/validate?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
@@ -223,7 +240,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.approveAll = function() {
 //		spinner.spin(target);		
-		$http.post("console/approveFiltered?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.post("console/approveFiltered?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
@@ -236,6 +253,26 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			spinner.stop();
 		});
 	}	
+	
+	$scope.clearFilter = function() {
+		document.getElementById("parsForm").reset();
+		$scope.allDates = false;
+
+		$scope.excludeZeroPoints = false;
+		$scope.toCheck = false;
+		$scope.pendingOnly = false;
+		$scope.filterUserId = "";
+		$scope.filterTravelId = "";
+		$scope.fromDate = Date.today().previous().saturday().previous().saturday();
+		$scope.toDate = Date.today().next().saturday().add(-1).minute();		
+		
+		$timeout(function() {
+			document.getElementById('fromDate').value = $scope.fromDate.toString('ddd MMM dd HH:mm');
+			document.getElementById('toDate').value = $scope.toDate.toString('ddd MMM dd HH:mm');
+		});
+		}
+
+	
 	
 //	$scope.getValidityStyle = function(instance) {
 //		if ((instance.valid & !instance.switchValidity) | (!instance.valid & instance.switchValidity)) {
