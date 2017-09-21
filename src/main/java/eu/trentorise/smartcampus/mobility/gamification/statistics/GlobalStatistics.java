@@ -12,6 +12,7 @@ public class GlobalStatistics {
 	private long updateTime;
 	private Map<AggregationGranularity, Map<String, Object>> stats;
 	
+	private String appId;
 	
 	public String getUserId() {
 		return userId;
@@ -30,6 +31,12 @@ public class GlobalStatistics {
 	}
 	public void setStats(Map<AggregationGranularity, Map<String, Object>> stats) {
 		this.stats = stats;
+	}
+	public String getAppId() {
+		return appId;
+	}
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 	
 	
