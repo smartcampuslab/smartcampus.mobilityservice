@@ -49,6 +49,7 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
+import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ItineraryDescriptor;
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
@@ -661,6 +662,7 @@ public class GamificationController {
 				Collections.sort(geo);				
 				result.setGeolocationPolyline(GamificationHelper.encodePoly(geo));
 			}
+			overrideWithOverridden(instance);
 			result.setValidationResult(instance.getValidationResult());
 			if (instance.getChangedValidity() != null) {
 				result.setValidity(instance.getChangedValidity());	
@@ -671,6 +673,18 @@ public class GamificationController {
 		
 		return result;
 	}	
+	
+	private void overrideWithOverridden(TrackedInstance ti) {
+		if (ti.getOverriddenDistances() == null || ti.getOverriddenDistances().isEmpty() || ti.getValidationResult() == null || ti.getValidationResult().getValidationStatus() == null) {
+			return;
+		}
+		
+		if (ti.getFreeTrackingTransport() != null) {
+			ti.getOverriddenDistances().entrySet().forEach(entry -> ti.getValidationResult().getValidationStatus().getEffectiveDistances().put(TrackValidator.toModeType(entry.getKey()), entry.getValue()));
+		} else {
+			ti.getOverriddenDistances().entrySet().forEach(entry -> ti.getValidationResult().getValidationStatus().getPlannedDistances().put(TrackValidator.toModeType(entry.getKey()), entry.getValue()));
+		}
+	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
