@@ -142,7 +142,7 @@ public class TrackValidator {
 
 		if (points.size() < 2) {
 			status.setValidationOutcome(TravelValidity.INVALID);
-			status.setError(ERROR_TYPE.TOO_SHORT);
+			status.setError(ERROR_TYPE.NO_DATA);
 			return points;
 		}
 		
@@ -330,7 +330,12 @@ public class TrackValidator {
 
 		MODE_TYPE mode = MODE_TYPE.BIKE; 
 		double speedThreshold = BIKE_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = BIKE_AVG_SPEED_THRESHOLD, guaranteedAvgSpeedThreshold = BIKE_GUARANTEED_AVG_SPEED_THRESHOLD; 
-		return validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, guaranteedAvgSpeedThreshold, BIKE_DISTANCE_THRESHOLD);
+		ValidationStatus status = validateFreeMode(track, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, avgSpeedThreshold, guaranteedAvgSpeedThreshold, BIKE_DISTANCE_THRESHOLD);
+
+		if (TravelValidity.INVALID.equals(status.getValidationOutcome()) && ERROR_TYPE.TOO_SHORT.equals(status.getError())) {
+			status.setError(ERROR_TYPE.DOES_NOT_MATCH);
+		}
+		return status;
 	}
 
 	
