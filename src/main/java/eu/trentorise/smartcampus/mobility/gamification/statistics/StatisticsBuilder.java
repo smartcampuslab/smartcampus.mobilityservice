@@ -26,7 +26,7 @@ import com.google.common.collect.Multimaps;
 import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
-import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 
 @Component
 public class StatisticsBuilder {
@@ -39,22 +39,22 @@ public class StatisticsBuilder {
 	@Qualifier("mongoTemplate")
 	MongoTemplate template;
 	
-	private StatisticsGroup computeStatistics(String userId, String from, String to, AggregationGranularity granularity) throws Exception {
-		StatisticsGroup result = statsByGranularity(userId, from, to, granularity);
+	private StatisticsGroup computeStatistics(String userId, String appId, String from, String to, AggregationGranularity granularity) throws Exception {
+		StatisticsGroup result = statsByGranularity(userId, appId, from, to, granularity);
 //		result.setGlobalStats(getGlobalStatistics(userId, start).getStats());
 		return result;
 	}
 	
-	public StatisticsGroup computeStatistics(String userId, long from, long to, AggregationGranularity granularity) throws Exception {
+	public StatisticsGroup computeStatistics(String userId, String appId, long from, long to, AggregationGranularity granularity) throws Exception {
 		String fromDay = sdf.format(new Date(from));
 		String toDay = sdf.format(new Date(to));
 		
-		return computeStatistics(userId, fromDay, toDay, granularity);
+		return computeStatistics(userId, appId, fromDay, toDay, granularity);
 	}	
 	
-	public GlobalStatistics getGlobalStatistics(String userId, String start, boolean dates) throws Exception {
-		Criteria criteria = new Criteria("userId").is(userId);
-		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000 * 60 * 60);
+	public GlobalStatistics getGlobalStatistics(String userId, String appId, String start, boolean dates) throws Exception {
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
+		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000 * 60 * 60 * 0);
 		Query query = new Query(criteria);
 		
 		GlobalStatistics statistics = template.findOne(query, GlobalStatistics.class, GLOBAL_STATISTICS);
@@ -62,24 +62,25 @@ public class StatisticsBuilder {
 			statistics = new GlobalStatistics();
 			statistics.setUserId(userId);
 			statistics.setUpdateTime(System.currentTimeMillis());
-			statistics.setStats(computeGlobalStatistics(userId, start, dates));
+			statistics.setStats(computeGlobalStatistics(userId, appId, start, dates));
+			statistics.setAppId(appId);
 			template.save(statistics, GLOBAL_STATISTICS);
 		}
 		
 		return statistics;
 	}
 	
-	private Map<AggregationGranularity, Map<String, Object>> computeGlobalStatistics(String userId, String start, boolean dates) throws Exception {
+	private Map<AggregationGranularity, Map<String, Object>> computeGlobalStatistics(String userId, String appId, String start, boolean dates) throws Exception {
 		Map<AggregationGranularity, Map<String, Object>> result = Maps.newHashMap();
 		for (AggregationGranularity granularity: AggregationGranularity.values()) {
-			result.put(granularity, computeGlobalStatistics(userId, start, granularity, dates));
+			result.put(granularity, computeGlobalStatistics(userId, appId, start, granularity, dates));
 		}
 		
 		return result;
 	}
 	
-	private Map<String, Object> computeGlobalStatistics(String userId, String start, AggregationGranularity granularity, boolean dates) throws Exception {
-		List<TrackedInstance> instances = findAll(userId);
+	private Map<String, Object> computeGlobalStatistics(String userId, String appId, String start, AggregationGranularity granularity, boolean dates) throws Exception {
+		List<TrackedInstance> instances = findAll(userId, appId);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
 		Multimap<Range, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, start, sdf.format(new Date()));
 		Map<Range, Map<String,Double>> rangeSum = statsByRanges(byWeek);
@@ -107,13 +108,13 @@ public class StatisticsBuilder {
 		return result;
 	}
 	
-	private StatisticsGroup statsByGranularity(String userId, String from, String to, AggregationGranularity granularity) throws Exception {
-		List<TrackedInstance> instances = find(userId, from, to);
+	private StatisticsGroup statsByGranularity(String userId, String appId, String from, String to, AggregationGranularity granularity) throws Exception {
+		List<TrackedInstance> instances = find(userId, appId, from, to);
 		Multimap<String, TrackedInstance> byDay = groupByDay(instances);
 		Multimap<Range, TrackedInstance> byWeek = mergeByGranularity(byDay, granularity, from, to);
 		Map<Range, Map<String,Double>> rangeSum = statsByRanges(byWeek);
 		
-		Map<String, String> outside = outside(userId, from, to);
+		Map<String, String> outside = outside(userId, appId, from, to);
 		
 		StatisticsGroup result = new StatisticsGroup();
 		if (outside.containsKey("before")) {
@@ -136,13 +137,13 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private List<TrackedInstance> findAll(String userId) {
-		Criteria criteria = new Criteria("userId").is(userId);//.and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
+	private List<TrackedInstance> findAll(String userId, String appId) {
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);//.and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
 		criteria.orOperator(
 				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -151,14 +152,14 @@ public class StatisticsBuilder {
 		return result;
 	}	
 	
-	private List<TrackedInstance> find(String userId, String from, String to) {
-		Criteria criteria = new Criteria("userId").is(userId);
+	private List<TrackedInstance> find(String userId, String appId, String from, String to) {
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 		criteria.orOperator(
 				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
-		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary");
+		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
 		
@@ -167,10 +168,10 @@ public class StatisticsBuilder {
 		return result;
 	}
 	
-	private Map<String, String> outside(String userId, String from, String to) {
+	private Map<String, String> outside(String userId, String appId, String from, String to) {
 		Map<String, String> result = Maps.newTreeMap();
 		
-		Criteria criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		criteria = criteria.and("day").lt(from);
 		Query query = new Query(criteria);
 		query.with(new Sort(Sort.Direction.DESC, "day"));
@@ -181,7 +182,7 @@ public class StatisticsBuilder {
 			result.put("before", before.getDay());
 		}
 		
-		criteria = new Criteria("userId").is(userId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
+		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		criteria = criteria.and("day").gt(to);
 		query = new Query(criteria);
 		query.with(new Sort(Sort.Direction.ASC, "day"));
@@ -228,12 +229,13 @@ public class StatisticsBuilder {
 			Map<String, Double> statByRange = Maps.newTreeMap();
 			for (TrackedInstance ti: group.get(groupKey)) {
 				Map<String, Double> dist = null;
-				Double val = ti.getValidationResult().getDistance();
-				if (val == null) {
-					val = 0.0;
-				}
+//				Double val = ti.getValidationResult().getDistance();
+//				if (val == null) {
+//					val = 0.0;
+//				}
 				if (ti.getFreeTrackingTransport() != null) {
-					dist = computeFreeTrackingDistances(val, ti.getFreeTrackingTransport());
+//					dist = computeFreeTrackingDistances(val, ti.getFreeTrackingTransport());
+					dist = computeFreeTrackingDistances(ti, true);
 //					statByRange.put("free tracking", statByRange.getOrDefault("free tracking", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
@@ -241,7 +243,8 @@ public class StatisticsBuilder {
 					
 				}
 				if (ti.getItinerary() != null) {
-					dist = computePlannedJourneyDistances(ti.getValidationResult().getValidationStatus());
+//					dist = computePlannedJourneyDistances(ti.getValidationResult().getValidationStatus());
+					dist = computePlannedJourneyDistances(ti, true);
 //					statByRange.put("planned", statByRange.getOrDefault("planned", 0.0) + 1);
 //					if (ti.getEstimatedScore() != null) {					
 //						statByRange.put("score", statByRange.getOrDefault("score", 0.0) + ti.getEstimatedScore());
@@ -290,19 +293,48 @@ public class StatisticsBuilder {
 //		return result;
 //	}		
 	
-	private Map<String, Double> computePlannedJourneyDistances(ValidationStatus vs) {
+//	private Map<String, Double> computePlannedJourneyDistances(ValidationStatus vs) {
+//		Map<String, Double> result = Maps.newTreeMap();
+//		if (vs.getPlannedDistances() != null && !vs.getPlannedDistances().isEmpty()) {
+//			vs.getPlannedDistances().entrySet().forEach(entry -> result.put(TrackValidator.toModeString(entry.getKey()), entry.getValue()));
+//		}
+//		return result;
+//	}
+//	
+//	private Map<String, Double> computeFreeTrackingDistances(Double distance, String ttype) {
+//		Map<String, Double> result = Maps.newTreeMap();
+//		result.put(ttype, distance);
+//		return result;
+//	}	
+	
+	
+	private Map<String, Double> computePlannedJourneyDistances(TrackedInstance ti, boolean userOverride) {
 		Map<String, Double> result = Maps.newTreeMap();
-		if (vs.getPlannedDistances() != null && !vs.getPlannedDistances().isEmpty()) {
-			vs.getPlannedDistances().entrySet().forEach(entry -> result.put(TrackValidator.toModeString(entry.getKey()), entry.getValue()));
+		if (ti.getValidationResult() != null && ti.getValidationResult().getValidationStatus() != null && ti.getValidationResult().getValidationStatus().getPlannedDistances() != null && !ti.getValidationResult().getValidationStatus().getPlannedDistances().isEmpty()) {
+			ti.getValidationResult().getValidationStatus().getPlannedDistances().entrySet().forEach(entry -> result.put(TrackValidator.toModeString(entry.getKey()), entry.getValue()));
+		}
+		if (userOverride && ti.getOverriddenDistances() != null && !ti.getOverriddenDistances().isEmpty()) {
+			ti.getOverriddenDistances().entrySet().forEach(entry -> result.put(entry.getKey(), entry.getValue()));
 		}
 		return result;
 	}
 	
-	private Map<String, Double> computeFreeTrackingDistances(Double distance, String ttype) {
+	private Map<String, Double> computeFreeTrackingDistances(TrackedInstance ti, boolean userOverride) {
 		Map<String, Double> result = Maps.newTreeMap();
-		result.put(ttype, distance);
+		String ttype = ti.getFreeTrackingTransport();
+		MODE_TYPE ettype = TrackValidator.toModeType(ttype);
+		if (ti.getValidationResult() != null && ti.getValidationResult().getValidationStatus() != null && ti.getValidationResult().getValidationStatus().getEffectiveDistances() != null) {
+			Double value = ti.getValidationResult().getValidationStatus().getEffectiveDistances().get(ettype);
+			result.put(ttype, value != null ? value : 0);
+		}
+		if (userOverride && ti.getOverriddenDistances() != null && ti.getOverriddenDistances().containsKey(ttype)) {
+			Double value = ti.getOverriddenDistances().get(ttype);
+			result.put(ttype, value != null ? value : 0);
+		}		
+		
 		return result;
-	}	
+	}		
+	
 	
 	private static Range buildRanges(String day, AggregationGranularity granularity, String from, String to) throws Exception {
 		switch (granularity) {

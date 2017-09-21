@@ -1180,7 +1180,7 @@ public class GamificationController {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}	
-			
+
 			long start = 0;
 			AppInfo ai = appSetup.findAppById(appId);
 			if (ai == null) {
@@ -1206,7 +1206,7 @@ public class GamificationController {
 			}
 			
 
-			result = statisticsBuilder.computeStatistics(userId, from, to, granularity);
+			result = statisticsBuilder.computeStatistics(userId, appId, from, to, granularity);
 			
 		} catch (Exception e) {
 			logger.error("Failed retrieving player statistics events: "+e.getMessage(),e);
@@ -1228,7 +1228,7 @@ public class GamificationController {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return null;
 			}	
-			
+
 			long start = 0;
 			AppInfo ai = appSetup.findAppById(appId);
 			if (ai == null) {
@@ -1244,7 +1244,7 @@ public class GamificationController {
 			startDate = sdf2.format(new Date(start));
 			
 
-			result = statisticsBuilder.getGlobalStatistics(userId, startDate, true);
+			result = statisticsBuilder.getGlobalStatistics(userId, appId, startDate, true);
 			
 		} catch (Exception e) {
 			logger.error("Failed retrieving player statistics events: "+e.getMessage(),e);
