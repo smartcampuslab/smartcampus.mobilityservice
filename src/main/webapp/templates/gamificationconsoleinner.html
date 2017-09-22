@@ -288,7 +288,7 @@
 					<div class="modal-body">
 					<form  id="notification-form">
 						<div class="form-group">
-							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'walk' || selectedInstance.freeTrackingTransport == null">
+							<div class="row padding pull-right" ng-if="!isTTypeDisabled(selectedInstance, 'walk')">
 								<div class="col-md-8 text-right"><label>Walk</label></div>
 								<div class="col-md-4">
 									<input type="text" class="form-control" id="customWalk"
@@ -296,7 +296,7 @@
 								</div>
 							</div>
 							
-							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'bike' || selectedInstance.freeTrackingTransport == null">
+							<div class="row padding pull-right" ng-if="!isTTypeDisabled(selectedInstance, 'bike')">
 								<div class="col-md-8 text-right"><label>Bike</label></div>
 								<div class="col-md-4">
 									<input type="text" class="form-control" id="customBike"
@@ -304,7 +304,7 @@
 								</div>
 							</div>							
 							
-							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'bus' || selectedInstance.freeTrackingTransport == null">
+							<div class="row padding pull-right" ng-if="!isTTypeDisabled(selectedInstance, 'bus')">
 								<div class="col-md-8 text-right"><label>Bus</label></div>
 								<div class="col-md-4">
 									<input type="text" class="form-control" id="customBus"
@@ -312,7 +312,7 @@
 								</div>
 							</div>							
 							
-							<div class="row padding pull-right" ng-if="selectedInstance.freeTrackingTransport == 'train' || selectedInstance.freeTrackingTransport == null">
+							<div class="row padding pull-right" ng-if="!isTTypeDisabled(selectedInstance, 'train')">
 								<div class="col-md-8 text-right"><label>Train</label></div>
 								<div class="col-md-4">
 									<input type="text" class="form-control" id="customTrain"

@@ -272,6 +272,21 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 		}
 
+	$scope.isTTypeDisabled = function(instance, ttype) {
+		if (instance == null) {
+			return true;
+		}
+		if (ttype == instance.freeTrackingTransport) {
+			return false;
+		}
+		for (i = 0; i < instance.itinerary.data.leg.length; i++) {
+			lg = instance.itinerary.data.leg[i];
+			if (ttype.toUpperCase() == lg.transport.type) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	
 //	$scope.getValidityStyle = function(instance) {
