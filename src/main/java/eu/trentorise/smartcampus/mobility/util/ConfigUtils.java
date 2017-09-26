@@ -124,7 +124,7 @@ public class ConfigUtils {
 	}
 	
 	public List<CheckinData> getCheckinEventData() throws Exception {
-		return (List<CheckinData>)configData.get(ConfigDataType.WEEK_DATA);
+		return (List<CheckinData>)configData.get(ConfigDataType.CHECKIN_EVENT_DATA);
 	}	
 	
 	public List<WeekWinnersData> getWeekWinnersData() throws Exception {
