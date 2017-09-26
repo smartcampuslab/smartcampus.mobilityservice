@@ -55,7 +55,6 @@ import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
-import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengeManager;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
@@ -110,7 +109,7 @@ public class DiaryController {
 	private BadgesCache badgesCache;
 
 	@Autowired
-	private ChallengeManager challengeManager;
+	private ChallengesUtils challengeUtils;
 	
 	private ObjectMapper mapper = new ObjectMapper();
 
@@ -267,10 +266,10 @@ public class DiaryController {
 
 		String allData = res.getBody();
 
-		List<ChallengeConcept> challengeConcepts = challengeManager.parse(allData);
+		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
-			String description = challengeManager.fillDescription(challengeConcept, language);
-//			String longDescription = challengeManager.fillLongDescription(challengeConcept, language);
+			String description = challengeUtils.fillDescription(challengeConcept, language);
+//			String longDescription = challengeUtils.fillLongDescription(challengeConcept, language);
 			
 			DiaryEntry de = new DiaryEntry();
 			de.setEntityId(challengeConcept.getName() + "_assigned");
