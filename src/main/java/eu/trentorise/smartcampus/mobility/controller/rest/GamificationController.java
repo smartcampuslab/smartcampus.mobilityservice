@@ -962,7 +962,7 @@ public class GamificationController {
 			try {
 				gamificationManager.sendCheckin(event, p.getId(), p.getGameId());
 			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e);
+				logger.error(e1.getMessage(), e1);
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return null;
 			}
