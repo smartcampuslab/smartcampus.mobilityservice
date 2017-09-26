@@ -960,7 +960,7 @@ public class GamificationController {
 		if (!checkIn.stream().anyMatch(e -> event.equals(e.getName()))) {
 			
 			try {
-				gamificationManager.sendCheckin(event, p.getId(), p.getGameId());
+				gamificationManager.sendCheckin(event, p.getId(), appId);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
