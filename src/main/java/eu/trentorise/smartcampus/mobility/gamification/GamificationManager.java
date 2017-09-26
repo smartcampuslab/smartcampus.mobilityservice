@@ -269,7 +269,7 @@ public class GamificationManager {
 		ExecutionDataDTO ed = new ExecutionDataDTO();
 		ed.setGameId(game.getId());
 		ed.setPlayerId(id);
-		ed.setActionId("checkin"+event);
+		ed.setActionId("checkin_"+event);
 		ed.setData(Collections.singletonMap("checkinType",event));
 
 		String content = JsonUtils.toJSON(ed);
