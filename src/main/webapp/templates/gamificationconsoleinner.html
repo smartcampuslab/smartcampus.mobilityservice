@@ -78,6 +78,8 @@
 						</div>
 					</div>
 				</form>
+				<!-- <b>{{tripsStats.total}}</b><i>???</i> -->
+			    <strong>({{tripsStats.total}} tracked, <span style="{{validColor(tripsStats)}}">{{tripsStats.invalid}} invalid</span>, <span style="{{pendingColor(tripsStats)}}">{{tripsStats.pending}} pending</span>)</strong>				
 				<div id="left-scrollable" ng-scrollable="{scrollX:'none',scrollY:'right'}" style="width: 100%; height: 100%;">
 					<div class="">
 						<div ng-repeat="user in users" class="panel panel-default user-row">

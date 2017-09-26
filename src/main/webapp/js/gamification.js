@@ -36,6 +36,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.approvedList = [{name: 'All', value : false}, {name: 'Modified', value : true}];
 	$scope.filterApproved = $scope.approvedList[0];
 	$scope.scores = "";
+	$scope.tripsStats = {total : 0, valid : 0, invalid: 0, pending: 0}
 	
 	$scope.validities = ['', 'PENDING', 'INVALID', 'VALID'];
 	
@@ -84,6 +85,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				$scope.userTotals = {};
+				$scope.tripsStats = {total : 0, valid : 0, invalid: 0, pending: 0}
+				
 				data.data.forEach(function(descr) {
 					users.push(descr.userId);
 					$scope.userTotals[descr.userId] = {
@@ -92,6 +95,10 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 						"invalid" : (descr.invalid),
 						"pending" : (descr.pending)
 					};
+					$scope.tripsStats.total += descr.total;
+					$scope.tripsStats.valid += descr.valid;
+					$scope.tripsStats.invalid += descr.invalid;
+					$scope.tripsStats.pending += descr.pending;
 				});
 
 				$scope.users = users;
