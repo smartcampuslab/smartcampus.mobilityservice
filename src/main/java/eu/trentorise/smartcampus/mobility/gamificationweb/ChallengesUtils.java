@@ -376,7 +376,7 @@ public class ChallengesUtils {
 		String counterNameA = null;
 		String counterNameB = null;
 		if (filterField != null) {
-			if (CHAL_FIELDS_COUNTER_NAME.equals(filterField)) {
+			if (CHAL_FIELDS_COUNTER_NAME.equals(filter)) {
 				String counterNames[] = filterField.split("_");
 				counterNameA = counterNames[0];
 				if (counterNames.length == 2) {
