@@ -1,6 +1,6 @@
 [{
 	"name": "absoluteIncrement",
-	"counterName": "_Km",
+	"filter": "_Km",
 	"description": {
 		"it": "Fai almeno <target> km <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "Do at least <target> km <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
@@ -8,7 +8,7 @@
 },
 {
 	"name": "absoluteIncrement",
-	"counterName": "_Trips",
+	"filter": "_Trips",
 	"description": {
 		"it": "Fai almeno <target> viaggi <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "Do at least <target> trips <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
@@ -16,7 +16,7 @@
 },
 {
 	"name": "absoluteIncrement",
-	"counterName": "_NoTrips",
+	"filter": "_NoTrips",
 	"description": {
 		"it": "Fai almeno <target> viaggi senza usare <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "Do at least <target> trips without <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
@@ -24,7 +24,7 @@
 },
 {
 	"name": "absoluteIncrement",
-	"counterName": "green leaves",
+	"filter": "green leaves",
 	"description": {
 		"it": "Ottieni almeno <target> punti <counterNameA> e avrai <bonusScore> punti <bonusPointType> in bonus.",
 		"en": "Get at least <target> <counterNameA> points and you will have <bonusScore> additional <bonusPointType> bonus points."
@@ -32,7 +32,7 @@
 },
 {
 	"name": "absoluteIncrement",
-	"counterName": "Recommendations",
+	"filter": "Recommendations",
 	"description": {
 		"it": "Raccomanda la App ad almeno <target> utenti e guadagni <bonusScore> punti <bonusPointType>.",
 		"en": "Recommend the app to at least <target> users and you will gain a bonus of <bonusScore> <bonusPointType> points."
@@ -40,7 +40,7 @@
 },
 {
 	"name": "percentageIncrement",
-	"counterName": "_Km",
+	"filter": "_Km",
 	"description": {
 		"it": "Fai almeno altri <target> km <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "Do at least <target> more km <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
@@ -48,7 +48,7 @@
 },
 {
 	"name": "percentageIncrement",
-	"counterName": "_Trips",
+	"filter": "_Trips",
 	"description": {
 		"it": "Fai almeno altri <target> viaggi <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "Do at least <target> more trips <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
@@ -56,7 +56,7 @@
 },
 {
 	"name": "percentageIncrement",
-	"counterName": "green leaves",
+	"filter": "green leaves",
 	"description": {
 		"it": "Ottieni almeno altri <target> punti <counterNameA> e avrai ulteriori <bonusScore> punti <bonusPointType> in bonus.",
 		"en": "Get at least <target> more <counterNameA> points and you will get <bonusScore> additional <bonusPointType> bonus points."
@@ -85,8 +85,18 @@
 },
 {
 	"name": "poiCheckin",
+	"filter": "Fai la cosa giusta",
 	"description": {
 		"it": "Sabato 29 o domenica 30 ottobre visita lo stand ViaggiaTrento Play&Go a \"Fa' la cosa giusta!\" ( TrentoFiere - Via di Briamasco, 2) usando una modalita' di trasporto sostenibile e vinci un bonus di <bonusScore> punti <bonusPointType>.",
 		"en": "On Saturday Oct. 29 or Sunday Oct. 30, visit the ViaggiaTrento Play&Go booth in the \"Fa' la cosa giusta!\" fair (TrentoFiere - Via di Briamasco, 2) using a sustainable transport mode, and you will win a bonus of <bonusScore> <bonusPointType> points."
 	}
-}]
+},
+{
+	"name": "checkin",
+	"filter": "notte_dei_ricercatori",
+	"description": {
+		"it": "Vieni a trovarci Venerdi' 29 settembre alla Notte dei Ricercatori al MUSE (Corso del Lavoro e della Scienza, 3, Trento) e vinci un bonus di <bonusScore> punti <bonusPointType>.",
+		"en": "Come and visit us on Friday September 29 at the Researchers’ Night at MUSE (Corso del Lavoro e della Scienza, 3, Trento) and you will win a bonus of <bonusScore> <bonusPointType> points."
+	}
+}
+]

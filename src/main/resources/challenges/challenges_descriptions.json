@@ -312,6 +312,14 @@
       "en": "To win this challenge, you must: 1. plan or track a trip that ends in TrentoFiere (Via di Briamasco, 2), and uses sustainable transport modes, during the opening times of the FA' LA COSA GIUSTA! fair (Saturday Oct. 29 or Sunday Oct. 30), and 2. find out booth inside the fair (Floor -1) and check yourself in there."
     }
   },
+  {
+    "modelName": "checkin",
+    "filter": "notte_dei_ricercatori",
+    "description": {
+      "it": "Per vincere questa sfida partecipa alla Notte dei Ricercatori al MUSE (Venerdi' 29 settembre, dalle 17 alle 22), cerca lo stand Viaggia Play&Go e registrarti presso di esso (Piano -1).",
+      "en": "To win this challenge join the Researchers’ Night at MUSE (Friday September 29, from 5PM to 10PM), come to the Viaggia Play&Go stand (Floor -1) and complete the check-in.”"
+    }
+  },  
 	{
 		"modelName": "survey",
 		"filter": "end",
