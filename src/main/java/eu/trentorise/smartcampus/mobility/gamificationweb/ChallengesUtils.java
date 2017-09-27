@@ -196,7 +196,7 @@ public class ChallengesUtils {
     				switch (tmp_chall.getType()) {
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
-		    				int earned = retrieveCorrectStatusFromCounterName(counterName, pointConcept, challData.getStart(), challData.getEnd(), null); 
+		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, challData.getStart(), challData.getEnd(), null); 
 		    				row_status = round(earned, 2);
 		    				status = Math.max(100, (int)(100.0 * earned / target));
 	    					break;
@@ -308,11 +308,11 @@ public class ChallengesUtils {
 	}
 	
 	// Method retrieveCorrectStatusFromCounterName: used to get the correct player status starting from counter name field
-	private int retrieveCorrectStatusFromCounterName(String cName, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now){
+	private int retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now){
 		int actualStatus = 0; // km or trips
 		if(cName != null && cName.compareTo("") != 0){
 			for(PointConcept pt : pointConcept){
-				if(pt.getName().compareTo(cName) == 0){
+				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
 					List<PointConceptPeriod> allPeriods = pt.getInstances();
 					for(PointConceptPeriod pcp : allPeriods){
 						if(chalStart != null && chalEnd != null){
