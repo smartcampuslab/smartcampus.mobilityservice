@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.stringtemplate.v4.ST;
@@ -49,13 +51,14 @@ public class ChallengesUtils {
 	private static final String CHAL_MODEL_COMPLETE_BADGE_COLL = "completeBadgeCollection";
 	private static final String CHAL_MODEL_SURVEY = "survey";
 	private static final String CHAL_MODEL_POICHECKIN = "poiCheckin";
+	private static final String CHAL_MODEL_CHECKIN = "checkin";
 	private static final String CHAL_MODEL_CLASSPOSITION = "leaderboardPosition";
 	
 	// week delta in milliseconds
 //	private static final Long W_DELTA = 2000L;
 	private static final int MILLIS_IN_DAY = 1000 * 60 * 60 * 24;
 		
-//	private static final Logger logger = Logger.getLogger(ChallengesUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ChallengesUtils.class);
 
 	private ObjectMapper mapper = new ObjectMapper();
 
@@ -78,10 +81,11 @@ public class ChallengesUtils {
 		for (Object o : list) {
 			ChallengeStructure challenge = mapper.convertValue(o, ChallengeStructure.class);
 
-			String key = challenge.getName() + "#" + challenge.getCounterName();
+			String key = challenge.getName() + (challenge.getFilter() != null ? ("#" + challenge.getFilter()) : "");
 			challengeStructureMap.put(key, challenge);
 //			template.save(challenge);
 		}
+		
 		list = mapper.readValue(Resources.getResource("challenges/challenges_descriptions.json"), List.class);
 		for (Object o : list) {
 			ChallengeLongDescrStructure challenge = mapper.convertValue(o, ChallengeLongDescrStructure.class);
@@ -293,6 +297,9 @@ public class ChallengesUtils {
 			case CHAL_MODEL_SURVEY: {
 				return "surveyType";
 			}
+			case CHAL_MODEL_CHECKIN: {
+				return "checkinType";
+			}
 			default: {
 				return null;
 			}
@@ -364,28 +371,30 @@ public class ChallengesUtils {
 		String filter = getFilterByType(challenge.getModelName());
 		String description = null;
 		String name = challenge.getModelName();
-		String counterName = (String) challenge.getFields().get("counterName");
+		String filterField = (String) challenge.getFields().get(filter);
 
 		String counterNameA = null;
 		String counterNameB = null;
-		if (counterName != null) {
-			String counterNames[] = ((String) challenge.getFields().get("counterName")).split("_");
-			counterNameA = counterNames[0];
-			if (counterNames.length == 2) {
-				counterNameB = counterNames[1];
+		if (filterField != null) {
+			if (CHAL_FIELDS_COUNTER_NAME.equals(filterField)) {
+				String counterNames[] = filterField.split("_");
+				counterNameA = counterNames[0];
+				if (counterNames.length == 2) {
+					counterNameB = counterNames[1];
 
-				if (counterNameA.startsWith("No")) {
-					counterNameA = counterNameA.replace("No", "");
-					counterNameB = "No" + counterNameB;
+					if (counterNameA.startsWith("No")) {
+						counterNameA = counterNameA.replace("No", "");
+						counterNameB = "No" + counterNameB;
+					}
+
 				}
-
 			}
 		}
 
-		ChallengeStructure challengeStructure = challengeStructureMap.getOrDefault(name + "#" + counterName, null);
+		ChallengeStructure challengeStructure = challengeStructureMap.getOrDefault(name + "#" + filterField, null);
 
 		if (challengeStructure == null) {
-			challengeStructure = challengeStructureMap.getOrDefault(name + "#_" + counterNameB, null);
+			challengeStructure = challengeStructureMap.getOrDefault(name + (counterNameB != null ? ("#_" + counterNameB) : ""), null);
 		}
 
 		if (challengeStructure != null) {
@@ -400,7 +409,7 @@ public class ChallengesUtils {
 //			System.err.println("\t" + description);
 //			System.err.println("________________________");
 		} else {
-			System.err.println(name + " / " + counterName);
+			logger.error("Cannot find structure for challenge: '" + name + "', " + filter + "=" + filterField);
 			return "";
 		}
 

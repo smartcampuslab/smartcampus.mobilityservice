@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class ChallengeStructure {
 
 	private String name;
-	private String counterName;
+	private String filter;
 	private Map<String, String> description;
 	
 	public String getName() {
@@ -18,11 +18,11 @@ public class ChallengeStructure {
 		this.name = name;
 	}
 
-	public String getCounterName() {
-		return counterName;
+	public String getFilter() {
+		return filter;
 	}
-	public void setCounterName(String counterName) {
-		this.counterName = counterName;
+	public void setFilter(String counterName) {
+		this.filter = counterName;
 	}
 	
 	public Map<String, String> getDescription() {
