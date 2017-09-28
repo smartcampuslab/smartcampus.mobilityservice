@@ -198,7 +198,7 @@ public class ChallengesUtils {
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
 		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, challData.getStart(), challData.getEnd(), null); 
 		    				row_status = round(earned, 2);
-		    				status = Math.max(100, (int)(100.0 * earned / target));
+		    				status = Math.min(100, (int)(100.0 * earned / target));
 	    					break;
 	    				}
 	    				case CHAL_MODEL_NEXT_BADGE: {
@@ -213,7 +213,7 @@ public class ChallengesUtils {
 		    					}
 		    				}
 		    				row_status = round(count, 2);
-		    				status = Math.max(100, (int)(100.0 * count / target));
+		    				status = Math.min(100, (int)(100.0 * count / target));
 		    				break;
 	    				}
 	    				case CHAL_MODEL_SURVEY: {

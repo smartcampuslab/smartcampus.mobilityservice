@@ -136,6 +136,7 @@ public class StatusUtils {
 							if (pc_period != null) {
 								Iterator<String> keys = pc_period.keys();
 								while (keys.hasNext()) {
+									instances = new ArrayList<PointConceptPeriod>();
 									String key = keys.next();
 									JSONObject pc_weekly = pc_period.getJSONObject(key);
 									if (pc_weekly != null) {
@@ -168,15 +169,22 @@ public class StatusUtils {
 											}
 										}
 									}
+									PointConcept pt = new PointConcept(pc_name, pc_score, identifier, start, periodDuration, identifier, instances);
+									pointConcept.add(pt);	
+									if (pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
+										greenPointConcept.add(pt); // I add the point
+																	// concept to the
+																	// green leaves list
+									}									
 								}
 							}
-							PointConcept pt = new PointConcept(pc_name, pc_score, periodType, start, periodDuration, identifier, instances);
-							pointConcept.add(pt);
-							if (pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
-								greenPointConcept.add(pt); // I add the point
-															// concept to the
-															// green leaves list
-							}
+//							PointConcept pt = new PointConcept(pc_name, pc_score, periodType, start, periodDuration, identifier, instances);
+//							pointConcept.add(pt);
+//							if (pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
+//								greenPointConcept.add(pt); // I add the point
+//															// concept to the
+//															// green leaves list
+//							}
 						}
 					}
 				}
