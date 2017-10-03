@@ -261,7 +261,7 @@ public class GamificationWebController {
 		String gameId = getGameId(appId);
 		logger.debug("External registration: found user profile with id " + id);
 		Player withNick = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
-		if (withNick != null && withNick.getId().equals(id)) {
+		if (withNick != null && !withNick.getId().equals(id)) {
 			logger.debug("External registration: nickname conflict with user " + withNick.getId());
 			res.setStatus(HttpStatus.CONFLICT.value());
 			return null;
