@@ -15,67 +15,64 @@
 					</div>
 					<div class="panel panel-default padding">
 						<div class="row">
-							<div class="col-md-4">
-								<button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>
-								<button class="btn btn-primary btn-sm" ng-click="clearFilter(parsForm)">Clear filter</button>
-							</div>
 							
-							<div class="col-md-8 text-right">
-								<label class="form-check"  style="color: red;"> <input type="checkbox" ng-click="allDates=!allDates" class="navbar-btn btn-sm">All dates
-								</label>							
-								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts
-								</label> <label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve only
-								</label> <label class="form-check"> <input type="checkbox" ng-click="pendingOnly=!pendingOnly" class="navbar-btn btn-sm">Pending only
-								</label>
+							<div class="col-md-12 small">
+								<label class="form-check"  style="color: red;"> <input type="checkbox" ng-click="allDates=!allDates" class="navbar-btn btn-sm">All dates</label>							
+								<label class="form-check"> <input type="checkbox" ng-click="excludeZeroPoints=!excludeZeroPoints" class="navbar-btn btn-sm">No 0 pts</label> 
+								<label class="form-check"> <input type="checkbox" ng-click="unapprovedOnly=!unapprovedOnly" class="navbar-btn btn-sm">To approve </label> 
+								<label class="form-check"> <input type="checkbox" ng-click="pendingOnly=!pendingOnly" class="navbar-btn btn-sm">Pending</label>
 								<label class="form-check"> <input type="checkbox" ng-click="toCheck=!toCheck" class="navbar-btn btn-sm">To check</label>
 							</div>
 
 						</div>
 						
-						<div class="row padding">
-							<div class="col-md-3 text-right">
+						<div class="row small">
+							<div class="col-md-6">
 								<label>From:</label>
+                <div class="input-group">
+                  <input id="fromDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="fromDate"
+                    is-open="openedFrom" close-text="Close"
+                  /> <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
+                      <i class="glyphicon glyphicon-calendar"></i>
+                    </button>
+                  </span>
+                </div>
 							</div>
-							<div class="col-md-9">
-								<div class="input-group">
-									<input id="fromDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="fromDate"
-										is-open="openedFrom" close-text="Close"
-									/> <span class="input-group-btn">
-										<button type="button" class="btn btn-default" ng-click="toggleOpen($event, true)">
-											<i class="glyphicon glyphicon-calendar"></i>
-										</button>
-									</span>
-								</div>
+							<div class="col-md-6">
+                <label>To:</label>
+                <div class="input-group">
+                  <input id="toDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="toDate" is-open="openedTo"
+                    close-text="Close"
+                  /> <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
+                      <i class="glyphicon glyphicon-calendar"></i>
+                    </button>
+                  </span>
+                </div>
 							</div>
 						</div>
-						<div class="row padding">
-							<div class="col-md-3 text-right">
-								<label>To:</label>
-							</div>
-							<div class="col-md-9">
-								<div class="input-group">
-									<input id="toDate" type="text" class="form-control" datepicker-popup="{{format}}" datepicker-options="dateOptions" ng-model="toDate" is-open="openedTo"
-										close-text="Close"
-									/> <span class="input-group-btn">
-										<button type="button" class="btn btn-default" ng-click="toggleOpen($event, false)">
-											<i class="glyphicon glyphicon-calendar"></i>
-										</button>
-									</span>
-								</div>
-							</div>
-
-							<div class="padding row pull-right col-md-12">
-								<div class="col-md-2 text-right"><label>User Id</label></div>
-								<div class="col-md-2">
-									<input type="text" class="form-control" id="userId" ng-model="filterUserId">
-								</div>
-								<div class="col-md-2 text-right"><label>Travel Id</label></div>
-								<div class="col-md-6">
-									<input type="text" class="form-control" id="travelId" ng-model="filterTravelId">
-								</div>								
-							</div>	
-
+						<br/>
+						<div class="row small">
+              <div class="col-md-6">
+	              <label>User Id:</label>
+	              <input type="text" class="form-control" id="userId" ng-model="filterUserId">
+              </div>
+              <div class="col-md-6">
+                <label>Travel Id:</label>
+                <input type="text" class="form-control" id="travelId" ng-model="filterTravelId">
+              </div>
 						</div>
+            <br/>
+            <div class="row ">
+              <div class="col-md-6">
+                <button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>
+              </div>
+              <div class="col-md-6 text-right">  
+                <button class="btn btn-default btn-sm" ng-click="clearFilter(parsForm)">Clear filter</button>
+              </div>
+            </div>  
+						
 					</div>
 				</form>
 				<!-- <b>{{tripsStats.total}}</b><i>???</i> -->
