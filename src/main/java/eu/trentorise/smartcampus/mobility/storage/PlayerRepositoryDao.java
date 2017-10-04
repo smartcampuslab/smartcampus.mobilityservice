@@ -22,6 +22,9 @@ public interface PlayerRepositoryDao extends CrudRepository<Player, String>{
 	public Player findByNickIgnoreCase(String nickname);*/
 	
 	Iterable<Player> findAllByGameId(String gameId);
+
+	Player findByGameIdAndMail(String gameId, String mail);
+
 	
 	Iterable<Player> findAllByCheckedRecommendationAndGameId(boolean recommendation, String gameId);
 	

@@ -31,6 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -60,6 +61,7 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGra
 import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
+import eu.trentorise.smartcampus.mobility.gamificationweb.ReportEmailSender;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Activity;
@@ -80,7 +82,6 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ConfigUtils;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
-import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.TType;
@@ -124,8 +125,6 @@ public class GamificationController {
 	@Autowired
 	private StatisticsBuilder statisticsBuilder;
 
-	private BasicProfileService basicProfileService;
-
 	@Autowired
 	private GamificationValidator gamificationValidator;		
 	
@@ -135,6 +134,9 @@ public class GamificationController {
 	@Autowired
 	private ConfigUtils config;
 	
+	@Autowired
+	private ReportEmailSender emailSender;
+	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
 
 	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
@@ -143,12 +145,11 @@ public class GamificationController {
 
 	@PostConstruct
 	public void init() throws Exception {
-		basicProfileService = new BasicProfileService(aacURL);
-
 		File f = new File(geolocationsDBDir);
 		if (!f.exists()) {
 			f.mkdir();
 		}
+		
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
@@ -974,6 +975,32 @@ public class GamificationController {
 		return p;	
 	}
 	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/console/email/template")
+	public @ResponseBody Map<String, String> getEmailTemplate(HttpServletResponse response) throws IOException {
+		return Collections.singletonMap("template", config.getGenericEmailTemplate());
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/console/email")
+	public @ResponseBody void sendEmail(@RequestBody Map<String, Object> body, HttpServletResponse response) throws IOException {
+		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
+		String text = (String)body.get("html");
+		Boolean all = (Boolean) body.get("all");
+		String emailsString = (String)body.get("emails");
+		Set<String> emails = StringUtils.commaDelimitedListToSet(emailsString);
+		String subj = (String)body.get("subject");
+		
+		try {
+			if (all) {
+				emailSender.sendGenericMailToAll(text, subj, appId);
+			} else {
+				emailSender.sendGenericMailToUsers(text, subj, appId, emails);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+		}
+	}	
 
 	@RequestMapping(method = RequestMethod.GET, value = "/console/appId", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	public @ResponseBody String getAppId(HttpServletResponse response) throws Exception {

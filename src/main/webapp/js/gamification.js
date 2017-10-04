@@ -1,4 +1,4 @@
-var gamificationConsole = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable']);
+var gamificationConsole = angular.module('gameconsole', [ 'ui.bootstrap', 'ngScrollable', 'ngMask', 'textAngular']);
 
 gamificationConsole.directive('dlEnterKey', function() {
     return function(scope, element, attrs) {
@@ -786,6 +786,29 @@ gamificationConsole.controller('CheckinCtrl', function($scope, $timeout, $http) 
 		});
 	}
 	
+})
+
+gamificationConsole.controller('EmailCtrl', function($scope, $timeout, $http) {
+	$scope.data = {all: false, emails: [], html: null};
+	
+	$http.get('console/email/template').success(function(data){
+		if (data) {
+			$scope.data.html = data.template;
+		}		
+	});
+
+	$scope.send = function(){
+		if (!$scope.data.all && $scope.data.emails.length == 0) return;
+		$('#confirmModalSend').modal();
+	}
+	
+	$scope.doSend = function() {		
+		$http.put('console/email',$scope.data).then(function(data) {
+			$('#confirmModalSent').modal();
+		}, function(){
+			alert('Error sending data');
+		});
+	}
 })
 
 

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.crypto.NoSuchPaddingException;
@@ -135,6 +136,57 @@ public class ReportEmailSender {
 		}
 	}	
 	
+	/**
+	 * Send a generic mail to all the subscribed users
+	 * @param body
+	 * @param subject
+	 * @param appId
+	 */
+	public void sendGenericMailToAll(String body, String subject, String appId) {
+		logger.info("Sending generic mail to all");
+		String gameId = getGameId(appId);
+		Iterable<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
+
+		for (Player p : iter) {
+			logger.debug(String.format("Profile found  %s", p.getNickname()));
+
+			if (p.isSendMail()) {
+				try {
+					emailService.sendGenericMail(body, subject, p.getNickname(), p.getMail(), Locale.forLanguageTag(getPlayerLang(p)));
+				} catch (Exception e) {
+					logger.error("Failed to send message to "+p.getMail(), e);
+				}
+			}
+		}	
+	}
+
+	/**
+	 * Send a generic mail to the specific list of users. If one of the users does not exist or is not subscribed, error is returned
+	 * @param body
+	 * @param subject
+	 * @param appId
+	 * @param emails
+	 */
+	public void sendGenericMailToUsers(String body, String subject, String appId, Set<String> emails) {
+		logger.info("Sending generic mail to users: "+emails);
+		String gameId = getGameId(appId);
+		for (String email: emails) {
+			Player p = playerRepositoryDao.findByGameIdAndMail(gameId, email);
+			if (p == null || !p.isSendMail()) {
+				throw new IllegalArgumentException("Incorrect email "+email);
+			}
+			logger.debug(String.format("Profile found  %s", p.getNickname()));
+
+			if (p.isSendMail()) {
+				try {
+					emailService.sendGenericMail(body, subject, p.getNickname(), p.getMail(), Locale.forLanguageTag(getPlayerLang(p)));
+				} catch (Exception e) {
+					logger.error("Failed to send message to "+p.getMail(), e);
+				}
+			}
+		}	
+	}
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test2")
 //	public synchronized void checkWinnersNotification() throws Exception {
 //		for (AppInfo appInfo : appSetup.getApps()) {

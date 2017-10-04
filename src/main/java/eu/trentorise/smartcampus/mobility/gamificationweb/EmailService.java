@@ -482,5 +482,31 @@ public class EmailService {
         
     }
 
+    public void sendGenericMail(String body, String subject, final String recipientName, final String recipientEmail, final Locale locale) throws MessagingException {
+        
+    	logger.debug(String.format("Gamification Generic Mail Prepare for %s - OK", recipientName));
+    	
+        // Prepare the evaluation context
+        final Context ctx = new Context(locale);
+        ctx.setVariable("name", recipientName);
+        ctx.setVariable("body", body);
+                
+        // Prepare message using a Spring helper
+        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        final MimeMessageHelper message = 
+                new MimeMessageHelper(mimeMessage, true /* multipart */, "UTF-8");
+        message.setSubject(subject);
+        message.setFrom(mailFrom);
+        message.setTo(recipientEmail);
 
+        // Create the HTML body using Thymeleaf
+        final String htmlContent = this.templateEngine.process("mail/email-generic-template", ctx);
+        message.setText(htmlContent, true /* isHtml */);        
+        
+        // Send mail
+        this.mailSender.send(mimeMessage);
+        logger.info(String.format("Gamification Generic Mail Sent to %s - OK", recipientName));
+        
+    }
+    
 }

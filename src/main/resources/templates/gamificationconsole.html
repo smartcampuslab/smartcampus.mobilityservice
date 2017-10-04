@@ -10,10 +10,20 @@
 <!-- Custom styles for this template -->
 <link href="../css/style.css" rel="stylesheet"/>
 <link href="../css/ng-scrollable.min.css" rel="stylesheet"/>
+<link rel='stylesheet' href='../css/textAngular.css'/>
+
 <!-- Bootstrap core CSS -->
 <link href="../css/bootstrap.min.css" rel="stylesheet"/>
 <script src="../lib/angular/angular.min.js"></script>
 <script src="../lib/angular/angular-route.min.js"></script>
+
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css"/>
+
+<script src='../lib/ngMask.min.js'></script>
+<script src='../lib/angular/textAngular-rangy.min.js'></script>
+<script src='../lib/angular/textAngular-sanitize.min.js'></script>
+<script src='../lib/angular/textAngular.min.js'></script>
+
 <script src="../lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="../lib/bootstrap.min.js"></script>
@@ -22,10 +32,19 @@
 <script src="../lib/sprintf.min.js"></script>
 <script src="../lib/date.js"></script>
 <script src="../lib/spin.min.js"></script>
-<script src="../js/gamification.js"></script>
 <script src="../js/gamificationconsole.js"></script>
+<script src="../js/gamification.js"></script>
 <script src="lib/ie-emulation-modes-warning.js"></script>
+
 <style type="text/css">
+.ta-editor {
+    min-height: 300px;
+    height: auto;
+    overflow: auto;
+    font-family: inherit;
+    font-size: 100%;
+    margin: 20px 0;
+}
 .console {
 	padding: 73px 20px 20px 20px;
 }
@@ -134,7 +153,7 @@ body {
                 <li><a href="#/" >Console</a></li>
                 <li><a href="#/users" >Users</a></li>
                 <li><a href="#/checkin">Checkin</a></li>
-
+                <li><a href="#/email">E-Mail</a></li>
               </ul>
             </div>
             <!-- /.nav-collapse -->

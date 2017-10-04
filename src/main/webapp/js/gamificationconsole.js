@@ -17,7 +17,11 @@ gamificationConsole.config(['$routeProvider',
                          when('/checkin', {
                              templateUrl: '../templates/gamificationconsolecheckin.html',
                              controller: 'CheckinCtrl'
-                           });
+                           }).
+                       when('/email', {
+                           templateUrl: '../templates/gamificationconsoleemail.html',
+                           controller: 'EmailCtrl'
+                         });
                      }]);
 
 gamificationConsole.run(['$rootScope', '$q',

@@ -1,6 +1,11 @@
 package eu.trentorise.smartcampus.mobility.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +24,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.CheckinData;
@@ -47,8 +53,10 @@ public class ConfigUtils {
 	
 	private static final Logger logger = Logger.getLogger(ConfigUtils.class);
 	
+	private static String genericTemplate;
+	
 	@PostConstruct
-	public void init(){
+	public void init() throws IOException{
 //		checkinEvents = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
 //				.build(new CacheLoader<String, List<CheckinData>>() {
 //					@Override
@@ -98,7 +106,7 @@ public class ConfigUtils {
 							logger.error("Error reading " + key, e);
 						}
 						
-						return Collections.EMPTY_LIST;
+						return Collections.emptyList();
 					}
 				});	
 		
@@ -112,9 +120,11 @@ public class ConfigUtils {
 						} catch (Exception e) {
 							logger.error("Error reading week prizes " + lang, e);
 						}
-						return Collections.EMPTY_LIST;
+						return Collections.emptyList();
 					}
-				});			
+				});		
+		
+		genericTemplate = readGenericEmailTemplate();
 		
 	}
 	
@@ -148,6 +158,9 @@ public class ConfigUtils {
 		return prizeWeekData;
 	}	
 	
+	public String getGenericEmailTemplate() {
+		return genericTemplate;
+	}	
 	// Method used to read a week conf data file and store all values in a list of WeekConfData object
 	private List<WeekConfData> loadWeekConfFile() throws Exception {
 		synchronized(this) {
@@ -311,6 +324,11 @@ public class ConfigUtils {
 			logger.error("Error reading checkin list", e);
 			return Collections.emptyList();
 		}
+	}
+	
+	private String readGenericEmailTemplate() throws IOException {
+		String src = weeklyDataDir + "/email-generic-content.html";
+		return Files.toString(new File(src), Charset.forName("UTF-8"));
 	}
 	
 }
