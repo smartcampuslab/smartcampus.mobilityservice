@@ -319,7 +319,7 @@ public class GamificationWebController {
 			if (player.getPersonalData() != null) {
 				String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
 				if (nickname != null && !nickname.isEmpty()) {
-					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(nickname, gameId);
+					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
 					if (recommender != null) {
 						RestTemplate restTemplate = new RestTemplate();
 						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
