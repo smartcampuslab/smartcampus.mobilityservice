@@ -15,13 +15,13 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
 
 public class DelayChecker {
 
@@ -94,7 +94,7 @@ public class DelayChecker {
 
 	private static String buildDate() {
 		Calendar cal = Calendar.getInstance();
-		return cal.get(Calendar.DAY_OF_MONTH) + "-" + cal.get(Calendar.MONTH) + "-" + cal.get(Calendar.YEAR);
+		return cal.get(Calendar.DAY_OF_MONTH) + "-" + (1 + cal.get(Calendar.MONTH)) + "-" + cal.get(Calendar.YEAR);
 	}
 
 }
