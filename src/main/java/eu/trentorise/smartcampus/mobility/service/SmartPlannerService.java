@@ -418,7 +418,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		}
 		
 		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
-//		logger.info(result);				
+		logger.info(result);				
 		processAlerResult(alert, result);
 	}	
 
