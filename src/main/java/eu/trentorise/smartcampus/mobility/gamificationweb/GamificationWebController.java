@@ -290,6 +290,7 @@ public class GamificationWebController {
 					logger.info("Added user (mobile registration) " + email);
 				}
 				assignSurveyChallenge(id, gameId, appId);
+				assignInitialChallenge(id, gameId, appId);
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
@@ -401,6 +402,33 @@ public class GamificationWebController {
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(challenge, createHeaders(appId)), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}	
+	
+	
+	private void assignInitialChallenge(String playerId, String gameId, String appId) {
+		RestTemplate restTemplate = new RestTemplate();
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("bonusPointType", "green leaves");
+		data.put("bonusScore", new Double(50.0));
+		data.put("target", new Double(1.0));
+		data.put("periodName", "weekly");
+		data.put("counterName", "ZeroImpact_Trips");
+		
+		ChallengeDataDTO challenge = new ChallengeDataDTO();
+		long now = System.currentTimeMillis();
+		challenge.setStart(new Date(now));
+		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
+
+		challenge.setModelName("absoluteIncrement");
+		challenge.setInstanceName("'initial_challenge_" + Long.toHexString(now) + "-" + Integer.toHexString((playerId + gameId).hashCode()));
+		
+		challenge.setData(data);
+		
+		String partialUrl = "game/" + gameId + "/player/" + playerId + "/challenges";
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(challenge, createHeaders(appId)), String.class);
+		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
+	}		
+	
+	
 	
 	//Method used to send the survey call to gamification engine (if user complete the survey the engine need to be updated with this call)
 	private void sendSurveyToGamification(String playerId, String gameId, String survey) throws Exception{
