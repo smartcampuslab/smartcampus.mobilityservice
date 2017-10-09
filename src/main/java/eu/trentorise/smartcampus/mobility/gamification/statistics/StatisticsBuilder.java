@@ -358,6 +358,7 @@ public class StatisticsBuilder {
 				Range range = new Range();
 				Calendar c = Calendar.getInstance();
 				c.setFirstDayOfWeek(Calendar.MONDAY);
+				c.setTimeInMillis(sdf.parse(day).getTime());
 				c.set(Calendar.DAY_OF_MONTH, 1);
 				range.from = sdf.format(new Date(c.getTimeInMillis()));
 				c.add(Calendar.MONTH, 1);
