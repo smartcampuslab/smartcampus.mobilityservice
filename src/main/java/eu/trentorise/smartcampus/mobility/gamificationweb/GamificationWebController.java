@@ -285,12 +285,16 @@ public class GamificationWebController {
 
 			}
 			try {
+				logger.info("Creating player");
 				createPlayerInGamification(id, gameId, appId);
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
+				logger.info("Assigning survey challenge");
 				assignSurveyChallenge(id, gameId, appId);
+				logger.info("Assigning initial challenge");
 				assignInitialChallenge(id, gameId, appId);
+				logger.info("Saving player");
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
