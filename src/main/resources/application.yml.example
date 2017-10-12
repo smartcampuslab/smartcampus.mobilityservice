@@ -47,3 +47,5 @@ validation:
   shapefolder:
   
 weeklyDataDir: 
+
+externalDataDir:
