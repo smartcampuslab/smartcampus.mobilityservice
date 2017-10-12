@@ -429,10 +429,14 @@ public class DiaryController {
 			de.setEntityId(instance.getId());
 			de.setClientId(instance.getClientId());
 			
-			if (scores.containsKey(instance.getId()) && ! ScoreStatus.ASSIGNED.equals(instance.getScoreStatus())) {
-				instance.setScore(scores.get(instance.getId()).longValue());
-				instance.setScoreStatus(ScoreStatus.ASSIGNED);
-				storage.saveTrackedInstance(instance);
+			if (scores.containsKey(instance.getId())) {
+				long score = scores.get(instance.getId()).longValue();
+				de.setTravelScore(score);
+				if (!ScoreStatus.ASSIGNED.equals(instance.getScoreStatus())) {
+					instance.setScore(score);
+					instance.setScoreStatus(ScoreStatus.ASSIGNED);
+					storage.saveTrackedInstance(instance);
+				}
 			}
 			de.setScoreStatus(instance.getScoreStatus());
 			
