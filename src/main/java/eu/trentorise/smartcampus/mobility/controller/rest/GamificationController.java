@@ -93,11 +93,6 @@ public class GamificationController {
 	private static final String TRAVEL_ID = "travelId";
 	public static final String START_TIME = "startTime";
 
-	/**
-	 * 
-	 */
-	private static final int SAME_TRIP_INTERVAL = 5 * 60 * 1000; // 5 minutes
-
 	@Autowired
 	private DomainStorage storage;
 	@Autowired
@@ -422,6 +417,13 @@ public class GamificationController {
 				} else if (res.getFreeTrackingTransport() != null) {
 					if (!res.getComplete()) {
 						ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
+						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+							boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
+							if (isGroup) {
+								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+							}
+						}
+						
 						res.setValidationResult(vr);
 						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
 							// canSave =
@@ -732,7 +734,15 @@ public class GamificationController {
 
 				} else {
 					logger.info("Validating free tracking " + ti.getId());
+					
 					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), appId);
+					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
+						if (isGroup) {
+							vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+						}
+					}
+					
 					ti.setValidationResult(vr);
 					Map<String, Object> data = gamificationValidator.computeFreeTrackingScore(appId, ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), vr.getValidationStatus(), ti.getOverriddenDistances());
 					if (ti.getScoreStatus() == null || ScoreStatus.UNASSIGNED.equals(ti.getScoreStatus())) {
@@ -1064,8 +1074,10 @@ public class GamificationController {
 					}
 				}
 
-				// instances = aggregateFollowingTrackedInstances(instances);
+				instances = aggregateFollowingTrackedInstances(instances);
 				for (TrackedInstance o : instances) {
+					o.setSuspect(gamificationValidator.isSuspect(o));
+					
 					ItineraryDescriptor descr = new ItineraryDescriptor();
 					if (o.getUserId() != null) {
 						descr.setUserId(o.getUserId());
@@ -1318,11 +1330,18 @@ public class GamificationController {
 			for (int i = 1; i < sortedInstances.size(); i++) {
 				List<Geolocation> ge1 = (List) sortedInstances.get(i).getGeolocationEvents();
 				List<Geolocation> ge2 = (List) sortedInstances.get(i - 1).getGeolocationEvents();
-
+				if (sortedInstances.get(i).getFreeTrackingTransport()  == null || sortedInstances.get(i - 1).getFreeTrackingTransport() == null) {
+					continue;
+				}
+//				if (!sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
+//					continue;
+//				}
+				
 				if (ge1.isEmpty() || ge2.isEmpty()) {
 					continue;
 				}
-				if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < SAME_TRIP_INTERVAL) {
+				if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < GamificationValidator.SAME_TRIP_INTERVAL
+						&& sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
 					sortedInstances.get(i).setGroupId(groupId);
 					sortedInstances.get(i - 1).setGroupId(groupId);
 				} else {
