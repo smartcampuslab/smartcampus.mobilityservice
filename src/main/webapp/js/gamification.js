@@ -16,6 +16,7 @@ gamificationConsole.directive('dlEnterKey', function() {
 
 gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.users = [];
+	$scope.banned = [];
 	$scope.userMap = {};
 	$scope.selectedUser = null;
 	$scope.selectedItinerary = null;
@@ -84,11 +85,15 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			spinner.spin(target);
 			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
+				var banned = [];
 				$scope.userTotals = {};
 				$scope.tripsStats = {total : 0, valid : 0, invalid: 0, pending: 0}
 				
 				data.data.forEach(function(descr) {
 					users.push(descr.userId);
+					if (descr.banned) {
+						banned.push(descr.userId);
+					}
 					$scope.userTotals[descr.userId] = {
 						"total" : descr.total,
 						"valid" : (descr.valid),
@@ -102,6 +107,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 				});
 
 				$scope.users = users;
+				$scope.banned = banned;
 				$scope.userMap = {};
 				spinner.stop();
 			});			
