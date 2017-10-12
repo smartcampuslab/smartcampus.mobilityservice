@@ -50,9 +50,11 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.BannedChecker;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.HTTPConnector;
 import eu.trentorise.smartcampus.network.JsonUtils;
 
@@ -68,9 +70,15 @@ public class GamificationManager {
 	
 	@Autowired
 	private GameSetup gameSetup;	
+	
+	@Autowired
+	private PlayerRepositoryDao playerRepositoryDao;	
 
 	@Autowired
-	private ExecutorService executorService;		
+	private ExecutorService executorService;	
+	
+	@Autowired
+	private BannedChecker bannedChecker;
 
 	@Autowired(required = false)
 	@Value("${gamification.url}")
@@ -113,6 +121,11 @@ public class GamificationManager {
 		
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
+		
+		if (bannedChecker.isBanned(playerId, app.getGameId())) {
+			logger.warn("Not sending for banned player " + playerId);
+			return;
+		}
 
 		try {
 			ExecutionDataDTO ed = new ExecutionDataDTO();
@@ -194,6 +207,11 @@ public class GamificationManager {
 
 			AppInfo app = appSetup.findAppById(appId);
 			GameInfo game = gameSetup.findGameById(app.getGameId());
+			
+			if (bannedChecker.isBanned(userId, app.getGameId())) {
+				logger.warn("Not sending for banned player " + userId);
+				return;
+			}		
 			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
 			ed.setGameId(app.getGameId());
