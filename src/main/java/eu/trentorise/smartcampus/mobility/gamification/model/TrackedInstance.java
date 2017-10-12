@@ -55,6 +55,8 @@ public class TrackedInstance {
 	
 	private Map<String, Double> overriddenDistances;
 	
+	private Boolean suspect;
+	
 	public TrackedInstance() {
 		geolocationEvents = Sets.newConcurrentHashSet();
 		validationResult = new ValidationResult();
@@ -236,6 +238,14 @@ public class TrackedInstance {
 
 	public void setOverriddenDistances(Map<String, Double> overriddenDistances) {
 		this.overriddenDistances = overriddenDistances;
+	}
+
+	public Boolean getSuspect() {
+		return suspect;
+	}
+
+	public void setSuspect(Boolean suspect) {
+		this.suspect = suspect;
 	}
 
 	@Override
