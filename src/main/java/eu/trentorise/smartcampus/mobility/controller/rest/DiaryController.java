@@ -437,6 +437,8 @@ public class DiaryController {
 					instance.setScoreStatus(ScoreStatus.ASSIGNED);
 					storage.saveTrackedInstance(instance);
 				}
+			} else {
+				de.setTravelScore(0L);
 			}
 			de.setScoreStatus(instance.getScoreStatus());
 			
