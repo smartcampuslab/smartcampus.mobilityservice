@@ -22,6 +22,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,13 +33,19 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Doubles;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.TTDescriptor;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
@@ -64,6 +72,8 @@ public class GamificationValidator {
 	private static final String UNKNOWN = "unknown";
 	private static final String EMPTY = "unknown";
 	private static final double SPACE_ERROR = 0.1;
+	
+	public static final int SAME_TRIP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 	private static final Logger logger = LoggerFactory.getLogger(GamificationValidator.class);
 
@@ -75,6 +85,10 @@ public class GamificationValidator {
 	
 	@Autowired
 	private GameSetup gameSetup;	
+	
+	@Autowired
+	@Qualifier("mongoTemplate")
+	MongoTemplate template;	
 
 	public List<List<Geolocation>> TRAIN_SHAPES = new ArrayList<>();
 	public TTDescriptor BUS_DESCRIPTOR = null;
@@ -621,6 +635,98 @@ public class GamificationValidator {
 		
 
 	}
+
+	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
+		try {
+		long start = findFirstGeolocation(geolocations);
+		
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
+		Query query = new Query(criteria);
+		query.fields().include("geolocationEvents.recorded_at").include("_id").include("groupId");
+		
+		List<TrackedInstance> tis = template.find(query, TrackedInstance.class, "trackedInstances");
+		Set<Integer> groupIds = Sets.newHashSet();
+		
+		for (TrackedInstance ti: tis) {
+			groupIds.add(ti.getGroupId());
+		}
+		
+		for (TrackedInstance ti: tis) {
+			long last = 0;
+			for (Geolocation loc:  ti.getGeolocationEvents()) {
+				last = Math.max(last, loc.getRecorded_at().getTime());
+			}
+			if (start > last && start - last < SAME_TRIP_INTERVAL) {
+				return true;
+			}
+		}		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	private long findFirstGeolocation(Collection<Geolocation> geolocations) {
+		long first = Long.MAX_VALUE;
+		for (Geolocation loc : geolocations) {
+			first = Math.min(first, loc.getRecorded_at().getTime());
+		}
+		return first;
+	}
+	
+	public boolean isSuspect(TrackedInstance trackedInstance) {
+		List<Geolocation> points = new ArrayList<Geolocation>(trackedInstance.getGeolocationEvents());
+		
+		if (points.size() < 5) {
+			return false;
+		}
+		
+		Collections.sort(points, new Comparator<Geolocation>() {
+
+			@Override
+			public int compare(Geolocation o1, Geolocation o2) {
+				return (int) (o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime());
+			}
+
+		});
+		
+		List<Double> allSpeeds = Lists.newArrayList();
+		for (Geolocation location: points) {
+			if (location.getSpeed() > 0.0) {
+				allSpeeds.add(location.getSpeed());
+			}
+		}
+
+		Set<Double> speeds = Sets.newHashSet(allSpeeds);
+		
+		if (speeds.size() < allSpeeds.size() * .8 ) {
+			return true;
+		}
+		
+		if (!allSpeeds.isEmpty()) {
+			double[] speedArray = Doubles.toArray(allSpeeds);
+
+			double min = Doubles.min(speedArray);
+			double max = Doubles.max(speedArray);
+
+			allSpeeds.remove(min);
+			allSpeeds.remove(max);
+
+			if (!allSpeeds.isEmpty()) {
+				speedArray = Doubles.toArray(allSpeeds);
+
+				min = Doubles.min(speedArray);
+				max = Doubles.max(speedArray);
+
+				if (max < min * 1.1) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 
 
 }
