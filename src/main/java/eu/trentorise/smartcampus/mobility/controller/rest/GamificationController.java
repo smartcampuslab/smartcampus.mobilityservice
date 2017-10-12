@@ -75,6 +75,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.Tra
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.BannedChecker;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
@@ -131,6 +132,9 @@ public class GamificationController {
 	
 	@Autowired
 	private ReportEmailSender emailSender;
+	
+	@Autowired
+	private BannedChecker bannedChecker;
 	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
 
@@ -420,7 +424,9 @@ public class GamificationController {
 						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
 							boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
 							if (isGroup) {
-								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+								if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
+									vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+								}
 							}
 						}
 						
@@ -739,7 +745,9 @@ public class GamificationController {
 					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
 						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
 						if (isGroup) {
-							vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
+								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+							}
 						}
 					}
 					
@@ -1146,6 +1154,9 @@ public class GamificationController {
 			keys.add("validationResult");
 			keys.add("approved");
 			keys.add("changedValidity");
+			
+			AppInfo app = appSetup.findAppById(appId);
+			GameInfo game = gameSetup.findGameById(app.getGameId());			
 
 //			Criteria criteria = new Criteria("appId").is(appId);
 //			if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
@@ -1184,8 +1195,11 @@ public class GamificationController {
 					ud.setUserId(userId);
 					ud.setValid(0);
 					ud.setTotal(0);
-					users.put(userId, ud);
 				}
+				
+				ud.setBanned(bannedChecker.isBanned(userId, game.getId()));
+				users.put(userId, ud);
+				
 				ud.setTotal(ud.getTotal() + 1);
 				TravelValidity validity = ti.getValidationResult().getTravelValidity();
 				if (ti.getApproved() != null && ti.getApproved().booleanValue() && ti.getChangedValidity() != null) {
