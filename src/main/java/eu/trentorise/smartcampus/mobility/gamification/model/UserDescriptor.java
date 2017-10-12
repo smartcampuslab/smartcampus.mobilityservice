@@ -7,6 +7,7 @@ public class UserDescriptor implements Comparable<UserDescriptor> {
 	private int invalid;
 	private int pending;
 	private int total;
+	private boolean banned;
 	
 	public String getUserId() {
 		return userId;
@@ -37,6 +38,12 @@ public class UserDescriptor implements Comparable<UserDescriptor> {
 	}
 	public void setTotal(int total) {
 		this.total = total;
+	}
+	public boolean isBanned() {
+		return banned;
+	}
+	public void setBanned(boolean banned) {
+		this.banned = banned;
 	}
 	@Override
 	public int compareTo(UserDescriptor o) {
