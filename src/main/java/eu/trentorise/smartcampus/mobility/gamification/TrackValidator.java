@@ -38,7 +38,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.ERR
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.Interval;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.TRIP_TYPE;
-import eu.trentorise.smartcampus.mobility.security.Circle;
+import eu.trentorise.smartcampus.mobility.security.Shape;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
@@ -112,7 +112,7 @@ public class TrackValidator {
 	 * @param distanceThreshold 
 	 * @return preprocessed track data
 	 */
-	public static List<Geolocation> prevalidate(Collection<Geolocation> track, ValidationStatus status, List<Circle> areas, double distanceThreshold) {
+	public static List<Geolocation> prevalidate(Collection<Geolocation> track, ValidationStatus status, List<Shape> areas, double distanceThreshold) {
 		// check data present
 		if (track == null || track.size() <= 1) {
 			status.setError(ERROR_TYPE.NO_DATA);
@@ -176,7 +176,7 @@ public class TrackValidator {
 	 * @param areas
 	 * @return
 	 */
-	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
+	public static ValidationStatus validateFreeTrain(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Shape> areas) {
 		MODE_TYPE mode = MODE_TYPE.TRAIN; 
 		double speedThreshold = 15, timeThreshold = 3*60*1000, minTrackThreshold = 1*60*1000; 
 		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, false);
@@ -192,7 +192,7 @@ public class TrackValidator {
 	 * @param areas
 	 * @return
 	 */
-	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Circle> areas) {
+	public static ValidationStatus validateFreeBus(Collection<Geolocation> track, List<List<Geolocation>> referenceTracks, List<Shape> areas) {
 		MODE_TYPE mode = MODE_TYPE.BUS; 
 		double speedThreshold = 10, timeThreshold = 1*60*1000, minTrackThreshold = 30*1000; 
 		return validateFreePTMode(track, referenceTracks, areas, mode, speedThreshold, timeThreshold, minTrackThreshold, true);
@@ -201,7 +201,7 @@ public class TrackValidator {
 	private static ValidationStatus validateFreePTMode(
 			Collection<Geolocation> track, 
 			List<List<Geolocation>> referenceTracks,
-			List<Circle> areas, 
+			List<Shape> areas, 
 			MODE_TYPE mode, 
 			double speedThreshold, 
 			double timeThreshold, 
@@ -310,7 +310,7 @@ public class TrackValidator {
 	 * @param areas
 	 * @return
 	 */
-	public static ValidationStatus validateFreeWalk(Collection<Geolocation> track, List<Circle> areas) {
+	public static ValidationStatus validateFreeWalk(Collection<Geolocation> track, List<Shape> areas) {
 
 		MODE_TYPE mode = MODE_TYPE.WALK; 
 		double speedThreshold = WALK_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = WALK_AVG_SPEED_THRESHOLD, guaranteedAvgSpeedThreshold = WALK_GUARANTEED_AVG_SPEED_THRESHOLD; 
@@ -326,7 +326,7 @@ public class TrackValidator {
 	 * @param areas
 	 * @return
 	 */
-	public static ValidationStatus validateFreeBike(Collection<Geolocation> track, List<Circle> areas) {
+	public static ValidationStatus validateFreeBike(Collection<Geolocation> track, List<Shape> areas) {
 
 		MODE_TYPE mode = MODE_TYPE.BIKE; 
 		double speedThreshold = BIKE_SPEED_THRESHOLD, timeThreshold = 20*1000, minTrackThreshold = 30*1000, avgSpeedThreshold = BIKE_AVG_SPEED_THRESHOLD, guaranteedAvgSpeedThreshold = BIKE_GUARANTEED_AVG_SPEED_THRESHOLD; 
@@ -341,7 +341,7 @@ public class TrackValidator {
 	
 	private static ValidationStatus validateFreeMode(
 			Collection<Geolocation> track,
-			List<Circle> areas, 
+			List<Shape> areas, 
 			MODE_TYPE mode,
 			double speedThreshold, 
 			double timeThreshold, 
@@ -395,7 +395,7 @@ public class TrackValidator {
 	 * @param areas
 	 * @return
 	 */
-	public static ValidationStatus validatePlanned(Collection<Geolocation> track, Itinerary itinerary, List<Circle> areas) {
+	public static ValidationStatus validatePlanned(Collection<Geolocation> track, Itinerary itinerary, List<Shape> areas) {
 		ValidationStatus status = new ValidationStatus();
 		// set parameters
 		status.setTripType(TRIP_TYPE.PLANNED);

@@ -9,7 +9,7 @@ public class GameInfo implements Serializable {
 	private String user;
 	private String password;
 	private String start;
-	private List<Circle> areas;
+	private List<Shape> areas;
 
 	public String getId() {
 		return id;
@@ -43,11 +43,11 @@ public class GameInfo implements Serializable {
 		this.start = start;
 	}
 
-	public List<Circle> getAreas() {
+	public List<Shape> getAreas() {
 		return areas;
 	}
 
-	public void setAreas(List<Circle> areas) {
+	public void setAreas(List<Shape> areas) {
 		this.areas = areas;
 	}
 

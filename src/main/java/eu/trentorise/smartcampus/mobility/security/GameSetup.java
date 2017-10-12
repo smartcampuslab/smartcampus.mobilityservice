@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -31,7 +32,11 @@ public class GameSetup {
 	
 	@PostConstruct
 	public void init() throws Exception {
-		Yaml yaml = new Yaml(new Constructor(GameSetup.class));
+		Constructor constructor = new Constructor(GameSetup.class);
+		constructor.addTypeDescription(new TypeDescription(Circle.class, "!circle"));
+		constructor.addTypeDescription(new TypeDescription(Polygon.class, "!polygon"));
+		
+		Yaml yaml = new Yaml(constructor);
 		GameSetup data = (GameSetup) yaml.load(resource.getInputStream());
 		this.games = data.games;
 		

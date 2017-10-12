@@ -37,7 +37,7 @@ import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.Circle;
+import eu.trentorise.smartcampus.mobility.security.Shape;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 import eu.trentorise.smartcampus.network.JsonUtils;
 import eu.trentorise.smartcampus.network.RemoteConnector;
@@ -361,11 +361,10 @@ public class GamificationHelper {
 		return tt;
 	}	
 	
-	public static boolean inAreas(List<Circle> circles, Geolocation point) {
-		if (circles != null) {
-			for (Circle circle : circles) {
-				Geolocation center = new Geolocation(circle.getCenter()[0], circle.getCenter()[1], null);
-				if (harvesineDistance(point, center) <= circle.getRadius()) {
+	public static boolean inAreas(List<Shape> shapes, Geolocation point) {
+		if (shapes != null) {
+			for (Shape shape : shapes) {
+				if (shape.inside(point.getLatitude(), point.getLongitude())) {
 					return true;
 				}
 			}

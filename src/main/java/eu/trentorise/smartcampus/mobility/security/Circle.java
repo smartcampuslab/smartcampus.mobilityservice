@@ -1,10 +1,15 @@
 package eu.trentorise.smartcampus.mobility.security;
 
-public class Circle {
+import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
+
+public class Circle extends Shape {
 
 	private double[] center;
 	private double radius;
 
+	public Circle() {
+	}
+	
 	public double[] getCenter() {
 		return center;
 	}
@@ -19,6 +24,11 @@ public class Circle {
 
 	public void setRadius(double radius) {
 		this.radius = radius;
+	}
+
+	@Override
+	public boolean inside(double lat, double lon) {
+		return GamificationHelper.harvesineDistance(center[0], center[1], lat, lon) <= radius;
 	}
 
 }
