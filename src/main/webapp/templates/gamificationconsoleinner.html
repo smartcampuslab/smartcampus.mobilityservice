@@ -108,15 +108,17 @@
 													<i>{{itinerary.instance.validationResult.plannedAsFreeTracking ? '(as free tracking)' : ''}}</i>
 												</div>
 												<div class="col-md-6 text-right">
+												<span ng-if="itinerary.instance.suspect == true" class="label label-danger"><b>SUSPECT</b></span>												
+												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">Group {{itinerary.instance.groupId}}</span>
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
 													></span><br /> <span ng-show="itinerary.instance.itinerary"><b>Estimated score: {{itinerary.instance.itinerary.data.customData.estimatedScore}},</span> {{itinerary.instance.scoreStatus}}: {{itinerary.instance.score}}</b>
 												</div>
 											</div>
-											<div class="group-indicator">
+<!-- 											<div class="group-indicator">
 												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">group {{itinerary.instance.groupId}}</span>
-											</div>
+											</div> -->
 <!-- 											<label class="itinerary-switch"><b>{{'Switch validity ' + (itinerary.instance.approved ? '(Approved) ' : '')}}</b> <input
 												ng-disabled="itinerary.instance.approved" type="checkbox" ng-model="itinerary.instance.switchValidity" 
 												class="navbar-btn btn-sm" data-toggle="modal" data-target="#confirmModal1"
