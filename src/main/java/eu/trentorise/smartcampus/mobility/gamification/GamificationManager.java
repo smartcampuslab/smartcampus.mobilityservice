@@ -239,7 +239,7 @@ public class GamificationManager {
 		
 		logger.info("Get score notifications for " + userId);
 		
-		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification";
+		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification&size=10000";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		
