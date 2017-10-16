@@ -237,7 +237,7 @@ public class GamificationManager {
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
-		logger.info("Get score notifications for " + userId);
+//		logger.info("Get score notifications for " + userId);
 		
 		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification&size=10000";
 		
@@ -254,7 +254,7 @@ public class GamificationManager {
 			result.put((String)data.get("travelId"), (Double)data.get("score"));
 		}		
 		
-		logger.info("Got scores: " + result);
+//		logger.info("Got scores: " + result);
 		
 		return result;
 		
