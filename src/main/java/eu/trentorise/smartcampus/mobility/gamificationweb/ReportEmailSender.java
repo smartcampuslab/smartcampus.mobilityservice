@@ -80,9 +80,6 @@ public class ReportEmailSender {
 	@Autowired
 	@Value("${mail.redirectUrl}")
 	private String mailRedirectUrl;
-	@Autowired
-	@Value("${weeklyDataDir}")
-	private String weeklyDataDirx;	
 
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
@@ -122,7 +119,7 @@ public class ReportEmailSender {
 //	}
 	
 //	@Scheduled(cron="0 10 10 * * *")
-	@Scheduled(cron="0 0 17 * * FRI")
+	@Scheduled(cron="0 0 17 * * WED")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");

@@ -68,6 +68,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.UserCheck;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.WeekConfData;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.BannedChecker;
 import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
@@ -126,6 +127,9 @@ public class GamificationWebController {
 	
 	@Autowired
 	private ConfigUtils configUtils;
+	
+	@Autowired
+	private BannedChecker bannedChecker;
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -326,6 +330,12 @@ public class GamificationWebController {
 				if (nickname != null && !nickname.isEmpty()) {
 					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
 					if (recommender != null) {
+						if (bannedChecker.isBanned(recommender.getId(), gameId)) {
+							logger.warn("Not sending for banned player " + recommender.getId());
+							player.setCheckedRecommendation(false);
+							playerRepositoryDao.save(player);							
+							continue;
+						}						
 						RestTemplate restTemplate = new RestTemplate();
 						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
 								new HttpEntity<Object>(null, createHeaders(appId)), String.class);

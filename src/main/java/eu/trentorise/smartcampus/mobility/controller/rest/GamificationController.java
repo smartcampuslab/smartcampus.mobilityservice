@@ -422,13 +422,13 @@ public class GamificationController {
 					if (!res.getComplete()) {
 						ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
 						if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
-//							TODO reenable
-//							boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
-//							if (isGroup) {
-//								if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
-//									vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
-//								}
-//							}
+//							TODO reenabled
+							boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
+							if (isGroup) {
+								if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
+									vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+								}
+							}
 						}
 						
 						res.setValidationResult(vr);
@@ -744,13 +744,13 @@ public class GamificationController {
 					
 					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), appId);
 					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
-//						TODO reenable
-//						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
-//						if (isGroup) {
-//							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
-//								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
-//							}
-//						}
+//						TODO reenabled
+						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
+						if (isGroup) {
+							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
+								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+							}
+						}
 					}
 					
 					ti.setValidationResult(vr);
@@ -1086,8 +1086,8 @@ public class GamificationController {
 
 				instances = aggregateFollowingTrackedInstances(instances);
 				for (TrackedInstance o : instances) {
-//					TODO reenable
-//					o.setSuspect(gamificationValidator.isSuspect(o));
+//					TODO reenabled
+					o.setSuspect(gamificationValidator.isSuspect(o));
 					
 					ItineraryDescriptor descr = new ItineraryDescriptor();
 					if (o.getUserId() != null) {
