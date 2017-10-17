@@ -677,7 +677,7 @@ public class GamificationValidator {
 	public boolean isSuspect(TrackedInstance trackedInstance) {
 		List<Geolocation> points = new ArrayList<Geolocation>(trackedInstance.getGeolocationEvents());
 		
-		if (points.size() < 5) {
+		if (points.size() < 2) {
 			return false;
 		}
 		
