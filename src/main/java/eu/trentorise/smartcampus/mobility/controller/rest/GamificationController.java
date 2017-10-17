@@ -427,6 +427,7 @@ public class GamificationController {
 							if (isGroup) {
 								if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
 									vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+									logger.info("In a group");
 								}
 							}
 						}
@@ -749,6 +750,7 @@ public class GamificationController {
 						if (isGroup) {
 							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
 								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+								logger.info("In a group");
 							}
 						}
 					}

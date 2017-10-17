@@ -123,7 +123,7 @@ public class GamificationManager {
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
 		if (bannedChecker.isBanned(playerId, app.getGameId())) {
-			logger.warn("Not sending for banned player " + playerId);
+			logger.info("Not sending for banned player " + playerId);
 			return;
 		}
 
