@@ -284,6 +284,11 @@ public class GamificationManager {
 		AppInfo app = appSetup.findAppById(appId);
 		GameInfo game = gameSetup.findGameById(app.getGameId());
 
+		if (bannedChecker.isBanned(id, app.getGameId())) {
+			logger.info("Not sending for banned player " + id);
+			return;
+		}		
+		
 		ExecutionDataDTO ed = new ExecutionDataDTO();
 		ed.setGameId(game.getId());
 		ed.setPlayerId(id);

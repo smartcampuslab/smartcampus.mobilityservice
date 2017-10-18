@@ -455,6 +455,12 @@ public class GamificationWebController {
 
 		String content = JsonUtils.toJSON(ed);
 		GameInfo game = gameSetup.findGameById(gameId);
+		
+		if (bannedChecker.isBanned(playerId, gameId)) {
+			logger.info("Not sending for banned player " + playerId);
+			return;
+		}		
+		
 		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
 //		logger.info("Sent app survey data to gamification engine ");
 	}
@@ -721,7 +727,6 @@ public class GamificationWebController {
 //	}	
 	
 		
-	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
 	ModelAndView survey(HttpServletRequest request, HttpServletResponse response, @PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
@@ -760,7 +765,6 @@ public class GamificationWebController {
 		}		
 	}
 
-	// Method used to unsubscribe user to mailing list
 	@RequestMapping(method = RequestMethod.POST, value = "/gamificationweb/survey/{lang}/{survey}/{playerId:.*}")	///{socialId}
 	public 
 	ModelAndView sendSurvey(@RequestBody MultiValueMap<String,String> formData, @PathVariable String lang, @PathVariable String survey, @PathVariable String playerId) throws Exception {
