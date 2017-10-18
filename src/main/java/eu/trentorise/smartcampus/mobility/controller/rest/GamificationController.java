@@ -1087,9 +1087,12 @@ public class GamificationController {
 				}
 
 				instances = aggregateFollowingTrackedInstances(instances);
+				gamificationValidator.findOverlappedTrips(instances);
 				for (TrackedInstance o : instances) {
 //					TODO reenabled
-					o.setSuspect(gamificationValidator.isSuspect(o));
+					if (o.getSuspect() == null) {
+						o.setSuspect(gamificationValidator.isSuspect(o));
+					}
 					
 					ItineraryDescriptor descr = new ItineraryDescriptor();
 					if (o.getUserId() != null) {

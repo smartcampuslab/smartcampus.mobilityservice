@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Doubles;
 
@@ -505,7 +506,7 @@ public class GamificationValidator {
 		Double score = 0.0;
 		double distance = 0; 		
 		
-		logger.info("Computing free tracking score");
+//		logger.info("Computing free tracking score");
 
 		boolean isOverridden = overriddenDistances != null && !overriddenDistances.isEmpty();
 		
@@ -638,7 +639,7 @@ public class GamificationValidator {
 
 	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
 		try {
-		long start = findFirstGeolocation(geolocations);
+		long start = findGeolocationTimeRange(geolocations).lowerEndpoint();
 		
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
 		Query query = new Query(criteria);
@@ -666,12 +667,17 @@ public class GamificationValidator {
 		return false;
 	}
 	
-	private long findFirstGeolocation(Collection<Geolocation> geolocations) {
+	private Range<Long> findGeolocationTimeRange(Collection<Geolocation> geolocations) {
 		long first = Long.MAX_VALUE;
+		long last = 0;
 		for (Geolocation loc : geolocations) {
 			first = Math.min(first, loc.getRecorded_at().getTime());
+			last = Math.max(last, loc.getRecorded_at().getTime());
 		}
-		return first;
+		
+		Range<Long> range = Range.closed(first, last);
+		
+		return range;
 	}
 	
 	public boolean isSuspect(TrackedInstance trackedInstance) {
@@ -679,6 +685,11 @@ public class GamificationValidator {
 		
 		if (points.size() < 2) {
 			return false;
+		}
+		
+		
+		if (trackedInstance.getDeviceInfo() == null || !trackedInstance.getDeviceInfo().contains("\"isVirtual\":false")) {
+			return true;
 		}
 		
 		Collections.sort(points, new Comparator<Geolocation>() {
@@ -699,6 +710,7 @@ public class GamificationValidator {
 
 		Set<Double> speeds = Sets.newHashSet(allSpeeds);
 		
+		// too many distance duplicate values
 		if (speeds.size() < allSpeeds.size() * .8 ) {
 			return true;
 		}
@@ -718,6 +730,7 @@ public class GamificationValidator {
 				min = Doubles.min(speedArray);
 				max = Doubles.max(speedArray);
 
+				// speed range is too narrow
 				if (max < min * 1.1) {
 					return true;
 				}
@@ -727,6 +740,30 @@ public class GamificationValidator {
 		return false;
 	}
 	
+	public void findOverlappedTrips(List<TrackedInstance> tis) {
+		try {
 
+			Map<String, Range<Long>> ranges = Maps.newTreeMap();
+			
+			for (TrackedInstance ti: tis) {
+				Range<Long> range = findGeolocationTimeRange(ti.getGeolocationEvents());
+				ranges.put(ti.getId(), range);
+			}
+			
+			for (int i = 0; i < tis.size(); i++) {
+				for (int j = 0; j < i; j++) {
+					String key1 = tis.get(i).getId();
+					String key2 = tis.get(j).getId();
+					
+					if (ranges.get(key1).isConnected(ranges.get(key2))) {
+						tis.get(i).setSuspect(true);
+						tis.get(j).setSuspect(true);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
