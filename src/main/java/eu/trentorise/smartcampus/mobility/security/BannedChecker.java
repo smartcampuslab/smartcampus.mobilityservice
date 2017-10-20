@@ -46,6 +46,7 @@ public class BannedChecker {
 			logger.error("Error reading " + src);
 			return;
 		}
+		banned.clear();
 		for (String line: lines) {
 			String[] vals = line.split(",");
 			if (vals.length != 2) {
@@ -54,6 +55,7 @@ public class BannedChecker {
 			}
 			banned.put(vals[0], vals[1]);
 		}
+		logger.info("Read banned players: " + banned);
 	}
 	
 	public boolean isBanned(String playerId, String gameId) {
