@@ -131,7 +131,7 @@ public class DiaryController {
 			return null;
 		}
 
-		logger.debug("Reading diary for user " + userId);
+		logger.info("Reading diary for user " + userId);
 
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
@@ -190,6 +190,8 @@ public class DiaryController {
 
 		// getRanking(p, appId);
 
+		logger.info("Returning entries: " + result.size());
+		
 		return result;
 	}
 
