@@ -48,6 +48,13 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.dateOptions = {
 	    startingDay: 1
 	};
+	
+	$scope.ttypeconversion = {
+			"BUS" : "BUS",
+			"TRAIN" : "TRAIN",
+			"BIKE" : "BICYCLE",
+			"WALK" : "WALK"
+	}
 
 	$timeout(function() {
 		document.getElementById('fromDate').value = $scope.fromDate.toString('ddd MMM dd HH:mm');
@@ -294,9 +301,14 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		}
 		for (i = 0; i < instance.itinerary.data.leg.length; i++) {
 			lg = instance.itinerary.data.leg[i];
-			if (ttype.toUpperCase() == lg.transport.type) {
+//			if (ttype.toUpperCase() == lg.transport.type) {
+//				return false;
+//			}
+//			console.log(ttype.toUpperCase() + " = " + $scope.ttypeconversion[ttype.toUpperCase()] + " / " + lg.transport.type);
+			if ($scope.ttypeconversion[ttype.toUpperCase()] == lg.transport.type) {
 				return false;
 			}
+			
 		}
 		return true;
 	}
