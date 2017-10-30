@@ -232,6 +232,9 @@ public class GamificationManager {
 	}	
 
 	public Map<String, Double> getScoreNotification(String appId, String userId) throws Exception {
+		Map<String, Double> result = Maps.newTreeMap();
+		
+		try {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		AppInfo app = appSetup.findAppById(appId);
@@ -247,7 +250,7 @@ public class GamificationManager {
 		
 		List nots = mapper.readValue(res.getBody(), List.class);
 		
-		Map<String, Double> result = Maps.newTreeMap();
+
 		for (Object not: nots) {
 			MessageNotification msg = mapper.convertValue(not, MessageNotification.class);
 			Map data = msg.getData();
@@ -255,6 +258,9 @@ public class GamificationManager {
 		}		
 		
 //		logger.info("Got scores: " + result);
+		} catch (Exception e) {
+			logger.error("Error getting scores from GE", e);
+		}
 		
 		return result;
 		
