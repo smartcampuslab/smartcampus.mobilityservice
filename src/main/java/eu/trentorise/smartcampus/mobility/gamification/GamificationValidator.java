@@ -639,34 +639,38 @@ public class GamificationValidator {
 
 	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
 		try {
-		long start = findGeolocationTimeRange(geolocations).lowerEndpoint();
-		
-		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
-		Query query = new Query(criteria);
-		query.fields().include("geolocationEvents.recorded_at").include("_id").include("groupId");
-		
-		List<TrackedInstance> tis = template.find(query, TrackedInstance.class, "trackedInstances");
-		Set<Integer> groupIds = Sets.newHashSet();
-		
-		for (TrackedInstance ti: tis) {
-			groupIds.add(ti.getGroupId());
-		}
-		
-		for (TrackedInstance ti: tis) {
-			long last = 0;
-			for (Geolocation loc:  ti.getGeolocationEvents()) {
-				last = Math.max(last, loc.getRecorded_at().getTime());
+			Range<Long> range = findGeolocationTimeRange(geolocations);
+			if (range == null) {
+				return false;
 			}
-			if (start > last && start - last < SAME_TRIP_INTERVAL) {
-				return true;
+			long start = range.lowerEndpoint();
+
+			Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
+			Query query = new Query(criteria);
+			query.fields().include("geolocationEvents.recorded_at").include("_id").include("groupId");
+
+			List<TrackedInstance> tis = template.find(query, TrackedInstance.class, "trackedInstances");
+			Set<Integer> groupIds = Sets.newHashSet();
+
+			for (TrackedInstance ti : tis) {
+				groupIds.add(ti.getGroupId());
 			}
-		}		
+
+			for (TrackedInstance ti : tis) {
+				long last = 0;
+				for (Geolocation loc : ti.getGeolocationEvents()) {
+					last = Math.max(last, loc.getRecorded_at().getTime());
+				}
+				if (start > last && start - last < SAME_TRIP_INTERVAL) {
+					return true;
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
 	}
-	
+
 	private Range<Long> findGeolocationTimeRange(Collection<Geolocation> geolocations) {
 		long first = Long.MAX_VALUE;
 		long last = 0;
@@ -675,9 +679,12 @@ public class GamificationValidator {
 			last = Math.max(last, loc.getRecorded_at().getTime());
 		}
 		
-		Range<Long> range = Range.closed(first, last);
-		
-		return range;
+		if (first < last) {
+			Range<Long> range = Range.closed(first, last);
+			return range;
+		} else {
+			return null;
+		}
 	}
 	
 	public boolean isSuspect(TrackedInstance trackedInstance) {
@@ -747,7 +754,9 @@ public class GamificationValidator {
 			
 			for (TrackedInstance ti: tis) {
 				Range<Long> range = findGeolocationTimeRange(ti.getGeolocationEvents());
-				ranges.put(ti.getId(), range);
+				if (range != null) {
+					ranges.put(ti.getId(), range);
+				}
 			}
 			
 			for (int i = 0; i < tis.size(); i++) {
@@ -755,7 +764,7 @@ public class GamificationValidator {
 					String key1 = tis.get(i).getId();
 					String key2 = tis.get(j).getId();
 					
-					if (ranges.get(key1).isConnected(ranges.get(key2))) {
+					if (ranges.get(key1) != null &&  ranges.get(key2) != null && ranges.get(key1).isConnected(ranges.get(key2))) {
 						tis.get(i).setSuspect(true);
 						tis.get(j).setSuspect(true);
 					}
