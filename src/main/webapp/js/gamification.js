@@ -23,6 +23,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.selectedInstance = null;
 	$scope.layers = [];
 	$scope.fixpaths = false;
+	$scope.showroutes = false;
 	$scope.removeoutliers = false;
 	$scope.eventsMarkers = new Map();
 	$scope.fromDate = Date.today().previous().saturday().previous().saturday();
@@ -295,10 +296,13 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.isTTypeDisabled = function(instance, ttype) {
 		if (instance == null) {
 			return true;
-		}
+		}		
+		
 		if (ttype == instance.freeTrackingTransport) {
 			return false;
-		}
+		}		
+		
+		if (instance.itinerary != null) {
 		for (i = 0; i < instance.itinerary.data.leg.length; i++) {
 			lg = instance.itinerary.data.leg[i];
 //			if (ttype.toUpperCase() == lg.transport.type) {
@@ -309,6 +313,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 				return false;
 			}
 			
+		}
 		}
 		return true;
 	}
@@ -465,7 +470,38 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		newMarker(coordinates[0], 'ic_start');
 		newMarker(coordinates[coordinates.length - 1], 'ic_stop');
 
-
+		if ($scope.showroutes && instance.routesPolylines != null) {
+			if (instance.routesPolylines["train"] != null) {
+			instance.routesPolylines["train"].forEach(function(polyline) {
+				var path = google.maps.geometry.encoding.decodePath(polyline);
+				var line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'brown',
+					strokeOpacity : 0.8,
+					strokeWeight : 3,
+					map : $scope.map
+				});
+				$scope.layers.push(line);
+			});		
+			}
+			
+			if (instance.routesPolylines["bus"] != null) {
+			Object.keys(instance.routesPolylines["bus"]).forEach(function(route) {
+				var path = google.maps.geometry.encoding.decodePath(instance.routesPolylines["bus"][route]);
+				var line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'yellow',
+					strokeOpacity : 0.8,
+					strokeWeight : 3,
+					map : $scope.map
+				});
+				$scope.layers.push(line);
+				var m1 = $scope.createMarkerObject(path[0], 'circle', route, true);
+				$scope.layers.push(m1);	
+			});	
+			}
+		}
+		
 		var path = new google.maps.Polyline({
 			path : coordinates,
 			geodesic : true,
@@ -502,10 +538,11 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.createMarkerObject = function(pos, icon, i, bottom) {
 		var m;
 		if (i) {
+			var sz = 26 - ("" + i).length * 4 + "px";
 			m = new google.maps.Marker({
 			position : pos,
 			icon : '../img/' + icon + '.png',
-			label : { text : "" + i, fontWeight : "bold", fontSize : "22px", color: "DarkRed"},
+			label : { text : "" + i, fontWeight : "bold", fontSize : sz, color: "DarkRed"},
 			map : $scope.map,
 			draggable : false,
 			labelContent : "A",
@@ -728,7 +765,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		};
 		mapOptions = {
 			zoom : 15,
-			center : ll
+			center : ll,
+			gestureHandling: 'greedy'			
 		}
 		$scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
 	}

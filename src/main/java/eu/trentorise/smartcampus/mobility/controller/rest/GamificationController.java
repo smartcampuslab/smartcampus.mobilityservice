@@ -1124,17 +1124,21 @@ public class GamificationController {
 					} else {
 						descr.setFreeTrackingTransport(o.getFreeTrackingTransport());
 						descr.setTripName(o.getId());
+						
+						gamificationValidator.setPolylines(o);						
 					}
 					descr.setInstance(o);
 					
 					if (o.getDeviceInfo() != null) {
 						Map<String, Object> map = mapper.readValue(o.getDeviceInfo(), Map.class);
-						map.remove("uuid");
-						map.remove("cordova");
-						map.remove("available");
-						map.remove("manufacturer");
-						map.remove("serial");
-						o.setDeviceInfo(mapper.writeValueAsString(map));
+						if (map != null) {
+							map.remove("uuid");
+							map.remove("cordova");
+							map.remove("available");
+							map.remove("manufacturer");
+							map.remove("serial");
+							o.setDeviceInfo(mapper.writeValueAsString(map));
+						}
 					}
 					list.add(descr);
 				}

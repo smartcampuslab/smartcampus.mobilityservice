@@ -150,7 +150,14 @@
 				<span ng-hide="!selectedInstance"><label class="navbar-btn"><input type="checkbox" ng-click="fixpaths=!fixpaths; reselectInstance();"
 						name="fix-paths" class="navbar-btn btn-sm"
 					>&nbsp;Fix paths {{scores}}</label></span>					
-				<span ng-hide="!selectedInstance"><label class="navbar-btn">
+				<!-- <span ng-hide="!selectedInstance"><label class="navbar-btn"> -->
+				
+				<span ng-hide="!selectedInstance || selectedInstance.routesPolylines == null"><label class="navbar-btn"><input type="checkbox" ng-click="showroutes=!showroutes; reselectInstance();"
+						name="show-routes" class="navbar-btn btn-sm"
+					>&nbsp;Show routes</label></span>					
+				<!-- <span ng-hide="!selectedInstance"><label class="navbar-btn"> -->				
+				
+				
 				<button class="btn btn-danger btn-sm" ng-click="showAllPoints()">Show all points</button>
 				</span>
 				<div>

@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -92,6 +93,7 @@ public class GamificationValidator {
 	MongoTemplate template;	
 
 	public List<List<Geolocation>> TRAIN_SHAPES = new ArrayList<>();
+	public List<String> TRAIN_POLYLINES = new ArrayList<>();
 	public TTDescriptor BUS_DESCRIPTOR = null;
 
 	@Autowired
@@ -105,6 +107,7 @@ public class GamificationValidator {
 			for (File f : trainFiles) {
 				TRAIN_SHAPES.add(TrackValidator.parseShape(new FileInputStream(f)).get(0));
 			}
+			TRAIN_POLYLINES = TRAIN_SHAPES.stream().map(x -> GamificationHelper.encodePoly(x)).collect(Collectors.toList());
 		}
 		BUS_DESCRIPTOR = new TTDescriptor();
 		loadBusFolder(new File(shapeFolder+"/bus"));
@@ -636,6 +639,27 @@ public class GamificationValidator {
 		
 
 	}
+	
+	public void setPolylines(TrackedInstance instance) throws Exception {
+		if (instance.getGeolocationEvents() == null || instance.getGeolocationEvents().size() < 2 || instance.getFreeTrackingTransport() == null) {
+			return;
+		}
+		
+		Map<String, Object> polys = Maps.newTreeMap();
+		
+		switch(instance.getFreeTrackingTransport()) {
+		case "bus": 
+			polys.put("bus", BUS_DESCRIPTOR.filteredPolylines(instance.getGeolocationEvents()));
+			instance.setRoutesPolylines(polys);
+			break;
+		case "train": 
+			polys.put("train",TRAIN_POLYLINES);
+			instance.setRoutesPolylines(polys);
+			break;
+		}
+		
+
+	}	
 
 	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
 		try {

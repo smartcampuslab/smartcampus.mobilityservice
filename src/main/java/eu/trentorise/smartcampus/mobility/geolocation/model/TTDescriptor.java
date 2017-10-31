@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
@@ -63,6 +64,8 @@ public class TTDescriptor {
 	
 	private Map<Integer, List<Geolocation>> shapeMap = new HashMap<>();
 	private Map<Integer, Geolocation> stopMap = new HashMap<>();
+	
+	private Map<Integer, String> polylineMap = new HashMap<>();
 	
 	// map shapes to set of time 
 	private ArrayListMultimap<Integer, int[]> shapeTimeMap = ArrayListMultimap.create();
@@ -89,6 +92,12 @@ public class TTDescriptor {
 		loadShapes(shapeSrc);
 		loadStops(stopSrc);
 		loadStopTimes(stopTimeSrc, loadTrips(tripSrc));
+		
+		buildPolylines();
+	}
+	
+	private void buildPolylines() {
+		shapeMap.entrySet().stream().forEach(x -> polylineMap.put(x.getKey(), GamificationHelper.encodePoly(x.getValue())));
 	}
 
 	/**
@@ -192,11 +201,91 @@ public class TTDescriptor {
 			descriptors = occurences.keySet();
 		}
 //		descriptors.forEach(d -> {
-//			System.err.println(d + " --- "+routeMap.get(d.route)+" : "+Arrays.toString(occurences.get(d)));
-//		});
+//		System.err.println(d + " --- "+routeMap.get(d.route)+" : "+Arrays.toString(occurences.get(d)));
+//	});
 		
 		return descriptors.stream().map(d -> shapeMap.get(d.shape)).collect(Collectors.toList());
 	}
+	
+	/**
+	 * Select polylines corresponding to the lines matching the specified track
+	 * @param track
+	 * @return list of matching shapes
+	 */
+	public Map<String, String> filteredPolylines(Collection<Geolocation> track){
+		if (stopDescriptors.size() == 0) {
+			return null;
+		}
+		List<Geolocation> points = new ArrayList<>(track);
+		Map<TTLineDescriptor, int[]> occurences = new HashMap<>();
+		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
+
+		HashSet<Integer> set = new HashSet<>();
+		for (int i = 0; i < points.size(); i++) {
+			Geolocation g = points.get(i);
+			final int row = row(se[0], g.getLatitude(), g.getLongitude(), distance);
+			final int col = col(nw[1], g.getLatitude(), g.getLongitude(), distance);
+			
+			set.addAll(stopMatrix.get(row*width+col));
+			if (row > 0 && col > 0) set.addAll(stopMatrix.get((row - 1) * width + col - 1));
+			if (row > 0) set.addAll(stopMatrix.get((row - 1) * width + col));
+			if (row < height - 1 && col < width - 1) set.addAll(stopMatrix.get((row + 1) * width + col + 1));
+			if (row < height - 1) set.addAll(stopMatrix.get((row + 1) * width + col));
+			if (row < height - 1 && col > 0) set.addAll(stopMatrix.get((row+1) * width + col - 1));
+			if (col > 0) set.addAll(stopMatrix.get(row * width + col - 1));
+			if (row > 0 && col < width - 1) set.addAll(stopMatrix.get((row -1) * width + col + 1));
+			if (col < width - 1) set.addAll(stopMatrix.get(row * width + col + 1));
+			
+			if (set != null)
+				for (Integer stopId: set) {
+					Collection<TTLineDescriptor> descriptors = stopDescriptors.get(stopId);
+					if (descriptors != null)
+						for (TTLineDescriptor descriptor : descriptors) {
+							int[] occ = occurences.getOrDefault(descriptor, new int[]{0,Integer.MAX_VALUE,0});
+							occ[0]++;
+							occ[1] = Math.min(occ[1], i);
+							occ[2] = i - occ[1];
+							occurences.put(descriptor, occ);
+						}
+				}
+			set.clear();
+		}
+		Collection<TTLineDescriptor> descriptors = null;
+		// filter occurrences for time of shapes
+		Set<TTLineDescriptor> keys = new HashSet<>(occurences.keySet());
+		for(TTLineDescriptor d : keys) {
+			if (!validTime(d.shape, points.get(0).getRecorded_at(), points.get(points.size()-1).getRecorded_at())) {
+				occurences.remove(d);
+			}
+		} 
+		
+		if (occurences.size() > 5) {
+			List<TTLineDescriptor> list = new ArrayList<>(occurences.keySet());
+			list.sort((a,b) -> {
+				return    (occurences.get(b)[2] - occurences.get(a)[2]) != 0 
+						? (occurences.get(b)[2] - occurences.get(a)[2]) 
+						: (occurences.get(b)[0] - occurences.get(a)[0]); 
+			});
+			descriptors = list.subList(0, 5);
+			int maxOccur = occurences.get(list.get(0))[2];
+			if (maxOccur == 0) {
+				descriptors = list.subList(0, 5);
+			} else {
+				int count = 0;
+				for (TTLineDescriptor d : list) if (occurences.get(d)[2] == maxOccur) count++;
+				if (count < 5) descriptors = list.subList(0, 5);
+				else descriptors = list.subList(0, count);
+			}
+		} else {
+			descriptors = occurences.keySet();
+		}
+		
+		Map<String,String> polys = Maps.newTreeMap();
+		descriptors.forEach(x -> polys.put(routeMap.get(x.route), polylineMap.get(x.shape)));
+		
+		return polys;
+	}	
+	
 	
 	/**
 	 * @param shape
