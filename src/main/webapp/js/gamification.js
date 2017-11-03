@@ -23,7 +23,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.selectedInstance = null;
 	$scope.layers = [];
 	$scope.fixpaths = false;
-	$scope.showroutes = false;
+//	$scope.showroutes = false;
+	$scope.selectedRoutes = [];
 	$scope.removeoutliers = false;
 	$scope.eventsMarkers = new Map();
 	$scope.fromDate = Date.today().previous().saturday().previous().saturday();
@@ -75,7 +76,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			, direction: 1 // 1: clockwise, -1: counterclockwise
 			, speed: 1 // Rounds per second
 			, trail: 60 // Afterglow percentage
-			, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+			, fps: 20 // Frames per second when using setTimeout() as a
+						// fallback for CSS
 			, zIndex: 2e9 // The z-index (defaults to 2000000000)
 			, className: 'spinner' // The CSS class to assign to the spinner
 			, top: '66%' // Top position relative to parent
@@ -132,7 +134,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 
 			if (!$scope.userMap[user]) {
 				spinner.spin(target);
-				console.log($scope.allDates);
+//				console.log($scope.allDates);
 				$http.get("console/useritinerary/" + user + "?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 					$scope.userMap[user] = data.data;
 					spinner.stop();
@@ -149,15 +151,15 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		resetLayers();
 		$scope.selectedInstance = null;
 		$scope.selectedItinerary = itinerary;
-//		itinerary.instances.sort(function(a, b) {
-//			if (!a.day && !b.day)
-//				return 0;
-//			if (!a.day)
-//				return -1;
-//			if (!b.day)
-//				return 1;
-//			return a.day.localeCompare(b.day);
-//		});
+// itinerary.instances.sort(function(a, b) {
+// if (!a.day && !b.day)
+// return 0;
+// if (!a.day)
+// return -1;
+// if (!b.day)
+// return 1;
+// return a.day.localeCompare(b.day);
+// });
 		
 		// if (itinerary.instances.length == 1) {
 		// $scope.selectInstance(itinerary.instances[0]);
@@ -196,23 +198,29 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 
 	$scope.revalidate = function() {
 		spinner.spin(target);
-//		$http.post("console/validate?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+// $http.post("console/validate?fromDate=" + $scope.fromDate.getTime() +
+// "&toDate=" + $scope.toDate.getTime() + "&excludeZeroPoints=" +
+// $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck, {}, {"headers" : {
+// "appId" : $scope.appId}}).then(function(data) {
 		$http.post("console/validate?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
 	}
 	
-//	$scope.switchCurrentValidity = function(toggle) {
-//		if (toggle) {
-//		$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-//			$scope.selectedInstance.changedValidity = data.data.changedValidity;
-//			$scope.reselectInstance();
-//		});
-//		} else {
-//			$scope.selectedInstance.changedValidity = !$scope.selectedInstance.changedValidity;
-//		}
-//	}	
+// $scope.switchCurrentValidity = function(toggle) {
+// if (toggle) {
+// $http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id +
+// "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : {
+// "appId" : $scope.appId}}).then(function(data) {
+// $scope.selectedInstance.changedValidity = data.data.changedValidity;
+// $scope.reselectInstance();
+// });
+// } else {
+// $scope.selectedInstance.changedValidity =
+// !$scope.selectedInstance.changedValidity;
+// }
+// }
 
 	$scope.openSwitchValidity = function(instance) {
 		$scope.selectInstance(instance);
@@ -224,23 +232,24 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	}		
 	
 	$scope.switchCurrentValidity = function() {
-		console.log("SV -> " + $scope.selectedInstance.changedValidity);
 		$http.post("console/itinerary/changeValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 		$scope.selectedInstance.changedValidity = data.data.changedValidity;
 		$scope.reselectInstance();
 	});		
-//	if (toggle) {
-//	$http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id + "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-//		$scope.selectedInstance.changedValidity = data.data.changedValidity;
-//		$scope.reselectInstance();
-//	});
-//	} else {
-//		$scope.selectedInstance.changedValidity = !$scope.selectedInstance.changedValidity;
-//	}
+// if (toggle) {
+// $http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id +
+// "?value=" + $scope.selectedInstance.changedValidity, {}, {"headers" : {
+// "appId" : $scope.appId}}).then(function(data) {
+// $scope.selectedInstance.changedValidity = data.data.changedValidity;
+// $scope.reselectInstance();
+// });
+// } else {
+// $scope.selectedInstance.changedValidity =
+// !$scope.selectedInstance.changedValidity;
+// }
 }	
 	
 	$scope.overrideDistances = function(instance) {
-		console.log(instance);
 		var distances = instance.overriddenDistances != null && instance.overriddenDistances.length != 0 ? instance.overriddenDistances : {}
 		$http.post("console/itinerary/overrideDistances/" + instance.id, distances, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 	});		
@@ -253,14 +262,16 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}			
 	
-//	$scope.toggleApproved = function(instance) {
-//		$http.post("console/itinerary/approve/" + instance.id + "?value=" + !instance.approved, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
-//			instance.approved = data.data.approved;
-//		});
-//	}		
+// $scope.toggleApproved = function(instance) {
+// $http.post("console/itinerary/approve/" + instance.id + "?value=" +
+// !instance.approved, {}, {"headers" : { "appId" :
+// $scope.appId}}).then(function(data) {
+// instance.approved = data.data.approved;
+// });
+// }
 	
 	$scope.approveAll = function() {
-//		spinner.spin(target);		
+// spinner.spin(target);
 		$http.post("console/approveFiltered?excludeZeroPoints=" + $scope.excludeZeroPoints + "&toCheck=" + $scope.toCheck + "&pendingOnly=" + $scope.pendingOnly + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
@@ -305,10 +316,11 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		if (instance.itinerary != null) {
 		for (i = 0; i < instance.itinerary.data.leg.length; i++) {
 			lg = instance.itinerary.data.leg[i];
-//			if (ttype.toUpperCase() == lg.transport.type) {
-//				return false;
-//			}
-//			console.log(ttype.toUpperCase() + " = " + $scope.ttypeconversion[ttype.toUpperCase()] + " / " + lg.transport.type);
+// if (ttype.toUpperCase() == lg.transport.type) {
+// return false;
+// }
+// console.log(ttype.toUpperCase() + " = " +
+// $scope.ttypeconversion[ttype.toUpperCase()] + " / " + lg.transport.type);
 			if ($scope.ttypeconversion[ttype.toUpperCase()] == lg.transport.type) {
 				return false;
 			}
@@ -319,41 +331,43 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	}
 	
 	
-//	$scope.getValidityStyle = function(instance) {
-//		if ((instance.valid & !instance.switchValidity) | (!instance.valid & instance.switchValidity)) {
-//			return true;
-//		}
-//		if ((!instance.valid & !instance.switchValidity) | (instance.valid & instance.switchValidity)) {
-//			return false;
-//		}
-//	}
+// $scope.getValidityStyle = function(instance) {
+// if ((instance.valid & !instance.switchValidity) | (!instance.valid &
+// instance.switchValidity)) {
+// return true;
+// }
+// if ((!instance.valid & !instance.switchValidity) | (instance.valid &
+// instance.switchValidity)) {
+// return false;
+// }
+// }
 	
 	$scope.hasValidStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'VALID';
-//		console.log('V: ' + style);
+// console.log('V: ' + style);
 		return style;
 	}
 	
 	$scope.hasInvalidStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'INVALID';
-//		console.log('I: ' + style);
+// console.log('I: ' + style);
 		return style;		
 
 	}		
 	
 	$scope.hasPendingStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'PENDING';
-//		console.log('I: ' + style);
+// console.log('I: ' + style);
 		return style;		
 
 	}	
 	
 	$scope.getActualValidity = function(instance) {
 		if (instance.changedValidity) {
-//			console.log('Ch: ' + instance.changedValidity);
+// console.log('Ch: ' + instance.changedValidity);
 			return instance.changedValidity;
 		}
-//		console.log('Or: ' + instance.valid);
+// console.log('Or: ' + instance.valid);
 		return instance.validationResult.travelValidity;
 	}
 	
@@ -365,7 +379,6 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		if ($scope.selectedInstance != null) {
 			$scope.selectInstance($scope.selectedInstance);
 		}
-		
 	}
 	
 	$scope.showAllPoints = function() {
@@ -375,7 +388,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			var s = e.latitude + "_" + e.longitude;
 			var m = $scope.createMarkerObject(pos, 'circle2', i + 1, true);
 			$scope.layers.push(m);
-//			$scope.eventsMarkers.set(s,m);
+// $scope.eventsMarkers.set(s,m);
 		}
 	}	
 	
@@ -396,7 +409,35 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		}
 	}
 	
+	$scope.toggleRoute = function(route) {
+		var index = $scope.selectedRoutes.indexOf(route);
+		if (index != -1) {
+			$scope.selectedRoutes.splice(index, 1);
+		} else {
+			$scope.selectedRoutes.push(route);
+		}
+	}
+	
+	$scope.toggleAllRoutes = function() {
+		var checkbox = document.getElementById("allRoutesCheckbox");
+		var checkboxes = document.getElementsByClassName("routeCheckbox");
+		var i;
+		for (i = 0; i < checkboxes.length; i++) {
+			checkboxes[i].checked = checkbox.checked;
+			$scope.toggleRoute(checkboxes[i].id);
+		}			
+	}
+	
 	$scope.selectInstance = function(instance) {
+		if ($scope.selectedInstance != instance) {
+			$scope.selectedRoutes = [];
+			var checkboxes = document.getElementsByClassName("routeCheckbox");
+			var i;
+			for (i = 0; i < checkboxes.length; i++) {
+				checkboxes[i].checked = false;
+			}			
+		}
+		
 		$scope.selectedInstance = instance;
 		eventsMarkers = new Map();
 
@@ -470,7 +511,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		newMarker(coordinates[0], 'ic_start');
 		newMarker(coordinates[coordinates.length - 1], 'ic_stop');
 
-		if ($scope.showroutes && instance.routesPolylines != null) {
+		if (instance.routesPolylines != null) {
 			if (instance.routesPolylines["train"] != null) {
 			instance.routesPolylines["train"].forEach(function(polyline) {
 				var path = google.maps.geometry.encoding.decodePath(polyline);
@@ -487,6 +528,9 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			
 			if (instance.routesPolylines["bus"] != null) {
 			Object.keys(instance.routesPolylines["bus"]).forEach(function(route) {
+				var index = $scope.selectedRoutes.indexOf(route);
+				if (index != -1) {
+				
 				var path = google.maps.geometry.encoding.decodePath(instance.routesPolylines["bus"][route]);
 				var line = new google.maps.Polyline({
 					path : path,
@@ -496,8 +540,11 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 					map : $scope.map
 				});
 				$scope.layers.push(line);
-				var m1 = $scope.createMarkerObject(path[0], 'circle', route, true);
-				$scope.layers.push(m1);	
+				var m1 = $scope.createMarkerObject(path[0], 'circle_start', route, true);
+				$scope.layers.push(m1);
+				m1 = $scope.createMarkerObject(path[path.length - 1], 'circle_stop', route, true);
+				$scope.layers.push(m1);					
+				}
 			});	
 			}
 		}
@@ -538,7 +585,9 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.createMarkerObject = function(pos, icon, i, bottom) {
 		var m;
 		if (i) {
-			var sz = 26 - ("" + i).length * 4 + "px";
+//			var sz = 32 - Math.pow(("" + i).length,1.1) * 3 + "px";
+			var len = ("" + i).length;
+			var sz = (len < 2 ? 22 : len < 4 ? 14 : len < 6 ? 8 : 6) + "px"; 
 			m = new google.maps.Marker({
 			position : pos,
 			icon : '../img/' + icon + '.png',
@@ -548,8 +597,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			labelContent : "A",
 			labelAnchor : new google.maps.Point(3, 30),
 			labelClass : "labels",
-			zIndex : (10 + i + bottom ? 0 : 100),
-			draggable: true
+			zIndex : (10 + i + bottom ? 0 : 100)
+//			draggable: true
 			});
 		} else {
 			m = new google.maps.Marker({
@@ -584,7 +633,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
             var lon2 = Number(pt2[1]);
 
             var R = 6371; // km
-            //var R = 3958.76; // miles
+            // var R = 3958.76; // miles
             var dLat = (lat2 - lat1).toRad();
             var dLon = (lon2 - lon1).toRad();
             var lat1 = lat1.toRad();
@@ -658,7 +707,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	  var avgSpeed = (3.6 * distance /  t);
 	  
 	  var toRemove = [];
-//	  console.log(">" + itArray.length);
+// console.log(">" + itArray.length);
 
 	  	res = [];
 	  	toRemove = [];
@@ -685,7 +734,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 // console.log("\t" + (i + 1) + ": " + a + " <- " + rd1 + "," + rd2 + "," +
 // rd3);
 	    		
-//	    		console.log("@" + i + "/" + (itArray.length) + " -> " + s2 + "/" + avgSpeed);
+// console.log("@" + i + "/" + (itArray.length) + " -> " + s2 + "/" + avgSpeed);
 	    		
 	    		if (a < 0.017453292519943 * 3) {
 	    			index = i;
@@ -700,7 +749,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 				}	    		
 				
 				if (index) {
-//					console.log(index);
+// console.log(index);
 					toRemove.push(index);
 				}    			
     			
@@ -713,7 +762,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	    }	    
 	    
 	    itArray = res;
-//	    console.log("<" + res.length);
+// console.log("<" + res.length);
 
 	    return res;
 	  
@@ -754,7 +803,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.initMap = function() {
 		document.getElementById("left-scrollable").style.height = (window.innerHeight - 283) + "px";
-//		document.getElementById("right-scrollable").style.height = (window.innerHeight / 2 - 60) + "px";	
+// document.getElementById("right-scrollable").style.height =
+// (window.innerHeight / 2 - 60) + "px";
 		if (!document.getElementById('map'))
 			return;
 		var ll = null;
