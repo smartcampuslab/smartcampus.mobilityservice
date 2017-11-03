@@ -382,12 +382,14 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	}
 	
 	$scope.showAllPoints = function() {
+	if (document.getElementById("showAllPoints").checked) {
 		for (var i = 0; i < $scope.selectedInstance.geolocationEvents.length; i++) {
 			var e = $scope.selectedInstance.geolocationEvents[i];
 			var pos = {'lat' : e.latitude, 'lng' : e.longitude};	
 			var s = e.latitude + "_" + e.longitude;
 			var m = $scope.createMarkerObject(pos, 'circle2', i + 1, true);
 			$scope.layers.push(m);
+		}
 // $scope.eventsMarkers.set(s,m);
 		}
 	}	
@@ -512,17 +514,25 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		newMarker(coordinates[coordinates.length - 1], 'ic_stop');
 
 		if (instance.routesPolylines != null) {
-			if (instance.routesPolylines["train"] != null) {
+			if (instance.routesPolylines["train"] != null && document.getElementById("allRoutesCheckbox").checked) {
 			instance.routesPolylines["train"].forEach(function(polyline) {
 				var path = google.maps.geometry.encoding.decodePath(polyline);
 				var line = new google.maps.Polyline({
 					path : path,
 					strokeColor : 'brown',
 					strokeOpacity : 0.8,
-					strokeWeight : 3,
+					strokeWeight : 5,
 					map : $scope.map
 				});
 				$scope.layers.push(line);
+				
+				line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'black',
+					strokeOpacity : 1,
+					strokeWeight : 1,
+					map : $scope.map
+				});				
 			});		
 			}
 			
@@ -534,12 +544,22 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 				var path = google.maps.geometry.encoding.decodePath(instance.routesPolylines["bus"][route]);
 				var line = new google.maps.Polyline({
 					path : path,
-					strokeColor : 'yellow',
+					strokeColor : 'orange',
 					strokeOpacity : 0.8,
-					strokeWeight : 3,
+					strokeWeight : 5,
 					map : $scope.map
 				});
 				$scope.layers.push(line);
+				
+				line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'black',
+					strokeOpacity : 1,
+					strokeWeight : 1,
+					map : $scope.map
+				});
+				$scope.layers.push(line);				
+				
 				var m1 = $scope.createMarkerObject(path[0], 'circle_start', route, true);
 				$scope.layers.push(m1);
 				m1 = $scope.createMarkerObject(path[path.length - 1], 'circle_stop', route, true);
@@ -574,6 +594,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 				$scope.layers.push(line);
 			});
 		}
+		
+		$scope.showAllPoints();
 	}
 
 	var newMarker = function(pos, icon, i) {
