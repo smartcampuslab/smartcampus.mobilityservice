@@ -420,13 +420,23 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		}
 	}
 	
+	$scope.setRoute = function(route, value) {
+		var index = $scope.selectedRoutes.indexOf(route);
+		if (index != -1 && !value) {
+			$scope.selectedRoutes.splice(index, 1);
+		} else if (index == -1 && value) {
+			$scope.selectedRoutes.push(route);
+		}
+	}	
+	
+	
 	$scope.toggleAllRoutes = function() {
 		var checkbox = document.getElementById("allRoutesCheckbox");
 		var checkboxes = document.getElementsByClassName("routeCheckbox");
 		var i;
 		for (i = 0; i < checkboxes.length; i++) {
 			checkboxes[i].checked = checkbox.checked;
-			$scope.toggleRoute(checkboxes[i].id);
+			$scope.setRoute(checkboxes[i].id, checkbox.checked);
 		}			
 	}
 	
@@ -532,7 +542,8 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 					strokeOpacity : 1,
 					strokeWeight : 1,
 					map : $scope.map
-				});				
+				});		
+				$scope.layers.push(line);
 			});		
 			}
 			
