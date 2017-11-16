@@ -345,13 +345,23 @@ public class StatisticsBuilder {
 				Calendar c = Calendar.getInstance();
 				c.setFirstDayOfWeek(Calendar.MONDAY);
 				c.setTimeInMillis(sdf.parse(day).getTime());
-				c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-				c.add(Calendar.DAY_OF_YEAR, -2); // past saturday
+				if (c.get(Calendar.DAY_OF_WEEK) < Calendar.SATURDAY) {
+					c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+					c.add(Calendar.DAY_OF_YEAR, -2); // past saturday
+				} else {
+					c.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // past saturday
+				}
 				range.from = sdf.format(new Date(c.getTimeInMillis()));
 				c.setTimeInMillis(sdf.parse(day).getTime());
-				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-				c.add(Calendar.DAY_OF_YEAR, -2); // next friday
+				if (c.get(Calendar.DAY_OF_WEEK) < Calendar.SATURDAY) {
+					c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+					c.add(Calendar.DAY_OF_YEAR, -2); // next friday
+				} else {
+					c.add(Calendar.DAY_OF_YEAR, 7);
+					c.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY); // next friday
+				}
 				range.to = sdf.format(new Date(c.getTimeInMillis()));
+				
 				return range;
 			}	
 			case month: {
