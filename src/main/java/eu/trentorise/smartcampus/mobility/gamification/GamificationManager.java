@@ -25,7 +25,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +95,7 @@ public class GamificationManager {
 			return false;
 		}
 		publishQueue.add(travelId);
-		saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
-		return true;
+		return saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
 	}
 	
 	public synchronized boolean sendIntineraryDataToGamificationEngine(String appId, String playerId, String publishKey, ItineraryObject itinerary, Map<String, Object> trackingData) throws Exception {
@@ -103,20 +104,19 @@ public class GamificationManager {
 			return false;
 		}
 		publishQueue.add(publishKey);
-		saveItinerary(itinerary, appId, playerId, trackingData);
-		return true;
+		return saveItinerary(itinerary, appId, playerId, trackingData);
 	}
 
-	private void saveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
+	private boolean saveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
 		if ((Long)trackingData.get("estimatedScore") == 0) {
 			logger.debug("EstimatedScore is 0, returning.");
-			return;
+			return false;
 		}
 		trackingData.remove("estimatedScore");
 		
 		if (trackingData.isEmpty()) {
 			logger.debug("Data is empty, returning.");
-			return;
+			return false;
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
@@ -124,7 +124,7 @@ public class GamificationManager {
 		
 		if (bannedChecker.isBanned(playerId, app.getGameId())) {
 			logger.info("Not sending for banned player " + playerId);
-			return;
+			return false;
 		}
 
 		try {
@@ -140,9 +140,11 @@ public class GamificationManager {
 			String content = JsonUtils.toJSON(ed);
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
+			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+			return true;
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
+			return false;
 		}
 	}
 
@@ -152,10 +154,10 @@ public class GamificationManager {
 	 * @param playerId
 	 * @param geolocationEvents
 	 */
-	private void saveFreeTracking(final String travelId, final String appId, final String playerId, final Collection<Geolocation> geolocationEvents, final String ttype, Map<String, Object> trackingData) {
+	private boolean saveFreeTracking(final String travelId, final String appId, final String playerId, final Collection<Geolocation> geolocationEvents, final String ttype, Map<String, Object> trackingData) {
 		if (gamificationUrl == null) {
 			logger.debug("No gamification URL, returning.");
-			return;
+			return false;
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
@@ -164,24 +166,50 @@ public class GamificationManager {
 		try {
 			if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(game.getStart()).getTime()) {
 				logger.debug("Game not yet started, returning.");
-				return;
+				return false;
 			}
 		} catch (ParseException e) {
-			return;
+			return false;
 		}
 
-		executorService.execute(new Runnable() {
-			@Override
-			public void run() {
-				saveFreetracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
-			}
-
-		});
+		CallableSaveFreetracking save = new CallableSaveFreetracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
+		Future<Boolean> future = executorService.submit(save);
+		try {
+			return future.get();
+		} catch (Exception e) {
+			logger.debug("Error invoking GE, returning.");
+			return false;
+		}
 	}
 	
-	private void saveItinerary(final BasicItinerary itinerary, final String appId, final String userId, Map<String, Object> trackingData) throws ParseException {
+	private class CallableSaveFreetracking implements Callable<Boolean> {
+		
+		private String travelId;
+		private String appId;
+		private String playerId;
+		private Collection<Geolocation> geolocationEvents;
+		private String ttype;
+		private Map<String, Object> trackingData;		
+		
+		public CallableSaveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
+			super();
+			this.travelId = travelId;
+			this.appId = appId;
+			this.playerId = playerId;
+			this.geolocationEvents = geolocationEvents;
+			this.ttype = ttype;
+			this.trackingData = trackingData;
+		}
+
+		@Override
+		public Boolean call() throws Exception {
+			return saveFreetracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
+		}
+	}	
+	
+	private boolean saveItinerary(final BasicItinerary itinerary, final String appId, final String userId, Map<String, Object> trackingData) throws ParseException {
 		if (gamificationUrl == null) {
-			return;
+			return false;
 		}
 		
 		AppInfo app = appSetup.findAppById(appId);
@@ -189,20 +217,55 @@ public class GamificationManager {
 		
 		
 		if (System.currentTimeMillis() < new SimpleDateFormat("dd/MM/yyyy").parse(game.getStart()).getTime()) {
-			return;
+			return false;
 		}
 
-		executorService.execute(new Runnable() {
-			@Override
-			public void run() {
-				saveTrip(itinerary, appId, userId, trackingData);
-			}
-		});
+//		executorService.execute(new Runnable() {
+//			@Override
+//			public void run() {
+//				saveTrip(itinerary, appId, userId, trackingData);
+//			}
+//		});
+		
+		CallableSaveTrip save = new CallableSaveTrip(itinerary, appId, userId, trackingData);
+		Future<Boolean> future = executorService.submit(save);
+		try {
+			return future.get();
+		} catch (Exception e) {
+			logger.debug("Error invoking GE, returning.");
+			return false;
+		}		
+		
 	}
+	
+	private class CallableSaveTrip implements Callable<Boolean> {
+		
+		private BasicItinerary itinerary;
+		private String appId;
+		private String userId;
+		private Map<String, Object> trackingData;		
+		
+		public CallableSaveTrip(BasicItinerary itinerary, String appId, String userId, Map<String, Object> trackingData) {
+			super();
+			this.itinerary = itinerary;
+			this.appId = appId;
+			this.userId = userId;
+			this.trackingData = trackingData;
+		}
 
-	private void saveTrip(BasicItinerary itinerary, String appId, String userId, Map<String, Object> trackingData) {
+		@Override
+		public Boolean call() throws Exception {
+			return saveTrip(itinerary, appId, userId, trackingData);
+		}
+	}	
+
+	private boolean saveTrip(BasicItinerary itinerary, String appId, String userId, Map<String, Object> trackingData) {
 		try {
 //			Map<String, Object> data = validator.computePlannedJourneyScore(itinerary.getData(), true);
+			if ((Long)trackingData.get("estimatedScore") == 0) {
+				logger.debug("EstimatedScore is 0, returning.");
+				return false;
+			}			
 			trackingData.remove("estimatedScore");
 
 			AppInfo app = appSetup.findAppById(appId);
@@ -210,7 +273,7 @@ public class GamificationManager {
 			
 			if (bannedChecker.isBanned(userId, app.getGameId())) {
 				logger.warn("Not sending for banned player " + userId);
-				return;
+				return false;
 			}		
 			
 			ExecutionDataDTO ed = new ExecutionDataDTO();
@@ -226,8 +289,10 @@ public class GamificationManager {
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
 			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+			return true;
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
+			return false;
 		}
 	}	
 
