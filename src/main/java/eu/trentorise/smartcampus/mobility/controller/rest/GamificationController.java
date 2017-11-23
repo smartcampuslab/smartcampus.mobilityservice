@@ -735,7 +735,7 @@ public class GamificationController {
 					logger.info("Validating planned " + ti.getId());
 					ValidationResult vr = gamificationValidator.validatePlannedJourney(ti.getItinerary(), ti.getGeolocationEvents(), appId);
 					ti.setValidationResult(vr);
-					if (vr != null) {
+					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
 						Map<String, Object> data = gamificationValidator.computePlannedJourneyScore(appId, ti.getItinerary().getData(), ti.getGeolocationEvents(), vr.getValidationStatus(), ti.getOverriddenDistances(), false);
 						if (ti.getScoreStatus() == null || ScoreStatus.UNASSIGNED.equals(ti.getScoreStatus())) {
 							ti.setScoreStatus(ScoreStatus.COMPUTED);
