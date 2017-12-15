@@ -91,6 +91,13 @@
 						    </tr>
 					    </table>
 			        </div>
+					<div th:if="${n_prizes eq null or !are_prizes}">
+						<b>
+							<p><u>Weekly prizes will be suspended during weeks 15 and 16 (from 16/12/2017 to 29/12/2017).</u></p> 
+							<p>The Green Leaves Points obtained through tracking and challenges completion during these weeks will count for the global ranking. Prize awarding will start again form week 17, beginning on Saturday, 30/12/2017.</p>
+							<p>We wish you a Merry Christmas. Keep on playing to make it greener and more sustainable.</p>
+						</b>
+					</div>				        
 			        <br/>
 			        <h3>
 				    	YOUR GAME RESULTS for week <strong th:text="${week_num}">X</strong> are:

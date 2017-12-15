@@ -91,6 +91,13 @@
 						    </tr>
 					    </table>
 			        </div>
+					<div th:if="${n_prizes eq null or !are_prizes}">
+						<b>
+							<p><u>I premi settimanali saranno sospesi durante le settimane 15 e 16 (dal 16/12/2017 al 29/12/2017).</u></p> 
+							<p>I punti Green Leaves ottenuti tramite il tracciamento dei percorsi e il superamento delle sfide settimanali saranno conteggiati nella classifica globale. L'assegnazione dei premi settimanali riprenderà a partire dalle 17^ settimana di gioco, con inizio sabato 30/12/2017.</p>
+							<p>Ti auguriamo un Natale sereno, continua a giocare per renderlo più verde e sostenibile.</p>
+						</b>
+					</div>			        
 			        <br/>
 			        <h3>
 				    	I TUOI RISULTATI della <strong th:text="${week_num}">X</strong>^a settimana di gioco sono:
