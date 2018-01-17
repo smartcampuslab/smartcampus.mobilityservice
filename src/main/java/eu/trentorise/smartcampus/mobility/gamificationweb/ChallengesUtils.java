@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.stringtemplate.v4.ST;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -41,12 +42,14 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_BONUS_SCORE = "bonusScore";
 	private static final String CHAL_FIELDS_BASELINE = "baseline";
 	private static final String CHAL_FIELDS_TARGET = "target";
+	private static final String CHAL_FIELDS_PERIOD_TARGET = "periodTarget";
 	private static final String CHAL_FIELDS_INITIAL_BADGE_NUM = "initialBadgeNum";
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
 	// new challenge types
 	private static final String CHAL_MODEL_PERCENTAGE_INC = "percentageIncrement";
 	private static final String CHAL_MODEL_ABSOLUTE_INC = "absoluteIncrement";
+	private static final String CHAL_MODEL_REPETITIVE_BEAV = "repetitiveBehaviour";
 	private static final String CHAL_MODEL_NEXT_BADGE = "nextBadge";
 	private static final String CHAL_MODEL_COMPLETE_BADGE_COLL = "completeBadgeCollection";
 	private static final String CHAL_MODEL_SURVEY = "survey";
@@ -72,6 +75,7 @@ public class ChallengesUtils {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@PostConstruct
 	private void init() throws Exception {
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		// template.dropCollection(ChallengeStructure.class);
 
 		challengeStructureMap = Maps.newTreeMap();
@@ -141,6 +145,7 @@ public class ChallengesUtils {
 					String bonusPointType = "green leaves";
 					String counterName = "";
 					int target = 0;
+					int periodTarget = 0;
 					String badgeCollectionName = "";
 					int baseline = 0;
 					int initialBadgeNum = 0;
@@ -153,6 +158,7 @@ public class ChallengesUtils {
 						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");//(!chalFields.isNull(CHAL_FIELDS_BADGE_COLLECTION_NAME)) ? chalFields.getString(CHAL_FIELDS_BADGE_COLLECTION_NAME) : "";
 						baseline = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_BASELINE,0)).intValue(); //(!chalFields.isNull(CHAL_FIELDS_BASELINE)) ? chalFields.getInt(CHAL_FIELDS_BASELINE) : 0;
 						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue(); //(!chalFields.isNull(CHAL_FIELDS_INITIAL_BADGE_NUM)) ? chalFields.getInt(CHAL_FIELDS_INITIAL_BADGE_NUM) : 0;
+						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).intValue(); ///(int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
 					}
 					ServerChallengesData challData = new ServerChallengesData();
 					challData.setName(name);
@@ -194,6 +200,11 @@ public class ChallengesUtils {
     				int status = 0;
     				
     				switch (tmp_chall.getType()) {
+    					case CHAL_MODEL_REPETITIVE_BEAV:
+		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, challData.getStart(), challData.getEnd(), null, target); 
+		    				row_status = round(successes, 2);
+		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
+	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
 		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, challData.getStart(), challData.getEnd(), null); 
@@ -284,6 +295,9 @@ public class ChallengesUtils {
 			case CHAL_MODEL_ABSOLUTE_INC: {
 				return "counterName";
 			}
+			case CHAL_MODEL_REPETITIVE_BEAV: {
+				return "counterName";
+			}
 			case CHAL_MODEL_COMPLETE_BADGE_COLL:
 			case CHAL_MODEL_NEXT_BADGE: {
 				return "badgeCollectionName";
@@ -336,6 +350,39 @@ public class ChallengesUtils {
 		}
 		return actualStatus;
 	}
+	
+	
+	
+	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now, int target){
+		int countSuccesses = 0; // km or trips
+		if(cName != null && cName.compareTo("") != 0){
+			for(PointConcept pt : pointConcept){
+				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
+					List<PointConceptPeriod> allPeriods = pt.getInstances();
+					for(PointConceptPeriod pcp : allPeriods){
+						if(chalStart != null && chalEnd != null){
+							if(chalStart <= pcp.getStart() && chalEnd >= pcp.getEnd()){	// Now I check only using starting time
+								countSuccesses += pcp.getScore() >= target ? 1 : 0;
+							}
+						} else {
+							if(now != null){
+								if(pcp.getStart() <= now && pcp.getEnd() >= now){	// the actual time is contained in the week duration instance
+									countSuccesses += pcp.getScore() >= target ? 1 : 0;
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+		
+		return countSuccesses;
+	}	
+	
+	
+	
+	
 	
 	// Method getEarnedBadgesFromList: used to get the earned badge number during challenge
 	private int getEarnedBadgesFromList(List<BadgeCollectionConcept> bcc_list, String badgeCollName, int initial){
