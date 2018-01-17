@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ChallengeConcept extends GameConcept {
@@ -70,8 +70,7 @@ public class ChallengeConcept extends GameConcept {
 	
 	@Override
 	public String toString() {
-		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
-		return tsb.build();
-	}	
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
 
 }
