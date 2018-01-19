@@ -204,6 +204,8 @@ public class ChallengesUtils {
 		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, challData.getStart(), challData.getEnd(), null, target); 
 		    				row_status = round(successes, 2);
 		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
+		    				challData.setTarget(periodTarget);
+		    				tmp_chall.setChallTarget(periodTarget);
 	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
