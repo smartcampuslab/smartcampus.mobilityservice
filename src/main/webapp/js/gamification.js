@@ -208,6 +208,14 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		});
 	}
 	
+	$scope.synchronize = function() {
+		spinner.spin(target);
+		$http.post("console/synchronize", {}, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			load();
+			spinner.stop();
+		});
+	}	
+	
 // $scope.switchCurrentValidity = function(toggle) {
 // if (toggle) {
 // $http.post("console/itinerary/switchValidity/" + $scope.selectedInstance.id +
