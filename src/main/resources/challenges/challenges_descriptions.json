@@ -387,7 +387,14 @@
       "en": "The 'promoted' itineraries are those suggested by Viaggia Play&Go App and marked in green."
     }
   },
-
+  {
+    "modelName": "percentageIncrement",
+    "filter": "NoCar_Trips",
+    "description": {
+      "it": "Per vincere la sfida vale il numero di itinerari effettuati senza utilizzare l'automobile tracciati con Viaggia Play&Go e compiuti durante la validita' della sfida.",
+      "en": "To win this challenge, we take into account the total number of itineraries you have done with Viaggia Play&Go withouth using the car and which you have taken in between the beginning and end time for this challenge."
+    }
+  },
 
 	{
     "modelName": "nextBadge",

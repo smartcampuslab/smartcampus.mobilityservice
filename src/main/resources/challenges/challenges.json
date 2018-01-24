@@ -106,6 +106,14 @@
 	},
 	{
 		"name": "percentageIncrement",
+		"filter": "_NoTrips",
+		"description": {
+			"it": "Fai almeno <target> viaggi senza usare <counterNameA> e avrai un bonus di <bonusScore> punti <bonusPointType>.",
+			"en": "Do at least <target> trips without <counterNameA> and you will get a bonus of <bonusScore> <bonusPointType> points."
+		}
+	},	
+	{
+		"name": "percentageIncrement",
 		"filter": "green leaves",
 		"description": {
 			"it": "Ottieni almeno altri <target> punti <counterNameA> e avrai ulteriori <bonusScore> punti <bonusPointType> in bonus.",
