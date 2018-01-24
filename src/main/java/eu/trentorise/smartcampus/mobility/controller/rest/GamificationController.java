@@ -927,6 +927,7 @@ public class GamificationController {
 		
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		
+		logger.info("Found " + instances.size() + " COMPUTED trips.");
 		instances.forEach(x -> {
 			try {
 				logger.error("Synchronizing " + x.getId());
