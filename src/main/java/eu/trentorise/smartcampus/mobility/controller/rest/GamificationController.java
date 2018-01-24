@@ -893,6 +893,9 @@ public class GamificationController {
 				if (gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(),
 						trackingData)) {
 					instance.setScoreStatus(ScoreStatus.SENT);
+					gamificationManager.removeIdsFromQueue(instance.getClientId() + "_" + instance.getDay());
+					logger.info("Sent: " + instance.getId());
+					instance.setApproved(true);
 				}
 			} else if (instance.getFreeTrackingTransport() != null) {
 				Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(instance.getAppId(), instance.getGeolocationEvents(), instance.getFreeTrackingTransport(), instance.getValidationResult().getValidationStatus(), instance.getOverriddenDistances());
@@ -905,14 +908,35 @@ public class GamificationController {
 				if (gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(),
 						instance.getFreeTrackingTransport(), trackingData)) {
 					instance.setScoreStatus(ScoreStatus.SENT);
+					gamificationManager.removeIdsFromQueue(instance.getClientId());
+					logger.info("Sent: " + instance.getId());
+					instance.setApproved(true);
 				}
 			}
 		}
 
-		instance.setApproved(true);
 		storage.saveTrackedInstance(instance);
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/console/synchronize")
+	public @ResponseBody void synchronize(@RequestHeader(required = true, value = "appId") String appId) throws Exception {
+		Criteria criteria = new Criteria("appId").is(appId);
+		criteria = criteria.and("scoreStatus").is(ScoreStatus.COMPUTED); //.and("approved").ne(true);
+		
+		Query query = new Query(criteria);
+		
+		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
+		
+		instances.forEach(x -> {
+			try {
+				logger.error("Synchronizing " + x.getId());
+				approveAndSendScore(x);
+			} catch (Exception e) {
+				logger.error("Error approving and sending " + x.getId());
+			}
+		});
+	}
+	
 	// TODO update
 	@RequestMapping(value = "/console/report")
 	public @ResponseBody void generareReport(HttpServletResponse response, @RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
