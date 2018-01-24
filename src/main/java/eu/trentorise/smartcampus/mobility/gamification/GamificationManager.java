@@ -19,6 +19,7 @@ package eu.trentorise.smartcampus.mobility.gamification;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -91,22 +92,33 @@ public class GamificationManager {
 	public synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
 		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
 		if (publishQueue.contains(travelId)) {
-			logger.debug("publishQueue contains travelId " + travelId + ", returning");
+			logger.info("publishQueue contains travelId " + travelId + ", returning");
 			return false;
 		}
-		publishQueue.add(travelId);
-		return saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
+		boolean result = saveFreeTracking(travelId, appId, playerId, geolocationEvents, ttype, trackingData);
+		if (result) {
+			publishQueue.add(travelId);
+		}
+		return result;
 	}
 	
 	public synchronized boolean sendIntineraryDataToGamificationEngine(String appId, String playerId, String publishKey, ItineraryObject itinerary, Map<String, Object> trackingData) throws Exception {
 		logger.info("Send data for user " + playerId + ", trip " + itinerary.getClientId());
 		if (publishQueue.contains(publishKey)) {
+			logger.info("Already sent, returning " + playerId + ", trip " + itinerary.getClientId());
 			return false;
 		}
-		publishQueue.add(publishKey);
-		return saveItinerary(itinerary, appId, playerId, trackingData);
+		boolean result = saveItinerary(itinerary, appId, playerId, trackingData);
+		if (result) {
+			publishQueue.add(publishKey);			
+		}
+		return result;
 	}
 
+	public void removeIdsFromQueue(String... ids) {
+		publishQueue.removeAll(Arrays.asList(ids));
+	}	
+	
 	private boolean saveFreetracking(String travelId, String appId, String playerId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
 		if ((Long)trackingData.get("estimatedScore") == 0) {
 			logger.debug("EstimatedScore is 0, returning.");
