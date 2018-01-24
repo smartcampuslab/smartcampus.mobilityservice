@@ -8,7 +8,8 @@
 								<a class="btn btn-primary btn-sm" href="{{'console/report?fromDate=' + fromDate.getTime() + '&toDate=' + toDate.getTime()}}" role="button">Report</a>
 							</div>
 							<div class="col-md-9 text-right">
-								<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal2">Revalidate</button>
+								<!-- <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal2">Revalidate</button> -->
+								<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#confirmModal2">Synchronize</button>
 								<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal3">Approve all</button>
 							</div>
 						</div>
@@ -278,7 +279,8 @@
 					<div class="modal-body">
 						<form id="notification-form">
 							<div class="form-group">
-								<button class="btn btn-primary" type="button" ng-click="revalidate()" data-dismiss="modal">Yes</button>
+								<!-- <button class="btn btn-primary" type="button" ng-click="revalidate()" data-dismiss="modal">Yes</button> -->
+								<button class="btn btn-primary" type="button" ng-click="synchronize()" data-dismiss="modal">Yes</button>
 								<button class="btn btn-primary right" type="button" data-dismiss="modal">No</button>
 							</div>
 						</form>
