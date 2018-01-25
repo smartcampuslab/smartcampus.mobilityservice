@@ -315,7 +315,13 @@ public class GamificationManager {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		AppInfo app = appSetup.findAppById(appId);
-		GameInfo game = gameSetup.findGameById(app.getGameId());
+		
+		if (app == null) {
+			logger.error("App not found for user = " + userId + ", app = " + appId);
+			return result;
+		}
+		
+//		GameInfo game = gameSetup.findGameById(app.getGameId());
 		
 //		logger.info("Get score notifications for " + userId);
 		
@@ -331,7 +337,11 @@ public class GamificationManager {
 		for (Object not: nots) {
 			MessageNotification msg = mapper.convertValue(not, MessageNotification.class);
 			Map data = msg.getData();
-			result.put((String)data.get("travelId"), (Double)data.get("score"));
+			if (data.get("travelId") != null) {
+				result.put((String)data.get("travelId"), (Double)data.get("score"));
+			} else {
+				logger.error("TravelId null in GE for user = " + userId + ", app = " + appId);
+			}
 		}		
 		
 //		logger.info("Got scores: " + result);
