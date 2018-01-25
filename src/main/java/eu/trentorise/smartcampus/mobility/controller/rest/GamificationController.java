@@ -239,6 +239,7 @@ public class GamificationController {
 						// initialization/synchronization.
 						// we skip them here
 						logger.warn("location without idTrip, user: "+userId);
+						logger.warn("Extras = " + location.getExtras());
 						continue;
 						// if (lastTravelId != null) {
 						// locationTravelId = lastTravelId;
