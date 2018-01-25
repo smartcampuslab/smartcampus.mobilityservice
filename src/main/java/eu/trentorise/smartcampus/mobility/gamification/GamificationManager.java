@@ -340,7 +340,7 @@ public class GamificationManager {
 			if (data.get("travelId") != null) {
 				result.put((String)data.get("travelId"), (Double)data.get("score"));
 			} else {
-				logger.error("TravelId null in GE for user = " + userId + ", app = " + appId);
+				logger.warn("TravelId null in GE for user = " + userId + ", app = " + appId);
 			}
 		}		
 		

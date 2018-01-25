@@ -238,8 +238,7 @@ public class GamificationController {
 						// locations with empty idTrip are possible only upon
 						// initialization/synchronization.
 						// we skip them here
-						logger.warn("location without idTrip, user: "+userId);
-						logger.warn("Extras = " + location.getExtras());
+						logger.warn("location without idTrip, user: " + userId + ", extras = " + location.getExtras());
 						continue;
 						// if (lastTravelId != null) {
 						// locationTravelId = lastTravelId;
