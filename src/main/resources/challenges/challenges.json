@@ -3,8 +3,8 @@
 	"filter": "green leaves",
 	"periodName": "daily",
 	"description": {
-		"it": "Ottieni almeno <target> punti <counterNameA> al giorno per almeno <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
-		"en": "Get at least <target> <counterNameA> points daily for at least <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
+		"it": "Ottieni almeno <target> punti <counterNameA> al giorno per <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
+		"en": "Get at least <target> <counterNameA> points daily for <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
@@ -12,8 +12,8 @@
 	"filter": "_Km",
 	"periodName": "daily",
 	"description": {
-		"it": "Fai almeno <target> km <counterNameA> al giorno per almeno <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
-		"en": "Do at least <target> <counterNameA> km daily for at least <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
+		"it": "Fai almeno <target> km <counterNameA> al giorno per <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
+		"en": "Do at least <target> km <counterNameA> daily for <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
@@ -21,8 +21,8 @@
 	"filter": "_Trips",
 	"periodName": "daily",
 	"description": {
-		"it": "Ottieni almeno <target> viaggi <counterNameA> al giorno per almeno <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
-		"en": "Do at least <target> <counterNameA> trips daily for at least <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
+		"it": "Fai almeno <target> viaggi <counterNameA> al giorno per <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
+		"en": "Do at least <target> trips <counterNameA> daily for <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
@@ -30,8 +30,8 @@
 	"filter": "_NoTrips",
 	"periodName": "daily",
 	"description": {
-		"it": "Fai almeno <target> viaggi al giorno senza usare <counter> per almeno <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
-		"en": "Do at least <target> trips daily without <counter> for at least <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
+		"it": "Fai almeno <target> viaggi al giorno senza usare <counter> per <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
+		"en": "Do at least <target> trips daily without <counter> for <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
@@ -40,7 +40,7 @@
 	"periodName": "daily",
 	"description": {
 		"it": "Raccomanda la App ad almeno <target> utenti <counter> al giorno per <periodTarget> giorni e avrai un bonus di <bonusScore> punti <bonusPointType>.",
-		"en": "Recommend the app at least <target> users daily for at least <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
+		"en": "Recommend the app to at least <target> users daily for <periodTarget> days and you will get a bonus of <bonusScore> <bonusPointType> points."
 	}
 },
 {
