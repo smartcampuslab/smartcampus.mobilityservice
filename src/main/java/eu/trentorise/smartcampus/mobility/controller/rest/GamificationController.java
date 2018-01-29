@@ -913,6 +913,8 @@ public class GamificationController {
 					instance.setApproved(true);
 				}
 			}
+		} else {
+			instance.setApproved(true);
 		}
 
 		storage.saveTrackedInstance(instance);
