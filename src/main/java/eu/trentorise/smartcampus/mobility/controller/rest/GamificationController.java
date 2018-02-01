@@ -458,7 +458,7 @@ public class GamificationController {
 				res.setDeviceInfo(deviceInfo);
 				storage.saveTrackedInstance(res);
 				
-				logger.info("Saved geolocation events: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
+				logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 			}
 
 		} catch (Exception e) {
@@ -875,11 +875,11 @@ public class GamificationController {
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		for (TrackedInstance ti : instances) {
 			logger.info("ApproveAndSendScore for " + ti.getId());
-			approveAndSendScore(ti);
+			approveAndSendScore(ti, false);
 		}
 	}
 	
-	private void approveAndSendScore(TrackedInstance instance) throws Exception {
+	private void approveAndSendScore(TrackedInstance instance, boolean forceQueue) throws Exception {
 		if (!TravelValidity.VALID.equals(instance.getValidationResult().getTravelValidity()) && TravelValidity.VALID.equals(instance.getChangedValidity()) || ScoreStatus.COMPUTED.equals(instance.getScoreStatus())) {
 			logger.info("Sending approved itinerary data to GE: " + instance.getId());
 			if (instance.getItinerary() != null && instance.getValidationResult() != null) {
@@ -890,10 +890,12 @@ public class GamificationController {
 				}
 				trackingData.put(TRAVEL_ID, instance.getId());
 				trackingData.put(START_TIME, getStartTime(instance));
+				if (forceQueue) {
+					gamificationManager.removeIdFromQueue(instance.getClientId() + "_" + instance.getDay());
+				}
 				if (gamificationManager.sendIntineraryDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId() + "_" + instance.getDay(), instance.getItinerary(),
 						trackingData)) {
 					instance.setScoreStatus(ScoreStatus.SENT);
-					gamificationManager.removeIdsFromQueue(instance.getClientId() + "_" + instance.getDay());
 					logger.info("Sent: " + instance.getId());
 					instance.setApproved(true);
 				}
@@ -905,10 +907,11 @@ public class GamificationController {
 				}
 				trackingData.put(TRAVEL_ID, instance.getId());
 				trackingData.put(START_TIME, getStartTime(instance));
+				if (forceQueue) {
+					gamificationManager.removeIdFromQueue(instance.getClientId());				}				
 				if (gamificationManager.sendFreeTrackingDataToGamificationEngine(instance.getAppId(), instance.getUserId(), instance.getClientId(), instance.getGeolocationEvents(),
 						instance.getFreeTrackingTransport(), trackingData)) {
 					instance.setScoreStatus(ScoreStatus.SENT);
-					gamificationManager.removeIdsFromQueue(instance.getClientId());
 					logger.info("Sent: " + instance.getId());
 					instance.setApproved(true);
 				}
@@ -933,7 +936,7 @@ public class GamificationController {
 		instances.forEach(x -> {
 			try {
 				logger.error("Synchronizing " + x.getId());
-				approveAndSendScore(x);
+				approveAndSendScore(x, true);
 			} catch (Exception e) {
 				logger.error("Error approving and sending " + x.getId());
 			}
