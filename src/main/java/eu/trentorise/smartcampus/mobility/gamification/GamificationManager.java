@@ -115,6 +115,10 @@ public class GamificationManager {
 		return result;
 	}
 
+	public void removeIdFromQueue(String id) {
+		publishQueue.remove(id);
+	}		
+	
 	public void removeIdsFromQueue(String... ids) {
 		publishQueue.removeAll(Arrays.asList(ids));
 	}	
