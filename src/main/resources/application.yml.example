@@ -52,3 +52,10 @@ imageDir:
 
 externalDataDir:
 
+management:
+  security:
+    enabled: false 
+  ssl:
+    enabled: false 
+  port:   
+  context-path: /manage         
