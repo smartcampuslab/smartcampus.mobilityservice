@@ -256,6 +256,12 @@
 			<artifactId>ST4</artifactId>
 			<version>4.0.8</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.jolokia</groupId>
+		    <artifactId>jolokia-core</artifactId>
+		</dependency>		
+		
 	</dependencies>
 
 	<build>
