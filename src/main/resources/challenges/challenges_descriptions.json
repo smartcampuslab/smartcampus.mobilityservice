@@ -128,10 +128,10 @@
 },
 {
 	"modelName": "repetitiveBehaviour",
-	"filter": "ParkAndRide_Km",
+	"filter": "ParkAndRide_Trips",
 	"description": {
-		"it": "Per vincere la sfida vale il numero di itinerari al giorno che utilizzano il park and ride pianificati e tracciati con Viaggia Play&Go e compiuti durante la validita' della sfida.",
-		"en": "To win this challenge, we take into account the total number of itineraries you have done within the day using park and ride with Viaggia Play&Go and which you have taken in between the beginning and end time for this challenge."
+		"it": "Per vincere la sfida vale il numero di itinerari al giorno che utilizzano il park and ride pianificati e tracciati con Viaggia Play&Go e compiuti durante la validita' della sfida. I parcheggi Park&Ride sono: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto.",
+		"en": "To win this challenge, we take into account the total number of itineraries you have done within the day using park and ride with Viaggia Play&Go and which you have taken in between the beginning and end time for this challenge. Park&Ride parkings are: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto."
 	}
 },
 {
@@ -384,18 +384,18 @@
 },
 {
 	"modelName": "absoluteIncrement",
-	"filter": "ParkAndRide_Km",
+	"filter": "ParkAndRide_Trips",
 	"description": {
-		"it": "Per vincere la sfida vale il numero di itinerari che utilizzano il park and ride pianificati e tracciati con Viaggia Play&Go e compiuti durante la validita' della sfida.",
-		"en": "To win this challenge, we take into account the total number of itineraries you have done using park and ride with Viaggia Play&Go and which you have taken in between the beginning and end time for this challenge."
+		"it": "Per vincere la sfida vale il numero di itinerari che utilizzano il park and ride pianificati e tracciati con Viaggia Play&Go e compiuti durante la validita' della sfida. I parcheggi Park&Ride sono: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto.",
+		"en": "To win this challenge, we take into account the total number of itineraries you have done using park and ride with Viaggia Play&Go and which you have taken in between the beginning and end time for this challenge. Park&Ride parkings are: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto."
 	}
 },
 {
 	"modelName": "nextBadge",
 	"filter": "park and ride pioneer",
 	"description": {
-		"it": "Per vincere la sfida utilizza nel corso del periodo di validita' della sfida un parcheggio Park&Ride che non hai ancora visitato.",
-		"en": "To win this challenge you need to park in a Park&Ride facility you have not visited yet."
+		"it": "Per vincere la sfida utilizza nel corso del periodo di validita' della sfida un parcheggio Park&Ride che non hai ancora visitato. I parcheggi Park&Ride sono: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto.",
+		"en": "To win this challenge you need to park in a Park&Ride facility you have not visited yet. Park&Ride parkings are: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto."
 	}
 },
 {
