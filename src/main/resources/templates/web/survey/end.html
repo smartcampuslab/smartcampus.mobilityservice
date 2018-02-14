@@ -1,0 +1,117 @@
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.thymeleaf.org"
+  th:with="lang=${#locale.language}" th:lang="${lang}">
+<head lang="it">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title th:text="#{surveyend.title}">Play&amp;Go - Questionario finale</title>
+<link href="../../../../css/bootstrap.min.css" rel="stylesheet" />
+<link href="../../../../css/bootstrap-theme.min.css" rel="stylesheet" />
+<link href="../../../../css/gg_style.css" rel="stylesheet" />
+
+<!-- required libraries -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="../../../../lib/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+  <h3 th:text="#{surveyend.head}" style="text-align:center;">Questionario Finale Play&amp;Go</h3>
+  <form id="form" role="form" name="form" method="POST" class="" style="max-width: 600px;">
+    
+    <div class="form-group">
+      <label for="q1" th:text="#{surveyend.q1}">Come valuteresti la tua esperienza di gioco in queste settimane?*</label>
+      <div>
+        <small th:text="#{surveyend.q1.1}">Molto negativa</small>  
+        <small class="pull-right" th:text="#{surveyend.q1.2}">Molto positiva</small>            
+      </div>  
+	    <div class="text-center">
+				<label class="radio-inline">
+				  <input type="radio" name="q1" id="q11" value="1" />&nbsp;
+				</label>      
+		    <label class="radio-inline">
+		      <input type="radio" name="q1" id="q12" value="2" />&nbsp;
+		    </label>      
+		    <label class="radio-inline">
+		      <input type="radio" name="q1" id="q13" value="3" />&nbsp;
+		    </label>      
+		    <label class="radio-inline">
+		      <input type="radio" name="q1" id="q14" value="4" />&nbsp;
+		    </label>      
+		    <label class="radio-inline">
+		      <input type="radio" name="q1" id="q15" value="5" />&nbsp;
+		    </label>      
+		    <label class="radio-inline">
+		      <input type="radio" name="q1" id="q16" value="6" />&nbsp;
+		    </label>
+	    </div>
+    </div> 
+
+    <div class="form-group">
+      <label for="q2" th:text="#{surveyend.q2}">In quale misura il gioco ti ha indotto a cambiare le tue abitudini di mobilità?*</label>
+      <div>
+        <small th:text="#{surveyend.q2.1}">Per nulla</small>  
+        <small class="pull-right" th:text="#{surveyend.q2.2}">Molto</small>            
+      </div>  
+      <div class="text-center">
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q21" value="1" />&nbsp;
+        </label>      
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q22" value="2" />&nbsp;
+        </label>      
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q23" value="3" />&nbsp;
+        </label>      
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q24" value="4" />&nbsp;
+        </label>      
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q25" value="5" />&nbsp;
+        </label>      
+        <label class="radio-inline">
+          <input type="radio" name="q2" id="q26" value="6" />&nbsp;
+        </label>
+      </div>
+    </div> 
+    
+    <div class="form-group"><i th:text="#{survey.required}"></i></div>
+    
+    <div class="form-group">
+      <button id="send" type="button" class="btn btn-primary" th:text="#{survey.submit}" >Submit</button>
+    </div> 
+     
+  </form>
+  </div>
+
+
+<script>
+/*<![CDATA[*/
+  function changePart() {
+    if ($('#prev').val() == 'yes') {
+        $('#inflgroup').show();     
+    } else {
+          $('#inflgroup').hide();      
+    }
+  }
+ 
+  $('#send').click(function() {
+    if (!checkData()) {
+      $('form').submit();     
+    }
+  });
+  
+  function checkData() {
+	  var disabled = false;
+    if (!$("input[name='q1']:checked").val() || !$("input[name='q2']:checked").val()) {
+        disabled = true;
+    }
+    $('#send').prop('disabled', disabled);
+    return disabled;
+  }
+  $('input').change(checkData);
+  checkData();
+/*]]>*/
+</script>
+</body>
+</html>
