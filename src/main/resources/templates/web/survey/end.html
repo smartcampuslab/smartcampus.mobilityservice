@@ -22,6 +22,7 @@
 <body>
   <div class="container">
   <h3 th:text="#{surveyend.head}" style="text-align:center;">Questionario Finale Play&amp;Go</h3>
+  <p th:utext="#{surveyend.message}"></p>
   <form id="form" role="form" name="form" method="POST" class="" style="max-width: 600px;">
     
     <div class="form-group">
@@ -80,7 +81,7 @@
       <div class="checkbox"><label><input type="checkbox" name="q4" value="no"/><span th:text="#{surveyend.q45}"></span></label></div>
     </div>
 
-    <div class="form-inline">
+    <div class="form">
       <label for="q5" th:text="#{surveyend.q5}"></label>
 		  <div class="form-group">
 		    <label for="q51" th:text="#{surveyend.q51}"></label>
