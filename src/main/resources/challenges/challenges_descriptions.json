@@ -479,6 +479,14 @@
 	}
 },
 {
+  "modelName": "survey",
+  "filter": "last",
+  "description": {
+    "it": "Per vincere la sfida compila questo breve questionario al seguente \\<a href='<surveylink>' target='_system'>indirizzo\\</a>.",
+    "en": "To win this challenge, complete the short survey that you can access \\<a href='<surveylink>' target='_system'>here\\</a>."
+  }
+},
+{
 	"modelName": "survey",
 	"filter": "start",
 	"description": {
