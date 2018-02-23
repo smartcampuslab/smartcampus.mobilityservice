@@ -166,6 +166,21 @@
 			"it": "finale",
 			"en": "final"
 		}
-	}]		
+	}],
+  "last": [{
+    "negative": false,
+    "word": {
+      "it": "breve",
+      "en": "short"
+    }
+  },
+  {
+    "negative": true,
+    "word": {
+      "it": "breve",
+      "en": "short"
+    }
+  }]    
+	
 	
 }
