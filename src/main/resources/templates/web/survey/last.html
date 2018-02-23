@@ -60,13 +60,6 @@
 
 <script>
 /*<![CDATA[*/
-  function changePart() {
-    if ($('#prev').val() == 'yes') {
-        $('#inflgroup').show();     
-    } else {
-          $('#inflgroup').hide();      
-    }
-  }
  
   $('#send').click(function() {
     if (!checkData()) {
@@ -88,10 +81,10 @@
     ) {
         disabled = true;
     }
-    $('input').change(checkData);
     $('#send').prop('disabled', disabled);
     return disabled;
   }
+  $('input').change(checkData);
   checkData();
 /*]]>*/
 </script>
