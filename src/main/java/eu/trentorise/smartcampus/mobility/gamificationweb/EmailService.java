@@ -326,13 +326,13 @@ public class EmailService {
     public void sendMailGamificationWithReport(
             final String recipientName, final String point_green, final String point_health, final String point_pr, final String badge,
             final String position, final Integer week_number, final String week_theme, final Integer last_week_number, final Boolean are_challenges, final Boolean are_prizes, final Boolean are_last_week_prizes, 
-            final Boolean surveyCompiled, File reportFile,
+            File reportFile,
             final List<ChallengesData> challenges,
             final List<ChallengesData> last_week_challenges,
             final List<WeekPrizeData> prizes,
             final List<WeekWinnersData> winners,
             final List<MailImage> standardImages,
-            final String recipientEmail, final String greengame_url, String surveyLink, String surveyLinkShort, final Boolean show_final_event, String unsubscribtionLink, final Locale locale)
+            final String recipientEmail, final String greengame_url, final Boolean show_final_event, String unsubscribtionLink, final Locale locale)
             throws MessagingException {
         
     	logger.debug(String.format("Gamification Mail Prepare for %s - OK", recipientName));
@@ -381,9 +381,9 @@ public class EmailService {
         ctx.setVariable("are_challenges", are_challenges);
         ctx.setVariable("u_position", position);
         ctx.setVariable("greengame_url", greengame_url);
-        ctx.setVariable("surveyLink", surveyLink);
-        ctx.setVariable("surveyLinkShort", surveyLinkShort);
-        ctx.setVariable("show_survey_ok", surveyCompiled);
+//        ctx.setVariable("surveyLink", surveyLink);
+//        ctx.setVariable("surveyLinkShort", surveyLinkShort);
+//        ctx.setVariable("show_survey_ok", surveyCompiled);
         ctx.setVariable("show_final_event", show_final_event);
         ctx.setVariable("unsubscribtionLink", unsubscribtionLink);
         ctx.setVariable("imageRNFoglie03", standardImages.get(0).getImageName()); // so that we can reference it from HTML
@@ -402,7 +402,7 @@ public class EmailService {
         message.setTo(recipientEmail);
 
         // Create the HTML body using Thymeleaf
-        final String htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2016-module-tn", ctx) : this.templateEngine.process("mail/email-gamification2016-module-tn-eng", ctx);
+        final String htmlContent = (locale == Locale.ITALIAN) ? this.templateEngine.process("mail/email-gamification2017-module-tn", ctx) : this.templateEngine.process("mail/email-gamification2017-module-tn-eng", ctx);
         message.setText(htmlContent, true /* isHtml */);
         
         // Add the inline titles image, referenced from the HTML code as "cid:${imageResourceName}"
@@ -412,8 +412,9 @@ public class EmailService {
         message.addInline(standardImages.get(1).getImageName(), imageSourceFoglia04, standardImages.get(1).getImageType());
         
         // Add the inline footer image, referenced from the HTML code as "cid:${imageResourceName}"
-        final InputStreamSource imageSourceFooter = new ByteArrayResource(standardImages.get(5).getImageByte());
-        message.addInline(standardImages.get(5).getImageName(), imageSourceFooter, standardImages.get(5).getImageType());
+//        final InputStreamSource imageSourceFooter = new ByteArrayResource(standardImages.get(5).getImageByte());
+//        message.addInline(standardImages.get(5).getImageName(), imageSourceFooter, standardImages.get(5).getImageType());
+        
         message.addAttachment(reportFile.getName(), reportFile);
         
         // Send mail
