@@ -48,9 +48,9 @@ validation:
   
 weeklyDataDir:
 
-imageDir:
-
 externalDataDir:
+
+certificatesDir: 
 
 management:
   port: 7011  
