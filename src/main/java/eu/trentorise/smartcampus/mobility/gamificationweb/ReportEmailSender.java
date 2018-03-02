@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
@@ -81,6 +80,10 @@ public class ReportEmailSender {
 	@Value("${mail.redirectUrl}")
 	private String mailRedirectUrl;
 
+	@Autowired
+	@Value("${certificatesDir}")
+	private String certificatesDir;	
+	
 	private static final String ITA_LANG = "it";
 	private static final String ENG_LANG = "en";
 
@@ -117,9 +120,15 @@ public class ReportEmailSender {
 //		sendWeeklyNotification();
 //		System.out.println("DONE");
 //	}
+//	
+//	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/test2")
+//	public synchronized void sendPDFMail() throws Exception {
+//		sendPDFReportMail();
+//		System.out.println("DONE");
+//	}	
 	
 //	@Scheduled(cron="0 10 10 * * *")
-	@Scheduled(cron="0 0 17 * * FRI")
+//	@Scheduled(cron="0 0 17 * * FRI")
 	public void sendWeeklyNotification() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending weekly notifications");
@@ -132,6 +141,21 @@ public class ReportEmailSender {
 			}
 		}
 	}	
+	
+//	@Scheduled(cron="0 56 11 15 2 ?")
+	public void sendPDFReportMail() throws Exception {
+//		System.err.println("TIME " + new Date());
+		logger.info("Sending PDF email");
+		for (AppInfo appInfo : appSetup.getApps()) {
+			logger.info("Sending PDF for app " + appInfo.getAppId());
+			try {
+				sendPDFReportMail(appInfo.getAppId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}	
+	
 	
 	/**
 	 * Send a generic mail to all the subscribed users
@@ -574,19 +598,19 @@ public class ReportEmailSender {
 			}
 		}
 		// Send summary mail
-		if (mailSend && iter.iterator().hasNext()) {
-			// Here I send the summary mail (only if the sendMail parameter is true)
-			try {
-				this.emailService.sendMailSummary("Amministratore", "0", "0", "0", summaryMail, standardImages, mailTo, Locale.ITALIAN);
-			} catch (MessagingException e) {
-				logger.error(String.format("Errore invio mail notifica : %s", e.getMessage()));
-			}
-		}
+//		if (mailSend && iter.iterator().hasNext()) {
+//			// Here I send the summary mail (only if the sendMail parameter is true)
+//			try {
+//				this.emailService.sendMailSummary("Amministratore", "0", "0", "0", summaryMail, standardImages, mailTo, Locale.ITALIAN);
+//			} catch (MessagingException e) {
+//				logger.error(String.format("Errore invio mail notifica : %s", e.getMessage()));
+//			}
+//		}
 	}
 
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 30 11 * * WED") // Repeat every WED at 11:30 AM
-	public synchronized void sendReportMail(String appId) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException {
+	public synchronized void sendPDFReportMail(String appId) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException {
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		long millisNoEvent = 1480978800000L; // Tue Dec 06 2016 00:00:00 GMT+0100
@@ -612,10 +636,10 @@ public class ReportEmailSender {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 
 			if (p.isSendMail()) {
-				String moduleName = "mail/certificates-pdf/Certificato_TrentoPlayAndGo_" + p.getId() + ".pdf";
+				String moduleName = certificatesDir +"/Certificato_TrentoPlayAndGo_" + p.getId() + ".pdf";
 				try {
-					File finalModule = new File(path + moduleName);
-					String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
+					File finalModule = new File(moduleName);
+//					String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
 					String unsubcribeLink = utils.createUnsubscribeUrl(p.getId(), gameId);
 					// List<State> states = null;
 					List<PointConcept> states = null;
@@ -670,11 +694,11 @@ public class ReportEmailSender {
 						try {
 							if (states != null && states.size() > 0) {
 								this.emailService.sendMailGamificationWithReport(playerName, states.get(0).getScore() + "", null, null, null, null, // health and pr point are null
-										null, null, null, null, null, null, surveyCompiled, finalModule, challenges, lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl,
-										compileSurveyUrl, compileSurveyUrl, showFinalEvent, unsubcribeLink, mailLoc);
+										null, null, null, null, null, null, finalModule, challenges, lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl,
+										showFinalEvent, unsubcribeLink, mailLoc);
 							} else {
-								this.emailService.sendMailGamificationWithReport(playerName, "0", "0", "0", null, null, null, null, null, null, null, null, surveyCompiled, finalModule, challenges,
-										lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl, compileSurveyUrl, compileSurveyUrl, showFinalEvent, unsubcribeLink, mailLoc);
+								this.emailService.sendMailGamificationWithReport(playerName, "0", "0", "0", null, null, null, null, null, null, null, null, finalModule, challenges,
+										lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl, showFinalEvent, unsubcribeLink, mailLoc);
 							}
 						} catch (MessagingException e) {
 							logger.error(String.format("Errore invio mail : %s", e.getMessage()));
@@ -690,14 +714,14 @@ public class ReportEmailSender {
 			}
 		}
 		// Send summary mail
-		if (mailSend && iter.iterator().hasNext()) {
-			// Here I send the summary mail (only if the sendMail parameter is true)
-			try {
-				emailService.sendMailSummary("Amministratore", "0", "0", "0", summaryMail, standardImages, mailTo, Locale.ITALIAN);
-			} catch (MessagingException e) {
-				logger.error(String.format("Errore invio mail notifica : %s", e.getMessage()));
-			}
-		}
+//		if (mailSend && iter.iterator().hasNext()) {
+//			// Here I send the summary mail (only if the sendMail parameter is true)
+//			try {
+//				emailService.sendMailSummary("Amministratore", "0", "0", "0", summaryMail, standardImages, mailTo, Locale.ITALIAN);
+//			} catch (MessagingException e) {
+//				logger.error(String.format("Errore invio mail notifica : %s", e.getMessage()));
+//			}
+//		}
 	}
 	
 	private List<BadgesData> getAllBadges(String path) throws IOException {
