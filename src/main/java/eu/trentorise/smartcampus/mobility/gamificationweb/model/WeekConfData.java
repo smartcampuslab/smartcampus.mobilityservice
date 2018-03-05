@@ -1,7 +1,13 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.Date;
+import java.util.Locale;
 
 public class WeekConfData {
 
@@ -14,6 +20,7 @@ public class WeekConfData {
 	private String weekStart, weekEnd;
 	
 	private static final SimpleDateFormat SDF_WEEK_DATE = new SimpleDateFormat("yyyy-MM-dd");
+	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	
 	public int getWeekNum() {
 		return weekNum;
@@ -99,7 +106,7 @@ public class WeekConfData {
 	@Override
 	public String toString() {
 		return "WeekConfData [weekNum=" + weekNum + ", weekTheme=" + weekTheme + ", challenges=" + challenges
-				+ ", prizes=" + prizes + ", prizesLast=" + prizesLast + ", weekStart=" + weekStart + "]";
+				+ ", prizes=" + prizes + ", prizesLast=" + prizesLast + ", weekStart=" + weekStart + ", weekEnd=" + weekEnd + "]";
 	}
 
 	public boolean isWeek(long timestamp) {
@@ -121,5 +128,40 @@ public class WeekConfData {
 		String currDate = SDF_WEEK_DATE.format(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7));
 		return currDate.compareTo(weekEnd) <= 0 && currDate.compareTo(weekStart) >= 0;
 	}	
+	
+
+	public static WeekConfData buildDummyCurrentWeek() {
+		return buildDummytWeek(0);
+	}
+	
+	public static WeekConfData buildDummyPrevioustWeek() {
+		return buildDummytWeek(1);
+	}	
+	
+	private static WeekConfData buildDummytWeek(int deltaWeeks) {
+		WeekConfData current = new WeekConfData();
+
+		LocalDate now = LocalDate.now().minusWeeks(deltaWeeks);
+		TemporalField tf = WeekFields.of(Locale.ITALY).dayOfWeek();
+		
+		int day = now.getDayOfWeek().getValue(); 
+		LocalDate start = null;
+		LocalDate end = null;
+		if (day >= 6) {
+			start = now.with(DayOfWeek.SATURDAY);
+			end = start.plusDays(6);
+		} else {
+			end = now.with(DayOfWeek.FRIDAY);
+			start = end.minusDays(6);
+		}
+		current.setWeekStart(dtf.format(start));
+		current.setWeekEnd(dtf.format(end));
+		current.setWeekNum(-deltaWeeks);
+		
+//		System.err.println(current);
+		
+		return current;
+	}
+
 	
 }

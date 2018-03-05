@@ -593,15 +593,24 @@ public class GamificationWebController {
 		List<ClassificationData> data = null;
 
 		if (timestamp != null) {
-		WeekConfData wcd = configUtils.getWeek(timestamp);
-		WeekConfData wcdnow = configUtils.getCurrentWeekConf();
-		if (wcd != null && wcdnow != null) {
+			WeekConfData wcd = configUtils.getWeek(timestamp);
+			WeekConfData wcdnow = configUtils.getCurrentWeekConf();
+			if (wcdnow == null) {
+				wcdnow = WeekConfData.buildDummyCurrentWeek();
+			}
+			if (wcd == null) {
+				if (timestamp < System.currentTimeMillis() - 1000 * 60 * 60 * 24) {
+					wcd = WeekConfData.buildDummyPrevioustWeek();
+				} else {
+					wcd = WeekConfData.buildDummyCurrentWeek();
+				}
+			}
+
 			if (wcd.getWeekNum() == wcdnow.getWeekNum()) {
 				data = currentIncClassification.get(appId);
 			} else if (wcd.getWeekNum() == wcdnow.getWeekNum() - 1) {
 				data = previousIncClassification.get(appId);
 			}
-		}
 		} else {
 			data = globalClassification.get(appId);
 		}
