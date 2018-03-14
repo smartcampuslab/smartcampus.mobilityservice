@@ -631,10 +631,11 @@ public class ReportEmailSender {
 		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("./public/img/mail/templateMail.png")).read(), "image/png"));		
 		
 		String gameId = getGameId(appId);
-		Iterable<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
-
+		List<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
+		logger.info("Found " + iter.size() + " players for game " + gameId);
+		
 		for (Player p : iter) {
-			logger.debug(String.format("Profile found  %s", p.getNickname()));
+			logger.info(String.format("Profile found  %s", p.getNickname()));
 
 			if (p.isSendMail()) {
 				String moduleName = certificatesDir +"/Certificato_TrentoRoveretoPlayAndGo_" + p.getId() + ".pdf";
