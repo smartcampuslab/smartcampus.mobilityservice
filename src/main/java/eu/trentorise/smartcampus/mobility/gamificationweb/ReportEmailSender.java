@@ -612,6 +612,7 @@ public class ReportEmailSender {
 	// @Scheduled(fixedRate = 5*60*1000) // Repeat every 5 minutes
 	// @Scheduled(cron="0 30 11 * * WED") // Repeat every WED at 11:30 AM
 	public synchronized void sendPDFReportMail(String appId) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException {
+		try {
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		long millisNoEvent = 1480978800000L; // Tue Dec 06 2016 00:00:00 GMT+0100
@@ -726,6 +727,9 @@ public class ReportEmailSender {
 //				logger.error(String.format("Errore invio mail notifica : %s", e.getMessage()));
 //			}
 //		}
+		} catch (Exception e) {
+			logger.error("Error sending email", e);
+		}
 	}
 	
 	private List<BadgesData> getAllBadges(String path) throws IOException {
