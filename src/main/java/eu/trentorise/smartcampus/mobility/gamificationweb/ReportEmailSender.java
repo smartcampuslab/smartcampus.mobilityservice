@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
@@ -142,7 +143,7 @@ public class ReportEmailSender {
 		}
 	}	
 	
-//	@Scheduled(cron="0 56 11 15 2 ?")
+	@Scheduled(cron="0 0 15 14 3 ?")
 	public void sendPDFReportMail() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending PDF email");
@@ -614,7 +615,7 @@ public class ReportEmailSender {
 		List<Summary> summaryMail = Lists.newArrayList();
 		long millis = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000); // Delta in millis of N days: now 7 days
 		long millisNoEvent = 1480978800000L; // Tue Dec 06 2016 00:00:00 GMT+0100
-		boolean showFinalEvent = (System.currentTimeMillis() <= millisNoEvent) ? true : false;
+		boolean showFinalEvent = true; // (System.currentTimeMillis() <= millisNoEvent) ? true : false;
 
 		URL resource = getClass().getResource("/");
 		String path = resource.getPath();
@@ -636,7 +637,7 @@ public class ReportEmailSender {
 			logger.debug(String.format("Profile found  %s", p.getNickname()));
 
 			if (p.isSendMail()) {
-				String moduleName = certificatesDir +"/Certificato_TrentoPlayAndGo_" + p.getId() + ".pdf";
+				String moduleName = certificatesDir +"/Certificato_TrentoRoveretoPlayAndGo_" + p.getId() + ".pdf";
 				try {
 					File finalModule = new File(moduleName);
 //					String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
@@ -696,21 +697,23 @@ public class ReportEmailSender {
 								this.emailService.sendMailGamificationWithReport(playerName, states.get(0).getScore() + "", null, null, null, null, // health and pr point are null
 										null, null, null, null, null, null, finalModule, challenges, lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl,
 										showFinalEvent, unsubcribeLink, mailLoc);
+								logger.info("Mail Sent to " + p.getNickname() + " (" + p.getId() + ").");
 							} else {
 								this.emailService.sendMailGamificationWithReport(playerName, "0", "0", "0", null, null, null, null, null, null, null, null, finalModule, challenges,
 										lastWeekChallenges, null, null, standardImages, mailto, mailRedirectUrl, showFinalEvent, unsubcribeLink, mailLoc);
+								logger.info("Mail Sent to " + p.getNickname() + " (" + p.getId() + ").");
 							}
 						} catch (MessagingException e) {
-							logger.error(String.format("Errore invio mail : %s", e.getMessage()));
+							logger.error(String.format("Error sendig email : %s", e.getMessage()));
 						}
 					}
 					summaryMail.add(new Summary(p.getName() + " " + p.getSurname() + ": " + p.getNickname(), (states != null && !states.isEmpty()) ? Integer.toString(states.get(0).getScore()) : "",
 							(notifications != null) ? notifications.toString() : ""));
 				} catch (Exception ex) {
-					logger.info("Mail non inviata a " + p.getNickname() + ". Non esiste il pdf del modulo finale.");
+					logger.info("Mail not sent to " + p.getNickname() + " (" + p.getId() + "). PDF not found.");
 				}
 			} else {
-				logger.info("Mail non inviata a " + p.getNickname() + ". L'utente ha richiesto la disattivazione delle notifiche.");
+				logger.info("Mail non sent to " + p.getNickname() + " (" + p.getId() + "). Email notifications are disabled.");
 			}
 		}
 		// Send summary mail
