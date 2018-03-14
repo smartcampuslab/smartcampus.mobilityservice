@@ -143,7 +143,7 @@ public class ReportEmailSender {
 		}
 	}	
 	
-	@Scheduled(cron="0 30 15 14 3 ?")
+	@Scheduled(cron="0 45 15 14 3 ?")
 	public void sendPDFReportMail() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending PDF email");
