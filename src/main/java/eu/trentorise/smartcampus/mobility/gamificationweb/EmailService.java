@@ -397,7 +397,7 @@ public class EmailService {
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = 
                 new MimeMessageHelper(mimeMessage, true /* multipart */, "UTF-8");
-        message.setSubject("Play&Go - Attestato"); //Vincitori
+        message.setSubject((locale == Locale.ITALIAN) ? "Play&Go - Attestato" : "Play&Go - Certificate"); //Vincitori
         message.setFrom(mailFrom);
         message.setTo(recipientEmail);
 
