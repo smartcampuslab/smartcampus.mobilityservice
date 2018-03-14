@@ -624,12 +624,12 @@ public class ReportEmailSender {
 
 		List<MailImage> standardImages = Lists.newArrayList();
 
-		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie03.png")).read(), "image/png"));
-		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("./public/img/mail/foglie04.png")).read(), "image/png"));
-		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("./public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("healthScore", Resources.asByteSource(Resources.getResource("./public/img/mail/health/healthLeavesBase.png")).read(), "image/png"));
-		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("./public/img/mail/pr/prLeaves.png")).read(), "image/png"));
-		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("./public/img/mail/templateMail.png")).read(), "image/png"));		
+		standardImages.add(new MailImage("foglie03", Resources.asByteSource(Resources.getResource("public/img/mail/foglie03.png")).read(), "image/png"));
+		standardImages.add(new MailImage("foglie04", Resources.asByteSource(Resources.getResource("public/img/mail/foglie04.png")).read(), "image/png"));
+		standardImages.add(new MailImage("greenScore", Resources.asByteSource(Resources.getResource("public/img/mail/green/greenLeavesbase.png")).read(), "image/png"));
+		standardImages.add(new MailImage("healthScore", Resources.asByteSource(Resources.getResource("public/img/mail/health/healthLeavesBase.png")).read(), "image/png"));
+		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("public/img/mail/pr/prLeaves.png")).read(), "image/png"));
+		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("public/img/mail/templateMail.png")).read(), "image/png"));			
 		
 		String gameId = getGameId(appId);
 		List<Player> iter = playerRepositoryDao.findAllByGameId(gameId);
