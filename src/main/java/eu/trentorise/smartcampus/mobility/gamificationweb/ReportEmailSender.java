@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
@@ -143,7 +142,7 @@ public class ReportEmailSender {
 		}
 	}	
 	
-	@Scheduled(cron="0 45 15 14 3 ?")
+//	@Scheduled(cron="0 45 15 14 3 ?")
 	public void sendPDFReportMail() throws Exception {
 //		System.err.println("TIME " + new Date());
 		logger.info("Sending PDF email");
