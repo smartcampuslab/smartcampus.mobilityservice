@@ -16,11 +16,22 @@
 
 package eu.trentorise.smartcampus.mobility.logging;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
+
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 
 /**
  * @author raman
@@ -35,9 +46,45 @@ public class StatLogger {
 	
 	@Value("${statlogging.enabled}")
 	private Boolean loggingEnabled;
+	
+	@Value("${statlogging.excluded}")
+	private String excluded;	
+	
+	private List<String> excludedList;	
+	
+	private Map<String, Long> classLogTimestamp = Maps.newConcurrentMap();	
 
+	@PostConstruct
+	public void init() {
+		if (excluded != null) {
+			excludedList = Splitter.on(",").splitToList(excluded);
+		} else {
+			excludedList = Lists.newArrayList();
+		}
+	}
+	
 	public void log(Object sj, String userId) {
-		if (Boolean.TRUE.equals(loggingEnabled)) {
+		String className = sj.getClass().getSimpleName();
+		
+		if (excludedList.contains(className)) {
+			return;
+		}		
+		
+		if (sj instanceof Alert) {
+			className += " - " + ((Alert)sj).getNote();
+		}
+		
+		long last = classLogTimestamp.getOrDefault(className, 0L);
+		long delta = System.currentTimeMillis() - last;
+		
+		boolean write = true;
+		if (delta > 1000 * 60 * 10) {
+			classLogTimestamp.put(className, System.currentTimeMillis());
+		} else {
+			write = false;
+		}
+		
+		if (write && Boolean.TRUE.equals(loggingEnabled)) {
 			mongoTemplate.save(createData(sj, userId));
 		}
 	}

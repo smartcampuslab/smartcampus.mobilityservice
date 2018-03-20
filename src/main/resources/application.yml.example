@@ -16,7 +16,8 @@ smartcampus:
 
 statlogging:
   dbname: mobility-logging
-  enabled: false
+  enabled: true
+  excluded: AlertDelay
 
 smartplanner:
   router: trentino
