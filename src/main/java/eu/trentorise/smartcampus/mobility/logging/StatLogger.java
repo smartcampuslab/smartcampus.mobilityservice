@@ -50,6 +50,9 @@ public class StatLogger {
 	@Value("${statlogging.excluded}")
 	private String excluded;	
 	
+	@Value("${statlogging.samplingPeriod:1}")
+	private int samplingPeriod;	
+	
 	private List<String> excludedList;	
 	
 	private Map<String, Long> classLogTimestamp = Maps.newConcurrentMap();	
@@ -78,7 +81,7 @@ public class StatLogger {
 		long delta = System.currentTimeMillis() - last;
 		
 		boolean write = true;
-		if (delta > 1000 * 60 * 10) {
+		if (delta > 1000 * (60 * samplingPeriod - 10)) {
 			classLogTimestamp.put(className, System.currentTimeMillis());
 		} else {
 			write = false;

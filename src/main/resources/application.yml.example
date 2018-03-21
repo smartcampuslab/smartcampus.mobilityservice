@@ -18,6 +18,7 @@ statlogging:
   dbname: mobility-logging
   enabled: true
   excluded: AlertDelay
+  samplingPeriod: 15
 
 smartplanner:
   router: trentino
