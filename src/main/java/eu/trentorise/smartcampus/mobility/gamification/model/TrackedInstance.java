@@ -25,6 +25,8 @@ public class TrackedInstance {
 	private String clientId;
 	private String userId;
 	
+	private String multimodalId;
+	
 	private ItineraryObject itinerary;
 	private String freeTrackingTransport;
 	
@@ -88,6 +90,14 @@ public class TrackedInstance {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getMultimodalId() {
+		return multimodalId;
+	}
+
+	public void setMultimodalId(String multimodalId) {
+		this.multimodalId = multimodalId;
 	}
 
 	public ItineraryObject getItinerary() {
