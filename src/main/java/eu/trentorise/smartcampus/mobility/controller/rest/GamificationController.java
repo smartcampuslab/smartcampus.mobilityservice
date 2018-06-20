@@ -190,8 +190,8 @@ public class GamificationController {
 		return storage.searchDomainObjects(mongoQuery, Geolocation.class);
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}/{multimodalId}")
-	public @ResponseBody void startFreeTracking(@PathVariable String transport, @PathVariable String itineraryId, @PathVariable String multimodalId,
+	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
+	public @ResponseBody void startFreeTracking(@PathVariable String transport, @PathVariable String itineraryId,
 			@RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = false, value = "device") String device, HttpServletResponse response) throws Exception {
 		logger.info("Starting free tracking for gamification, device = " + device);
 		try {
@@ -219,7 +219,6 @@ public class GamificationController {
 			if (res2 == null) {
 				res2 = new TrackedInstance();
 				res2.setClientId(itineraryId);
-				res2.setMultimodalId(multimodalId);
 				res2.setDay(day);
 				res2.setUserId(userId);
 				res2.setTime(timeSdf.format(date));
