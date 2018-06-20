@@ -16,187 +16,103 @@
 package eu.trentorise.smartcampus.mobility.util;
 
 import java.io.InputStream;
+import java.util.Map;
+import java.util.TreeMap;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 public class HTTPConnector {
 	
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
-		HttpResponse<String> response = Unirest.get(address + ((req != null) ? ("?" + req) : "")).header("Accept", accept).header("Content-Type", contentType).asString();
-		if (response.getStatus() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
-		}		
-		return response.getBody();
-	}
+		RestTemplate restTemplate = new RestTemplate();
+		String url = address + ((req != null) ? ("?" + req) : "");
+
+		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))), String.class);
+
+		if (!res.getStatusCode().is2xxSuccessful()) {
+			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
+		}
+
+		return res.getBody();
+	}	
 	
 	public static InputStream doStreamGet(String address, String req, String accept, String contentType) throws Exception {
-		HttpResponse<InputStream> response = Unirest.get(address + ((req != null) ? ("?" + req) : "")).header("Accept", accept).header("Content-Type", contentType).asBinary();
-		if (response.getStatus() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
-		}		
-		return response.getBody();
-	}
-	
-	public static String doAuthenticatedPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
-		HttpResponse<String> response = Unirest.post(address).header("Accept", accept).header("Content-Type", contentType).basicAuth(user, password).body(req).asString();
-		if (response.getStatus() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
-		}		
-		return response.getBody();		
-	}
-	
-	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
-		HttpResponse<String> response = Unirest.post(address).header("Accept", accept).header("Content-Type", contentType).body(req).asString();
-		if (response.getStatus() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + response.getStatus(), response.getStatus());
-		}		
-		return response.getBody();		
-	}
-	
-	/*
-	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
-
-		StringBuffer response = new StringBuffer();
-
-		URL url = new URL(address + ((req != null) ? ("?" + req) : ""));
-
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
-
-		if (accept != null) {
-			conn.setRequestProperty("Accept", accept);
-		}
-		if (contentType != null) {
-			conn.setRequestProperty("Content-Type", contentType);
-		}
-		if (conn.getResponseCode() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
-		}
-
-		BufferedReader br;
-		if (encoding != null) {
-			br = new BufferedReader(new InputStreamReader((conn.getInputStream()), encoding));
-		} else {
-			br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-		}
-
-		String output = null;
-		while ((output = br.readLine()) != null) {
-			response.append(output);
-		}
-
-		conn.disconnect();
-		return response.toString();
-	}
-
-	public static InputStream doStreamGet(String address, String req, String accept, String contentType) throws Exception {
-
-		StringBuffer response = new StringBuffer();
-
-		URL url = new URL(address + ((req != null) ? ("?" + req) : ""));
-
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
-
-		if (accept != null) {
-			conn.setRequestProperty("Accept", accept);
-		}
-		if (contentType != null) {
-			conn.setRequestProperty("Content-Type", contentType);
-		}
-		if (conn.getResponseCode() != 200) {
-			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
-		}
-
-		return conn.getInputStream();
-	}
-	
-	public static String doAuthenticatedPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
-		StringBuffer response = new StringBuffer();
-
-		URL url = new URL(address);
-
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("POST");
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
+		RestTemplate restTemplate = new RestTemplate();
+		String url = address + ((req != null) ? ("?" + req) : "");
 		
-		String authString = user + ":" + password;
-		byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-		String authStringEnc = new String(authEncBytes);
-		conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
+		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, 
+				new HttpEntity<Object>(null, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))),
+				String.class);
 
-		if (accept != null) {
-			conn.setRequestProperty("Accept", accept);
-		}
-		if (contentType != null) {
-			conn.setRequestProperty("Content-Type", contentType);
+		if (!res.getStatusCode().is2xxSuccessful()) {
+			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
 		}		
 		
-		OutputStream out = conn.getOutputStream();
-		Writer writer = new OutputStreamWriter(out, "UTF-8");
-		writer.write(req);
-		writer.close();
-		out.close();
+		// TODO check
+		return IOUtils.toInputStream(res.getBody());
+	}	
+	
+	public static String doBasicAuthenticationPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
 
-		if (conn.getResponseCode() < 200 || conn.getResponseCode() > 299) {
-			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
+		String s = user + ":" + password;
+		byte[] b = Base64.encodeBase64(s.getBytes());
+		String es = new String(b);
+		
+		ResponseEntity<String> res = restTemplate.exchange(address, HttpMethod.POST, new HttpEntity<Object>(req, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}, {"Authorization", "Basic " + es}}))),
+				String.class);
+
+		if (!res.getStatusCode().is2xxSuccessful()) {
+			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
 		}
-		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-		String output = null;
-		while ((output = br.readLine()) != null) {
-			response.append(output);
-		}
-
-		conn.disconnect();
-
-		return response.toString();
+		return res.getBody();		
 	}
+	
+	public static String doTokenAuthenticationPost(String address, String req, String accept, String contentType, String token) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
 
+		ResponseEntity<String> res = restTemplate.exchange(address, HttpMethod.POST, new HttpEntity<Object>(req, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}, {"Authorization", "Bearer " + token}}))), String.class);
+
+		if (!res.getStatusCode().is2xxSuccessful()) {
+			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
+		}
+
+		return res.getBody();		
+	}	
+	
 	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
 
-		StringBuffer response = new StringBuffer();
+		ResponseEntity<String> res = restTemplate.exchange(address, HttpMethod.POST, new HttpEntity<Object>(req, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))),
+				String.class);
 
-		URL url = new URL(address);
-
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("POST");
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
-
-		if (accept != null) {
-			conn.setRequestProperty("Accept", accept);
-		}
-		if (contentType != null) {
-			conn.setRequestProperty("Content-Type", contentType);
+		if (!res.getStatusCode().is2xxSuccessful()) {
+			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
 		}
 
-		OutputStream out = conn.getOutputStream();
-		Writer writer = new OutputStreamWriter(out, "UTF-8");
-		writer.write(req);
-		writer.close();
-		out.close();
-
-		if (conn.getResponseCode() < 200 || conn.getResponseCode() > 299) {
-			throw new ConnectorException("Failed : HTTP error code : " + conn.getResponseCode(), conn.getResponseCode());
-		}
-		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-
-		String output = null;
-		while ((output = br.readLine()) != null) {
-			response.append(output);
-		}
-
-		conn.disconnect();
-
-		return response.toString();
+		return res.getBody();			
 	}
-	*/
+	
+	
 
+	static HttpHeaders createHeaders(Map<String, String> pars) {
+		return new HttpHeaders() {
+			{
+				for (String key: pars.keySet()) {
+					if (pars.get(key) != null) {
+						set(key, pars.get(key));
+					}
+				}
+			}
+		};
+	}	
+	
 }
