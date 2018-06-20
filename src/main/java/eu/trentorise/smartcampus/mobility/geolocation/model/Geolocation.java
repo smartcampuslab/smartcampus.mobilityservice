@@ -2,11 +2,14 @@ package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.Date;
 
+import it.sayservice.platform.smartplanner.data.message.TType;
+
 
 public class Geolocation implements Comparable<Geolocation> {
 
 	private String userId;
 	private String travelId;
+	private String multimodalId;
 	
 	private String uuid;
 	private String device_id;
@@ -35,7 +38,7 @@ public class Geolocation implements Comparable<Geolocation> {
 	private String certificate;
 	
 	double[] geocoding;
-
+	
 	public Geolocation() {
 	}
 	
@@ -62,6 +65,14 @@ public class Geolocation implements Comparable<Geolocation> {
 
 	public void setTravelId(String travelId) {
 		this.travelId = travelId;
+	}
+
+	public String getMultimodalId() {
+		return multimodalId;
+	}
+
+	public void setMultimodalId(String multimodalId) {
+		this.multimodalId = multimodalId;
 	}
 
 	public String getUuid() {
