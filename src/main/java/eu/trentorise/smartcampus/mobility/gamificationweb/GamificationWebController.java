@@ -461,7 +461,7 @@ public class GamificationWebController {
 			return;
 		}		
 		
-		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
+		HTTPConnector.doBasicAuthenticationPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());		
 //		logger.info("Sent app survey data to gamification engine ");
 	}
 

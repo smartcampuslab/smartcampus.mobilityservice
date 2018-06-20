@@ -156,7 +156,7 @@ public class GamificationManager {
 			String content = JsonUtils.toJSON(ed);
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+			HTTPConnector.doBasicAuthenticationPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
 			return true;
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
@@ -304,7 +304,7 @@ public class GamificationManager {
 			String content = JsonUtils.toJSON(ed);
 			
 			logger.debug("Sending to " + gamificationUrl + "/gengine/execute (" + SAVE_ITINERARY + ") = " + trackingData);
-			HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+			HTTPConnector.doBasicAuthenticationPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
 			return true;
 		} catch (Exception e) {
 			logger.error("Error sending gamification action: " + e.getMessage());
@@ -395,7 +395,7 @@ public class GamificationManager {
 		String content = JsonUtils.toJSON(ed);
 		
 		logger.debug("Sending to " + gamificationUrl + "/gengine/execute ('checkin') = " + content);
-		HTTPConnector.doAuthenticatedPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
+		HTTPConnector.doBasicAuthenticationPost(gamificationUrl + "/gengine/execute", content, "application/json", "application/json", game.getUser(), game.getPassword());
 		
 	}	
 	
