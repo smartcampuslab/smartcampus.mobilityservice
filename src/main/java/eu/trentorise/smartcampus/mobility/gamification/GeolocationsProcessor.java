@@ -19,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
@@ -167,7 +166,7 @@ public class GeolocationsProcessor {
 				Geolocation geolocation = buildGeolocation(location, userId, locationTravelId, device, now);
 				
 				String day = shortSdf.format(new Date(locationTs));
-				String key = geolocation.getTravelId() + "@" + day;
+				String key = geolocation.getTravelId() + (geolocation.getMultimodalId() != null ? ("#" + geolocation.getMultimodalId()):"") + "@" + day;
 				geolocationsByItinerary.put(key, geolocation);
 				if (StringUtils.hasText((String) location.getExtras().get("transportType"))) {
 					freeTracks.put(key, (String) location.getExtras().get("transportType"));
@@ -235,19 +234,28 @@ public class GeolocationsProcessor {
 		if (StringUtils.hasText((String) location.getExtras().get("btDeviceId"))) {
 			geolocation.setCertificate((String) location.getExtras().get("btDeviceId"));
 		}
+		if (StringUtils.hasText((String) location.getExtras().get("multimodalId"))) {
+			geolocation.setMultimodalId((String) location.getExtras().get("multimodalId"));
+		}		
 
 		return geolocation;
 	}
 
 	private void saveTrackedInstance(String key, String userId, String appId, String deviceInfo, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
 			Map<String, Long> freeTrackStarts) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-
 		String splitKey[] = key.split("@");
 		String travelId = splitKey[0];
+		String multimodalId = null;
+		
+		String splitId[] = travelId.split("#");
+		if (splitId.length == 2) {
+			travelId = splitId[0];
+			multimodalId = splitId[1];
+		}
+		
 		String day = splitKey[1];
 
-		TrackedInstance res = getStoredTrackedInstance(key, travelId, day, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+		TrackedInstance res = getStoredTrackedInstance(key, travelId, multimodalId, day, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
 
 		if (geolocationsByItinerary.get(key) != null) {
 			logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to result.");
@@ -272,15 +280,19 @@ public class GeolocationsProcessor {
 		logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 	}
 
-	private TrackedInstance getStoredTrackedInstance(String key, String travelId, String day, String userId, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
+	private TrackedInstance getStoredTrackedInstance(String key, String travelId, String multimodalId, String day, String userId, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
 			Map<String, Long> freeTrackStarts) throws Exception {
-		Map<String, Object> pars = Maps.newTreeMap();
+		Map<String, Object> pars = new TreeMap<String, Object>();
+		pars.put("clientId", travelId);
+		pars.put("day", day);
+		pars.put("userId", userId);
 
 		TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
 		if (res == null) {
 			logger.error("No existing TrackedInstance found.");
 			res = new TrackedInstance();
 			res.setClientId(travelId);
+			res.setMultimodalId(multimodalId);
 			res.setDay(day);
 			res.setUserId(userId);
 			res.setId(ObjectId.get().toString());
