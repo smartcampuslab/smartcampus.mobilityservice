@@ -38,19 +38,18 @@ public class StatisticsBuilder {
 	@Autowired
 	@Qualifier("mongoTemplate")
 	MongoTemplate template;
-	
-	private StatisticsGroup computeStatistics(String userId, String appId, String from, String to, AggregationGranularity granularity) throws Exception {
-		StatisticsGroup result = statsByGranularity(userId, appId, from, to, granularity);
-//		result.setGlobalStats(getGlobalStatistics(userId, start).getStats());
-		return result;
-	}
-	
+
 	public StatisticsGroup computeStatistics(String userId, String appId, long from, long to, AggregationGranularity granularity) throws Exception {
 		String fromDay = sdf.format(new Date(from));
 		String toDay = sdf.format(new Date(to));
 		
 		return computeStatistics(userId, appId, fromDay, toDay, granularity);
-	}	
+	}		
+	
+	private StatisticsGroup computeStatistics(String userId, String appId, String from, String to, AggregationGranularity granularity) throws Exception {
+		StatisticsGroup result = statsByGranularity(userId, appId, from, to, granularity);
+		return result;
+	}
 	
 	public GlobalStatistics getGlobalStatistics(String userId, String appId, String start, boolean dates) throws Exception {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
