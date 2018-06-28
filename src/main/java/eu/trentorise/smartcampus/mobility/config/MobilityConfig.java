@@ -32,7 +32,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 import com.google.common.io.Resources;
@@ -72,9 +71,6 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Value("${mail.password}")
 	private String password;	
 	
-	@Value("${imagesDir}")
-	private String imagesDir;		
-
 	public MobilityConfig() {
 		super();
 	}
