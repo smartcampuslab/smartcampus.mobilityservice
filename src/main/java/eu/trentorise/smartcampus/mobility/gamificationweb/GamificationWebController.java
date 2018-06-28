@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -54,12 +55,17 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
+import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
+import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
+import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.WebLinkUtils.PlayerIdentity;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherPlayer;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
@@ -131,6 +137,9 @@ public class GamificationWebController {
 	@Autowired
 	private BannedChecker bannedChecker;
 	
+	@Autowired
+	private StatisticsBuilder statisticsBuilder;
+	
 	private ObjectMapper mapper = new ObjectMapper();
 	
 	private CustomTokenExtractor tokenExtractor = new CustomTokenExtractor();
@@ -138,6 +147,8 @@ public class GamificationWebController {
 	private LoadingCache<String, List<ClassificationData>> currentIncClassification;
 	private LoadingCache<String, List<ClassificationData>> previousIncClassification;
 	private LoadingCache<String, List<ClassificationData>> globalClassification;
+	
+	private LoadingCache<String, OtherPlayer> otherPlayers;
 	
 	@PostConstruct
 	public void init() {
@@ -191,6 +202,20 @@ public class GamificationWebController {
 						return Collections.EMPTY_LIST;
 					}
 				});			
+		
+		otherPlayers = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
+				.build(new CacheLoader<String, OtherPlayer>() {
+					@Override
+					public OtherPlayer load(String id) throws Exception {
+						String[] ids = id.split("@");
+						OtherPlayer op =  buildOtherPlayer(ids[0], ids[1]);
+						op.setUpdated(System.currentTimeMillis());
+						
+						System.err.println(op);
+						
+						return op;
+					}
+				});				
 		
 	}
 	
@@ -519,6 +544,59 @@ public class GamificationWebController {
 		return ps;
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status/other/{playerId}")
+	public @ResponseBody OtherPlayer getOtherPlayerStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
+		String userId = null;
+		try {
+			userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			// userId = getUserId();
+		} catch (SecurityException e) {
+			logger.error("Unauthorized user.", e);
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			return null;
+		}	
+		
+		return otherPlayers.get(playerId + "@" + appId);
+		
+	}	
+	
+	private OtherPlayer buildOtherPlayer(String playerId, String appId) throws Exception {
+		OtherPlayer op = new OtherPlayer();
+
+		String gameId = appSetup.findAppById(appId).getGameId();
+		
+		GameInfo game = gameSetup.findGameById(gameId);
+
+		Player player = playerRepositoryDao.findByIdAndGameId(playerId, gameId);
+
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+				String.class);
+		String data = res.getBody();
+
+		int greenLeaves = getGreenLeavesPoints(data);
+
+		res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+
+		List nots = mapper.readValue(res.getBody(), List.class);
+		for (Object o : nots) {
+			if (((Map) o).containsKey("badge")) {
+				Badge not = mapper.convertValue(o, Badge.class);
+				op.getBadges().add(not);
+			}
+		}
+
+		StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, 0, System.currentTimeMillis(), AggregationGranularity.total);
+
+		op.setNickname(player.getNickname());
+		op.setGreenLeaves(greenLeaves);
+		op.setStatistics(statistics.getStats().get(0).getData());
+
+		op.setLevel("n00b");
+		
+		return op;
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
 	public @ResponseBody
 	PlayerClassification getPlayerClassification(HttpServletRequest request, @RequestParam(required=false) Long timestamp, @RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
