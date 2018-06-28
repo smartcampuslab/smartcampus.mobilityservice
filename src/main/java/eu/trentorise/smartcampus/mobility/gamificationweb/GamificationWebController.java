@@ -557,45 +557,71 @@ public class GamificationWebController {
 			return null;
 		}	
 		
-		return otherPlayers.get(playerId + "@" + appId);
+		OtherPlayer op = otherPlayers.get(playerId + "@" + appId);
 		
+		if (op == null) {
+			logger.error("Player " + playerId + " not found.");
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;			
+		}
+		
+		return op;
 	}	
 	
 	private OtherPlayer buildOtherPlayer(String playerId, String appId) throws Exception {
 		OtherPlayer op = new OtherPlayer();
 
 		String gameId = appSetup.findAppById(appId).getGameId();
-		
+
 		GameInfo game = gameSetup.findGameById(gameId);
 
 		Player player = playerRepositoryDao.findByIdAndGameId(playerId, gameId);
 
+		if (player == null) {
+			return null;
+		}
+		
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
-				String.class);
-		String data = res.getBody();
+		ResponseEntity<String> res = null;
 
-		int greenLeaves = getGreenLeavesPoints(data);
+		try {
+			res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+			String data = res.getBody();
 
-		res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-
-		List nots = mapper.readValue(res.getBody(), List.class);
-		for (Object o : nots) {
-			if (((Map) o).containsKey("badge")) {
-				Badge not = mapper.convertValue(o, Badge.class);
-				op.getBadges().add(not);
-			}
+			int greenLeaves = getGreenLeavesPoints(data);
+			op.setGreenLeaves(greenLeaves);
+		} catch (Exception e) {
+			logger.error("Error retrieving green leaves points", e);
 		}
 
-		StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, 0, System.currentTimeMillis(), AggregationGranularity.total);
+		try {
+			res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+
+			List nots = mapper.readValue(res.getBody(), List.class);
+			for (Object o : nots) {
+				if (((Map) o).containsKey("badge")) {
+					Badge not = mapper.convertValue(o, Badge.class);
+					op.getBadges().add(not);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error retrieving badges", e);
+		}
+
+		try {
+			StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, 0, System.currentTimeMillis(), AggregationGranularity.total);
+			if (statistics.getStats() != null && !statistics.getStats().isEmpty()) {
+				op.setStatistics(statistics.getStats().get(0).getData());
+			}
+		} catch (Exception e) {
+			logger.error("Error computing statistics", e);
+		}
 
 		op.setNickname(player.getNickname());
-		op.setGreenLeaves(greenLeaves);
-		op.setStatistics(statistics.getStats().get(0).getData());
 		op.setAvatar(player.getAvatar());
-		
+
 		op.setLevel("n00b");
-		
+
 		return op;
 	}
 	
