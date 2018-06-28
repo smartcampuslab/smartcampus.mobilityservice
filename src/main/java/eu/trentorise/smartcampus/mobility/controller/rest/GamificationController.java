@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -44,6 +45,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
@@ -777,34 +780,15 @@ public class GamificationController {
 	}
 
 	@RequestMapping("/console/useritinerary/{userId}")
-	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
+	public @ResponseBody Map<String, Collection<ItineraryDescriptor>> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
 			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
 			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) Boolean toCheck,
 			@RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws Exception {
+		
+		Multimap<String, ItineraryDescriptor> itineraryMap = TreeMultimap.create();
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
 		try {
-//			Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
-//			if (excludeZeroPoints != null && excludeZeroPoints.booleanValue()) {
-//				criteria = criteria.and("estimatedScore").gt(0);
-//			}
-//			if (unapprovedOnly != null && unapprovedOnly.booleanValue()) {
-//				criteria = criteria.and("approved").ne(true).and("changedValidity").ne(null);
-//			}
-//			if (toCheck != null && toCheck.booleanValue()) {
-//				criteria = criteria.and("toCheck").is(true);
-//			}
-//
-//			if (fromDate != null) {
-//				String fd = shortSdf.format(new Date(fromDate));
-//				criteria = criteria.and("day").gte(fd);
-//			}
-//
-//			if (toDate != null) {
-//				String td = shortSdf.format(new Date(toDate));
-//				criteria = criteria.andOperator(new Criteria("day").lte(td));
-//			}
-			
 			String actualUserId = (filterUserId == null || filterUserId.isEmpty()) ? userId : filterUserId;
 
 			Criteria criteria = generateFilterCriteria(appId, actualUserId, filterTravelId, fromDate, toDate, excludeZeroPoints, unapprovedOnly, toCheck, pendingOnly);
@@ -886,17 +870,23 @@ public class GamificationController {
 							o.setDeviceInfo(mapper.writeValueAsString(map));
 						}
 					}
-					list.add(descr);
+					
+					itineraryMap.put(o.getMultimodalId() != null ? o.getMultimodalId() : "", descr);
+					
+//					list.add(descr);
 				}
 			}
 
-			Collections.sort(list);
+//			Collections.sort(list);
+			itineraryMap.asMap().keySet().forEach(x -> list.addAll(itineraryMap.get(x)));
+			
+			
 			Collections.reverse(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
-		return list;
+		return itineraryMap.asMap();
 	}
 
 	@RequestMapping("/console/users")
