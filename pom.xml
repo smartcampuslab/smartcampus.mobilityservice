@@ -216,11 +216,11 @@
 			<artifactId>velocity</artifactId>
 			<!-- <version>1.7</version> -->
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.mashape.unirest</groupId>
 			<artifactId>unirest-java</artifactId>
 			<version>1.4.9</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
