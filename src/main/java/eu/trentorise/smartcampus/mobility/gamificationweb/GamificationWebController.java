@@ -203,19 +203,20 @@ public class GamificationWebController {
 					}
 				});			
 		
-		otherPlayers = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
-				.build(new CacheLoader<String, OtherPlayer>() {
-					@Override
-					public OtherPlayer load(String id) throws Exception {
-						String[] ids = id.split("@");
-						OtherPlayer op =  buildOtherPlayer(ids[0], ids[1]);
-						op.setUpdated(System.currentTimeMillis());
-						
-						System.err.println(op);
-						
-						return op;
-					}
-				});				
+		otherPlayers = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(new CacheLoader<String, OtherPlayer>() {
+			@Override
+			public OtherPlayer load(String id) throws Exception {
+				try {
+					String[] ids = id.split("@");
+					OtherPlayer op = buildOtherPlayer(ids[0], ids[1]);
+					op.setUpdated(System.currentTimeMillis());
+					return op;
+				} catch (Exception e) {
+					logger.error("Error populating players cache.", e);
+					throw e;
+				}
+			}
+		});			
 		
 	}
 	
@@ -591,7 +592,8 @@ public class GamificationWebController {
 		op.setNickname(player.getNickname());
 		op.setGreenLeaves(greenLeaves);
 		op.setStatistics(statistics.getStats().get(0).getData());
-
+		op.setAvatar(player.getAvatar());
+		
 		op.setLevel("n00b");
 		
 		return op;
