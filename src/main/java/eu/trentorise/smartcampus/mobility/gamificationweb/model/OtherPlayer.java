@@ -21,6 +21,8 @@ public class OtherPlayer {
 	private String level;
 	private Double pointsToNextLevel;
 	
+	private String avatar;
+	
 	private Long updated;
 
 	public String getNickname() {
@@ -69,6 +71,14 @@ public class OtherPlayer {
 
 	public void setPointsToNextLevel(Double pointsToNextLevel) {
 		this.pointsToNextLevel = pointsToNextLevel;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 
 	public Long getUpdated() {
