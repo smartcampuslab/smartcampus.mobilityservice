@@ -27,6 +27,8 @@ public class Player {
 	private boolean checkedRecommendation;
 	private List<Event> eventsCheckIn;
 	
+	private String avatar;
+	
 	public Player() {
 		super();
 	}
@@ -145,6 +147,14 @@ public class Player {
 
 	public void setEventsCheckIn(List<Event> eventsCheckIn) {
 		this.eventsCheckIn = eventsCheckIn;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 
 	public String toJSONString() {
