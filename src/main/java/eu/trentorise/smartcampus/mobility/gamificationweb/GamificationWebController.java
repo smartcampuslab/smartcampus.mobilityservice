@@ -50,6 +50,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheLoader.InvalidCacheLoadException;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -64,6 +65,8 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGra
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.WebLinkUtils.PlayerIdentity;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherPlayer;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
@@ -203,13 +206,15 @@ public class GamificationWebController {
 					}
 				});			
 		
-		otherPlayers = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(new CacheLoader<String, OtherPlayer>() {
+		otherPlayers = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build(new CacheLoader<String, OtherPlayer>() {
 			@Override
 			public OtherPlayer load(String id) throws Exception {
 				try {
 					String[] ids = id.split("@");
 					OtherPlayer op = buildOtherPlayer(ids[0], ids[1]);
-					op.setUpdated(System.currentTimeMillis());
+					if (op != null) {
+						op.setUpdated(System.currentTimeMillis());
+					}
 					return op;
 				} catch (Exception e) {
 					logger.error("Error populating players cache.", e);
@@ -557,13 +562,25 @@ public class GamificationWebController {
 			return null;
 		}	
 		
-		OtherPlayer op = otherPlayers.get(playerId + "@" + appId);
+		OtherPlayer op = null;
 		
-		if (op == null) {
+		try {
+			op = otherPlayers.get(playerId + "@" + appId);
+		} catch (InvalidCacheLoadException e1) {
 			logger.error("Player " + playerId + " not found.");
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		} catch (Exception e) {
+			logger.error("Error getting player " + playerId);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;			
 		}
+		
+//		if (op == null) {
+//			logger.error("Player " + playerId + " not found.");
+//			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+//			return null;			
+//		}
 		
 		return op;
 	}	
@@ -598,12 +615,14 @@ public class GamificationWebController {
 			res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 			List nots = mapper.readValue(res.getBody(), List.class);
+			List<Badge> badges = Lists.newArrayList();
 			for (Object o : nots) {
 				if (((Map) o).containsKey("badge")) {
 					Badge not = mapper.convertValue(o, Badge.class);
-					op.getBadges().add(not);
+					badges.add(not);
 				}
 			}
+			op.setBadgeCollectionConcept(buildBadgeCollectionConcepts(badges));
 		} catch (Exception e) {
 			logger.error("Error retrieving badges", e);
 		}
@@ -623,6 +642,21 @@ public class GamificationWebController {
 		op.setLevel("n00b");
 
 		return op;
+	}
+	
+	private List<BadgeCollectionConcept> buildBadgeCollectionConcepts(List<Badge> badges) {
+		Multimap<String, BadgeConcept> conceptMaps = ArrayListMultimap.create();
+		
+		badges.forEach(x -> {
+			conceptMaps.put(x.getCollectionName(), new BadgeConcept(x.getBadge(), statusUtils.getUrlFromBadgeName(mobilityUrl, x.getBadge())));
+		});
+		
+		List<BadgeCollectionConcept> result = Lists.newArrayList();
+		conceptMaps.keySet().forEach(x -> {
+			result.add(new BadgeCollectionConcept(x, Lists.newArrayList(conceptMaps.get(x))));
+		});
+		
+		return result;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")

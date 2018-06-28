@@ -576,7 +576,7 @@ public class StatusUtils {
 		return name;
 	}
 
-	private String getUrlFromBadgeName(String gamificationUrl, String b_name) {
+	public String getUrlFromBadgeName(String gamificationUrl, String b_name) {
 		BadgesData badge = badgeCache.getBadge(b_name);
 		if (badge != null) {
 			return gamificationUrl + "/" + badge.getPath();

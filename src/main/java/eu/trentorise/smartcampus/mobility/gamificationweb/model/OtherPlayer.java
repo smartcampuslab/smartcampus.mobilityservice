@@ -5,17 +5,14 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
 
 @JsonInclude(Include.NON_NULL)
 public class OtherPlayer {
 
 	private String nickname;
 	private int greenLeaves;
-	private List<Badge> badges = Lists.newArrayList();
+	private List<BadgeCollectionConcept> badgeCollectionConcept;
 	private Map<String, Double> statistics = Maps.newTreeMap();
 
 	private String level;
@@ -41,12 +38,12 @@ public class OtherPlayer {
 		this.greenLeaves = greenLeaves;
 	}
 
-	public List<Badge> getBadges() {
-		return badges;
+	public List<BadgeCollectionConcept> getBadgeCollectionConcept() {
+		return badgeCollectionConcept;
 	}
 
-	public void setBadges(List<Badge> badges) {
-		this.badges = badges;
+	public void setBadgeCollectionConcept(List<BadgeCollectionConcept> badgeCollectionConcept) {
+		this.badgeCollectionConcept = badgeCollectionConcept;
 	}
 
 	public Map<String, Double> getStatistics() {
