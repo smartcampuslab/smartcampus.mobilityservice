@@ -32,11 +32,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 import com.google.common.io.Resources;
-import com.mashape.unirest.http.ObjectMapper;
-import com.mashape.unirest.http.Unirest;
 import com.mongodb.MongoClient;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy;
@@ -72,30 +71,12 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	private String username;
 	@Value("${mail.password}")
 	private String password;	
+	
+	@Value("${imagesDir}")
+	private String imagesDir;		
 
 	public MobilityConfig() {
 		super();
-		Unirest.setObjectMapper(new ObjectMapper() {
-			private com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-
-			public <T> T readValue(String value, Class<T> valueType) {
-				try {
-					return mapper.readValue(value, valueType);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-			public String writeValue(Object value) {
-				try {
-					return mapper.writeValueAsString(value);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});		
-		
-		Unirest.setTimeouts(10000, 45000);		
 	}
 
 	@Bean
