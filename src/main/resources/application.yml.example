@@ -54,6 +54,8 @@ externalDataDir:
 
 certificatesDir: 
 
+imagesDir:
+
 management:
   port: 7011  
   context-path: /manage          
