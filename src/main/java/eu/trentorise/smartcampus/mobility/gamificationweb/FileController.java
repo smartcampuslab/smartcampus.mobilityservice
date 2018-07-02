@@ -36,6 +36,9 @@ public class FileController {
 
 	@Autowired
 	private PlayerRepositoryDao playerRepository;
+	
+//	@Autowired
+//	private AvatarRepository avatarRepository; 
 
 	private static Log logger = LogFactory.getLog(FileController.class);
 
@@ -67,13 +70,23 @@ public class FileController {
 				return;
 			}
 
-			deleteFile(imagesDir, player.getAvatar());
+			if (player.getAvatar() != null) {
+				deleteFile(imagesDir, player.getAvatar());
+			}
 
 			String avatar = saveFile(imagesDir, userId, data);
 
 			player.setAvatar(avatar);
-
 			playerRepository.save(player);
+
+//			 Avatar av = new Avatar();
+//			 Binary bb = new Binary(data.getBytes());
+//			 av.setId(userId);
+//			 av.setAvatarData(bb);
+//			 av.setContentType(data.getContentType());
+//			 av.setFileName(data.getOriginalFilename());
+//
+//			avatarRepository.save(av);
 		} catch (Exception e) {
 			logger.error("Error in post avatar: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -116,6 +129,19 @@ public class FileController {
 		return player.getAvatar();
 	}
 
+//	@GetMapping(value = "/gamificationweb/player/avatar/data/{playerId}", produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
+//	public @ResponseBody void getPlayerAvatarData(@PathVariable String playerId, HttpServletResponse response) throws Exception {
+//		Avatar avatar = avatarRepository.findOne(playerId);
+//		
+//		if (avatar != null) {
+//			response.getOutputStream().write(avatar.getAvatarData().getData());
+//			response.setContentLength(avatar.getAvatarData().getData().length);
+//			response.setContentType(avatar.getContentType());
+////			response.setHeader("Content-Disposition", "inline; filename=\"" + avatar.getFileName() + "\"");
+//		}
+//	}	
+	
+	
 	private void deleteFile(String dir, String name) {
 		FileUtils.deleteQuietly(new File(dir, name));
 	}
