@@ -141,8 +141,8 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 
 	 @Override
 	 public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//		 registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);	
-		    registry
+		 registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);	
+		 registry
 		      .addResourceHandler("/avatar/**")
 		      .addResourceLocations("file:///" + imagesDir)
 		      .setCachePeriod(3600);
