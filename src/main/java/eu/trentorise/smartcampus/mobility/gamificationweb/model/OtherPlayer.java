@@ -3,11 +3,8 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Maps;
 
-@JsonInclude(Include.NON_NULL)
 public class OtherPlayer {
 
 	private String nickname;
