@@ -546,6 +546,7 @@ public class GamificationWebController {
 		String allData = getAll(statusUrl, appId);
 		
 		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
+		ps.getPlayerData().put("level", "n00b");
 		
 		return ps;
 	}
