@@ -2,10 +2,13 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
+
 public class ChallengeConcept {
 
-	private List<ChallengesData> activeChallengeData;
-	private List<ChallengesData> oldChallengeData;
+	private List<ChallengesData> activeChallengeData = Lists.newArrayList();
+	private List<ChallengesData> oldChallengeData = Lists.newArrayList();
 	
 	public ChallengeConcept() {
 		super();

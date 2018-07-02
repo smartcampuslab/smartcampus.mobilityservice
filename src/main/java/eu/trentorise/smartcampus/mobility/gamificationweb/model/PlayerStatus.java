@@ -3,12 +3,15 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 public class PlayerStatus {
 
-	private Map<String, Object> playerData;
-	private List<PointConcept> pointConcept;
-	private List<BadgeCollectionConcept> badgeCollectionConcept;
-	private ChallengeConcept challengeConcept;
+	private Map<String, Object> playerData = Maps.newTreeMap();
+	private List<PointConcept> pointConcept = Lists.newArrayList();
+	private List<BadgeCollectionConcept> badgeCollectionConcept = Lists.newArrayList();
+	private ChallengeConcept challengeConcept = new ChallengeConcept();
 	
 	public PlayerStatus() {
 		super();
