@@ -1,6 +1,7 @@
 package eu.trentorise.smartcampus.mobility.gamification.diary;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +39,9 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private ScoreStatus scoreStatus;
 	private TravelValidity travelValidity;
 	private String clientId;
+	private String multimodalId;
+	
+	private List<DiaryEntry> children;
 
 	private String badge;
 	private String badgeText;
@@ -151,6 +155,22 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	public String getMultimodalId() {
+		return multimodalId;
+	}
+
+	public void setMultimodalId(String multimodalId) {
+		this.multimodalId = multimodalId;
+	}
+
+	public List<DiaryEntry> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<DiaryEntry> children) {
+		this.children = children;
 	}
 
 	public String getBadge() {
