@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -430,6 +431,7 @@ public class DiaryController {
 			}
 			de.setEntityId(instance.getId());
 			de.setClientId(instance.getClientId());
+			de.setMultimodalId(instance.getMultimodalId());
 			
 			if (scores.containsKey(instance.getId())) {
 				long score = scores.get(instance.getId()).longValue();
@@ -448,6 +450,33 @@ public class DiaryController {
 			
 		}
 
+		return groupByMultimodalId(result);
+	}
+	
+	private List<DiaryEntry> groupByMultimodalId(List<DiaryEntry> instances) {
+		Multimap<String, DiaryEntry> grouped = ArrayListMultimap.create();
+		
+		List<DiaryEntry> result = Lists.newArrayList();
+		instances.forEach(x -> {
+			if (x.getMultimodalId() != null) {
+				grouped.put(x.getMultimodalId(), x);
+			} else {
+				result.add(x);
+			}
+		});
+		
+		for (String key: grouped.keySet()) {
+			List<DiaryEntry> group = (List)grouped.get(key);
+			Iterator<DiaryEntry> it = group.iterator();
+			DiaryEntry root = it.next();
+			root.setChildren(Lists.newArrayList());
+			while (it.hasNext()) {
+				root.getChildren().add(it.next());
+			}
+			Collections.sort(root.getChildren());
+			result.add(root);
+		}
+		
 		return result;
 	}
 
