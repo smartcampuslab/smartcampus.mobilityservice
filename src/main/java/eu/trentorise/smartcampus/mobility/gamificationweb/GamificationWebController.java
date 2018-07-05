@@ -333,7 +333,7 @@ public class GamificationWebController {
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
-				logger.error("Exception in user registration to gamification " + e.getMessage());
+				logger.error("Exception in user registration to gamification " + e.getMessage(), e);
 			}
 		}
 		return null;
