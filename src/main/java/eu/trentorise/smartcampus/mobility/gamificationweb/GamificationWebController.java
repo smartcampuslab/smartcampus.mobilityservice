@@ -638,7 +638,7 @@ public class GamificationWebController {
 		}
 
 		op.setNickname(player.getNickname());
-		op.setAvatar(player.getAvatar());
+//		op.setAvatar(player.getAvatar());
 
 		op.setLevel("n00b");
 

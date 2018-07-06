@@ -15,7 +15,7 @@ public class OtherPlayer {
 	private String level;
 	private Double pointsToNextLevel;
 	
-	private String avatar;
+//	private String avatar;
 	
 	private Long updated;
 
@@ -67,13 +67,13 @@ public class OtherPlayer {
 		this.pointsToNextLevel = pointsToNextLevel;
 	}
 
-	public String getAvatar() {
-		return avatar;
-	}
-
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+//	public String getAvatar() {
+//		return avatar;
+//	}
+//
+//	public void setAvatar(String avatar) {
+//		this.avatar = avatar;
+//	}
 
 	public Long getUpdated() {
 		return updated;
