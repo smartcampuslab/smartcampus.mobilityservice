@@ -71,8 +71,8 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Value("${mail.password}")
 	private String password;	
 	
-	@Value("${imagesDir}")
-	private String imagesDir;		
+//	@Value("${imagesDir}")
+//	private String imagesDir;		
 
 	public MobilityConfig() {
 		super();
@@ -142,12 +142,12 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	 @Override
 	 public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		 registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);	
-		 registry
-		      .addResourceHandler("/avatar/**")
-		      .addResourceLocations("file:///" + imagesDir)
-		      .setCachePeriod(3600);
-//		      .resourceChain(true);
-//		      .addResolver(new PathResourceResolver());
+//		 registry
+//		      .addResourceHandler("/avatar/**")
+//		      .addResourceLocations("file:///" + imagesDir)
+//		      .setCachePeriod(3600);
+////		      .resourceChain(true);
+////		      .addResolver(new PathResourceResolver());
 	 }
 	 
 	@Override
