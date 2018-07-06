@@ -1,15 +1,11 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
-import java.io.File;
-
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.common.net.MediaType;
-
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Avatar;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -31,8 +25,8 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @RestController
 public class FileController {
 
-	@Value("${imagesDir}")
-	private String imagesDir;
+//	@Value("${imagesDir}")
+//	private String imagesDir;
 
 	@Autowired
 	private AppSetup appSetup;
@@ -73,9 +67,9 @@ public class FileController {
 				return;
 			}
 
-			if (player.getAvatar() != null) {
-				deleteFile(imagesDir, player.getAvatar());
-			}
+//			if (player.getAvatar() != null) {
+//				deleteFile(imagesDir, player.getAvatar());
+//			}
 
 //			String avatar = saveFile(imagesDir, userId, data);
 //
@@ -145,18 +139,18 @@ public class FileController {
 	}	
 	
 	
-	private void deleteFile(String dir, String name) {
-		FileUtils.deleteQuietly(new File(dir, name));
-	}
-
-	private String saveFile(String dir, String name, MultipartFile data) throws Exception {
-		String fileName = name + "." + MediaType.parse(data.getContentType()).subtype();
-
-		File file = new File(dir, fileName);
-		FileUtils.copyInputStreamToFile(data.getInputStream(), file);
-
-		return fileName;
-	}
+//	private void deleteFile(String dir, String name) {
+//		FileUtils.deleteQuietly(new File(dir, name));
+//	}
+//
+//	private String saveFile(String dir, String name, MultipartFile data) throws Exception {
+//		String fileName = name + "." + MediaType.parse(data.getContentType()).subtype();
+//
+//		File file = new File(dir, fileName);
+//		FileUtils.copyInputStreamToFile(data.getInputStream(), file);
+//
+//		return fileName;
+//	}
 
 	protected String getUserId() {
 		String principal = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
