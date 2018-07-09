@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.Striped;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
@@ -53,11 +55,14 @@ public class GeolocationsProcessor {
 
 	@Autowired
 	private GamificationManager gamificationManager;
+	
+	private Striped<Lock> striped = Striped.lock(20);
 
 	private static Log logger = LogFactory.getLog(GeolocationsProcessor.class);
 
 	public void storeGeolocationEvents(GeolocationsEvent geolocationsEvent, String appId, String userId, String gameId) throws Exception {
 		// logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
+		
 		ObjectMapper mapper = new ObjectMapper();
 
 		int pointCount = 0;
@@ -266,18 +271,27 @@ public class GeolocationsProcessor {
 
 		// boolean canSave = true;
 		//
-		if (res.getItinerary() != null) {
-			savePlanned(res, userId, travelId, day, appId);
-		} else if (res.getFreeTrackingTransport() != null) {
-			saveFreeTracking(res, userId, travelId, appId);
+		
+		Lock lock = striped.get(travelId);
+		
+		try {
+			lock.lock();
+
+			if (res.getItinerary() != null) {
+				savePlanned(res, userId, travelId, day, appId);
+			} else if (res.getFreeTrackingTransport() != null) {
+				saveFreeTracking(res, userId, travelId, appId);
+			}
+			//
+
+			res.setAppId(appId);
+			res.setDeviceInfo(deviceInfo);
+			storage.saveTrackedInstance(res);
+
+			logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
+		} finally {
+			lock.unlock();
 		}
-		//
-
-		res.setAppId(appId);
-		res.setDeviceInfo(deviceInfo);
-		storage.saveTrackedInstance(res);
-
-		logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 	}
 
 	private TrackedInstance getStoredTrackedInstance(String key, String travelId, String multimodalId, String day, String userId, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
@@ -292,7 +306,6 @@ public class GeolocationsProcessor {
 			logger.error("No existing TrackedInstance found.");
 			res = new TrackedInstance();
 			res.setClientId(travelId);
-			res.setMultimodalId(multimodalId);
 			res.setDay(day);
 			res.setUserId(userId);
 			res.setId(ObjectId.get().toString());
@@ -336,6 +349,7 @@ public class GeolocationsProcessor {
 			}
 		}
 
+		res.setMultimodalId(multimodalId);
 		return res;
 	}
 
