@@ -225,6 +225,7 @@ public class DomainStorage {
 			}
 			update.set("toCheck", tracked.getToCheck());
 			update.set("appId", tracked.getAppId());
+			update.set("multimodalId", tracked.getMultimodalId());
 			
 			template.updateFirst(query, update, TRACKED);
 		}
