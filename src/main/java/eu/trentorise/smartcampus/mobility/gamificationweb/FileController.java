@@ -110,9 +110,9 @@ public class FileController {
 			avatarRepository.save(av);
 			
 			
-			response.getOutputStream().write(av.getAvatarData().getData());
-			response.setContentLength(av.getAvatarData().getData().length);
-			response.setContentType(av.getContentType());			
+//			response.getOutputStream().write(av.getAvatarData().getData());
+//			response.setContentLength(av.getAvatarData().getData().length);
+//			response.setContentType(av.getContentType());			
 			
 		} catch (Exception e) {
 			logger.error("Error in post avatar: " + e.getMessage(), e);
