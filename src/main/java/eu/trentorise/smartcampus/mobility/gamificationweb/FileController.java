@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.storage.AvatarRepository;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
+import eu.trentorise.smartcampus.mobility.util.ImageUtils;
 
 @RestController
 public class FileController {
@@ -66,6 +68,21 @@ public class FileController {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
+			
+			if (data.getSize() > 10 * 1024 * 1024) {
+				logger.error("Image too big.");
+				response.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+				return;
+			}
+			
+			MediaType mediaType = MediaType.parseMediaType(data.getContentType());
+			
+			if (!mediaType.isCompatibleWith(MediaType.IMAGE_GIF) && !mediaType.isCompatibleWith(MediaType.IMAGE_JPEG) && !mediaType.isCompatibleWith(MediaType.IMAGE_PNG)) {
+				logger.error("Image format not supported.");
+				response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+				return;				
+			}
+			
 
 //			if (player.getAvatar() != null) {
 //				deleteFile(imagesDir, player.getAvatar());
@@ -77,13 +94,26 @@ public class FileController {
 //			playerRepository.save(player);
 
 			Avatar av = new Avatar();
-			Binary bb = new Binary(data.getBytes());
+			
+//			System.err.println("B:" + data.getBytes().length);
+			
+			byte cb[] = ImageUtils.compressImage(data.getInputStream(), data.getContentType());
+
+//			System.err.println("A:" + cb.length);
+			
+			Binary bb = new Binary(cb);
 			av.setId(userId);
 			av.setAvatarData(bb);
 			av.setContentType(data.getContentType());
 			av.setFileName(data.getOriginalFilename());
 
 			avatarRepository.save(av);
+			
+			
+			response.getOutputStream().write(av.getAvatarData().getData());
+			response.setContentLength(av.getAvatarData().getData().length);
+			response.setContentType(av.getContentType());			
+			
 		} catch (Exception e) {
 			logger.error("Error in post avatar: " + e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
