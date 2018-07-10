@@ -453,7 +453,7 @@ public class DiaryController {
 		return groupByMultimodalId(result);
 	}
 	
-	private List<DiaryEntry> groupByMultimodalId(List<DiaryEntry> instances) {
+	private List<DiaryEntry> groupByMultimodalId(List<DiaryEntry> instances) throws Exception {
 		Multimap<String, DiaryEntry> grouped = ArrayListMultimap.create();
 		
 		List<DiaryEntry> result = Lists.newArrayList();
@@ -469,8 +469,12 @@ public class DiaryController {
 			List<DiaryEntry> group = (List)grouped.get(key);
 			Iterator<DiaryEntry> it = group.iterator();
 			DiaryEntry root = it.next();
+			
+			String rootString = mapper.writeValueAsString(root);
+			DiaryEntry rootCopy = mapper.readValue(rootString, DiaryEntry.class);
+			
 			root.setChildren(Lists.newArrayList());
-			root.getChildren().add(root);
+			root.getChildren().add(rootCopy);
 			while (it.hasNext()) {
 				root.getChildren().add(it.next());
 			}
