@@ -366,10 +366,12 @@ public class DiaryController {
 		List<DiaryEntry> result = Lists.newArrayList();
 
 		Criteria criteria = new Criteria("userId").is(playerId).and("appId").is(appId);
+		criteria = criteria.and("complete").is(true);
 		String fd = shortSdf.format(new Date(from));
 		criteria = criteria.and("day").gte(fd);
 		String td = shortSdf.format(new Date(to));
 		criteria = criteria.andOperator(new Criteria("day").lte(td));
+
 
 		Query query = new Query(criteria);
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
