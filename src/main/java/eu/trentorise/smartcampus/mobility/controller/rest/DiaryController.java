@@ -472,6 +472,7 @@ public class DiaryController {
 			
 			String rootString = mapper.writeValueAsString(root);
 			DiaryEntry rootCopy = mapper.readValue(rootString, DiaryEntry.class);
+			rootCopy.setChildren(null);
 			
 			root.setChildren(Lists.newArrayList());
 			root.getChildren().add(rootCopy);
