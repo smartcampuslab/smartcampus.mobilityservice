@@ -470,6 +470,7 @@ public class DiaryController {
 			Iterator<DiaryEntry> it = group.iterator();
 			DiaryEntry root = it.next();
 			root.setChildren(Lists.newArrayList());
+			root.getChildren().add(root);
 			while (it.hasNext()) {
 				root.getChildren().add(it.next());
 			}
