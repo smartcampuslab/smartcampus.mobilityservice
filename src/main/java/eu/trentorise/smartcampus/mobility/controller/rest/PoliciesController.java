@@ -29,9 +29,11 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.Compi
 import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.VelocityCompiler;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerService;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
 @RequestMapping(value = "/policies")
+@ApiIgnore
 public class PoliciesController {
 
 	@Autowired

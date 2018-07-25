@@ -17,6 +17,7 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.CompressedTransitTimeTable;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -43,6 +44,7 @@ import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 
 @Controller
+@ApiIgnore
 public class CacheController {
 	
 	@Autowired

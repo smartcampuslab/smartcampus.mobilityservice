@@ -69,8 +69,10 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ErrorInfo;
 import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Leg;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
+@ApiIgnore
 public class DiaryController {
 
 	private static final Logger logger = Logger.getLogger(ChallengesUtils.class);

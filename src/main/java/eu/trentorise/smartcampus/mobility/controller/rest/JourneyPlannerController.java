@@ -69,8 +69,10 @@ import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
+@ApiIgnore
 public class JourneyPlannerController {
 
 	@Autowired

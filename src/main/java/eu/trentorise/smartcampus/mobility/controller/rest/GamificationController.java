@@ -86,9 +86,11 @@ import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.TType;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
 @RequestMapping(value = "/gamification")
+@ApiIgnore
 public class GamificationController {
 
 	private static final String TRAVEL_ID = "travelId";

@@ -1,9 +1,5 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +19,13 @@ import com.google.common.collect.Lists;
 import eu.trentorise.smartcampus.mobility.model.Station;
 import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingCache;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
+@ApiIgnore
 public class ServicesController {
 	
 	@Autowired

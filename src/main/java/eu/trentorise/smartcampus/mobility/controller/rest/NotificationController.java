@@ -30,9 +30,11 @@ import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
 import eu.trentorise.smartcampus.mobility.util.AnnouncementsHelper;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
 @RequestMapping(value = "/web/notification")
+@ApiIgnore
 public class NotificationController {
 
 	@Autowired

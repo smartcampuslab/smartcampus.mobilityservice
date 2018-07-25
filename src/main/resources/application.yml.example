@@ -57,3 +57,16 @@ certificatesDir:
 management:
   port: 7011  
   context-path: /manage          
+
+swagger:
+  title: 
+    PublicTransport: Mobility Data Info 
+  description: 
+    PublicTransport: Mobility Data Information APIs 
+  version: 1.0.0
+  license: Apache License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name:  Smart Community Lab
+    url: www.smartcommunitylab.it
+    email: info@smartcommunitylab.it

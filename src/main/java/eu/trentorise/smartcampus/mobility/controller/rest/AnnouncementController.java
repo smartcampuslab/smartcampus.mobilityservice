@@ -21,8 +21,10 @@ import org.w3c.dom.Document;
 
 import eu.trentorise.smartcampus.mobility.model.Announcements;
 import eu.trentorise.smartcampus.mobility.util.AnnouncementsHelper;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
+@ApiIgnore
 public class AnnouncementController {
 
 	@Autowired
