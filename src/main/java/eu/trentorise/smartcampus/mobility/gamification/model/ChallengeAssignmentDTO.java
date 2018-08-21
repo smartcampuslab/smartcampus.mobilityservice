@@ -3,10 +3,12 @@ package eu.trentorise.smartcampus.mobility.gamification.model;
 import java.util.Date;
 import java.util.Map;
 
-public class ChallengeDataDTO {
+public class ChallengeAssignmentDTO {
 	private String modelName;
 	private String instanceName;
 	private Map<String, Object> data;
+    private String state;
+    private String origin;
 	private Date start;
 	private Date end;
 
@@ -49,5 +51,21 @@ public class ChallengeDataDTO {
 	public void setEnd(Date end) {
 		this.end = end;
 	}
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
 
 }
