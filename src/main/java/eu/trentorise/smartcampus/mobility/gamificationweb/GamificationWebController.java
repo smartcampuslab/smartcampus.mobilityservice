@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +47,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
@@ -57,11 +59,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeAssignmentDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
-import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
+import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
@@ -329,11 +332,11 @@ public class GamificationWebController {
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
-//				logger.info("Assigning survey challenge");
-//				assignSurveyChallenge(id, gameId, appId);
-//				logger.info("Assigning initial challenge");
-//				assignInitialChallenge(id, gameId, appId);
-//				logger.info("Saving player");
+				logger.info("Assigning survey challenge");
+				assignSurveyChallenge(id, gameId, appId);
+				logger.info("Assigning initial challenge");
+				assignInitialChallenge(id, gameId, appId);
+				logger.info("Saving player");
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
@@ -404,16 +407,24 @@ public class GamificationWebController {
 		if (playerMap.containsKey("state")) {
 			Map stateMap = mapper.convertValue(playerMap.get("state"), Map.class);
 			if (stateMap.containsKey("PointConcept")) {
-				List conceptList = mapper.convertValue(stateMap.get("PointConcept"), List.class);
-				for (Object o : conceptList) {
-					PointConcept concept = mapper.convertValue(o, PointConcept.class);
-					if ("green leaves".equals(concept.getName())) {
-						return concept.getScore();
-					}
-				}
+				List<PointConcept> conceptList = mapper.convertValue(stateMap.get("PointConcept"), new TypeReference<List<PointConcept>>(){});
+				Optional<PointConcept> greenLeaves = conceptList.stream().filter(x -> "green leaves".equals(x.getName())).findFirst();
+				return greenLeaves.isPresent() ? greenLeaves.get().getScore() : 0;
 			}
 		}
 		return 0;
+	}	
+	
+	@SuppressWarnings("rawtypes")
+	private String getGreenLeavesLevel(String data) throws Exception {
+		Map playerMap = mapper.readValue(data, Map.class);
+		if (playerMap.containsKey("levels")) {
+			List<PlayerLevel> levelsList = mapper.convertValue(playerMap.get("levels"), new TypeReference<List<PlayerLevel>>() {
+			});
+			Optional<PlayerLevel> greenLeaves = levelsList.stream().filter(x -> "green leaves".equals(x.getPointConcept())).findFirst();
+			return greenLeaves.isPresent() ? greenLeaves.get().getLevelValue() : "";
+		}
+		return "";
 	}	
 
 	// Method to force the player creation in gamification engine
@@ -438,7 +449,7 @@ public class GamificationWebController {
 		data.put("surveyType", "start");
 		data.put("link", ""); // TODO
 		
-		ChallengeDataDTO challenge = new ChallengeDataDTO();
+		ChallengeAssignmentDTO challenge = new ChallengeAssignmentDTO();
 		long now = System.currentTimeMillis();
 		challenge.setStart(new Date(now));
 		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
@@ -463,7 +474,7 @@ public class GamificationWebController {
 		data.put("periodName", "weekly");
 		data.put("counterName", "ZeroImpact_Trips");
 		
-		ChallengeDataDTO challenge = new ChallengeDataDTO();
+		ChallengeAssignmentDTO challenge = new ChallengeAssignmentDTO();
 		long now = System.currentTimeMillis();
 		challenge.setStart(new Date(now));
 		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
@@ -551,7 +562,6 @@ public class GamificationWebController {
 		String allData = getAll(statusUrl, appId);
 		
 		PlayerStatus ps =  statusUtils.correctPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
-		ps.getPlayerData().put("level", "n00b");
 		
 		return ps;
 	}
@@ -613,8 +623,10 @@ public class GamificationWebController {
 
 			int greenLeaves = getGreenLeavesPoints(data);
 			op.setGreenLeaves(greenLeaves);
+			String level = getGreenLeavesLevel(data);
+			op.setLevel(level);
 		} catch (Exception e) {
-			logger.error("Error retrieving green leaves points", e);
+			logger.error("Error retrieving player state", e);
 		}
 
 		try {
@@ -667,8 +679,6 @@ public class GamificationWebController {
 				op.getWonChallenges().add(description);
 //			}
 		}		
-
-		op.setLevel("n00b");
 
 		return op;
 	}
