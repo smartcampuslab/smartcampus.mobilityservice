@@ -3,6 +3,7 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class OtherPlayer {
@@ -11,9 +12,12 @@ public class OtherPlayer {
 	private int greenLeaves;
 	private List<BadgeCollectionConcept> badgeCollectionConcept;
 	private Map<String, Double> statistics = Maps.newTreeMap();
+	private Map<String, Double> lastMonthStatistics = Maps.newTreeMap();
 
 	private String level;
 	private Double pointsToNextLevel;
+	
+	private List<String> wonChallenges = Lists.newArrayList();
 	
 //	private String avatar;
 	
@@ -51,6 +55,14 @@ public class OtherPlayer {
 		this.statistics = statistics;
 	}
 
+	public Map<String, Double> getLastMonthStatistics() {
+		return lastMonthStatistics;
+	}
+
+	public void setLastMonthStatistics(Map<String, Double> lastMonthStatistics) {
+		this.lastMonthStatistics = lastMonthStatistics;
+	}
+
 	public String getLevel() {
 		return level;
 	}
@@ -67,13 +79,13 @@ public class OtherPlayer {
 		this.pointsToNextLevel = pointsToNextLevel;
 	}
 
-//	public String getAvatar() {
-//		return avatar;
-//	}
-//
-//	public void setAvatar(String avatar) {
-//		this.avatar = avatar;
-//	}
+	public List<String> getWonChallenges() {
+		return wonChallenges;
+	}
+
+	public void setWonChallenges(List<String> wonChallenges) {
+		this.wonChallenges = wonChallenges;
+	}
 
 	public Long getUpdated() {
 		return updated;
