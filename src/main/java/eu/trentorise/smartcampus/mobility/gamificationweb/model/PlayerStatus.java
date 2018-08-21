@@ -6,12 +6,15 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
+
 public class PlayerStatus {
 
 	private Map<String, Object> playerData = Maps.newTreeMap();
 	private List<PointConcept> pointConcept = Lists.newArrayList();
 	private List<BadgeCollectionConcept> badgeCollectionConcept = Lists.newArrayList();
 	private ChallengeConcept challengeConcept = new ChallengeConcept();
+	private List<PlayerLevel> levels = Lists.newArrayList();
 	
 	public PlayerStatus() {
 		super();
@@ -47,6 +50,14 @@ public class PlayerStatus {
 
 	public void setPointConcept(List<PointConcept> pointConcept) {
 		this.pointConcept = pointConcept;
+	}
+
+	public List<PlayerLevel> getLevels() {
+		return levels;
+	}
+
+	public void setLevels(List<PlayerLevel> levels) {
+		this.levels = levels;
 	}
 	
 }
