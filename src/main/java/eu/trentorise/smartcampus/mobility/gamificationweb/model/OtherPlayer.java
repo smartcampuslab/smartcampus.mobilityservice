@@ -15,7 +15,6 @@ public class OtherPlayer {
 	private Map<String, Double> lastMonthStatistics = Maps.newTreeMap();
 
 	private String level;
-	private Double pointsToNextLevel;
 	
 	private List<String> wonChallenges = Lists.newArrayList();
 	
@@ -69,14 +68,6 @@ public class OtherPlayer {
 
 	public void setLevel(String level) {
 		this.level = level;
-	}
-
-	public Double getPointsToNextLevel() {
-		return pointsToNextLevel;
-	}
-
-	public void setPointsToNextLevel(Double pointsToNextLevel) {
-		this.pointsToNextLevel = pointsToNextLevel;
 	}
 
 	public List<String> getWonChallenges() {
