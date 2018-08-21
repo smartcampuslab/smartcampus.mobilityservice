@@ -57,6 +57,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
@@ -142,6 +143,9 @@ public class GamificationWebController {
 	
 	@Autowired
 	private StatisticsBuilder statisticsBuilder;
+	
+	@Autowired
+	private ChallengesUtils challengeUtils;	
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -325,11 +329,11 @@ public class GamificationWebController {
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
-				logger.info("Assigning survey challenge");
-				assignSurveyChallenge(id, gameId, appId);
-				logger.info("Assigning initial challenge");
-				assignInitialChallenge(id, gameId, appId);
-				logger.info("Saving player");
+//				logger.info("Assigning survey challenge");
+//				assignSurveyChallenge(id, gameId, appId);
+//				logger.info("Assigning initial challenge");
+//				assignInitialChallenge(id, gameId, appId);
+//				logger.info("Saving player");
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
@@ -417,9 +421,10 @@ public class GamificationWebController {
 		RestTemplate restTemplate = new RestTemplate();
 		Map<String, Object> data = new HashMap<String, Object>();
 		// data.put("actionId", "app_sent_recommandation");
-		 data.put("gameId", gameId);
+		data.put("gameId", gameId);
 		data.put("playerId", playerId);
 		String partialUrl = "game/" + gameId + "/player";
+
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "console/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(data, createHeaders(appId)), String.class);
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
@@ -628,6 +633,7 @@ public class GamificationWebController {
 			logger.error("Error retrieving badges", e);
 		}
 
+		long now = System.currentTimeMillis();
 		try {
 			StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, 0, System.currentTimeMillis(), AggregationGranularity.total);
 			if (statistics.getStats() != null && !statistics.getStats().isEmpty()) {
@@ -635,10 +641,32 @@ public class GamificationWebController {
 			}
 		} catch (Exception e) {
 			logger.error("Error computing statistics", e);
-		}
+		}		
+
+		try {
+			StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, now - (1000L * 60 * 60 * 24 * 31 * 1), now, AggregationGranularity.month);
+			if (statistics.getStats() != null && !statistics.getStats().isEmpty()) {
+				op.setLastMonthStatistics(statistics.getStats().get(statistics.getStats().size() - 1).getData());
+			}
+		} catch (Exception e) {
+			logger.error("Error computing statistics", e);
+		}		
+		
 
 		op.setNickname(player.getNickname());
-//		op.setAvatar(player.getAvatar());
+
+		res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+
+		String allData = res.getBody();
+
+		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
+		for (ChallengeConcept challengeConcept: challengeConcepts) {
+			
+//			if (challengeConcept.isCompleted()) {
+				String description = challengeUtils.fillDescription(challengeConcept, player.getLanguage());
+				op.getWonChallenges().add(description);
+//			}
+		}		
 
 		op.setLevel("n00b");
 
