@@ -18,8 +18,11 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
@@ -40,6 +43,7 @@ public class StatusUtils {
 	private static final String STATE = "state";
 	private static final String PLAYER_ID = "playerId";
 	private static final String BADGE_COLLECTION_CONCEPT = "BadgeCollectionConcept";
+	private static final String LEVELS = "levels";
 	private static final String BC_NAME = "name";
 	private static final String BC_BADGE_EARNED = "badgeEarned";
 	private static final String POINT_CONCEPT = "PointConcept";
@@ -207,6 +211,21 @@ public class StatusUtils {
 					logger.error("Error creating challenge info", e);
 					e.printStackTrace();
 				}
+				
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					Map profileMap = mapper.readValue(profile, Map.class);
+					if (profileMap.containsKey(LEVELS)) {
+						List<PlayerLevel> levels = mapper.convertValue((List)profileMap.get(LEVELS), new TypeReference<List<PlayerLevel>>() {
+						});
+						ps.setLevels(levels);
+					}
+					
+				} catch (Exception e) {
+					logger.error("Error creating levels", e);
+					e.printStackTrace();
+				}				
+				
 			}
 
 			ps.setPlayerData(playerData);
