@@ -469,6 +469,7 @@ public class DiaryController {
 		
 		for (String key: grouped.keySet()) {
 			List<DiaryEntry> group = (List)grouped.get(key);
+			Collections.sort(group);
 			Iterator<DiaryEntry> it = group.iterator();
 			DiaryEntry root = it.next();
 			
