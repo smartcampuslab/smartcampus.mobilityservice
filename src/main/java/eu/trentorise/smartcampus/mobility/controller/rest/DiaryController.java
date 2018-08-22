@@ -478,10 +478,11 @@ public class DiaryController {
 			rootCopy.setChildren(null);
 			
 			root.setChildren(Lists.newArrayList());
-			root.getChildren().add(rootCopy);
-			while (it.hasNext()) {
+			for (int i = 0; i < group.size() - 1; i++) {
 				root.getChildren().add(it.next());
 			}
+			root.getChildren().add(rootCopy);
+			
 			Collections.sort(root.getChildren());
 			result.add(root);
 		}
