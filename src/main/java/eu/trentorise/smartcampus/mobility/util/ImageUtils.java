@@ -19,16 +19,13 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 public class ImageUtils {
 
+		private final static int DIMENSION = 160;
+	
 		public static byte[] compressImage(InputStream is, String mediaType) throws IOException {
 			BufferedImage bs = ImageIO.read(is);
-			bs = rescale(bs, 160, 160);
+			bs = rescale(bs, DIMENSION, DIMENSION);
 			return compress(bs, mediaType);
 		}
-	
-//		public static void compressImage(BufferedImage bi, int w, int h) throws IOException {
-//			BufferedImage resized = rescale(bi, w, h);
-//			compress(resized);
-//		}
 	
 	   private static BufferedImage rescale(BufferedImage bi, int w, int h) throws IOException {
 	        int ow = bi.getWidth();
@@ -61,8 +58,8 @@ public class ImageUtils {
 //	        	dh = (nh - h) / 2;
 //	        }	        
 	        
-	        System.err.println(ow + "/" + oh + " -> " + nw + "/" + nh);
-	        System.err.println(dw + "/" + dh);
+//	        System.err.println(ow + "/" + oh + " -> " + nw + "/" + nh);
+//	        System.err.println(dw + "/" + dh);
 	        
 	        //rescale 50%
 	        BufferedImage resizedImage = new BufferedImage(nw - 2 * dw, nh - 2 * dh, type);
