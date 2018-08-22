@@ -760,10 +760,12 @@ public class GamificationWebController {
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));		
 		
 		List<ClassificationData> classificationList = Lists.newArrayList();
-		for (ClassificationPosition pos : board.getBoard()) {
+		if (board.getBoard() != null) {
+			for (ClassificationPosition pos : board.getBoard()) {
 				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
 				classificationList.add(cd);
 			}
+		}
 		
 		return classificationList;
 	}	
