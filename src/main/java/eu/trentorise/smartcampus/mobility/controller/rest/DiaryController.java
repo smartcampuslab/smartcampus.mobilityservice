@@ -471,7 +471,7 @@ public class DiaryController {
 			List<DiaryEntry> group = (List)grouped.get(key);
 			Collections.sort(group);
 			Iterator<DiaryEntry> it = group.iterator();
-			DiaryEntry root = it.next();
+			DiaryEntry root = group.get(group.size() - 1);
 			
 			String rootString = mapper.writeValueAsString(root);
 			DiaryEntry rootCopy = mapper.readValue(rootString, DiaryEntry.class);
