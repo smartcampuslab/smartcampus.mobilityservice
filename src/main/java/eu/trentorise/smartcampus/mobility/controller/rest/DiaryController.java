@@ -471,18 +471,17 @@ public class DiaryController {
 			List<DiaryEntry> group = (List)grouped.get(key);
 			Collections.sort(group);
 			Iterator<DiaryEntry> it = group.iterator();
-			DiaryEntry root = group.get(group.size() - 1);
+			DiaryEntry root = it.next();
 			
 			String rootString = mapper.writeValueAsString(root);
 			DiaryEntry rootCopy = mapper.readValue(rootString, DiaryEntry.class);
 			rootCopy.setChildren(null);
 			
 			root.setChildren(Lists.newArrayList());
-			for (int i = 0; i < group.size() - 1; i++) {
+			root.getChildren().add(rootCopy);
+			while (it.hasNext()) {
 				root.getChildren().add(it.next());
 			}
-			root.getChildren().add(rootCopy);
-			
 			Collections.sort(root.getChildren());
 			result.add(root);
 		}
