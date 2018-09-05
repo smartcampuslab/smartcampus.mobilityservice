@@ -124,10 +124,10 @@ public class ChallengesUtils {
 	
 	// Method correctChallengeData: used to retrieve the challenge data objects from the user profile data
 	@SuppressWarnings("rawtypes")
-	public List<List> correctChallengeData(String playerId, String gameId, String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
+	public eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept correctChallengeData(String playerId, String gameId, String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
 		List<ChallengesData> challenges = new ArrayList<ChallengesData>();
     	List<ChallengesData> oldChallenges = new ArrayList<ChallengesData>();
-    	List<List> challengesList = new ArrayList<List>();
+    	eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept result = new eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept();
     	if(profile != null && profile.compareTo("") != 0){
     		
     		List<ChallengeConcept> challengeList = parse(profile);
@@ -272,8 +272,9 @@ public class ChallengesUtils {
 			    		}
 	    			}
 				}
-				challengesList.add(challenges);
-    			challengesList.add(oldChallenges);
+				
+				result.setActiveChallengeData(challenges);
+				result.setOldChallengeData(oldChallenges);
 			}
     		// Sorting
         	/*Collections.sort(challenges, new Comparator<ChallengesData>() {
@@ -287,7 +288,7 @@ public class ChallengesUtils {
         	    }
         	});*/
 		}
-    	return challengesList;
+    	return result;
     }
 	
 	
