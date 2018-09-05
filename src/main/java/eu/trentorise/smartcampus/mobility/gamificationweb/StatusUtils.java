@@ -98,6 +98,7 @@ public class StatusUtils {
 		ps.setBadgeCollectionConcept(badges);
 		
 		List<PointConcept> points = mapper.convertValue(state.get("PointConcept"), new TypeReference<List<PointConcept>>() {});
+		points.removeIf(x -> !PC_GREEN_LEAVES.equals(x.getName()));
 		ps.setPointConcept(points);
 		
 		List<BadgeCollectionConcept> geChallenges = mapper.convertValue(state.get("ChallengeConcept"), new TypeReference<List<ChallengeConcept>>() {});		
