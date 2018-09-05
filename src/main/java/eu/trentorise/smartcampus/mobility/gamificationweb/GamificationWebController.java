@@ -60,10 +60,12 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeAssignmentDTO;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard;
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
@@ -530,7 +532,7 @@ public class GamificationWebController {
 		return uc;
 	}
 
-	// Method used to get the user status data (by mobyle app)
+	// Method used to get the user status data (by mobile app)
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/status")
 	public @ResponseBody PlayerStatus getPlayerStatus(HttpServletRequest request, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
 		String token = tokenExtractor.extractHeaderToken(request);
@@ -698,7 +700,22 @@ public class GamificationWebController {
 		return result;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/challenge/type/{playerId}")
+	public @ResponseBody List<ChallengeChoice> getChallengesStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
+		String gameId = getGameId(appId);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
+		
+		String res = result.getBody();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		Inventory inventory = mapper.readValue(res , Inventory.class);
+
+		return inventory.getChallengeChoices();
+	}		
+	
+		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
 	public @ResponseBody
 	PlayerClassification getPlayerClassification(HttpServletRequest request, @RequestParam(required=false) Long timestamp, @RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse res) throws Exception{
 		String token = tokenExtractor.extractHeaderToken(request);

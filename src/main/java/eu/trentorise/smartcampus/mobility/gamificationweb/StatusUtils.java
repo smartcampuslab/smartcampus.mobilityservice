@@ -1,15 +1,12 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -19,21 +16,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
 
 @Component
 public class StatusUtils {
@@ -82,159 +79,40 @@ public class StatusUtils {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public PlayerStatus correctPlayerData(String profile, String playerId, String gameId, String nickName, String gamificationUrl, int challType, String language)
-			throws JSONException {
-		List<ChallengesData> challenges = new ArrayList<ChallengesData>();
-		List<ChallengesData> oldChallenges = new ArrayList<ChallengesData>();
-		List<PointConcept> pointConcept = new ArrayList<PointConcept>();
-		List<PointConcept> greenPointConcept = new ArrayList<PointConcept>();
+			throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 		PlayerStatus ps = new PlayerStatus();
-		if (profile != null && profile.compareTo("") != 0) {
+		
+		Map<String, Object> stateMap = mapper.readValue(profile, Map.class);
+		System.err.println(stateMap.keySet());
+		
+		Map<String, Object> state = (Map<String, Object>)stateMap.get("state");
+		List<BadgeCollectionConcept> badges = mapper.convertValue(state.get("BadgeCollectionConcept"), new TypeReference<List<BadgeCollectionConcept>>() {});
+		badges.forEach(x -> {
+			x.getBadgeEarned().forEach(y -> {
+				y.setUrl(getUrlFromBadgeName(gamificationUrl, y.getName()));
+			});
+		});
+		ps.setBadgeCollectionConcept(badges);
+		
+		List<PointConcept> points = mapper.convertValue(state.get("PointConcept"), new TypeReference<List<PointConcept>>() {});
+		ps.setPointConcept(points);
+		
+		List<BadgeCollectionConcept> geChallenges = mapper.convertValue(state.get("ChallengeConcept"), new TypeReference<List<ChallengeConcept>>() {});		
+		ChallengeConcept challenges = challUtils.correctChallengeData(playerId, gameId, profile, challType, language, points, badges);
+		ps.setChallengeConcept(challenges);
+	
+		List<PlayerLevel> levels = mapper.convertValue((List)stateMap.get("levels"), new TypeReference<List<PlayerLevel>>() {});
+		ps.setLevels(levels);		
 
-			Map<String, Object> playerData = buildPlayerData(playerId, gameId, nickName);
-			List<BadgeCollectionConcept> bcc_list = new ArrayList<BadgeCollectionConcept>();
-			ChallengeConcept cc = new ChallengeConcept();
-			JSONArray badgeCollectionData = null;
-			JSONArray pointConceptData = null;
-			JSONObject profileData = new JSONObject(profile);
-			JSONObject stateData = (!profileData.isNull(STATE)) ? profileData.getJSONObject(STATE) : null;
-			if (stateData != null) {
-				badgeCollectionData = (!stateData.isNull(BADGE_COLLECTION_CONCEPT)) ? stateData.getJSONArray(BADGE_COLLECTION_CONCEPT) : null;
-				if (badgeCollectionData != null) {
-					for (int i = 0; i < badgeCollectionData.length(); i++) {
-						JSONObject badgeColl = badgeCollectionData.getJSONObject(i);
-						String bc_name = (!badgeColl.isNull(BC_NAME)) ? badgeColl.getString(BC_NAME) : null;
-						List<BadgeConcept> bc_badges = new ArrayList<BadgeConcept>();
-						JSONArray bc_badgesEarned = (!badgeColl.isNull(BC_BADGE_EARNED)) ? badgeColl.getJSONArray(BC_BADGE_EARNED) : null;
-						for (int j = 0; j < bc_badgesEarned.length(); j++) {
-							String b_name = bc_badgesEarned.getString(j);
-							String b_url = getUrlFromBadgeName(gamificationUrl, b_name);
-							// if(!b_url.contains("/img/gamification/pr/p&rLeaves.png")){ //
-							// not in default ParkAndRide badges
-							BadgeConcept badge = new BadgeConcept(b_name, b_url);
-							bc_badges.add(badge);
-							// }
-						}
-						BadgeCollectionConcept bcc = new BadgeCollectionConcept(bc_name, bc_badges);
-						bcc_list.add(bcc);
-					}
-				}
-				pointConceptData = (!stateData.isNull(POINT_CONCEPT)) ? stateData.getJSONArray(POINT_CONCEPT) : null; // to update for
-																														// new
-																														// gamification
-																														// version
-				if (pointConceptData != null) {
-					for (int i = 0; i < pointConceptData.length(); i++) {
-						JSONObject point = pointConceptData.getJSONObject(i);
-						String pc_name = (!point.isNull(PC_NAME)) ? point.getString(PC_NAME) : null;
-						int pc_score = 0;
-						String periodType = "";
-						long start = 0L;
-						long periodDuration = 0L;
-						String identifier = "weekly";
-						List<PointConceptPeriod> instances = new ArrayList<PointConceptPeriod>();
-						if (pc_name != null) { // &&
-												// pc_name.compareTo(PC_GREEN_LEAVES)
-												// == 0
-							pc_score = (!point.isNull(PC_SCORE)) ? point.getInt(PC_SCORE) : null;
-							JSONObject pc_period = (!point.isNull(PC_PERIOD)) ? point.getJSONObject(PC_PERIOD) : null;
-							if (pc_period != null) {
-								Iterator<String> keys = pc_period.keys();
-								while (keys.hasNext()) {
-									instances = new ArrayList<PointConceptPeriod>();
-									String key = keys.next();
-									JSONObject pc_weekly = pc_period.getJSONObject(key);
-									if (pc_weekly != null) {
-										start = (!pc_weekly.isNull(PC_START)) ? pc_weekly.getLong(PC_START) : 0L;
-										periodDuration = (!pc_weekly.isNull(PC_PERIOD_DURATION)) ? pc_weekly.getLong(PC_PERIOD_DURATION) : 0L;
-										identifier = (!pc_weekly.isNull(PC_IDENTIFIER)) ? pc_weekly.getString(PC_IDENTIFIER) : "weekly";
-										JSONObject pc_instances = pc_weekly.getJSONObject(PC_INSTANCES);
-										Iterator<String> instancesKeys = pc_instances.keys();
-
-										if (pc_instances != null) {
-											// fix to preserve order as in
-											// version < 2.2.0
-											TreeMap<Date, PointConceptPeriod> sortMachine = new TreeMap<Date, PointConceptPeriod>();
-											while (instancesKeys.hasNext()) {
-												String instanceKey = instancesKeys.next();
-												JSONObject pc_instance = pc_instances.getJSONObject(instanceKey);
-												int instance_score = (!pc_instance.isNull(PC_SCORE)) ? pc_instance.getInt(PC_SCORE) : 0;
-												long instance_start = (!pc_instance.isNull(PC_START)) ? pc_instance.getLong(PC_START) : 0L;
-												long instance_end = (!pc_instance.isNull(PC_END)) ? pc_instance.getLong(PC_END) : 0L;
-												PointConceptPeriod tmpPeriod = new PointConceptPeriod(instance_score, instance_start, instance_end);
-
-												try {
-													sortMachine.put(formatter.parse(instanceKey), tmpPeriod);
-												} catch (ParseException e) {
-													logger.error("Error parsing period instance key", e);
-												}
-											}
-											for (PointConceptPeriod periodConcept : sortMachine.values()) {
-												instances.add(periodConcept);
-											}
-										}
-									}
-									PointConcept pt = new PointConcept(pc_name, pc_score, identifier, start, periodDuration, identifier, instances);
-									pointConcept.add(pt);	
-									if (pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
-										greenPointConcept.add(pt); // I add the point
-																	// concept to the
-																	// green leaves list
-									}									
-								}
-							}
-//							PointConcept pt = new PointConcept(pc_name, pc_score, periodType, start, periodDuration, identifier, instances);
-//							pointConcept.add(pt);
-//							if (pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
-//								greenPointConcept.add(pt); // I add the point
-//															// concept to the
-//															// green leaves list
-//							}
-						}
-					}
-				}
-				// new Challenge management part
-				try {
-					if (challUtils != null) {
-						List<List> challLists = challUtils.correctChallengeData(playerId, gameId, profile, challType, language, pointConcept, bcc_list);
-						if (challLists != null && challLists.size() == 2) {
-							challenges = challLists.get(0);
-							oldChallenges = challLists.get(1);
-						}
-						cc.setActiveChallengeData(challenges); // default is []
-																// so I have to
-																// initialize
-																// the list
-																// anyway
-						cc.setOldChallengeData(oldChallenges);
-					}
-				} catch (Exception e) {
-					logger.error("Error creating challenge info", e);
-					e.printStackTrace();
-				}
-				
-				try {
-					ObjectMapper mapper = new ObjectMapper();
-					Map profileMap = mapper.readValue(profile, Map.class);
-					if (profileMap.containsKey(LEVELS)) {
-						List<PlayerLevel> levels = mapper.convertValue((List)profileMap.get(LEVELS), new TypeReference<List<PlayerLevel>>() {
-						});
-						ps.setLevels(levels);
-					}
-					
-				} catch (Exception e) {
-					logger.error("Error creating levels", e);
-					e.printStackTrace();
-				}				
-				
-			}
-
-			ps.setPlayerData(playerData);
-			// ps.setBadgeCollectionConcept(cleanFromGenericBadges(bcc_list));
-			// // filter for generic badges not more used
-			ps.setBadgeCollectionConcept(bcc_list);
-			ps.setPointConcept(greenPointConcept);
-			ps.setChallengeConcept(cc);
-		}
+		Inventory inventory = mapper.convertValue(stateMap.get("inventory"), Inventory.class);
+		ps.setInventory(inventory);	
+		
+		Map<String, Object> playerData = buildPlayerData(playerId, gameId, nickName);
+		ps.setPlayerData(playerData);
+		
 		return ps;
 	}
 
