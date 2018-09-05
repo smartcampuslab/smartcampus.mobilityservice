@@ -66,6 +66,8 @@ import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationBoard
 import eu.trentorise.smartcampus.mobility.gamification.model.ClassificationPosition;
 import eu.trentorise.smartcampus.mobility.gamification.model.ExecutionDataDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
@@ -714,6 +716,38 @@ public class GamificationWebController {
 
 		return inventory.getChallengeChoices();
 	}		
+	
+	@RequestMapping(method = RequestMethod.PUT, value = "/gamificationweb/challenge/unlock/{type}")
+	public @ResponseBody List<ChallengeChoice> activateChallengeType(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String type, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		logger.debug("WS-get status user token " + token);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String playerId = user.getUserId();		
+		String gameId = getGameId(appId);
+		
+		RestTemplate restTemplate = new RestTemplate();
+//		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(createHeaders(appId)), String.class);
+		ItemChoice choice = new ItemChoice(ChoiceType.CHALLENGE_MODEL, type);
+		
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
+		
+		String res = result.getBody();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		Inventory inventory = mapper.readValue(res , Inventory.class);
+
+		return inventory.getChallengeChoices();
+	}	
 	
 		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
 	public @ResponseBody
