@@ -25,6 +25,11 @@ public class BadgeConcept {
 		super();
 	}
 
+	public BadgeConcept(String name) {
+		super();
+		this.name = name;
+	}	
+	
 	public BadgeConcept(String name, String url) {
 		super();
 		this.name = name;

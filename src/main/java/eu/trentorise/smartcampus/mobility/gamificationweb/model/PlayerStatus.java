@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 
 public class PlayerStatus {
@@ -15,6 +16,7 @@ public class PlayerStatus {
 	private List<BadgeCollectionConcept> badgeCollectionConcept = Lists.newArrayList();
 	private ChallengeConcept challengeConcept = new ChallengeConcept();
 	private List<PlayerLevel> levels = Lists.newArrayList();
+	private Inventory inventory;
 	
 	public PlayerStatus() {
 		super();
@@ -58,6 +60,14 @@ public class PlayerStatus {
 
 	public void setLevels(List<PlayerLevel> levels) {
 		this.levels = levels;
+	}
+
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
 	}
 	
 }

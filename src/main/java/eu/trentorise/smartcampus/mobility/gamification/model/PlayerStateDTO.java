@@ -16,7 +16,9 @@
 
 package eu.trentorise.smartcampus.mobility.gamification.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +31,10 @@ public class PlayerStateDTO {
 	private String gameId;
 
 	private Map<String, Set<GameConcept>> state = new HashMap<String, Set<GameConcept>>();
+    private List<PlayerLevel> levels = new ArrayList<>();
+
+    private Inventory inventory;
+
 	private CustomData customData = new CustomData();
 
 	public String getPlayerId() {
@@ -62,5 +68,21 @@ public class PlayerStateDTO {
 	public void setCustomData(CustomData customData) {
 		this.customData = customData;
 	}
+
+    public List<PlayerLevel> getLevels() {
+        return levels;
+    }
+
+    public void setLevels(List<PlayerLevel> levels) {
+        this.levels = levels;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
 
 }
