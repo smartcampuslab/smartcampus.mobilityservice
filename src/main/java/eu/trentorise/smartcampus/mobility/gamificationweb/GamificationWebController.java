@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -736,9 +737,9 @@ public class GamificationWebController {
 		String gameId = getGameId(appId);
 		
 		RestTemplate restTemplate = new RestTemplate();
-//		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(createHeaders(appId)), String.class);
 		ItemChoice choice = new ItemChoice(ChoiceType.CHALLENGE_MODEL, type);
 		
+		try {
 		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
 		
 		String res = result.getBody();
@@ -747,6 +748,10 @@ public class GamificationWebController {
 		Inventory inventory = mapper.readValue(res , Inventory.class);
 
 		return inventory.getChallengeChoices();
+		} catch (HttpClientErrorException e) {
+			response.setStatus(e.getRawStatusCode());
+			return null;
+		}
 	}	
 	
 		@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/classification")
