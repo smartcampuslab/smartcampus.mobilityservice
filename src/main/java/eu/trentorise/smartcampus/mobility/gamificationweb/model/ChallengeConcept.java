@@ -9,6 +9,7 @@ public class ChallengeConcept {
 
 	private List<ChallengesData> activeChallengeData = Lists.newArrayList();
 	private List<ChallengesData> oldChallengeData = Lists.newArrayList();
+	private List<ChallengesData> proposedChallengeData = Lists.newArrayList();
 	
 	public ChallengeConcept() {
 		super();
@@ -28,6 +29,14 @@ public class ChallengeConcept {
 
 	public void setOldChallengeData(List<ChallengesData> oldChallengeData) {
 		this.oldChallengeData = oldChallengeData;
+	}
+
+	public List<ChallengesData> getProposedChallengeData() {
+		return proposedChallengeData;
+	}
+
+	public void setProposedChallengeData(List<ChallengesData> proposedChallengeData) {
+		this.proposedChallengeData = proposedChallengeData;
 	}
 
 }
