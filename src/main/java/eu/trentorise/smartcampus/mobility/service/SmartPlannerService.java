@@ -111,8 +111,8 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		SMARTPLANNER = "/smart-planner/" + smartplannerRouter + "/rest/";
-		OTP  = "/smart-planner/" + smartplannerRouter + "/rest/";
+		SMARTPLANNER = "/smart-planner2/" + smartplannerRouter + "/rest/";
+		OTP  = "/smart-planner2/" + smartplannerRouter + "/rest/";
 	}
 	
 	@Override
