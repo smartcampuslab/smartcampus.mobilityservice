@@ -16,6 +16,8 @@ public class ChallengeConcept extends GameConcept {
 	// metadata fields
 	private boolean completed = false;
 	private Date dateCompleted;
+	
+	private String state;
 
 	public String getModelName() {
 		return modelName;
@@ -68,6 +70,14 @@ public class ChallengeConcept extends GameConcept {
 		return completed;
 	}
 	
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
 	@Override
 	public String toString() {
 		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
