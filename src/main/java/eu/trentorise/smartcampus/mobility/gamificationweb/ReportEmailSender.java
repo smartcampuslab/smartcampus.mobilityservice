@@ -244,12 +244,6 @@ public class ReportEmailSender {
 		standardImages.add(new MailImage("prScore", Resources.asByteSource(Resources.getResource("public/img/mail/pr/prLeaves.png")).read(), "image/png"));
 		standardImages.add(new MailImage("footer", Resources.asByteSource(Resources.getResource("public/img/mail/templateMail.png")).read(), "image/png"));
 
-		// List<BadgesData> allBadgeTest = getAllBadges(path);
-		// try {
-		// this.emailService.sendMailGamification("NikName", "43", "32", "112", null, null, allBadgeTest, standardImages ,mailTo, Locale.ITALIAN);
-		// } catch (MessagingException e1) {
-		// e1.printStackTrace();
-		// }
 		// New method
 		logger.debug(String.format("Check Notification task. Cycle - %d", i++));
 		// Here I have to read the mail conf file data
@@ -321,7 +315,7 @@ public class ReportEmailSender {
 						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
-						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
+						PlayerStatus completePlayerStatus = statusUtils.convertPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
 						states = completePlayerStatus.getPointConcept();
 						ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();
 						// @SuppressWarnings("rawtypes")
@@ -513,7 +507,7 @@ public class ReportEmailSender {
 						mailPrizeActualData = configUtils.getWeekPrizes(actual_week, ITA_LANG);
 					}
 					try {
-						PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
+						PlayerStatus completePlayerStatus = statusUtils.convertPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
 						states = completePlayerStatus.getPointConcept();
 						ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();
 						// @SuppressWarnings("rawtypes")
@@ -665,7 +659,7 @@ public class ReportEmailSender {
 							mailLoc = Locale.ITALIAN;
 						}
 						try {
-							PlayerStatus completePlayerStatus = statusUtils.correctPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0,
+							PlayerStatus completePlayerStatus = statusUtils.convertPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0,
 									language);
 							states = completePlayerStatus.getPointConcept();
 							ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();

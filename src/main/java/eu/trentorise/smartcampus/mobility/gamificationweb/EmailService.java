@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -61,20 +62,16 @@ public class EmailService {
     	
     	// Correct the winners:
     	List<WeekWinnersData> last_week_winners = Lists.newArrayList();
-    	for(int i = 0; i < winners.size(); i++){
-    		if(last_week_number != null && winners.get(i).getWeekNum() == last_week_number){
-    			last_week_winners.add(winners.get(i));
-    		}
+    	if (winners != null && last_week_number != null) {
+    		last_week_winners = winners.stream().filter(x -> x.getWeekNum() == last_week_number).collect(Collectors.toList());
     	}
+    	
     	// Correct the win challenges
     	List<ChallengesData> winChallenges = Lists.newArrayList();
     	if(last_week_challenges != null){
-	    	for(int i = 0; i < last_week_challenges.size(); i++){
-	    		if(last_week_challenges.get(i).getSuccess()){
-	    			winChallenges.add(last_week_challenges.get(i));
-	    		}
-	    	}
+	    	last_week_challenges.stream().filter(x -> x.getSuccess()).collect(Collectors.toList());
     	}
+    	
     	
     	String challengesStartingTime = "";
     	String challengesEndingTime = "";
@@ -99,7 +96,7 @@ public class EmailService {
     	}
     	
     	boolean isLastWeek = false;
-    	if(week_theme.compareTo("Last") == 0){
+    	if("Last".equals(week_theme)){
     	//if(week_theme.compareTo("Batti i tuoi record") == 0){
     		isLastWeek = true;
     	}
