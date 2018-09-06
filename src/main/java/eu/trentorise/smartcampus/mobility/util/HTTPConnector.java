@@ -22,6 +22,8 @@ import java.util.TreeMap;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,7 +32,11 @@ import org.springframework.web.client.RestTemplate;
 
 public class HTTPConnector {
 	
+	private static final Logger logger = LoggerFactory.getLogger(HTTPConnector.class);
+	
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
+		logger.info("URL: " + address);
+		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 
