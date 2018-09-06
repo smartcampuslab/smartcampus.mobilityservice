@@ -141,6 +141,8 @@ public class GamificationController {
 	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
 	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
+	private ObjectMapper mapper = new ObjectMapper();
+	
 	@PostConstruct
 	public void init() throws Exception {
 		File f = new File(geolocationsDBDir);
@@ -153,8 +155,6 @@ public class GamificationController {
 	@RequestMapping(method = RequestMethod.POST, value = "/geolocations")
 	public @ResponseBody String storeGeolocationEvent(@RequestBody(required = false) GeolocationsEvent geolocationsEvent, @RequestHeader(required = true, value = "appId") String appId,
 			HttpServletResponse response) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -800,8 +800,6 @@ public class GamificationController {
 
 			Map<String, Double> scores = gamificationManager.getScoreNotification(appId, userId);
 			
-			ObjectMapper mapper = new ObjectMapper();
-
 			if (instances != null) {
 				for (TrackedInstance o : instances) {
 					List<Geolocation> geo = Lists.newArrayList(o.getGeolocationEvents());

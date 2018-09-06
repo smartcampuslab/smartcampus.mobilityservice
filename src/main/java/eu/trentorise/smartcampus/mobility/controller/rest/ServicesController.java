@@ -1,9 +1,5 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +19,9 @@ import com.google.common.collect.Lists;
 import eu.trentorise.smartcampus.mobility.model.Station;
 import eu.trentorise.smartcampus.mobility.processor.handlers.BikeSharingCache;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 
 @Controller
 public class ServicesController {
@@ -32,10 +31,11 @@ public class ServicesController {
 	
 	@Autowired
 	private BikeSharingCache bikeSharingCache;
+
+	private	ObjectMapper mapper = new ObjectMapper();
 	
 	@RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertParkings")
 	public @ResponseBody void pushAlertParkings(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
 		List<AlertParking> alerts = Lists.newArrayList();
 		for (Map map: data) {
 			AlertParking ap = mapper.convertValue(map, AlertParking.class);
@@ -46,7 +46,6 @@ public class ServicesController {
 	
 	@RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertDelays")
 	public @ResponseBody void pushAlertDelays(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
 		List<AlertDelay> alerts = Lists.newArrayList();
 		for (Map map: data) {
 			AlertDelay ap = mapper.convertValue(map, AlertDelay.class);
@@ -57,7 +56,6 @@ public class ServicesController {
     
     @RequestMapping(method = RequestMethod.POST, value = "servicedata/publishAlertRoads")
     public @ResponseBody void pushAlertRoads(HttpServletResponse response, @RequestBody(required=false) List<Map> data) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
         List<AlertRoad> alerts = Lists.newArrayList();
         for (Map map: data) {
             AlertRoad ar = mapper.convertValue(map, AlertRoad.class);
@@ -68,7 +66,6 @@ public class ServicesController {
 
     @RequestMapping(method = RequestMethod.POST, value = "servicedata/publishBikeStations/{comune}/{agencyId}")
     public @ResponseBody void publishBikeStations(HttpServletResponse response, @RequestBody(required=false) List<Map> data, @PathVariable String comune, @PathVariable String agencyId) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
         List<Station> stations = Lists.newArrayList();
         for (Map map: data) {
         	Station s = mapper.convertValue(map, Station.class);
