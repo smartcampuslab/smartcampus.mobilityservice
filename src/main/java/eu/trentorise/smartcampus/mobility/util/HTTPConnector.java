@@ -35,8 +35,6 @@ public class HTTPConnector {
 	private static final Logger logger = LoggerFactory.getLogger(HTTPConnector.class);
 	
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
-		logger.info("URL: " + address);
-		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 
