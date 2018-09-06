@@ -21,9 +21,9 @@ import java.util.TreeMap;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,16 +53,16 @@ public class HTTPConnector {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 		
-		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, 
+		ResponseEntity<Resource> res = restTemplate.exchange(url, HttpMethod.GET, 
 				new HttpEntity<Object>(null, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))),
-				String.class);
+				Resource.class);
 
 		if (!res.getStatusCode().is2xxSuccessful()) {
 			throw new ConnectorException("Failed : HTTP error code : " + res.getStatusCode(), res.getStatusCode().value());
 		}		
 		
 		// TODO check
-		return IOUtils.toInputStream(res.getBody());
+		return res.getBody().getInputStream();
 	}	
 	
 	public static String doBasicAuthenticationPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
