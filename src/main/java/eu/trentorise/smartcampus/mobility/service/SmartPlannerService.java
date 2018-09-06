@@ -82,16 +82,15 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	private static final String DUMMY = "Nessuna";
 	private static final String DEFAULT = "default";
 	
-	private String SMARTPLANNER;
-	private String OTP;
+	private String smartplannerRest;
 
 	private static final String PLAN = "plan";
 	private static final String RECURRENT = "recurrentJourney";
 
 
 	@Autowired
-	@Value("${otp.url}")
-	private String otpURL;	
+	@Value("${smartplannerURL}")
+	private String smartplannerURL;	
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	static {
@@ -111,8 +110,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		SMARTPLANNER = "/smart-planner/" + smartplannerRouter + "/rest/";
-		OTP  = "/smart-planner/" + smartplannerRouter + "/rest/";
+		smartplannerRest = "/smart-planner/" + smartplannerRouter + "/rest/";
 	}
 	
 	@Override
@@ -155,39 +153,39 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	private String performGET(String request, String query) throws Exception {
-		return HTTPConnector.doGet(otpURL+request, query, MediaType.APPLICATION_JSON_VALUE, null, "UTF-8");
+		return HTTPConnector.doGet(smartplannerURL+request, query, MediaType.APPLICATION_JSON_VALUE, null, "UTF-8");
 	}
 
 	private String performPOST(String request, String body) throws Exception {
-		return HTTPConnector.doPost(otpURL+request, body, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE);
+		return HTTPConnector.doPost(smartplannerURL+request, body, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Override
 	public String stopTimetable(String agencyId, String routeId, String stopId) throws Exception {
-		return performGET(OTP + "gettimetable/" + agencyId + "/" + routeId + "/" + stopId, null);
+		return performGET(smartplannerRest + "gettimetable/" + agencyId + "/" + routeId + "/" + stopId, null);
 	}
 
 	
 	@Override
 	public String stopTimetable(String agencyId, String stopId, Integer maxResults) throws Exception {
-		return performGET(OTP + "getlimitedtimetable/" + agencyId + "/" + stopId + "/" + maxResults, null);
+		return performGET(smartplannerRest + "getlimitedtimetable/" + agencyId + "/" + stopId + "/" + maxResults, null);
 	}
 
 	@Override
 	public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
+		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
 	}
 	
 	@Override
 	public String extendedTransitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to + "/extended", null);
+		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to + "/extended", null);
 	}
 	
 
 	
 	@Override
 	public String delays(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(OTP + "getTransitDelays/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
+		return performGET(smartplannerRest + "getTransitDelays/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
 	}
 	
 	@Override
@@ -195,7 +193,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		List<String> reqs = buildRecurrentJourneyPlannerRequest(parameters);
 		List<SimpleLeg> legs = new ArrayList<SimpleLeg>();
 		for (String req : reqs) {
-			String plan = performGET(SMARTPLANNER + RECURRENT, req);
+			String plan = performGET(smartplannerRest + RECURRENT, req);
 			List<?> sl = mapper.readValue(plan, List.class);
 			for (Object o : sl) {
 				legs.add(mapper.convertValue(o, SimpleLeg.class));
@@ -241,7 +239,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		List<String> reqs = buildRecurrentJourneyPlannerRequest(parameters);
 		List<SimpleLeg> legs = new ArrayList<SimpleLeg>();
 		for (String req : reqs) {
-			String plan = performGET(SMARTPLANNER + RECURRENT, req); 
+			String plan = performGET(smartplannerRest + RECURRENT, req); 
 			List<?> sl = mapper.readValue(plan, List.class);
 			for (Object o : sl) {
 				legs.add((SimpleLeg) mapper.convertValue(o, SimpleLeg.class));
@@ -278,42 +276,42 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 	@Override
 	public String parkingsByAgency(String agencyId) throws Exception {
-		return performGET(SMARTPLANNER + "getParkingsByAgency?agencyId=" + agencyId, null);
+		return performGET(smartplannerRest + "getParkingsByAgency?agencyId=" + agencyId, null);
 	}
 	
 	@Override
 	public String bikeStations() throws Exception {
-		return performGET(SMARTPLANNER + "getBikeStations", null);
+		return performGET(smartplannerRest + "getBikeStations", null);
 	}	
 
 	@Override
 	public String bikeSharingByAgency(String agencyId) throws Exception {
-		return performGET(SMARTPLANNER + "getBikeSharingByAgency?agencyId=" + agencyId, null);
+		return performGET(smartplannerRest + "getBikeSharingByAgency?agencyId=" + agencyId, null);
 	}
 
 	@Override
 	public void addBikeSharingStations(List<BikeStation> stations) throws Exception {
 		String body = mapper.writeValueAsString(stations);
-		performPOST(SMARTPLANNER + "data/bikesharing", body);
+		performPOST(smartplannerRest + "data/bikesharing", body);
 	}
 	
 	@Override
 	public String roadInfoByAgency(String agencyId, Long from, Long to) throws Exception {
-		return performGET(SMARTPLANNER + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to, null);
+		return performGET(smartplannerRest + "getAR?agencyId=" + agencyId + "&from=" + from + "&to=" + to, null);
 	}
 	@Override
 	public String routes(String agencyId) throws Exception {
-		return performGET(OTP + "getroutes/" + agencyId, null);
+		return performGET(smartplannerRest + "getroutes/" + agencyId, null);
 	}
 
 	@Override
 	public String stops(String agencyId, String routeId) throws Exception {
-		return performGET(OTP + "getstops/" + agencyId + "/" + routeId, null);
+		return performGET(smartplannerRest + "getstops/" + agencyId + "/" + routeId, null);
 	}
 
 	@Override
 	public String stops(String agencyId, String routeId, double latitude, double longitude, double radius) throws Exception {
-		return performGET(OTP + "getstops/" + agencyId + "/" + routeId + "/" + latitude + "/" + longitude + "/" + radius, null);
+		return performGET(smartplannerRest + "getstops/" + agencyId + "/" + routeId + "/" + latitude + "/" + longitude + "/" + radius, null);
 	}
 	
 	@Override
@@ -324,10 +322,9 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		gsr.setRadius(radius);
 		gsr.setPageSize(count == null ? 100 : count);
 		gsr.setPageNumber(page == null ? 0 : page);
-		ObjectMapper mapper = new ObjectMapper();
 		String content = mapper.writeValueAsString(gsr);
 
-		String res = performPOST(OTP + "getGeolocalizedStops", content);
+		String res = performPOST(smartplannerRest + "getGeolocalizedStops", content);
 		return JsonUtils.toObjectList(res, Stop.class);
 
 	}
@@ -389,7 +386,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		@Override
 		public PlanningRequest call() throws Exception {
 			try {
-				String plan = performGET(SMARTPLANNER + PLAN, request.getRequest());
+				String plan = performGET(smartplannerRest + PLAN, request.getRequest());
 				request.setPlan(plan);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -417,7 +414,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			throw new IllegalArgumentException("Unknown alert type "+alert.getClass().getName());
 		}
 		
-		String result = HTTPConnector.doPost(otpURL + SMARTPLANNER + param, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
+		String result = HTTPConnector.doPost(smartplannerURL + smartplannerRest + param, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
 //		logger.info(result);				
 		processAlerResult(alert, result);
 	}	
@@ -440,17 +437,17 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@Override
 	public InputStream routesDB(String appId) throws Exception {
-		return HTTPConnector.doStreamGet(otpURL + OTP + "routesDB/" + appId, null, "application/zip", null);
+		return HTTPConnector.doStreamGet(smartplannerURL + smartplannerRest + "routesDB/" + appId, null, "application/zip", null);
 	}
 
 	@Override
 	public InputStream extendedRoutesDB(String appId) throws Exception {
-		return HTTPConnector.doStreamGet(otpURL + OTP + "routesDB/" + appId + "/extended", null, "application/zip", null);
+		return HTTPConnector.doStreamGet(smartplannerURL + smartplannerRest + "routesDB/" + appId + "/extended", null, "application/zip", null);
 	}	
 	
 	@Override
 	public String getVersions() throws Exception {
-		return performGET(OTP + "versions", null);
+		return performGET(smartplannerRest + "versions", null);
 	}
 
 	@Override
@@ -465,7 +462,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 			}
 
 			response = performGET(
-					SMARTPLANNER + "taxisNearPoint?lat=" + latitude + "&lon=" + longitude + "&radius=" + defaultRadius, null);
+					smartplannerRest + "taxisNearPoint?lat=" + latitude + "&lon=" + longitude + "&radius=" + defaultRadius, null);
 		}
 		return response;
 
@@ -476,7 +473,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		String response = null;
 
-		response = performGET(SMARTPLANNER + "taxis",	null);
+		response = performGET(smartplannerRest + "taxis",	null);
 
 		return response;
 
@@ -488,7 +485,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 		String response = null;
 
-		response = performGET(SMARTPLANNER + "taxi/contacts/",	null);
+		response = performGET(smartplannerRest + "taxi/contacts/",	null);
 
 		return response;
 
@@ -499,7 +496,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public String getAgencyTaxiStations(String agencyId) throws Exception {
 		String response = null;
 
-		response = performGET(SMARTPLANNER + "taxis/"+agencyId,	null);
+		response = performGET(smartplannerRest + "taxis/"+agencyId,	null);
 
 		return response;
 	}
@@ -508,14 +505,14 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	public String getTaxiAgencyContacts(String agencyId) throws Exception {
 		String response = null;
 
-		response = performGET(SMARTPLANNER + "taxi/contacts/"+agencyId,	null);
+		response = performGET(smartplannerRest + "taxi/contacts/"+agencyId,	null);
 
 		return response;
 	}
 
 	@Override
 	public InputStream gtfs(String agencyId) throws Exception {
-		return HTTPConnector.doStreamGet(otpURL + SMARTPLANNER + "gtfs/" + agencyId, null, "application/zip", null);
+		return HTTPConnector.doStreamGet(smartplannerURL + smartplannerRest + "gtfs/" + agencyId, null, "application/zip", null);
 	}	
 	
 
