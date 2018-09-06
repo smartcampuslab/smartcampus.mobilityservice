@@ -7,8 +7,7 @@ aacURL: http://localhost:8080/aac/
 
 mobilityURL: http://localhost:8080/core.mobility
 
-otp:
-  url: http://localhost:7070
+smartplannerURL: http://localhost:7070
 
 smartcampus:
   clientId: 
