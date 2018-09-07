@@ -1,42 +1,31 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 import java.util.List;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
-
+import com.google.common.collect.Maps;
 
 public class ChallengeConcept {
 
-	private List<ChallengesData> activeChallengeData = Lists.newArrayList();
-	private List<ChallengesData> oldChallengeData = Lists.newArrayList();
-	private List<ChallengesData> proposedChallengeData = Lists.newArrayList();
+	public enum ChallengeDataType {
+		ACTIVE, OLD, PROPOSED
+	}
+
+	private Map<ChallengeDataType, List<ChallengesData>> challengeData;
 	
 	public ChallengeConcept() {
 		super();
+		challengeData = Maps.newHashMap();
 	}
 
-	public List<ChallengesData> getActiveChallengeData() {
-		return activeChallengeData;
+	public Map<ChallengeDataType, List<ChallengesData>> getChallengeData() {
+		return challengeData;
 	}
 
-	public List<ChallengesData> getOldChallengeData() {
-		return oldChallengeData;
+	public void setChallengeData(Map<ChallengeDataType, List<ChallengesData>> challengeData) {
+		this.challengeData = challengeData;
 	}
 
-	public void setActiveChallengeData(List<ChallengesData> activeChallengeData) {
-		this.activeChallengeData = activeChallengeData;
-	}
-
-	public void setOldChallengeData(List<ChallengesData> oldChallengeData) {
-		this.oldChallengeData = oldChallengeData;
-	}
-
-	public List<ChallengesData> getProposedChallengeData() {
-		return proposedChallengeData;
-	}
-
-	public void setProposedChallengeData(List<ChallengesData> proposedChallengeData) {
-		this.proposedChallengeData = proposedChallengeData;
-	}
+	
 
 }
