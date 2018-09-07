@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
@@ -31,6 +32,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerClassification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
 
 @Component
 public class StatusUtils {
@@ -70,12 +72,15 @@ public class StatusUtils {
 	
 	@Autowired
 	private BadgesCache badgeCache;
+
+	ObjectMapper mapper = new ObjectMapper(); 
+	{
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public PlayerStatus convertPlayerData(String profile, String playerId, String gameId, String nickName, String gamificationUrl, int challType, String language)
 			throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		PlayerStatus ps = new PlayerStatus();
 		
@@ -90,9 +95,8 @@ public class StatusUtils {
 		});
 		ps.setBadgeCollectionConcept(badges);
 		
-		List<PointConcept> points = mapper.convertValue(state.get("PointConcept"), new TypeReference<List<PointConcept>>() {});
-		points.removeIf(x -> !PC_GREEN_LEAVES.equals(x.getName()));
-		ps.setPointConcept(points);
+		List<Map> gePointsMap = mapper.convertValue(state.get("PointConcept"), new TypeReference<List<Map>>() {});
+		List<PointConcept> points = convertGEPointConcept(gePointsMap);
 		
 		List<BadgeCollectionConcept> geChallenges = mapper.convertValue(state.get("ChallengeConcept"), new TypeReference<List<ChallengeConcept>>() {});		
 		ChallengeConcept challenges = challUtils.correctChallengeData(playerId, gameId, profile, challType, language, points, badges);
@@ -107,9 +111,40 @@ public class StatusUtils {
 		Map<String, Object> playerData = buildPlayerData(playerId, gameId, nickName);
 		ps.setPlayerData(playerData);
 		
+		points.removeIf(x -> !PC_GREEN_LEAVES.equals(x.getName()));
+		ps.setPointConcept(points);		
+		
 		return ps;
 	}
 
+	private List<PointConcept> convertGEPointConcept(List<Map> gePointsMap) {
+		List<PointConcept> result = Lists.newArrayList();
+		
+		for (Map gePointMap: gePointsMap) {
+			PointConcept pc = new PointConcept();
+			pc.setName((String)gePointMap.get("name"));
+			pc.setScore(((Double)gePointMap.get("score")).intValue());
+			pc.setPeriodType("weekly");
+			
+			Map periods = (Map)gePointMap.get("periods");
+			Map weekly = (Map)periods.get("weekly");
+			if (weekly != null) {
+				pc.setStart((Long)weekly.get("start"));
+				pc.setPeriodDuration((Integer)weekly.get("period"));
+				pc.setPeriodIdentifier((String)weekly.get("identifier"));
+				if (weekly.containsKey("instances")) {
+					Map<Object, Map> instances = (Map<Object, Map>)weekly.get("instances");
+					for (Map inst: instances.values()) {
+						PointConceptPeriod pcp = mapper.convertValue(inst, PointConceptPeriod.class);
+						pc.getInstances().add(pcp);
+					}
+				}
+			}
+			result.add(pc);
+		}
+		return result;
+	}
+	
 	// Method cleanFromGenericBadges: useful method used to remove from the
 	// badges list the generic badge (used in P&R and bikeSharing)
 	private List<BadgeCollectionConcept> cleanFromGenericBadges(List<BadgeCollectionConcept> inputBadges) {
