@@ -36,6 +36,7 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.MailImage;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Notification;
@@ -321,11 +322,11 @@ public class ReportEmailSender {
 						// @SuppressWarnings("rawtypes")
 						// List<List> challLists = challUtils.correctCustomData(completeState, 0);
 						if (challLists != null) {
-							challenges = challLists.getActiveChallengeData();
+							challenges = challLists.getChallengeData().get(ChallengeDataType.ACTIVE);
 							if (challenges != null) {
 								challenges = challenges.stream().filter(x -> !x.getSuccess().booleanValue()).collect(Collectors.toList());
 							}
-							lastWeekChallenges = challLists.getOldChallengeData();
+							lastWeekChallenges = challLists.getChallengeData().get(ChallengeDataType.OLD);
 						}
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -513,8 +514,8 @@ public class ReportEmailSender {
 						// @SuppressWarnings("rawtypes")
 						// List<List> challLists = challUtils.correctCustomData(completeState, 0);
 						if (challLists != null) {
-							challenges = challLists.getActiveChallengeData();
-							lastWeekChallenges = challLists.getOldChallengeData();
+							challenges = challLists.getChallengeData().get(ChallengeDataType.ACTIVE);
+							lastWeekChallenges = challLists.getChallengeData().get(ChallengeDataType.OLD);
 						}
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -664,8 +665,8 @@ public class ReportEmailSender {
 							states = completePlayerStatus.getPointConcept();
 							ChallengeConcept challLists = completePlayerStatus.getChallengeConcept();
 							if (challLists != null) {
-								challenges = challLists.getActiveChallengeData();
-								lastWeekChallenges = challLists.getOldChallengeData();
+								challenges = challLists.getChallengeData().get(ChallengeDataType.ACTIVE);
+								lastWeekChallenges = challLists.getChallengeData().get(ChallengeDataType.OLD);
 							}
 						} catch (JSONException e) {
 							e.printStackTrace();
