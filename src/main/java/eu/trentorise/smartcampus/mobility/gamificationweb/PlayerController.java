@@ -69,6 +69,7 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuil
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherPlayer;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
@@ -281,6 +282,44 @@ public class PlayerController {
 		Inventory inventory = mapper.readValue(res , Inventory.class);
 
 		return inventory.getChallengeChoices();
+	}	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/challenges")
+	public @ResponseBody eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept getChallenges(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required=false) ChallengeDataType filter, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		logger.debug("WS-get status user token " + token);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);
+		
+		Player p = null;
+		String nickName = "";
+		p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		String language = "it";
+		if(p != null){
+			nickName = p.getNickname();
+			language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
+		}
+
+		String statusUrl = "state/" + gameId + "/" + userId;
+		String allData = getAll(statusUrl, appId);
+		
+		PlayerStatus ps =  statusUtils.convertPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
+		if (filter != null) {
+			ps.getChallengeConcept().getChallengeData().entrySet().removeIf(x -> !filter.equals(x.getKey()));
+		}
+		
+		return ps.getChallengeConcept();
 	}	
 	
 	public ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
