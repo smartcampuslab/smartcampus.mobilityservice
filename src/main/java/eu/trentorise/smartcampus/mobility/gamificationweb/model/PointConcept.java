@@ -2,6 +2,8 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 public class PointConcept {
 
 	private String name;
@@ -10,7 +12,7 @@ public class PointConcept {
 	private long start;
 	private long periodDuration;
 	private String periodIdentifier;
-	private List<PointConceptPeriod> instances;
+	private List<PointConceptPeriod> instances = Lists.newArrayList();
 	
 	public String getName() {
 		return name;
@@ -83,5 +85,11 @@ public class PointConcept {
 		this.periodIdentifier = periodIdentifier;
 		this.instances = instances;
 	}
+	
+	@Override
+	public String toString() {
+		return name + "/" + periodType;
+	}
+	
 	
 }
