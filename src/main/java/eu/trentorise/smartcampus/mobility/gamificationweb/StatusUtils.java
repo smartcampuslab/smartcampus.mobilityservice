@@ -61,12 +61,6 @@ public class StatusUtils {
 	// private static final String PC_CLASSIFICATION_WEEK_TEST =
 	// "green leaves week test";
 
-	public static final long GAME_STARTING_TIME = 1460757600000L; // for RV 16
-																	// april
-	public static final long GAME_STARTING_TIME_TEST = 1468101601000L; // for TN
-																		// test
-																		// 10
-																		// july
 	public static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 	private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

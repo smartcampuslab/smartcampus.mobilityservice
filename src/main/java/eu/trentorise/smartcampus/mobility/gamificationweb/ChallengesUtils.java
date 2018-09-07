@@ -20,6 +20,7 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeLongDescrStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
@@ -131,7 +132,7 @@ public class ChallengesUtils {
     		
     		List<ChallengeConcept> challengeList = parse(profile);
     		
-    		if(challengeList != null && !challengeList.isEmpty()){
+    		if(challengeList != null){
 				for(ChallengeConcept challenge: challengeList){
 					String name = challenge.getName();
 					String modelName = challenge.getModelName();
@@ -258,9 +259,9 @@ public class ChallengesUtils {
 					}
 				}
 				
-				result.setActiveChallengeData(challenges);
-				result.setOldChallengeData(oldChallenges);
-				result.setProposedChallengeData(proposedChallenges);
+				result.getChallengeData().put(ChallengeDataType.ACTIVE, challenges);
+				result.getChallengeData().put(ChallengeDataType.OLD, oldChallenges);
+				result.getChallengeData().put(ChallengeDataType.PROPOSED, proposedChallenges);
 			}
     		// Sorting
         	/*Collections.sort(challenges, new Comparator<ChallengesData>() {
