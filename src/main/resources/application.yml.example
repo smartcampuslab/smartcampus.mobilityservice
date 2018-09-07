@@ -7,7 +7,7 @@ aacURL: http://localhost:8080/aac/
 
 mobilityURL: http://localhost:8080/core.mobility
 
-smartplannerURL: http://localhost:7070
+smartplannerURL: https://dev.smartcommunitylab.it/smart-planner2/
 
 smartcampus:
   clientId: 
