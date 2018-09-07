@@ -17,7 +17,6 @@
 package eu.trentorise.smartcampus.mobility.service;
 
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +109,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	
 	@PostConstruct
 	public void init() {
-		smartplannerRest = "/smart-planner/" + smartplannerRouter + "/rest/";
+		smartplannerRest = "/" + smartplannerRouter + "/rest/";
 	}
 	
 	@Override
@@ -173,19 +172,19 @@ public class SmartPlannerService implements SmartPlannerHelper {
 
 	@Override
 	public String transitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
+		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
 	}
 	
 	@Override
 	public String extendedTransitTimes(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to + "/extended", null);
+		return performGET(smartplannerRest + "getTransitTimes/" + agencyId + "/" + routeId + "/" + from + "/" + to + "/extended", null);
 	}
 	
 
 	
 	@Override
 	public String delays(String agencyId, String routeId, Long from, Long to) throws Exception {
-		return performGET(smartplannerRest + "getTransitDelays/" + agencyId + "/" + URLEncoder.encode(routeId, "utf8") + "/" + from + "/" + to, null);
+		return performGET(smartplannerRest + "getTransitDelays/" + agencyId + "/" + routeId + "/" + from + "/" + to, null);
 	}
 	
 	@Override
