@@ -33,7 +33,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -323,7 +323,7 @@ public class PlayerController {
 		return ps.getChallengeConcept();
 	}	
 	
-	@PostMapping("/gamificationweb/challenge/choose/{challengeId}")
+	@PutMapping("/gamificationweb/challenge/choose/{challengeId}")
 	public void acceptChallenge(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeId, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String token = tokenExtractor.extractHeaderToken(request);
 		logger.debug("WS-get status user token " + token);
