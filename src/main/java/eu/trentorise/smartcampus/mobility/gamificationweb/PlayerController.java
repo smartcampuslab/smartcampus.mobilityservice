@@ -32,14 +32,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -90,7 +91,7 @@ import eu.trentorise.smartcampus.profileservice.BasicProfileService;
 import eu.trentorise.smartcampus.profileservice.model.AccountProfile;
 import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 
-@Controller
+@RestController
 @EnableScheduling
 public class PlayerController {
 
@@ -321,6 +322,30 @@ public class PlayerController {
 		
 		return ps.getChallengeConcept();
 	}	
+	
+	@PostMapping("/gamificationweb/challenge/choose/{challengeId}")
+	public void acceptChallenge(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		logger.debug("WS-get status user token " + token);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		String partialUrl = "game/" + gameId + "/player/" + userId + "/challenges/" + challengeId + "/accept";
+		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());		
+	}
 	
 	public ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
