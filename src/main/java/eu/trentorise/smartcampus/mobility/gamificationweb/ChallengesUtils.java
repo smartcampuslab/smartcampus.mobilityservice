@@ -14,8 +14,11 @@ import org.stringtemplate.v4.ST;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
@@ -123,12 +126,14 @@ public class ChallengesUtils {
 	
 	// Method correctChallengeData: used to retrieve the challenge data objects from the user profile data
 	@SuppressWarnings("rawtypes")
-	public eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept correctChallengeData(String playerId, String gameId, String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
+	public eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept convertChallengeData(String playerId, String gameId, String profile, int type, String language, List<PointConcept> pointConcept, List<BadgeCollectionConcept> bcc_list) throws Exception {
 		List<ChallengesData> challenges = Lists.newArrayList();
     	List<ChallengesData> oldChallenges = Lists.newArrayList();
     	List<ChallengesData> proposedChallenges = Lists.newArrayList();
+    	ListMultimap<ChallengeDataType, ChallengesData> challengesMap = ArrayListMultimap.create();
+    	
     	eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept result = new eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept();
-    	if(profile != null && profile.compareTo("") != 0){
+    	if(profile != null && !profile.isEmpty()){
     		
     		List<ChallengeConcept> challengeList = parse(profile);
     		
@@ -143,7 +148,6 @@ public class ChallengesUtils {
 					long dateCompleted = challenge.getDateCompleted() != null ? challenge.getDateCompleted().getTime() : 0L;
 					int bonusScore = 0;
 					String periodName = "";
-					String bonusPointType = "green leaves";
 					String counterName = "";
 					int target = 0;
 					int periodTarget = 0;
@@ -151,13 +155,12 @@ public class ChallengesUtils {
 					int initialBadgeNum = 0;
 					if(challenge.getFields() != null){
 						bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0)).intValue();
-						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");// (!chalFields.isNull(CHAL_FIELDS_PERIOD_NAME)) ? chalFields.getString(CHAL_FIELDS_PERIOD_NAME) : "";
-						bonusPointType = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_POINT_TYPE,"");// (!chalFields.isNull(CHAL_FIELDS_BONUS_POINT_TYPE)) ? chalFields.getString(CHAL_FIELDS_BONUS_POINT_TYPE) : "";
-						counterName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");//(!chalFields.isNull(CHAL_FIELDS_COUNTER_NAME)) ? chalFields.getString(CHAL_FIELDS_COUNTER_NAME) : "";
-						target =  ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0)).intValue(); ///(int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
-						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");//(!chalFields.isNull(CHAL_FIELDS_BADGE_COLLECTION_NAME)) ? chalFields.getString(CHAL_FIELDS_BADGE_COLLECTION_NAME) : "";
-						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue(); //(!chalFields.isNull(CHAL_FIELDS_INITIAL_BADGE_NUM)) ? chalFields.getInt(CHAL_FIELDS_INITIAL_BADGE_NUM) : 0;
-						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).intValue(); ///(int)((!chalFields.isNull(CHAL_FIELDS_TARGET)) ? chalFields.getDouble(CHAL_FIELDS_TARGET) : 0);
+						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");
+						counterName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
+						target =  ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0)).intValue(); 
+						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
+						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue();
+						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).intValue();
 					}
 
 					if (target == 0) {
@@ -168,20 +171,20 @@ public class ChallengesUtils {
 //						final String ch_point_type = challData.getBonusPointType();
 					final long now = System.currentTimeMillis();
 					
-	    			ChallengesData tmp_chall = new ChallengesData();
-	    			tmp_chall.setChallId(name);
+	    			ChallengesData challengeData = new ChallengesData();
+	    			challengeData.setChallId(name);
 
-    				tmp_chall.setChallTarget(target);
-    				tmp_chall.setType(modelName);
-    				tmp_chall.setActive(now < end);
-    				tmp_chall.setSuccess(completed);
-    				tmp_chall.setStartDate(start);
-    				tmp_chall.setEndDate(end);
-    				tmp_chall.setDaysToEnd(calculateRemainingDays(end, now));
-    				tmp_chall.setBonus(bonusScore);
-    				tmp_chall.setChallCompletedDate(dateCompleted);
+    				challengeData.setChallTarget(target);
+    				challengeData.setType(modelName);
+    				challengeData.setActive(now < end);
+    				challengeData.setSuccess(completed);
+    				challengeData.setStartDate(start);
+    				challengeData.setEndDate(end);
+    				challengeData.setDaysToEnd(calculateRemainingDays(end, now));
+    				challengeData.setBonus(bonusScore);
+    				challengeData.setChallCompletedDate(dateCompleted);
 	    			
-    				tmp_chall.setChallDesc(fillDescription(challenge, language));
+    				challengeData.setChallDesc(fillDescription(challenge, language));
     				
     				double row_status = 0D;
     				int status = 0;
@@ -191,7 +194,7 @@ public class ChallengesUtils {
 		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, null, target); 
 		    				row_status = round(successes, 2);
 		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
-		    				tmp_chall.setChallTarget(periodTarget);
+		    				challengeData.setChallTarget(periodTarget);
 	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
@@ -202,7 +205,7 @@ public class ChallengesUtils {
 	    				}
 	    				case CHAL_MODEL_NEXT_BADGE: {
 		    				int count = getEarnedBadgesFromList(bcc_list, badgeCollectionName, initialBadgeNum);
-		    				if(!tmp_chall.getActive()){	// NB: fix to avoid situation with challenge not win and count > target
+		    				if(!challengeData.getActive()){	// NB: fix to avoid situation with challenge not win and count > target
 		    					if(completed){
 		    						count = target;
 		    					} else {
@@ -233,35 +236,39 @@ public class ChallengesUtils {
 	    					}
 	    				}
     				}
-    				tmp_chall.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(tmp_chall.getType()), language));
+    				challengeData.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(challengeData.getType()), language));
 
-    				tmp_chall.setStatus(status);
-    				tmp_chall.setRow_status(row_status);
+    				challengeData.setStatus(status);
+    				challengeData.setRow_status(row_status);
     				
 					if (type == 0) {
 						if (now >= start - MILLIS_IN_DAY) { // if challenge is started (with one day of offset for mail)
 							if (now < end - MILLIS_IN_DAY) { // if challenge is not ended
-								challenges.add(tmp_chall);
+								challenges.add(challengeData);
 							} else if (now < end + MILLIS_IN_DAY) { // CHAL_TS_OFFSET
-								oldChallenges.add(tmp_chall); // last week challenges
+								oldChallenges.add(challengeData); // last week challenges
 							}
 						}
 					} else {
 						if ("PROPOSED".equals(state)) {
-							proposedChallenges.add(tmp_chall);
+							challengesMap.put(ChallengeDataType.PROPOSED, challengeData);
 						} else if (now < end) { // if challenge is not ended
 							if (now >= start) {
-								challenges.add(tmp_chall);
+								challengesMap.put(ChallengeDataType.ACTIVE, challengeData);
+							} else {
+								challengesMap.put(ChallengeDataType.FUTURE, challengeData);
 							}
-						} else if (now >= end) { // CHAL_TS_OFFSET
-							oldChallenges.add(tmp_chall); // last week challenges
+						} else { // CHAL_TS_OFFSET
+							challengesMap.put(ChallengeDataType.OLD, challengeData);
 						}
 					}
 				}
+
+				result.setChallengeData(Multimaps.asMap(challengesMap));
 				
-				result.getChallengeData().put(ChallengeDataType.ACTIVE, challenges);
-				result.getChallengeData().put(ChallengeDataType.OLD, oldChallenges);
-				result.getChallengeData().put(ChallengeDataType.PROPOSED, proposedChallenges);
+//				result.getChallengeData().put(ChallengeDataType.ACTIVE, challenges);
+//				result.getChallengeData().put(ChallengeDataType.OLD, oldChallenges);
+//				result.getChallengeData().put(ChallengeDataType.PROPOSED, proposedChallenges);
 			}
     		// Sorting
         	/*Collections.sort(challenges, new Comparator<ChallengesData>() {
@@ -314,7 +321,7 @@ public class ChallengesUtils {
 	// Method retrieveCorrectStatusFromCounterName: used to get the correct player status starting from counter name field
 	private int retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now){
 		int actualStatus = 0; // km or trips
-		if(cName != null && cName.compareTo("") != 0){
+		if(cName != null && !cName.isEmpty()){
 			for(PointConcept pt : pointConcept){
 				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
 					List<PointConceptPeriod> allPeriods = pt.getInstances();
@@ -345,7 +352,7 @@ public class ChallengesUtils {
 	
 	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now, int target){
 		int countSuccesses = 0; // km or trips
-		if(cName != null && cName.compareTo("") != 0){
+		if(cName != null && !cName.isEmpty()){
 			for(PointConcept pt : pointConcept){
 				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
 					List<PointConceptPeriod> allPeriods = pt.getInstances();
@@ -369,9 +376,6 @@ public class ChallengesUtils {
 		
 		return countSuccesses;
 	}	
-	
-	
-	
 	
 	
 	// Method getEarnedBadgesFromList: used to get the earned badge number during challenge
@@ -435,23 +439,16 @@ public class ChallengesUtils {
 		}
 
 		if (challengeStructure != null) {
-//			System.err.println(challengeStructure);
-
 			description = fillDescription(challengeStructure, counterNameA, counterNameB, challenge, lang);
 			
 			for (String key: challengeReplacements.keySet()) {
 				description = description.replaceAll(key, challengeReplacements.get(key));
 			}			
-			
-//			System.err.println("\t" + description);
-//			System.err.println("________________________");
 		} else {
 			logger.error("Cannot find structure for challenge: '" + name + "', " + filter + "=" + filterField);
 			return "";
 		}
 
-
-		
 		return description;
 	}
 
@@ -469,7 +466,6 @@ public class ChallengesUtils {
 				description = description.replaceAll(key, challengeReplacements.get(key));
 			}			
 		} else {
-			System.err.println(name + " / " + counterName);
 			return "";
 		}
 		return description;

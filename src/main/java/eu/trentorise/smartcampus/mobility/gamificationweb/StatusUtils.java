@@ -37,6 +37,8 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeri
 @Component
 public class StatusUtils {
 
+
+
 	private static final Logger logger = Logger.getLogger(StatusUtils.class);
 
 	private static final String STATE = "state";
@@ -49,9 +51,10 @@ public class StatusUtils {
 	private static final String PC_GREEN_LEAVES = "green leaves";
 	private static final String PC_NAME = "name";
 	private static final String PC_SCORE = "score";
-	private static final String PC_PERIOD = "periods";
-	// private static final String PC_WEEKLY = "weekly";
+	private static final String PC_PERIOD = "period";
+	private static final String PC_PERIODS = "periods";
 	private static final String PC_START = "start";
+	private static final String PC_WEEKLY = "weekly";	
 	private static final String PC_PERIOD_DURATION = "period";
 	private static final String PC_IDENTIFIER = "identifier";
 	private static final String PC_INSTANCES = "instances";
@@ -99,7 +102,7 @@ public class StatusUtils {
 		List<PointConcept> points = convertGEPointConcept(gePointsMap);
 		
 		List<BadgeCollectionConcept> geChallenges = mapper.convertValue(state.get("ChallengeConcept"), new TypeReference<List<ChallengeConcept>>() {});		
-		ChallengeConcept challenges = challUtils.correctChallengeData(playerId, gameId, profile, challType, language, points, badges);
+		ChallengeConcept challenges = challUtils.convertChallengeData(playerId, gameId, profile, challType, language, points, badges);
 		ps.setChallengeConcept(challenges);
 	
 		List<PlayerLevel> levels = mapper.convertValue((List)stateMap.get("levels"), new TypeReference<List<PlayerLevel>>() {});
@@ -122,18 +125,18 @@ public class StatusUtils {
 		
 		for (Map gePointMap: gePointsMap) {
 			PointConcept pc = new PointConcept();
-			pc.setName((String)gePointMap.get("name"));
-			pc.setScore(((Double)gePointMap.get("score")).intValue());
-			pc.setPeriodType("weekly");
+			pc.setName((String)gePointMap.get(PC_NAME));
+			pc.setScore(((Double)gePointMap.get(PC_SCORE)).intValue());
+			pc.setPeriodType(PC_WEEKLY);
 			
-			Map periods = (Map)gePointMap.get("periods");
-			Map weekly = (Map)periods.get("weekly");
+			Map periods = (Map)gePointMap.get(PC_PERIODS);
+			Map weekly = (Map)periods.get(PC_WEEKLY);
 			if (weekly != null) {
-				pc.setStart((Long)weekly.get("start"));
-				pc.setPeriodDuration((Integer)weekly.get("period"));
-				pc.setPeriodIdentifier((String)weekly.get("identifier"));
-				if (weekly.containsKey("instances")) {
-					Map<Object, Map> instances = (Map<Object, Map>)weekly.get("instances");
+				pc.setStart((Long)weekly.get(PC_START));
+				pc.setPeriodDuration((Integer)weekly.get(PC_PERIOD));
+				pc.setPeriodIdentifier((String)weekly.get(PC_IDENTIFIER));
+				if (weekly.containsKey(PC_INSTANCES)) {
+					Map<Object, Map> instances = (Map<Object, Map>)weekly.get(PC_INSTANCES);
 					for (Map inst: instances.values()) {
 						PointConceptPeriod pcp = mapper.convertValue(inst, PointConceptPeriod.class);
 						pc.getInstances().add(pcp);
@@ -175,7 +178,7 @@ public class StatusUtils {
 
 	public ClassificationData correctPlayerClassificationData(String profile, String playerId, String nickName, Long timestamp, String type) throws JSONException {
 		ClassificationData playerClass = new ClassificationData();
-		if (profile != null && profile.compareTo("") != 0) {
+		if (profile != null && !profile.isEmpty()) {
 
 			int score = 0;
 			// long time = (timestamp == null || timestamp.longValue() == 0L) ?
@@ -198,7 +201,7 @@ public class StatusUtils {
 							}
 						} else { // specific week
 							if (pc_name != null && pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
-								JSONObject pc_period = (!point.isNull(PC_PERIOD)) ? point.getJSONObject(PC_PERIOD) : null;
+								JSONObject pc_period = (!point.isNull(PC_PERIODS)) ? point.getJSONObject(PC_PERIODS) : null;
 								if (pc_period != null) {
 									@SuppressWarnings("unchecked")
 									Iterator<String> keys = pc_period.keys();
@@ -231,7 +234,7 @@ public class StatusUtils {
 				playerClass.setNickName(nickName);
 				playerClass.setPlayerId(playerId);
 				playerClass.setScore(score);
-				if (nickName == null || nickName.compareTo("") == 0) {
+				if (nickName == null || nickName.isEmpty()) {
 					playerClass.setPosition(-1); // used for user without
 													// nickName
 				}
@@ -243,7 +246,7 @@ public class StatusUtils {
 
 	public List<ClassificationData> correctClassificationData(String allStatus, Map<String, String> allNicks, Long timestamp, String type) throws JSONException {
 		List<ClassificationData> playerClassList = new ArrayList<ClassificationData>();
-		if (allStatus != null && allStatus.compareTo("") != 0) {
+		if (allStatus != null && !allStatus.isEmpty()) {
 
 			int score = 0;
 			// long time = (timestamp == null || timestamp.longValue() == 0L) ?
@@ -274,7 +277,7 @@ public class StatusUtils {
 									}
 								} else { // specific week
 									if (pc_name != null && pc_name.compareTo(PC_GREEN_LEAVES) == 0) {
-										JSONObject pc_period = (!point.isNull(PC_PERIOD)) ? point.getJSONObject(PC_PERIOD) : null;
+										JSONObject pc_period = (!point.isNull(PC_PERIODS)) ? point.getJSONObject(PC_PERIODS) : null;
 										if (pc_period != null) {
 											@SuppressWarnings("unchecked")
 											Iterator<String> keys = pc_period.keys();
@@ -309,7 +312,7 @@ public class StatusUtils {
 						playerClass.setNickName(nickName);
 						playerClass.setPlayerId(playerId);
 						playerClass.setScore(score);
-						if (nickName != null && nickName.compareTo("") != 0) { // if
+						if (nickName != null && !nickName.isEmpty()) { // if
 																				// nickName
 																				// present
 																				// (user
@@ -331,7 +334,7 @@ public class StatusUtils {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Map<String, Integer> correctGlobalClassification(String allStatus) throws JSONException {
 		Map classification = new HashMap<String, Integer>();
-		if (allStatus != null && allStatus.compareTo("") != 0) {
+		if (allStatus != null && !allStatus.isEmpty()) {
 			int score = 0;
 			JSONObject allPlayersData = new JSONObject(allStatus);
 			JSONArray allPlayersDataList = (!allPlayersData.isNull("content")) ? allPlayersData.getJSONArray("content") : null;
@@ -372,7 +375,7 @@ public class StatusUtils {
 		 * allStatus = "{" + "\"pointConceptName\": \"green leaves\"," + "\"type\": \"INCREMENTAL\"," + "\"board\": [" + "{" + "\"score\": 12," + "\"playerId\": \"3\"" + "}," + "{" + "\"score\": 10," + "\"playerId\": \"16\"" + "}," + "{" + "\"score\": 4," + "\"playerId\": \"4\"" + "}" + "]" + "}";
 		 */
 
-		if (allStatus != null && allStatus.compareTo("") != 0) {
+		if (allStatus != null && !allStatus.isEmpty()) {
 			JSONObject allIncClassData = new JSONObject(allStatus);
 			if (allIncClassData != null) {
 				JSONArray allPlayersDataList = (!allIncClassData.isNull("board")) ? allIncClassData.getJSONArray("board") : null;
@@ -387,7 +390,7 @@ public class StatusUtils {
 						playerClass.setNickName(nickName);
 						playerClass.setPlayerId(playerId);
 						playerClass.setScore(playerScore);
-						if (nickName != null && nickName.compareTo("") != 0) { // if
+						if (nickName != null && !nickName.isEmpty()) { // if
 																				// nickName
 																				// present
 																				// (user

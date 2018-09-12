@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 public class ChallengeConcept {
 
 	public enum ChallengeDataType {
-		ACTIVE, OLD, PROPOSED
+		ACTIVE, OLD, PROPOSED, FUTURE
 	}
 
 	private Map<ChallengeDataType, List<ChallengesData>> challengeData;
@@ -25,7 +25,5 @@ public class ChallengeConcept {
 	public void setChallengeData(Map<ChallengeDataType, List<ChallengesData>> challengeData) {
 		this.challengeData = challengeData;
 	}
-
-	
 
 }
