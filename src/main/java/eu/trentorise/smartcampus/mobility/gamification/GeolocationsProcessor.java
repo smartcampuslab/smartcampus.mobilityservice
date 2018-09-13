@@ -359,7 +359,7 @@ public class GeolocationsProcessor {
 			ValidationResult vr = gamificationValidator.validatePlannedJourney(res.getItinerary(), res.getGeolocationEvents(), appId);
 			res.setValidationResult(vr);
 
-			if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
 				Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(appId, res.getItinerary().getData(), res.getGeolocationEvents(), vr.getValidationStatus(),
 						res.getOverriddenDistances(), false);
 				res.setScoreStatus(ScoreStatus.COMPUTED);
@@ -379,7 +379,7 @@ public class GeolocationsProcessor {
 	private void saveFreeTracking(TrackedInstance res, String userId, String travelId, String appId) throws Exception {
 		if (!res.getComplete()) {
 			ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
-			if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
 				// TODO reenabled
 				boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
 				if (isGroup) {
@@ -391,7 +391,7 @@ public class GeolocationsProcessor {
 			}
 
 			res.setValidationResult(vr);
-			if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
 				// canSave =
 				Map<String, Object> trackingData = gamificationValidator.computeFreeTrackingScore(appId, res.getGeolocationEvents(), res.getFreeTrackingTransport(), vr.getValidationStatus(),
 						res.getOverriddenDistances());
