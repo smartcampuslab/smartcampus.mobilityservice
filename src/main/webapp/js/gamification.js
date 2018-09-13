@@ -104,11 +104,18 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 					if (descr.banned) {
 						banned.push(descr.userId);
 					}
+					
+					var vp = descr.valid + descr.pending;
+					var pp = 0;
+					if (vp != 0) {
+						pp = 100 * descr.pending / vp;
+					}
 					$scope.userTotals[descr.userId] = {
 						"total" : descr.total,
 						"valid" : (descr.valid),
 						"invalid" : (descr.invalid),
-						"pending" : (descr.pending)
+						"pending" : (descr.pending),
+						"pendingPercent" : pp
 					};
 					$scope.tripsStats.total += descr.total;
 					$scope.tripsStats.valid += descr.valid;

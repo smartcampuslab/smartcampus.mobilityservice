@@ -82,11 +82,11 @@
 					<div class="">
 						<div ng-repeat="user in users" class="panel panel-default user-row">
 							<div class="row">
-								<div class="col-md-6">
+								<div class="col-md-5">
 									<a ng-click="selectUser(user)">{{user}} {{banned.indexOf(user) > -1 ? "- BANNED" : ""}}</a>
 								</div>
-								<div class="col-md-6 pull-right">
-								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].invalid}} invalid</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pending}} pending</span>)
+								<div class="col-md-7 pull-right">
+								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].invalid}} invalid</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pending}} pending</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pendingPercent}}% pending</span>)
 									</strong>
 								</div>
 							</div>
