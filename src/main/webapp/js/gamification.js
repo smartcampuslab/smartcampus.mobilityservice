@@ -108,7 +108,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 					var vp = descr.valid + descr.pending;
 					var pp = 0;
 					if (vp != 0) {
-						pp = 100 * descr.pending / vp;
+						pp = Math.round(100 * descr.pending / vp);
 					}
 					$scope.userTotals[descr.userId] = {
 						"total" : descr.total,
