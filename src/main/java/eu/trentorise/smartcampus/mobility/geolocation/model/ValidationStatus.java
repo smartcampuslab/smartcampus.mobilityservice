@@ -425,11 +425,12 @@ public class ValidationStatus {
 
 
 	public void setValidationOutcome(TravelValidity validationOutcome) {
-		if (TravelValidity.PENDING.equals(validationOutcome)) {
-			this.validationOutcome = TravelValidity.VALID;
-		} else {
-			this.validationOutcome = validationOutcome;
-		}
+//		if (TravelValidity.PENDING.equals(validationOutcome)) {
+//			this.validationOutcome = TravelValidity.VALID;
+//		} else {
+//			this.validationOutcome = validationOutcome;
+//		}
+		this.validationOutcome = validationOutcome;
 	}
 
 	public ERROR_TYPE getError() {
