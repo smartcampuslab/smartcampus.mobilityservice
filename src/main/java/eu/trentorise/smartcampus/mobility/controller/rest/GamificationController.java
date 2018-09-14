@@ -61,12 +61,14 @@ import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGra
 import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
+import eu.trentorise.smartcampus.mobility.gamificationweb.RankingManager;
+import eu.trentorise.smartcampus.mobility.gamificationweb.RankingManager.RankingType;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ReportEmailSender;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
-import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -134,6 +136,9 @@ public class GamificationController {
 	
 	@Autowired
 	private BannedChecker bannedChecker;
+	
+	@Autowired
+	private RankingManager rankingManager;
 	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
 
@@ -412,6 +417,7 @@ public class GamificationController {
 		}
 	}
 	
+	/*
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 
@@ -485,6 +491,7 @@ public class GamificationController {
 
 		}
 	}
+	*/
 	
 //	@RequestMapping(method = RequestMethod.POST, value = "/console/assignScore")
 //	public @ResponseBody TrackedInstance assignScore(@PathVariable String instanceId, HttpServletResponse response) throws Exception {
@@ -591,7 +598,8 @@ public class GamificationController {
 	}
 	
 	private void approveAndSendScore(TrackedInstance instance, boolean forceQueue) throws Exception {
-		if (!TravelValidity.VALID.equals(instance.getValidationResult().getTravelValidity()) && TravelValidity.VALID.equals(instance.getChangedValidity()) || ScoreStatus.COMPUTED.equals(instance.getScoreStatus())) {
+//		if (!TravelValidity.VALID.equals(instance.getValidationResult().getTravelValidity()) && TravelValidity.VALID.equals(instance.getChangedValidity()) || ScoreStatus.COMPUTED.equals(instance.getScoreStatus())) {
+		if (TravelValidity.INVALID.equals(instance.getValidationResult().getTravelValidity()) && !TravelValidity.INVALID.equals(instance.getChangedValidity()) || ScoreStatus.COMPUTED.equals(instance.getScoreStatus())) {
 			logger.info("Sending approved itinerary data to GE: " + instance.getId());
 			if (instance.getItinerary() != null && instance.getValidationResult() != null) {
 				Map<String, Object> trackingData = gamificationValidator.computePlannedJourneyScore(instance.getAppId(), instance.getItinerary().getData(), instance.getGeolocationEvents(), instance.getValidationResult().getValidationStatus(), instance.getOverriddenDistances(), false);
@@ -890,9 +898,34 @@ public class GamificationController {
 	@RequestMapping("/console/users")
 	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
 			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly,
-			@RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws ParseException {
+			@RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId,
+			@RequestParam(required = false) RankingType rankingType) throws Exception {
 		List<UserDescriptor> userList = null;
 
+		List<ClassificationData> ranking = null;
+		
+		if (rankingType != null) {
+			switch (rankingType) {
+			case CURRENT:
+				ranking = rankingManager.getCurrentIncClassification().get(appId);
+				break;
+			case PREVIOUS:
+				ranking = rankingManager.getPreviousIncClassification().get(appId);
+				break;
+			case GLOBAL:
+				ranking = rankingManager.getGlobalClassification().get(appId);
+				break;				
+			}
+		} else {
+			ranking = rankingManager.getGlobalClassification().get(appId);
+		}
+		
+		Set<String> rankingPlayers = null;
+		
+		if (ranking != null) {
+			rankingPlayers = ranking.stream().map(x -> x.getPlayerId()).collect(Collectors.toSet());
+		}
+		
 		try {
 			Map<String, UserDescriptor> users = new HashMap<String, UserDescriptor>();
 			Set<String> keys = new HashSet<String>();
@@ -933,6 +966,9 @@ public class GamificationController {
 			for (TrackedInstance ti : tis) {
 				String userId = ti.getUserId();
 				if (userId == null) {
+					continue;
+				}
+				if (rankingPlayers != null && !rankingPlayers.contains(userId)) {
 					continue;
 				}
 				UserDescriptor ud = users.get(userId);
