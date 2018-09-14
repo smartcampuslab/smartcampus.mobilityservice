@@ -65,6 +65,30 @@
               </div>
 						</div>
             <br/>
+            
+            <div class="row ">
+            <div class="col-md-8">
+              		<label>Player Ranking</label></br>
+              		
+					<label>
+					    <input type="radio" ng-model="rankingType" value="NONE">
+					    None
+					  </label>
+					  <label>
+					    <input type="radio" ng-model="rankingType" value="GLOBAL">
+					    Global
+					  </label>
+					  <label>
+					    <input type="radio" ng-model="rankingType" value="CURRENT">
+					    Current week
+					  </label>       
+					  <label>
+					    <input type="radio" ng-model="rankingType" value="PREVIOUS">
+					    Previous week
+					  </label>      
+              </div>
+            </div>             
+            
             <div class="row ">
               <div class="col-md-6">
                 <button class="btn btn-primary btn-sm" ng-click="reload()">Filter</button>

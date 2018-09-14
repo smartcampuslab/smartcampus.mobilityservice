@@ -45,6 +45,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.filterUserId = ""
 	$scope.filterTravelId = ""
+	$scope.rankingType = "NONE"
 	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
@@ -93,7 +94,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
 			spinner.spin(target);
-			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId + "&rankingType=" + $scope.rankingType, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				var banned = [];
 				$scope.userTotals = {};
