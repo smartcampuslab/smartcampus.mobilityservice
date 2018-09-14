@@ -65,29 +65,27 @@
               </div>
 						</div>
             <br/>
-            
-            <div class="row ">
-            <div class="col-md-8">
-              		<label>Player Ranking</label></br>
-              		
-					<label>
-					    <input type="radio" ng-model="rankingType" value="NONE">
-					    None
-					  </label>
-					  <label>
-					    <input type="radio" ng-model="rankingType" value="GLOBAL">
-					    Global
-					  </label>
-					  <label>
-					    <input type="radio" ng-model="rankingType" value="CURRENT">
-					    Current week
-					  </label>       
-					  <label>
-					    <input type="radio" ng-model="rankingType" value="PREVIOUS">
-					    Previous week
-					  </label>      
-              </div>
-            </div>             
+
+			<div class="row ">
+				<div class="col-md-10">
+					<label>Player Ranking</label></br> <label> <input type="radio"
+						ng-model="rankingType" value="NONE"> None
+					</label> <label> <input type="radio" ng-model="rankingType"
+						value="GLOBAL"> Global
+					</label> <label> <input type="radio" ng-model="rankingType"
+						value="CURRENT"> Current week
+					</label> <label> <input type="radio" ng-model="rankingType"
+						value="PREVIOUS"> Previous week
+					</label>
+
+				</div>
+
+				<div class="col-md-2" ng-hide="rankingType == 'NONE'">
+					<label>Max rank:</label> <input type="text" class="form-control"
+						id="rank" ng-model="maxRanking" ng-value="50">
+				</div>
+			</div>
+			</br>     
             
             <div class="row ">
               <div class="col-md-6">

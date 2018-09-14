@@ -899,7 +899,7 @@ public class GamificationController {
 	public @ResponseBody List<UserDescriptor> getTrackInstancesUsers(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate,
 			@RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly,
 			@RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId,
-			@RequestParam(required = false) RankingType rankingType) throws Exception {
+			@RequestParam(required = false) RankingType rankingType, @RequestParam(required = false) final Integer maxRanking) throws Exception {
 		List<UserDescriptor> userList = null;
 
 		List<ClassificationData> ranking = null;
@@ -923,7 +923,7 @@ public class GamificationController {
 		Set<String> rankingPlayers = null;
 		
 		if (ranking != null) {
-			rankingPlayers = ranking.stream().map(x -> x.getPlayerId()).collect(Collectors.toSet());
+			rankingPlayers = ranking.stream().filter(x -> x.getPosition() < (maxRanking == null ? 50 : maxRanking)).map(x -> x.getPlayerId()).collect(Collectors.toSet());
 		}
 		
 		try {

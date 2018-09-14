@@ -46,6 +46,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	$scope.filterUserId = ""
 	$scope.filterTravelId = ""
 	$scope.rankingType = "NONE"
+	$scope.maxRanking = 50
 	
 	$scope.format = 'EEE MMM dd HH:mm';
 	$scope.dateOptions = {
@@ -94,7 +95,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$http.get("console/appId").success(function(data) {	
 			$scope.appId = data;
 			spinner.spin(target);
-			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId + "&rankingType=" + $scope.rankingType, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+			$http.get("console/users?excludeZeroPoints=" + $scope.excludeZeroPoints + "&unapprovedOnly=" + $scope.unapprovedOnly + "&pendingOnly=" + $scope.pendingOnly + "&toCheck=" + $scope.toCheck + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())) + "&filterUserId=" + $scope.filterUserId + "&filterTravelId=" + $scope.filterTravelId + "&rankingType=" + $scope.rankingType + "&maxRanking=" + $scope.maxRanking, {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 				var users = [];
 				var banned = [];
 				$scope.userTotals = {};
@@ -312,7 +313,10 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 		$scope.filterUserId = "";
 		$scope.filterTravelId = "";
 		$scope.fromDate = Date.today().previous().saturday().previous().saturday();
-		$scope.toDate = Date.today().next().saturday().add(-1).minute();		
+		$scope.toDate = Date.today().next().saturday().add(-1).minute();
+		
+		$scope.rankingType = "NONE"
+		$scope.maxRanking = 50		
 		
 		$timeout(function() {
 			document.getElementById('fromDate').value = $scope.fromDate.toString('ddd MMM dd HH:mm');
