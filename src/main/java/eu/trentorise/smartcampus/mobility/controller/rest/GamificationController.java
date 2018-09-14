@@ -919,12 +919,11 @@ public class GamificationController {
 		} else {
 			ranking = rankingManager.getGlobalClassification().get(appId);
 		}
-		logger.info(ranking);
 		
 		Set<String> rankingPlayers = null;
 		
 		if (ranking != null) {
-			rankingPlayers = ranking.stream().filter(x -> x.getPosition() < (maxRanking == null ? 50 : maxRanking)).map(x -> x.getPlayerId()).collect(Collectors.toSet());
+			rankingPlayers = ranking.stream().filter(x -> x.getPosition() <= (maxRanking == null ? 50 : maxRanking)).map(x -> x.getPlayerId()).collect(Collectors.toSet());
 		}
 		
 		try {
