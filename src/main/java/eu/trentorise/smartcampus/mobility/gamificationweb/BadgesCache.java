@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -28,9 +29,9 @@ public class BadgesCache {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-		List list = mapper.readValue(Resources.getResource("badges.json"), List.class);
-		for (Object o: list) {
-			BadgesData badge = mapper.convertValue(o, BadgesData.class);
+		List<BadgesData> list = mapper.readValue(Resources.getResource("badges.json"), new TypeReference<List<BadgesData>>() {
+		});
+		for (BadgesData badge: list) {
 			
 			URL resource = getClass().getResource("/public/" + badge.getPath());
 			byte b[] = Resources.asByteSource(resource).read();

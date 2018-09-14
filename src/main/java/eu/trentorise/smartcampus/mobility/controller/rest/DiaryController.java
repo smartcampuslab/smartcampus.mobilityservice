@@ -261,7 +261,7 @@ public class DiaryController {
 	private List<DiaryEntry> getChallenges(Player p, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
-		String language = ((p.getLanguage() != null) && (p.getLanguage().compareTo("") != 0)) ? p.getLanguage() : "it";
+		String language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();

@@ -230,7 +230,7 @@ public class GamificationWebController {
 				if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 					logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
 					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
-					user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
+					user_language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 				}
 			} catch (Exception ex){
 				logger.error("Error in mail unsubscribtion " + ex.getMessage());
@@ -260,7 +260,7 @@ public class GamificationWebController {
 					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
 					p.setSendMail(false);
 					playerRepositoryDao.save(p);
-					user_language = (p.getLanguage() != null && p.getLanguage().compareTo("") != 0) ? p.getLanguage() : "it";
+					user_language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 				}
 			} catch (Exception ex){
 				logger.error("Error in mail unsubscribtion " + ex.getMessage());
