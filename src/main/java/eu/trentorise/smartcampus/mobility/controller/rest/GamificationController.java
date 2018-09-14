@@ -919,6 +919,7 @@ public class GamificationController {
 		} else {
 			ranking = rankingManager.getGlobalClassification().get(appId);
 		}
+		logger.info(ranking);
 		
 		Set<String> rankingPlayers = null;
 		
