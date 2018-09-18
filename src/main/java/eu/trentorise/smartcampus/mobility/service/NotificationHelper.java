@@ -139,7 +139,7 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 //		notify(n, userId);
 	}
 
-	private void notify(Notification n, String userId, String appId) {
+	public void notify(Notification n, String userId, String appId) {
 			long when = System.currentTimeMillis();
 			n.setTimestamp(when);
 			try {
