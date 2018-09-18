@@ -124,7 +124,7 @@ public class NotificationsManager {
 		if (old != null) {
 			from = old.getTimestamp() + 1;
 		} else {
-			from = to - 1000 * 60 * 5;
+			from = to - 1000 * 60 * 60;
 			old = new Timestamp(gameId, ((Class)clz).getSimpleName(), to);
 		}
 
