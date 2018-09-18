@@ -72,7 +72,7 @@ public class NotificationsManager {
 	@Scheduled(fixedRate = 1000 * 60 * 1) 
 //	@PostConstruct
 	public void getNotifications() throws Exception {
-		logger.info("Reading notifications.");
+		logger.debug("Reading notifications.");
 		
 		List<Notification> nots = Lists.newArrayList();
 		
@@ -92,6 +92,7 @@ public class NotificationsManager {
 			if (p != null) {
 				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p, not);
 				if (notification != null) {
+					logger.info("Sending notification to " + not.getPlayerId());
 					notificatioHelper.notify(notification, not.getPlayerId(), NOTIFICATION_APP);
 				}
 			}
@@ -99,7 +100,7 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId) throws Exception {
-		logger.info("Reading notifications for " + appId);
+		logger.debug("Reading notifications for " + appId);
 		
 		List<Notification> nots = Lists.newArrayList();
 		
@@ -110,7 +111,7 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId, Class<T> clz) throws Exception {
-		logger.info("Reading notifications for type " + ((Class)clz).getSimpleName());
+		logger.debug("Reading notifications for type " + ((Class)clz).getSimpleName());
 		
 		String gameId = getGameId(appId);
 
@@ -124,7 +125,7 @@ public class NotificationsManager {
 		if (old != null) {
 			from = old.getTimestamp() + 1;
 		} else {
-			from = to - 1000 * 60 * 60;
+			from = to - 1000 * 60 * 60 * 24;
 			old = new Timestamp(gameId, ((Class)clz).getSimpleName(), to);
 		}
 
@@ -137,7 +138,7 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId, long from, long to, Class<T> clz) throws Exception {
-		logger.info("Reading notifications from " + from + " to " + to);
+		logger.debug("Reading notifications from " + from + " to " + to);
 		
 		String gameId = getGameId(appId);
 		
@@ -145,7 +146,7 @@ public class NotificationsManager {
 		ResponseEntity<String> res = null;
 		
 		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to;
-		logger.info("URL: " + url);
+		logger.debug("URL: " + url);
 		
 		try {
 			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
@@ -153,13 +154,13 @@ public class NotificationsManager {
 			e.printStackTrace();
 		}
 		
-		logger.info("Result: " + res.getStatusCodeValue());
+		logger.debug("Result: " + res.getStatusCodeValue());
 		
 		TypeFactory factory = mapper.getTypeFactory();
 		JavaType listOfT = factory.constructCollectionType(List.class, clz);
 		List<Notification> nots = mapper.readValue(res.getBody(), listOfT);		
 		
-		logger.info("Reading " + nots.size() + " notifications.");
+		logger.debug("Reading " + nots.size() + " notifications.");
 		
 		return nots;
 	}
