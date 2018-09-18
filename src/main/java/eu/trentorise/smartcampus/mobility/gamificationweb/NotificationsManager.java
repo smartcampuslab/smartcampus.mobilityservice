@@ -3,6 +3,7 @@ package eu.trentorise.smartcampus.mobility.gamificationweb;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,8 @@ public class NotificationsManager {
 
 	private static final String NOTIFICATION_APP = "mobility.trentoplaygo.test";
 
+	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
+	
 	@Autowired
 	@Value("${gamification.url}")
 	private String gamificationUrl;
@@ -66,13 +69,19 @@ public class NotificationsManager {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}	
 	
-	@Scheduled(fixedRate = 1000 * 60 * 5) 
+	@Scheduled(fixedRate = 1000 * 60 * 1) 
 //	@PostConstruct
 	public void getNotifications() throws Exception {
+		logger.info("Reading notifications.");
+		
 		List<Notification> nots = Lists.newArrayList();
 		
 		for (AppInfo appInfo : appSetup.getApps()) {
 			nots.addAll(getNotifications(appInfo.getAppId()));
+		}
+		
+		if (!nots.isEmpty()) {
+			logger.info("Read " + nots.size() + " notifications.");
 		}
 		
 		for (Notification not: nots) {
