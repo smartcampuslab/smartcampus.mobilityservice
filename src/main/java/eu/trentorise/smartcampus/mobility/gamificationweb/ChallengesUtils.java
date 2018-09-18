@@ -19,6 +19,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Range;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
@@ -191,14 +192,14 @@ public class ChallengesUtils {
     				
     				switch (modelName) {
     					case CHAL_MODEL_REPETITIVE_BEAV:
-		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, null, target); 
+		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, target); 
 		    				row_status = round(successes, 2);
 		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
 		    				challengeData.setChallTarget(periodTarget);
 	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
-		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, start, end, null); 
+		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, start, end); 
 		    				row_status = round(earned, 2);
 		    				status = Math.min(100, (int)(100.0 * earned / target));
 	    					break;
@@ -319,27 +320,20 @@ public class ChallengesUtils {
 	}
 	
 	// Method retrieveCorrectStatusFromCounterName: used to get the correct player status starting from counter name field
-	private int retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now){
+	private int retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd){
+		Range<Long> challengeRange = Range.open(chalStart, chalEnd);
 		int actualStatus = 0; // km or trips
 		if(cName != null && !cName.isEmpty()){
 			for(PointConcept pt : pointConcept){
 				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
 					List<PointConceptPeriod> allPeriods = pt.getInstances();
-					for(PointConceptPeriod pcp : allPeriods){
-						if(chalStart != null && chalEnd != null){
-							//if((pcp.getStart() - W_DELTA) <= chalStart && (pcp.getEnd() + W_DELTA) >= chalEnd){	// the week duration instance is major or equals the challenge duration 
-							if(chalStart >= pcp.getStart() && chalStart < pcp.getEnd()){	// Now I check only using starting time
-								actualStatus = pcp.getScore();
-								break;
+					for(PointConceptPeriod pcp : allPeriods) {
+						Range<Long> pcpRange = Range.open(pcp.getStart(), pcp.getEnd()); 
+						if(chalStart != null && chalEnd != null) {
+							if (pcpRange.isConnected(challengeRange)) {
+								actualStatus += pcp.getScore();
 							}
-						} else {
-							if(now != null){
-								if(pcp.getStart() <= now && pcp.getEnd() >= now){	// the actual time is contained in the week duration instance
-									actualStatus = pcp.getScore();
-									break;
-								}
-							}
-						}
+						} 
 					}
 					break;
 				}
@@ -348,9 +342,8 @@ public class ChallengesUtils {
 		return actualStatus;
 	}
 	
-	
-	
-	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, Long now, int target){
+	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, int target){
+		Range<Long> challengeRange = Range.open(chalStart, chalEnd);
 		int countSuccesses = 0; // km or trips
 		if(cName != null && !cName.isEmpty()){
 			for(PointConcept pt : pointConcept){
@@ -358,14 +351,10 @@ public class ChallengesUtils {
 					List<PointConceptPeriod> allPeriods = pt.getInstances();
 					for(PointConceptPeriod pcp : allPeriods){
 						if(chalStart != null && chalEnd != null){
-							if(chalStart <= pcp.getStart() && chalEnd >= pcp.getEnd()){	// Now I check only using starting time
+							Range<Long> pcpRange = Range.open(pcp.getStart(), pcp.getEnd()); 
+//							if(chalStart <= pcp.getStart() && chalEnd >= pcp.getEnd()){	// Now I check only using starting time
+							if(chalStart != null && chalEnd != null) {
 								countSuccesses += pcp.getScore() >= target ? 1 : 0;
-							}
-						} else {
-							if(now != null){
-								if(pcp.getStart() <= now && pcp.getEnd() >= now){	// the actual time is contained in the week duration instance
-									countSuccesses += pcp.getScore() >= target ? 1 : 0;
-								}
 							}
 						}
 					}
