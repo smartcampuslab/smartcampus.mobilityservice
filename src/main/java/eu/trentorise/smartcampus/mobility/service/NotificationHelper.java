@@ -16,13 +16,6 @@
 
 package eu.trentorise.smartcampus.mobility.service;
 
-import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
-import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +37,12 @@ import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.util.TokenHelper;
 import eu.trentorise.smartcampus.network.RemoteConnector;
+import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
+import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 
 /**
  * @author raman
@@ -143,7 +142,9 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 			long when = System.currentTimeMillis();
 			n.setTimestamp(when);
 			try {
-				connector().sendAppNotification(n, appId, Collections.singletonList(userId), tokenHelper.getToken());
+				String token = tokenHelper.getToken();
+				logger.info("Token: " + token);
+				connector().sendAppNotification(n, appId, Collections.singletonList(userId), token);
 			} catch (CommunicatorConnectorException e) {
 				e.printStackTrace();
 				logger .error("Failed to send notifications: "+e.getMessage(), e);
