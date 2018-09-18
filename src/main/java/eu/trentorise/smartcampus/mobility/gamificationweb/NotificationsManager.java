@@ -135,6 +135,8 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId, long from, long to, Class<T> clz) throws Exception {
+		logger.info("Reading notifications from " + from + " to " + to);
+		
 		String gameId = getGameId(appId);
 		
 		RestTemplate restTemplate = new RestTemplate();
@@ -142,11 +144,14 @@ public class NotificationsManager {
 		
 		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to;
 		res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-		
+		logger.info("URL: " + url);
+		logger.info("Result: " + res.getStatusCodeValue());
 		
 		TypeFactory factory = mapper.getTypeFactory();
 		JavaType listOfT = factory.constructCollectionType(List.class, clz);
 		List<Notification> nots = mapper.readValue(res.getBody(), listOfT);		
+		
+		logger.info("Reading " + nots.size() + " notifications.");
 		
 		return nots;
 	}
