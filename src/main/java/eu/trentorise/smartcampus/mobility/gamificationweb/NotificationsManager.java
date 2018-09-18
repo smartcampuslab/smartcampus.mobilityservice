@@ -143,8 +143,14 @@ public class NotificationsManager {
 		ResponseEntity<String> res = null;
 		
 		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to;
-		res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 		logger.info("URL: " + url);
+		
+		try {
+			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		logger.info("Result: " + res.getStatusCodeValue());
 		
 		TypeFactory factory = mapper.getTypeFactory();
