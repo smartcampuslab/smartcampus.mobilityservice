@@ -97,6 +97,8 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId) throws Exception {
+		logger.info("Reading notifications for " + appId);
+		
 		List<Notification> nots = Lists.newArrayList();
 		
 		nots.addAll(getNotifications(appId, LevelGainedNotification.class));
@@ -106,6 +108,8 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId, Class<T> clz) throws Exception {
+		logger.info("Reading notifications for type " + ((Class)clz).getSimpleName());
+		
 		String gameId = getGameId(appId);
 
 		Criteria criteria = new Criteria("gameId").is(gameId).and("type").is(((Class)clz).getSimpleName());
