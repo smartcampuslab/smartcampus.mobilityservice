@@ -77,7 +77,9 @@ public class NotificationsManager {
 		List<Notification> nots = Lists.newArrayList();
 		
 		for (AppInfo appInfo : appSetup.getApps()) {
-			nots.addAll(getNotifications(appInfo.getAppId()));
+			if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+				nots.addAll(getNotifications(appInfo.getAppId()));
+			}
 		}
 		
 		if (!nots.isEmpty()) {
