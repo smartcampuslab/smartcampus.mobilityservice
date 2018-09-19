@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -19,13 +18,16 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 public class ImageUtils {
 
-		private final static int DIMENSION = 160;
-	
-		public static byte[] compressImage(InputStream is, String mediaType) throws IOException {
-			BufferedImage bs = ImageIO.read(is);
-			bs = rescale(bs, DIMENSION, DIMENSION);
-			return compress(bs, mediaType);
-		}
+//		public static byte[] compressImage(InputStream is, String mediaType, int dimension) throws IOException {
+//			BufferedImage bs = ImageIO.read(is);
+//			bs = rescale(bs, dimension, dimension);
+//			return compress(bs, mediaType);
+//		}
+		
+		public static byte[] compressImage(BufferedImage bs, String mediaType, int dimension) throws IOException {
+			BufferedImage bsr = rescale(bs, dimension, dimension);
+			return compress(bsr, mediaType);
+		}		
 	
 	   private static BufferedImage rescale(BufferedImage bi, int w, int h) throws IOException {
 	        int ow = bi.getWidth();

@@ -1,8 +1,10 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +38,9 @@ public class FileController {
 //	private String imagesDir;
 
 	private static final String DEFAULT_USER = "default_user";
+	
+	private final static int DIMENSION = 640;
+	private final static int DIMENSION_SMALL = 160;
 
 	@Autowired
 	private AppSetup appSetup;
@@ -55,12 +60,18 @@ public class FileController {
 			avatar = new Avatar();
 			
 			InputStream is = Resources.asByteSource(Resources.getResource(DEFAULT_USER + ".png")).openBufferedStream();
+			BufferedImage bs = ImageIO.read(is);
 			
-			byte cb[] = ImageUtils.compressImage(is, "image/png");
+			byte cb[] = ImageUtils.compressImage(bs, "image/png", DIMENSION);
+			byte cbs[] = ImageUtils.compressImage(bs, "image/png", DIMENSION_SMALL);
+			
+			System.err.println(cb.length + "/" + cbs.length);
 			
 			Binary bb = new Binary(cb);
+			Binary bbs = new Binary(cbs);
 			avatar.setId(DEFAULT_USER);
 			avatar.setAvatarData(bb);
+			avatar.setAvatarDataSmall(bbs);
 			avatar.setContentType("image/png");
 			avatar.setFileName("default.png");
 
@@ -112,11 +123,18 @@ public class FileController {
 			
 			Avatar av = new Avatar();
 			
-			byte cb[] = ImageUtils.compressImage(data.getInputStream(), data.getContentType());
+			BufferedImage bs = ImageIO.read(data.getInputStream());
+			
+			byte cb[] = ImageUtils.compressImage(bs, data.getContentType(), DIMENSION);
+			byte cbs[] = ImageUtils.compressImage(bs, data.getContentType(), DIMENSION_SMALL);
 
+			System.err.println(cb.length + "/" + cbs.length);
+			
 			Binary bb = new Binary(cb);
+			Binary bbs = new Binary(cbs);
 			av.setId(userId + "@" + appId);
 			av.setAvatarData(bb);
+			av.setAvatarDataSmall(bbs);
 			av.setContentType(data.getContentType());
 			av.setFileName(data.getOriginalFilename());
 
@@ -129,9 +147,22 @@ public class FileController {
 	}
 
 	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public @ResponseBody void getPlayerAvatarDataSmall(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
+		Avatar avatar = avatarRepository.findOne(playerId + "@" + appId);
+		if (avatar == null || avatar.getAvatarDataSmall() == null) {
+			avatar = avatarRepository.findOne(DEFAULT_USER);
+		}
+		
+		response.getOutputStream().write(avatar.getAvatarDataSmall().getData());
+		response.setContentLength(avatar.getAvatarDataSmall().getData().length);
+		response.setContentType(avatar.getContentType());
+
+	}	
+	
+	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}/big") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public @ResponseBody void getPlayerAvatarData(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
 		Avatar avatar = avatarRepository.findOne(playerId + "@" + appId);
-		if (avatar == null) {
+		if (avatar == null || avatar.getAvatarData() == null) {
 			avatar = avatarRepository.findOne(DEFAULT_USER);
 		}
 		
@@ -139,7 +170,7 @@ public class FileController {
 		response.setContentLength(avatar.getAvatarData().getData().length);
 		response.setContentType(avatar.getContentType());
 
-	}	
+	}		
 	
 	protected String getUserId() {
 		String principal = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

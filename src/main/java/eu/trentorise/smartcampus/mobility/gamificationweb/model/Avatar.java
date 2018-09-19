@@ -9,6 +9,7 @@ public class Avatar {
 	private String id;
 	
 	private Binary avatarData;
+	private Binary avatarDataSmall;
 	
 	private String contentType;
 	private String fileName;
@@ -27,6 +28,14 @@ public class Avatar {
 
 	public void setAvatarData(Binary avatarData) {
 		this.avatarData = avatarData;
+	}
+
+	public Binary getAvatarDataSmall() {
+		return avatarDataSmall;
+	}
+
+	public void setAvatarDataSmall(Binary avatarDataSmall) {
+		this.avatarDataSmall = avatarDataSmall;
 	}
 
 	public String getContentType() {
