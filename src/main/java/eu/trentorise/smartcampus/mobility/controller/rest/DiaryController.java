@@ -53,6 +53,7 @@ import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.DiaryEnt
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelType;
 import eu.trentorise.smartcampus.mobility.gamification.model.BadgeNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
+import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
 import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
@@ -354,7 +355,17 @@ public class DiaryController {
 				de.setBadgeCollection(not.getCollectionName());
 				de.setEntityId(not.getCollectionName() + "_" + not.getBadge());
 				result.add(de);
+			} else if (((Map) o).containsKey("levelName")) {
+				LevelGainedNotification not = mapper.convertValue(o, LevelGainedNotification.class);
+				
+				DiaryEntry de = new DiaryEntry();
+				de.setType(DiaryEntryType.NEW_LEVEL);
+				de.setTimestamp(not.getTimestamp());
+				de.setLevelName(not.getLevelName());
+				de.setEntityId(not.getLevelType() + "_" + not.getLevelName());
+				result.add(de);				
 			}
+				
 		}
 
 		return result;

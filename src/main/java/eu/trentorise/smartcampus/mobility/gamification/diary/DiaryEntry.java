@@ -19,7 +19,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.Tra
 public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public enum DiaryEntryType {
-		TRAVEL, BADGE, CHALLENGE, CHALLENGE_WON, RECOMMENDED
+		TRAVEL, BADGE, CHALLENGE, CHALLENGE_WON, RECOMMENDED, NEW_LEVEL
 	}
 	
 	public enum TravelType {
@@ -54,6 +54,8 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private Integer challengeBonus;
 	
 	private String recommendedNickname;
+	
+	private String levelName;
 
 	@JsonGetter
 	public String getDate() {
@@ -243,6 +245,14 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public void setRecommendedNickname(String recommendedNickname) {
 		this.recommendedNickname = recommendedNickname;
+	}
+
+	public String getLevelName() {
+		return levelName;
+	}
+
+	public void setLevelName(String levelName) {
+		this.levelName = levelName;
 	}
 
 	@Override
