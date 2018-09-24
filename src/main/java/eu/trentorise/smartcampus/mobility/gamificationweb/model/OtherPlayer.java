@@ -16,7 +16,7 @@ public class OtherPlayer {
 
 	private String level;
 	
-	private List<String> wonChallenges = Lists.newArrayList();
+	private List<Map<String, Object>> wonChallenges = Lists.newArrayList();
 	
 //	private String avatar;
 	
@@ -70,11 +70,11 @@ public class OtherPlayer {
 		this.level = level;
 	}
 
-	public List<String> getWonChallenges() {
+	public List<Map<String, Object>> getWonChallenges() {
 		return wonChallenges;
 	}
 
-	public void setWonChallenges(List<String> wonChallenges) {
+	public void setWonChallenges(List<Map<String, Object>> wonChallenges) {
 		this.wonChallenges = wonChallenges;
 	}
 

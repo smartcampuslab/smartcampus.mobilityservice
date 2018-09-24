@@ -1,6 +1,10 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +54,7 @@ import com.google.common.cache.CacheLoader.InvalidCacheLoadException;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
@@ -307,10 +312,24 @@ public class PlayerController {
 			return null;
 		}	
 		
+		String gameId = getGameId(appId);
+		
+		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		final String lang;
+		if (p == null || p.getLanguage() == null || p.getLanguage().isEmpty()) {
+			lang = "it";
+		} else {
+			lang = p.getLanguage();
+		}
 		OtherPlayer op = null;
 		
 		try {
 			op = otherPlayers.get(playerId + "@" + appId);
+			op.getWonChallenges().forEach(x -> {
+				x.put("text", x.get(lang));
+				x.remove("it");
+				x.remove("en");
+			});
 		} catch (InvalidCacheLoadException e1) {
 			logger.error("Player " + playerId + " not found.");
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -527,7 +546,12 @@ public class PlayerController {
 		ChallengeAssignmentDTO challenge = new ChallengeAssignmentDTO();
 		long now = System.currentTimeMillis();
 		challenge.setStart(new Date(now));
-		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
+		
+		Date end = new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L);
+//		LocalDateTime ldt = LocalDateTime.now().plusDays(10).with(ChronoField.DAY_OF_WEEK, 6).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+//		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());
+		
+		challenge.setEnd(end);
 
 		challenge.setModelName("survey");
 		challenge.setInstanceName("start_survey-" + Long.toHexString(now) + "-" + Integer.toHexString((playerId + gameId).hashCode()));
@@ -627,10 +651,18 @@ public class PlayerController {
 		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			
-//			if (challengeConcept.isCompleted()) {
-				String description = challengeUtils.fillDescription(challengeConcept, player.getLanguage());
-				op.getWonChallenges().add(description);
-//			}
+			if (challengeConcept.isCompleted()) {
+				String itDescription = challengeUtils.fillDescription(challengeConcept, "it");
+				String enDescription = challengeUtils.fillDescription(challengeConcept, "en");
+				long time = challengeConcept.getDateCompleted().getTime();
+				
+				Map<String, Object> challengeMap = Maps.newTreeMap();
+				challengeMap.put("it", itDescription);
+				challengeMap.put("en", enDescription);
+				challengeMap.put("date", time);
+				
+				op.getWonChallenges().add(challengeMap);
+			}
 		}		
 
 		return op;
