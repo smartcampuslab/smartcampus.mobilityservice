@@ -151,7 +151,7 @@ public class NotificationHelper extends RemoteConnector implements AlertNotifier
 			}
 	}
 	
-	private void notify(Notification n, String appId) {
+	public void notify(Notification n, String appId) {
 		long when = System.currentTimeMillis();
 		n.setTimestamp(when);
 		try {
