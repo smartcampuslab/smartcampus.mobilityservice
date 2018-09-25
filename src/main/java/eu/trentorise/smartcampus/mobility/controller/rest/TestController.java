@@ -28,6 +28,8 @@ public class TestController {
 		notification.setTitle("Test notification");
 		if (text != null) {
 			notification.setDescription(text);
+		} else {
+			notification.setDescription("...");
 		}
 		
 		notificatioHelper.notify(notification, (id == null ? "8" : id), NOTIFICATION_APP);
@@ -41,6 +43,8 @@ public class TestController {
 		notification.setTitle("Test broadcast");
 		if (text != null) {
 			notification.setDescription(text);
+		} else {
+			notification.setDescription("...");
 		}
 		
 		notificatioHelper.notify(notification, NOTIFICATION_APP);
