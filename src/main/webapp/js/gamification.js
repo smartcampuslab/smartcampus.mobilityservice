@@ -364,30 +364,25 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.hasValidStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'VALID';
-// console.log('V: ' + style);
 		return style;
 	}
 	
 	$scope.hasInvalidStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'INVALID';
-// console.log('I: ' + style);
 		return style;		
 
 	}		
 	
 	$scope.hasPendingStyle = function(instance) {
 		var style = $scope.getActualValidity(instance) == 'PENDING';
-// console.log('I: ' + style);
 		return style;		
 
 	}	
 	
 	$scope.getActualValidity = function(instance) {
 		if (instance.changedValidity) {
-// console.log('Ch: ' + instance.changedValidity);
 			return instance.changedValidity;
 		}
-// console.log('Or: ' + instance.valid);
 		return instance.validationResult.travelValidity;
 	}
 	
