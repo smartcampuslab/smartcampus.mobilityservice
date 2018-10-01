@@ -37,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -661,39 +659,39 @@ public class GamificationValidator {
 
 	}	
 
-	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
-		try {
-			Range<Long> range = findGeolocationTimeRange(geolocations);
-			if (range == null) {
-				return false;
-			}
-			long start = range.lowerEndpoint();
-
-			Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
-			Query query = new Query(criteria);
-			query.fields().include("geolocationEvents.recorded_at").include("_id").include("groupId");
-
-			List<TrackedInstance> tis = template.find(query, TrackedInstance.class, "trackedInstances");
-			Set<Integer> groupIds = Sets.newHashSet();
-
-			for (TrackedInstance ti : tis) {
-				groupIds.add(ti.getGroupId());
-			}
-
-			for (TrackedInstance ti : tis) {
-				long last = 0;
-				for (Geolocation loc : ti.getGeolocationEvents()) {
-					last = Math.max(last, loc.getRecorded_at().getTime());
-				}
-				if (start > last && start - last < SAME_TRIP_INTERVAL) {
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+//	public boolean isTripsGroup(Collection<Geolocation> geolocations, String userId, String appId, String ttpye) {
+//		try {
+//			Range<Long> range = findGeolocationTimeRange(geolocations);
+//			if (range == null) {
+//				return false;
+//			}
+//			long start = range.lowerEndpoint();
+//
+//			Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("freeTrackingTransport").is(ttpye);
+//			Query query = new Query(criteria);
+//			query.fields().include("geolocationEvents.recorded_at").include("_id").include("groupId");
+//
+//			List<TrackedInstance> tis = template.find(query, TrackedInstance.class, "trackedInstances");
+//			Set<Integer> groupIds = Sets.newHashSet();
+//
+//			for (TrackedInstance ti : tis) {
+//				groupIds.add(ti.getGroupId());
+//			}
+//
+//			for (TrackedInstance ti : tis) {
+//				long last = 0;
+//				for (Geolocation loc : ti.getGeolocationEvents()) {
+//					last = Math.max(last, loc.getRecorded_at().getTime());
+//				}
+//				if (start > last && start - last < SAME_TRIP_INTERVAL) {
+//					return true;
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return false;
+//	}
 
 	private Range<Long> findGeolocationTimeRange(Collection<Geolocation> geolocations) {
 		long first = Long.MAX_VALUE;
@@ -771,32 +769,32 @@ public class GamificationValidator {
 		return false;
 	}
 	
-	public void findOverlappedTrips(List<TrackedInstance> tis) {
-		try {
-
-			Map<String, Range<Long>> ranges = Maps.newTreeMap();
-			
-			for (TrackedInstance ti: tis) {
-				Range<Long> range = findGeolocationTimeRange(ti.getGeolocationEvents());
-				if (range != null) {
-					ranges.put(ti.getId(), range);
-				}
-			}
-			
-			for (int i = 0; i < tis.size(); i++) {
-				for (int j = 0; j < i; j++) {
-					String key1 = tis.get(i).getId();
-					String key2 = tis.get(j).getId();
-					
-					if (ranges.get(key1) != null &&  ranges.get(key2) != null && ranges.get(key1).isConnected(ranges.get(key2))) {
-						tis.get(i).setSuspect(true);
-						tis.get(j).setSuspect(true);
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	public void findOverlappedTrips(List<TrackedInstance> tis) {
+//		try {
+//
+//			Map<String, Range<Long>> ranges = Maps.newTreeMap();
+//			
+//			for (TrackedInstance ti: tis) {
+//				Range<Long> range = findGeolocationTimeRange(ti.getGeolocationEvents());
+//				if (range != null) {
+//					ranges.put(ti.getId(), range);
+//				}
+//			}
+//			
+//			for (int i = 0; i < tis.size(); i++) {
+//				for (int j = 0; j < i; j++) {
+//					String key1 = tis.get(i).getId();
+//					String key2 = tis.get(j).getId();
+//					
+//					if (ranges.get(key1) != null &&  ranges.get(key2) != null && ranges.get(key1).isConnected(ranges.get(key2))) {
+//						tis.get(i).setSuspect(true);
+//						tis.get(j).setSuspect(true);
+//					}
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 }

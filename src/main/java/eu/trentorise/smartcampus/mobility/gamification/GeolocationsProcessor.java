@@ -379,16 +379,16 @@ public class GeolocationsProcessor {
 	private void saveFreeTracking(TrackedInstance res, String userId, String travelId, String appId) throws Exception {
 		if (!res.getComplete()) {
 			ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
-			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
-				// TODO reenabled
-				boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
-				if (isGroup) {
-					if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
-						vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
-						logger.info("In a group");
-					}
-				}
-			}
+//			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
+//				// TODO reenabled
+//				boolean isGroup = gamificationValidator.isTripsGroup(res.getGeolocationEvents(), userId, appId, res.getFreeTrackingTransport());
+//				if (isGroup) {
+//					if ("bus".equals(res.getFreeTrackingTransport()) || "train".equals(res.getFreeTrackingTransport())) {
+//						vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+//						logger.info("In a group");
+//					}
+//				}
+//			}
 
 			res.setValidationResult(vr);
 			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
