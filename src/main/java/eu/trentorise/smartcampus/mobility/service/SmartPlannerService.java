@@ -415,6 +415,8 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		
 		String url = smartplannerURL + smartplannerRest + param;
 		logger.info("Sending alert to " + url);
+		logger.info("Body: " + req);
+		
 		String result = HTTPConnector.doPost(url, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
 //		logger.info(result);				
 		processAlerResult(alert, result);
