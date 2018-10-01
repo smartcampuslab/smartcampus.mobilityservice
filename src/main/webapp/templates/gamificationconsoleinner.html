@@ -66,7 +66,7 @@
 						</div>
             <br/>
 
-			<div class="row ">
+			<div class="row small">
 				<div class="col-md-10">
 					<label>Player Ranking</label></br> <label> <input type="radio"
 						ng-model="rankingType" value="NONE"> None
@@ -134,7 +134,7 @@
 												</div>
 												<div class="col-md-6 text-right">
 												<span ng-if="itinerary.instance.suspect == true" class="label label-danger"><b>SUSPECT</b></span>												
-												<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">Group {{itinerary.instance.groupId}}</span>
+												<!-- <span ng-if="itinerary.instance.groupId != 0" class="label label-primary">Group {{itinerary.instance.groupId}}</span> -->
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
