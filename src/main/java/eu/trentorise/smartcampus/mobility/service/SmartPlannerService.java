@@ -156,7 +156,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 	}
 
 	private String performPOST(String request, String body) throws Exception {
-		return HTTPConnector.doPost(smartplannerURL+request, body, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE);
+		return HTTPConnector.doPost(smartplannerURL+request, body, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE);
 	}
 
 	@Override
@@ -417,7 +417,7 @@ public class SmartPlannerService implements SmartPlannerHelper {
 		logger.info("Sending alert to " + url);
 		logger.info("Body: " + req);
 		
-		String result = HTTPConnector.doPost(url, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE);
+		String result = HTTPConnector.doPost(url, req, MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE);
 //		logger.info(result);				
 		processAlerResult(alert, result);
 	}	
