@@ -53,7 +53,7 @@ public class TrackedInstance {
 	private Boolean approved;
 	private Boolean toCheck;
 	
-	private int groupId;
+//	private int groupId;
 	
 	private Map<String, Double> overriddenDistances;
 	
@@ -238,13 +238,13 @@ public class TrackedInstance {
 		this.toCheck = toCheck;
 	}
 
-	public int getGroupId() {
-		return groupId;
-	}
-
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
+//	public int getGroupId() {
+//		return groupId;
+//	}
+//
+//	public void setGroupId(int groupId) {
+//		this.groupId = groupId;
+//	}
 
 	public Map<String, Double> getOverriddenDistances() {
 		return overriddenDistances;

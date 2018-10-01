@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -822,9 +821,10 @@ public class GamificationController {
 					}
 				}
 
-				instances = aggregateFollowingTrackedInstances(instances);
-				gamificationValidator.findOverlappedTrips(instances);
+//				instances = aggregateFollowingTrackedInstances(instances);
+//				gamificationValidator.findOverlappedTrips(instances);
 				for (TrackedInstance o : instances) {
+					
 //					TODO reenabled
 					if (o.getSuspect() == null) {
 						o.setSuspect(gamificationValidator.isSuspect(o));
@@ -1105,49 +1105,49 @@ public class GamificationController {
 		
 	}	
 	
-	private List<TrackedInstance> aggregateFollowingTrackedInstances(List<TrackedInstance> instances) {
-		List<TrackedInstance> sortedInstances = Lists.newArrayList(instances);
-		Collections.sort(sortedInstances, new Comparator<TrackedInstance>() {
-
-			@Override
-			public int compare(TrackedInstance o1, TrackedInstance o2) {
-				if (o1.getGeolocationEvents() == null || o1.getGeolocationEvents().isEmpty()) {
-					return -1;
-				}
-				if (o2.getGeolocationEvents() == null || o2.getGeolocationEvents().isEmpty()) {
-					return 1;
-				}
-				return (o1.getGeolocationEvents().iterator().next().compareTo(o2.getGeolocationEvents().iterator().next()));
-			}
-		});
-
-		int groupId = 1;
-		if (sortedInstances.size() > 1) {
-			for (int i = 1; i < sortedInstances.size(); i++) {
-				List<Geolocation> ge1 = (List) sortedInstances.get(i).getGeolocationEvents();
-				List<Geolocation> ge2 = (List) sortedInstances.get(i - 1).getGeolocationEvents();
-				if (sortedInstances.get(i).getFreeTrackingTransport()  == null || sortedInstances.get(i - 1).getFreeTrackingTransport() == null) {
-					continue;
-				}
-//				if (!sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
+//	private List<TrackedInstance> aggregateFollowingTrackedInstances(List<TrackedInstance> instances) {
+//		List<TrackedInstance> sortedInstances = Lists.newArrayList(instances);
+//		Collections.sort(sortedInstances, new Comparator<TrackedInstance>() {
+//
+//			@Override
+//			public int compare(TrackedInstance o1, TrackedInstance o2) {
+//				if (o1.getGeolocationEvents() == null || o1.getGeolocationEvents().isEmpty()) {
+//					return -1;
+//				}
+//				if (o2.getGeolocationEvents() == null || o2.getGeolocationEvents().isEmpty()) {
+//					return 1;
+//				}
+//				return (o1.getGeolocationEvents().iterator().next().compareTo(o2.getGeolocationEvents().iterator().next()));
+//			}
+//		});
+//
+//		int groupId = 1;
+//		if (sortedInstances.size() > 1) {
+//			for (int i = 1; i < sortedInstances.size(); i++) {
+//				List<Geolocation> ge1 = (List) sortedInstances.get(i).getGeolocationEvents();
+//				List<Geolocation> ge2 = (List) sortedInstances.get(i - 1).getGeolocationEvents();
+//				if (sortedInstances.get(i).getFreeTrackingTransport()  == null || sortedInstances.get(i - 1).getFreeTrackingTransport() == null) {
 //					continue;
 //				}
-				
-				if (ge1.isEmpty() || ge2.isEmpty()) {
-					continue;
-				}
-				if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < GamificationValidator.SAME_TRIP_INTERVAL
-						&& sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
-					sortedInstances.get(i).setGroupId(groupId);
-					sortedInstances.get(i - 1).setGroupId(groupId);
-				} else {
-					groupId++;
-				}
-			}
-		}
-
-		return sortedInstances;
-	}
+////				if (!sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
+////					continue;
+////				}
+//				
+//				if (ge1.isEmpty() || ge2.isEmpty()) {
+//					continue;
+//				}
+//				if (Math.abs(ge2.get(ge2.size() - 1).getRecorded_at().getTime() - ge1.get(0).getRecorded_at().getTime()) < GamificationValidator.SAME_TRIP_INTERVAL
+//						&& sortedInstances.get(i).getFreeTrackingTransport().equals(sortedInstances.get(i - 1).getFreeTrackingTransport())) {
+//					sortedInstances.get(i).setGroupId(groupId);
+//					sortedInstances.get(i - 1).setGroupId(groupId);
+//				} else {
+//					groupId++;
+//				}
+//			}
+//		}
+//
+//		return sortedInstances;
+//	}
 
 	private long getStartTime(TrackedInstance trackedInstance) throws ParseException {
 		long time = 0;
