@@ -995,7 +995,9 @@ public class GamificationController {
 					ud.setInvalid(ud.getInvalid() + 1);
 					break;
 				case PENDING:
-					ud.setPending(ud.getPending() + 1);
+					if (ti.getComplete()) {
+						ud.setPending(ud.getPending() + 1);
+					}
 					break;
 				}
 			}
