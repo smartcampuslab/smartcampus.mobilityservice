@@ -122,12 +122,7 @@
 										>
 											<div class="row">
 												<div class="col-md-6 itinerary-def">
-													{{itinerary.tripName}} <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
-														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
-													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
-														title="Mismatched activities" data-toggle="tooltip"
-													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> 
-													<span ng-show="!itinerary.instance.validationResult.inAreas" class="glyphicon glyphicon-flag" title="Not in areas" data-toggle="tooltip"></span>
+													{{itinerary.tripName}}<em style="color: darkred;">{{itinerary.instance.validationResult.validationStatus.error === null ? '' : ': ' + itinerary.instance.validationResult.validationStatus.error}}</em>
 													<br />
 													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? ('Free tracking - ' + itinerary.instance.freeTrackingTransport) : 'Planned'}}</b>
 													<i>{{itinerary.instance.validationResult.plannedAsFreeTracking ? '(as free tracking)' : ''}}</i>
