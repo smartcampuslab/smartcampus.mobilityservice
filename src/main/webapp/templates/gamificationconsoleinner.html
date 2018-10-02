@@ -104,11 +104,11 @@
 					<div class="">
 						<div ng-repeat="user in users" class="panel panel-default user-row">
 							<div class="row">
-								<div class="col-md-5">
+								<div class="col-md-4">
 									<a ng-click="selectUser(user)">{{user}} {{banned.indexOf(user) > -1 ? "- BANNED" : ""}}</a>
 								</div>
-								<div class="col-md-7 pull-right">
-								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].invalid}} invalid</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pending}} pending</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pendingPercent}}% pending</span>)
+								<div class="col-md-8 pull-right">
+								    <strong>({{userTotals[user].total}} tracked, <span style="{{validColor(userTotals[user])}}">{{userTotals[user].valid}} valid, {{userTotals[user].invalid}} invalid</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pending}} pending</span>, <span style="{{pendingColor(userTotals[user])}}">{{userTotals[user].pendingPercent}}% pending</span>)
 									</strong>
 								</div>
 							</div>
@@ -118,8 +118,7 @@
 								<div ng-repeat="itinerary in multimodal" class="itinerary-row">
 									<div ng-class="{'incomplete': itinerary.instance.complete == false}">
 										<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
-											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}"
-										>
+											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}">
 											<div class="row">
 												<div class="col-md-6 itinerary-def">
 													{{itinerary.tripName}}<em style="color: darkred;">{{itinerary.instance.validationResult.validationStatus.error === null ? '' : ': ' + itinerary.instance.validationResult.validationStatus.error}}</em>
