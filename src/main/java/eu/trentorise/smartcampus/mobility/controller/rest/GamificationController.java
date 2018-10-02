@@ -932,6 +932,7 @@ public class GamificationController {
 			keys.add("userId");
 			keys.add("validationResult");
 			keys.add("approved");
+			keys.add("complete");
 			keys.add("changedValidity");
 			
 			AppInfo app = appSetup.findAppById(appId);
