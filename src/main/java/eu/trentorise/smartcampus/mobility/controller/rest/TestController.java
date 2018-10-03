@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.communicator.model.Notification;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
+import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 
 @Controller
 public class TestController {
@@ -20,14 +21,21 @@ public class TestController {
 	@Autowired
 	private NotificationHelper notificatioHelper;	
 	
+	@Autowired
+	private SmartPlannerHelper smartplanner;
+	
 	private static Log logger = LogFactory.getLog(TestController.class);
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/test/notification")
-	public @ResponseBody void notification(@RequestParam(required = false) String id, @RequestParam(required = false) String text) throws Exception {
+	public @ResponseBody void notification(@RequestParam(required = false) String id, @RequestParam(required = false) String title, @RequestParam(required = false) String description) throws Exception {
 		Notification notification = new Notification();
-		notification.setTitle("Test notification");
-		if (text != null) {
-			notification.setDescription(text);
+		if (title != null) {
+			notification.setTitle(title);	
+		} else {
+			notification.setTitle("Test notification");
+		}
+		if (description != null) {
+			notification.setDescription(description);
 		} else {
 			notification.setDescription("...");
 		}
@@ -38,11 +46,15 @@ public class TestController {
 	
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/test/broadcast")
-	public @ResponseBody void broadcast(@RequestParam(required = false) String text) throws Exception {
+	public @ResponseBody void broadcast(@RequestParam(required = false) String title, @RequestParam(required = false) String description) throws Exception {
 		Notification notification = new Notification();
-		notification.setTitle("Test broadcast");
-		if (text != null) {
-			notification.setDescription(text);
+		if (title != null) {
+			notification.setTitle(title);	
+		} else {
+			notification.setTitle("Test broadcast");
+		}
+		if (description != null) {
+			notification.setDescription(description);
 		} else {
 			notification.setDescription("...");
 		}
@@ -51,5 +63,4 @@ public class TestController {
 		
 	}	
 	
-		
 }
