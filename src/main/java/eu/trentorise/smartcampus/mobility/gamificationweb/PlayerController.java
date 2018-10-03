@@ -521,8 +521,12 @@ public class PlayerController {
 		
 		ChallengeAssignmentDTO challenge = new ChallengeAssignmentDTO();
 		long now = System.currentTimeMillis();
+		LocalDateTime ldt = LocalDateTime.now().plusDays(10).with(ChronoField.DAY_OF_WEEK, 6).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());		
+		
 		challenge.setStart(new Date(now));
-		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
+		challenge.setEnd(end);
+//		challenge.setEnd(new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L));
 
 		challenge.setModelName("absoluteIncrement");
 		challenge.setInstanceName("'initial_challenge_" + Long.toHexString(now) + "-" + Integer.toHexString((playerId + gameId).hashCode()));
@@ -547,9 +551,9 @@ public class PlayerController {
 		long now = System.currentTimeMillis();
 		challenge.setStart(new Date(now));
 		
-		Date end = new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L);
-//		LocalDateTime ldt = LocalDateTime.now().plusDays(10).with(ChronoField.DAY_OF_WEEK, 6).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
-//		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());
+//		Date end = new Date(now + 2 * 7 * 24 * 60 * 60 * 1000L);
+		LocalDateTime ldt = LocalDateTime.now().plusDays(10).with(ChronoField.DAY_OF_WEEK, 6).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());
 		
 		challenge.setEnd(end);
 
