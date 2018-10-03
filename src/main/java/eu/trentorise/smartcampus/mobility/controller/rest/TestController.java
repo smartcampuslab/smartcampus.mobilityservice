@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.communicator.model.Notification;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
-import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
 @Controller
 public class TestController {
@@ -22,7 +23,7 @@ public class TestController {
 	private NotificationHelper notificatioHelper;	
 	
 	@Autowired
-	private SmartPlannerHelper smartplanner;
+	private PlayerRepositoryDao playerRepositoryDao;
 	
 	private static Log logger = LogFactory.getLog(TestController.class);
 	
@@ -32,12 +33,19 @@ public class TestController {
 		if (title != null) {
 			notification.setTitle(title);	
 		} else {
-			notification.setTitle("Test notification");
+			notification.setTitle("Ding!");
 		}
 		if (description != null) {
 			notification.setDescription(description);
 		} else {
-			notification.setDescription("...");
+			String name = "Mario";
+			if (id != null) {
+				Player p = playerRepositoryDao.findOne(id);
+				if (p != null) {
+					name = p.getNickname();
+				}
+			}
+			notification.setDescription("Congratulazioni " + name + ", sei appena arrivato al livello 9000!");
 		}
 		
 		notificatioHelper.notify(notification, (id == null ? "8" : id), NOTIFICATION_APP);
