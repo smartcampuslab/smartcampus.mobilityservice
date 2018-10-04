@@ -1,0 +1,24 @@
+[
+	{
+		"id": "LevelGainedNotification",
+		"title": {
+			"IT": "Livello",
+			"EN": "Level"
+		},
+		"description": {
+			"IT": "Complimenti! Hai raggiunto un nuovo livello.",
+			"EN": "Congratulations! You have reached a new level."
+		}
+	},
+	{
+		"id": "PROPOSED",
+		"title": {
+			"IT": "Sfida in scadenza",
+			"EN": "Challenge expiring"
+		},
+		"description": {
+			"IT": "Ricordati di scegliere la tua sfida.",
+			"EN": "Remember to choose your challenge."
+		}
+	}
+]
