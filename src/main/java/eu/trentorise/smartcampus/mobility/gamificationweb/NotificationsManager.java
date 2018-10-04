@@ -2,6 +2,11 @@ package eu.trentorise.smartcampus.mobility.gamificationweb;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +24,18 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.Notification;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.NotificationMessage;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Timestamp;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -63,14 +72,68 @@ public class NotificationsManager {
 	private PlayerRepositoryDao playerRepository;
 	
 	@Autowired
+	private ChallengesUtils challengeUtils;	
+	
+	@Autowired
 	private NotificationHelper notificatioHelper;
 	
 	private ObjectMapper mapper = new ObjectMapper(); {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}	
 	
+	private Map<String, NotificationMessage> notificationsMessages;
+
+	@PostConstruct
+	public void init() throws Exception {
+		List<NotificationMessage> messages = mapper.readValue(Resources.getResource("notifications/notifications.json"), new TypeReference<List<NotificationMessage>>() {
+		});
+		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
+	}
+	
+	@Scheduled(cron="0 15 9 * * MON")
+	public void checkProposedPending() throws Exception {
+		for (AppInfo appInfo : appSetup.getApps()) {
+			logger.info("Sending notifications for app " + appInfo.getAppId());
+			try {
+				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+					checkProposedPending(appInfo);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}	
+	
+	public void checkProposedPending(AppInfo appInfo) throws Exception {
+		List<eu.trentorise.smartcampus.communicator.model.Notification> nots = Lists.newArrayList();
+		
+		List<Player> players = playerRepository.findAllByGameId(appInfo.getGameId());
+		for (Player p: players) {
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())),
+					String.class);
+			String data = res.getBody();			
+			
+			List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
+			
+			boolean proposed = false;
+			for (ChallengeConcept challengeConcept: challengeConcepts) {
+				if ("PROPOSED".equals(challengeConcept.getState())) {
+					proposed = true;
+					break;
+				}
+			}
+			
+			if (proposed) {
+				logger.info("Sending notification to " + p.getId());
+				notificatioHelper.notify(buildProposedRemainderNotification(p), p.getId(), NOTIFICATION_APP);
+				continue;
+			}
+			
+		}
+	}
+	
 	@Scheduled(fixedRate = 1000 * 60 * 1) 
-//	@PostConstruct
 	public void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
@@ -168,22 +231,36 @@ public class NotificationsManager {
 	private eu.trentorise.smartcampus.communicator.model.Notification buildNotification(Player p, Notification not) {
 		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
 		
-		if (not instanceof LevelGainedNotification) {
-			result.setTitle("Ding!");
-			switch (p.getLanguage()) {
-			case "EN":
-				result.setDescription("Congratulations " + p.getNickname() + ", you just reached level " + ((LevelGainedNotification)not).getLevelName() + "!");
-			default:
-				result.setDescription("Congratulazioni " + p.getNickname() + ", sei appena arrivato al livello " + ((LevelGainedNotification)not).getLevelName() + "!");
-			}
-//		} else if (not instanceof ChallengeAssignedNotification) {
-//			result.setTitle("Ding!");
-//			result.setDescription("Ciao " + p.getNickname() + ", ti è appena stata assegnata una nuova sfida: " + "!");
-		} else {
-			result = null;
+		NotificationMessage message = notificationsMessages.get(not.getClass().getSimpleName());
+		String lang = p.getLanguage();
+		if (!"EN".equals(lang)) {
+			lang = "IT";
 		}
+			
+		fillNotification(result, lang, message);
 		
 		return result;
+	}
+	
+	private eu.trentorise.smartcampus.communicator.model.Notification buildProposedRemainderNotification(Player p) {
+		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
+
+		NotificationMessage message = notificationsMessages.get("PROPOSED");
+		String lang = p.getLanguage();
+		if (!"EN".equals(lang)) {
+			lang = "IT";
+		}
+			
+		fillNotification(result, lang, message);
+
+		return result;
+	}
+	
+	private void fillNotification(eu.trentorise.smartcampus.communicator.model.Notification notification, String lang, NotificationMessage message) {
+		if (message != null) {
+			notification.setTitle(message.getTitle().get(lang));
+			notification.setDescription(message.getDescription().get(lang));
+		}
 	}
 	
 	private String getGameId(String appId) {
