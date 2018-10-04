@@ -297,7 +297,7 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 	
 	$scope.report = function() {
 		spinner.spin(target);
-		$http.get("console/report"  + ($scope.allDates ? "" : ("&fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
+		$http.get("console/report"  + ($scope.allDates ? "" : ("?fromDate=" + $scope.fromDate.getTime() + "&toDate=" + $scope.toDate.getTime())), {"headers" : { "appId" : $scope.appId}}).then(function(data) {
 			load();
 			spinner.stop();
 		});
