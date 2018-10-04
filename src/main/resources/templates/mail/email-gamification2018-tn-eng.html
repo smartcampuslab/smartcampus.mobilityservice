@@ -45,7 +45,7 @@
 			        	game week <strong th:text="${next_week_num}">X+1</strong> is about to start.<br/>
 			        	Below, you can find your weekly challenges and your recent game results.
 			        </h3>
-			        <div th:if="${n_challenges ne null}">
+			        <!-- <div th:if="${n_challenges ne null}"> -->
 				        <h3 th:if="${show_last_week} == false and ${next_week_theme} ne 'No'" th:text="#{week_desc(${next_week_theme})}">
 				            This will be the THE BIKE week
 				        </h3>
@@ -71,7 +71,7 @@
 <!-- 					    <h3 th:if="${n_challenges ne null and not #lists.isEmpty(n_challenges) and are_challenges}">
 				            Challenges start at <span th:text="${chs_start_time}">00:00</span> on <span th:text="${chs_start_date}">XXX</span> and you can accomplish them till <span th:text="${chs_end_time}">23:59</span> of <span th:text="${chs_end_date}">YYY</span>!
 				        </h3> -->
-			        </div>
+			        <!-- </div> -->
 			        <div th:if="${n_prizes ne null and are_prizes}">
 				        <h3>
 				            The prizes for week <strong th:text="${next_week_num}">X+1</strong> are the following:
