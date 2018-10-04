@@ -663,7 +663,7 @@ public class GamificationController {
 	
 	// TODO update
 	@RequestMapping(value = "/console/report")
-	public @ResponseBody void generareReport(HttpServletResponse response, @RequestHeader(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
+	public @ResponseBody void generareReport(HttpServletResponse response, @RequestParam(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
 		Criteria criteria = new Criteria("appId").is(appId).and("changedValidity").ne(null).and("approved").ne(true);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
