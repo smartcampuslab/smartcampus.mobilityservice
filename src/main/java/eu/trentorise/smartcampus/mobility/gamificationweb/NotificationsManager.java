@@ -260,6 +260,7 @@ public class NotificationsManager {
 		if (message != null) {
 			notification.setTitle(message.getTitle().get(lang));
 			notification.setDescription(message.getDescription().get(lang));
+			notification.setType(message.getType());
 		}
 	}
 	

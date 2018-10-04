@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.communicator.model.Notification;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
@@ -28,47 +27,35 @@ public class TestController {
 	private static Log logger = LogFactory.getLog(TestController.class);
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/test/notification")
-	public @ResponseBody void notification(@RequestParam(required = false) String id, @RequestParam(required = false) String title, @RequestParam(required = false) String description) throws Exception {
+	public @ResponseBody void notification(@RequestParam(required = false) String id, @RequestParam(required = false) String title, @RequestParam(required = false) String description, @RequestParam(required = false) String type) throws Exception {
 		Notification notification = new Notification();
-		if (title != null) {
-			notification.setTitle(title);	
-		} else {
-			notification.setTitle("Ding!");
-		}
-		if (description != null) {
-			notification.setDescription(description);
-		} else {
-			String name = "Mario";
-			if (id != null) {
-				Player p = playerRepositoryDao.findOne(id);
-				if (p != null) {
-					name = p.getNickname();
-				}
-			}
-			notification.setDescription("Congratulazioni " + name + ", sei appena arrivato al livello 9000!");
-		}
+
+		notification.setTitle(title != null ? title : "Livello");
+		
+		notification.setDescription(description != null ? title : "Complimenti! Hai raggiunto un nuovo livello.");
+		
+		notification.setType(type != null ? type : "level");
 		
 		notificatioHelper.notify(notification, (id == null ? "8" : id), NOTIFICATION_APP);
-		
 	}	
 	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/test/broadcast")
-	public @ResponseBody void broadcast(@RequestParam(required = false) String title, @RequestParam(required = false) String description) throws Exception {
-		Notification notification = new Notification();
-		if (title != null) {
-			notification.setTitle(title);	
-		} else {
-			notification.setTitle("Test broadcast");
-		}
-		if (description != null) {
-			notification.setDescription(description);
-		} else {
-			notification.setDescription("...");
-		}
-		
-		notificatioHelper.notify(notification, NOTIFICATION_APP);
-		
-	}	
+//	@RequestMapping(method = RequestMethod.GET, value = "/test/broadcast")
+//	public @ResponseBody void broadcast(@RequestParam(required = false) String title, @RequestParam(required = false) String description) throws Exception {
+//		Notification notification = new Notification();
+//		if (title != null) {
+//			notification.setTitle(title);	
+//		} else {
+//			notification.setTitle("Test broadcast");
+//		}
+//		if (description != null) {
+//			notification.setDescription(description);
+//		} else {
+//			notification.setDescription("...");
+//		}
+//		
+//		notificatioHelper.notify(notification, NOTIFICATION_APP);
+//		
+//	}	
 	
 }

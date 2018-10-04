@@ -1,6 +1,7 @@
 [
 	{
 		"id": "LevelGainedNotification",
+		"type" : "level",
 		"title": {
 			"IT": "Livello",
 			"EN": "Level"
@@ -12,6 +13,7 @@
 	},
 	{
 		"id": "PROPOSED",
+		"type" : "",
 		"title": {
 			"IT": "Sfida in scadenza",
 			"EN": "Challenge expiring"
