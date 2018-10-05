@@ -45,12 +45,12 @@ import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
-
-
 @Component
 public class NotificationsManager {
 
 	private static final String NOTIFICATION_APP = "mobility.trentoplaygo.test";
+	
+	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class};
 
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
 	
@@ -90,7 +90,7 @@ public class NotificationsManager {
 		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
 	}
 	
-	@Scheduled(cron="0 15 9 * * MON")
+//	@Scheduled(cron="0 15 9 * * MON")
 	public void checkProposedPending() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			logger.info("Sending notifications for app " + appInfo.getAppId());
@@ -126,7 +126,7 @@ public class NotificationsManager {
 			
 			if (proposed) {
 				logger.info("Sending notification to " + p.getId());
-				notificatioHelper.notify(buildProposedRemainderNotification(p), p.getId(), NOTIFICATION_APP);
+				notificatioHelper.notify(buildNotification(p.getLanguage(), "PROPOSED"), p.getId(), NOTIFICATION_APP);
 				continue;
 			}
 			
@@ -153,7 +153,7 @@ public class NotificationsManager {
 			Player p = playerRepository.findByIdAndGameId(not.getPlayerId(), not.getGameId());
 			
 			if (p != null) {
-				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p, not);
+				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not.getClass().getSimpleName());
 				if (notification != null) {
 					logger.info("Sending notification to " + not.getPlayerId());
 					notificatioHelper.notify(notification, not.getPlayerId(), NOTIFICATION_APP);
@@ -167,7 +167,9 @@ public class NotificationsManager {
 		
 		List<Notification> nots = Lists.newArrayList();
 		
-		nots.addAll(getNotifications(appId, LevelGainedNotification.class));
+		for (Class clz: notificationClasses) {
+		nots.addAll(getNotifications(appId, clz));
+		}
 //		nots.addAll(getNotifications(appId, ChallengeAssignedNotification.class));
 		
 		return nots;
@@ -228,31 +230,13 @@ public class NotificationsManager {
 		return nots;
 	}
 	
-	private eu.trentorise.smartcampus.communicator.model.Notification buildNotification(Player p, Notification not) {
+	public eu.trentorise.smartcampus.communicator.model.Notification buildNotification(String lang, String type) {
 		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
 		
-		NotificationMessage message = notificationsMessages.get(not.getClass().getSimpleName());
-		String lang = p.getLanguage();
-		if (!"EN".equals(lang)) {
-			lang = "IT";
-		}
+		NotificationMessage message = notificationsMessages.get(type);
 			
 		fillNotification(result, lang, message);
 		
-		return result;
-	}
-	
-	private eu.trentorise.smartcampus.communicator.model.Notification buildProposedRemainderNotification(Player p) {
-		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
-
-		NotificationMessage message = notificationsMessages.get("PROPOSED");
-		String lang = p.getLanguage();
-		if (!"EN".equals(lang)) {
-			lang = "IT";
-		}
-			
-		fillNotification(result, lang, message);
-
 		return result;
 	}
 	
