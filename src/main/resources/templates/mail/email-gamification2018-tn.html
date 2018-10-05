@@ -45,7 +45,7 @@
 			        	stiamo per entrare nella <strong th:text="${next_week_num}">X+1</strong>^a settimana di gioco.<br/>
 			        	Nel seguito le sfide di questa settimana e i tuoi risultati recenti.
 			        </h3>
-			        <div th:if="${n_challenges ne null}">
+			        <!-- <div th:if="${n_challenges ne null}"> -->
 				        <h3 th:if="${show_last_week} == false and ${next_week_theme} ne 'No'" th:text="#{week_desc(${next_week_theme})}">
 				            Questa sar&agrave; la settimana DELLA BICI
 				        </h3>
@@ -71,7 +71,7 @@
 <!-- 					    <h3 th:if="${n_challenges ne null and not #lists.isEmpty(n_challenges) and are_challenges}">
 				            Queste sfide partono alle ore <span th:text="${chs_start_time}">00:00</span> del giorno <span th:text="${chs_start_date}">XXX</span> e hai tempo fino alle ore <span th:text="${chs_end_time}">23:59</span> del giorno <span th:text="${chs_end_date}">YYY</span> per superarle!
 				        </h3> -->
-			        </div>
+			        <!-- </div> -->
 			        <div th:if="${n_prizes ne null and are_prizes}">
 				        <h3>
 				            I premi in palio per la <strong th:text="${next_week_num}">X+1</strong>^a settimana sono i seguenti:
