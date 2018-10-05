@@ -3,24 +3,24 @@
 		"id": "LevelGainedNotification",
 		"type" : "level",
 		"title": {
-			"IT": "Livello",
-			"EN": "Level"
+			"it": "Livello",
+			"en": "Level"
 		},
 		"description": {
-			"IT": "Complimenti! Hai raggiunto un nuovo livello.",
-			"EN": "Congratulations! You have reached a new level."
+			"it": "Complimenti! Hai raggiunto un nuovo livello.",
+			"en": "Congratulations! You have reached a new level."
 		}
 	},
 	{
 		"id": "PROPOSED",
 		"type" : "",
 		"title": {
-			"IT": "Sfida in scadenza",
-			"EN": "Challenge expiring"
+			"it": "Sfida in scadenza",
+			"en": "Challenge expiring"
 		},
 		"description": {
-			"IT": "Ricordati di scegliere la tua sfida.",
-			"EN": "Remember to choose your challenge."
+			"it": "Ricordati di scegliere la tua sfida.",
+			"en": "Remember to choose your challenge."
 		}
 	}
 ]
