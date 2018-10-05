@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.communicator.model.Notification;
+import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
+import eu.trentorise.smartcampus.mobility.gamificationweb.NotificationsManager;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
@@ -17,6 +19,9 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 public class TestController {
 
 	private static final String NOTIFICATION_APP = "mobility.trentoplaygo.test";
+	
+	@Autowired
+	private NotificationsManager notificatioManager;		
 	
 	@Autowired
 	private NotificationHelper notificatioHelper;	
@@ -28,13 +33,17 @@ public class TestController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/test/notification")
 	public @ResponseBody void notification(@RequestParam(required = false) String id, @RequestParam(required = false) String title, @RequestParam(required = false) String description, @RequestParam(required = false) String type) throws Exception {
-		Notification notification = new Notification();
+		Notification notification = notificatioManager.buildNotification("it", LevelGainedNotification.class.getSimpleName());
 
-		notification.setTitle(title != null ? title : "Livello");
-		
-		notification.setDescription(description != null ? title : "Complimenti! Hai raggiunto un nuovo livello.");
-		
-		notification.setType(type != null ? type : "level");
+		if (title != null) {
+			notification.setTitle(title);
+		}
+		if (description != null) {
+			notification.setDescription(description);
+		}
+		if (type != null) {
+			notification.setType(type);
+		}
 		
 		notificatioHelper.notify(notification, (id == null ? "8" : id), NOTIFICATION_APP);
 	}	
