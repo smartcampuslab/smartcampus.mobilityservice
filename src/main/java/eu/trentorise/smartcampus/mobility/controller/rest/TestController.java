@@ -1,5 +1,7 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Maps;
 
 import eu.trentorise.smartcampus.communicator.model.Notification;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
@@ -42,7 +46,9 @@ public class TestController {
 			notification.setDescription(description);
 		}
 		if (type != null) {
-			notification.setType(type);
+			Map<String, Object> content = Maps.newTreeMap();
+			content.put("type", type);
+			notification.setContent(content);
 		}
 		
 		notificatioHelper.notify(notification, (id == null ? "8" : id), NOTIFICATION_APP);

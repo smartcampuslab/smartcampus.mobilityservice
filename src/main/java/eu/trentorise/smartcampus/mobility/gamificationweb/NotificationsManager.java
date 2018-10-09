@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
@@ -244,7 +245,9 @@ public class NotificationsManager {
 		if (message != null) {
 			notification.setTitle(message.getTitle().get(lang));
 			notification.setDescription(message.getDescription().get(lang));
-			notification.setType(message.getType());
+			Map<String, Object> content = Maps.newTreeMap();
+			content.put("type", message.getType());
+			notification.setContent(content);
 		}
 	}
 	
