@@ -13,6 +13,8 @@ public class Avatar {
 	
 	private String contentType;
 	private String fileName;
+	
+	private String appId;
 
 	public String getId() {
 		return id;
@@ -52,6 +54,14 @@ public class Avatar {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 	
 }

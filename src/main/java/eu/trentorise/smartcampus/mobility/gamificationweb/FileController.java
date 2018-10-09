@@ -137,6 +137,7 @@ public class FileController {
 			av.setAvatarDataSmall(bbs);
 			av.setContentType(data.getContentType());
 			av.setFileName(data.getOriginalFilename());
+			av.setAppId(appId);
 
 			avatarRepository.save(av);
 		} catch (Exception e) {
