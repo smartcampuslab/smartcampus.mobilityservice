@@ -1,5 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -266,23 +267,14 @@ public class ChallengesUtils {
 				}
 
 				result.setChallengeData(Multimaps.asMap(challengesMap));
-				
-//				result.getChallengeData().put(ChallengeDataType.ACTIVE, challenges);
-//				result.getChallengeData().put(ChallengeDataType.OLD, oldChallenges);
-//				result.getChallengeData().put(ChallengeDataType.PROPOSED, proposedChallenges);
 			}
-    		// Sorting
-        	/*Collections.sort(challenges, new Comparator<ChallengesData>() {
-        	    public int compare(ChallengesData chalData2, ChallengesData chalData1){
-        	        return  chalData2.getChallId().compareTo(chalData1.getChallId());
-        	    }
-        	});
-        	Collections.sort(oldChallenges, new Comparator<ChallengesData>() {
-        	    public int compare(ChallengesData chalData2, ChallengesData chalData1){
-        	        return  chalData1.getChallId().compareTo(chalData2.getChallId());
-        	    }
-        	});*/
+    		
 		}
+    	
+		result.getChallengeData().values().forEach(x -> {
+			Collections.sort(x);
+		});
+    	
     	return result;
     }
 	

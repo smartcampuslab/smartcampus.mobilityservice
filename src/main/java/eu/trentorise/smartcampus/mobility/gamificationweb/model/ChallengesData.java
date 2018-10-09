@@ -3,7 +3,7 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class ChallengesData {
+public class ChallengesData implements Comparable<ChallengesData> {
 	
 	private String challId = "";
 	private String challDesc = "";
@@ -159,6 +159,11 @@ public class ChallengesData {
 	public String toString() {
 		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
 		return tsb.build();
+	}
+
+	@Override
+	public int compareTo(ChallengesData o) {
+		return challId.compareTo(o.challId);
 	}
 
 }
