@@ -27,13 +27,13 @@
 				<label th:text="#{survey.acc1}">acc1</label> <br />
 				<ol>
 					<p th:each="prod: ${#numbers.sequence(1, 24)}">
-					<fieldset>
-						<li th:text="#{survey.q + ${prod}}">?</li> <span
-							th:text="#{survey.acc2.1}"></span> <span
+					<fieldset th:id="|fs${prod}|">
+						<li th:text="#{survey.q + ${prod}}">?</li> <span style="font-size:12px" 
+							th:text="#{survey.acc2.1}"></span> <span style="font-size:12px" th:text="#{survey.acc2.2}"></span><br/><span th:id="|el${prod}|"
 							th:each="val: ${#numbers.sequence(1, 7)}"> <input
 							type="radio" th:id="|r${prod}|" th:name="|q${prod}|"
 							th:value="${val}" /> <label th:for="|r${prod}|" th:text="${val}">1</label>
-						</span> <span th:text="#{survey.acc2.2}"></span>
+						</span> 
 					</fieldset>
 					</p>
 				</ol>
@@ -120,7 +120,7 @@
 						<option value="Other" th:text="#{survey.residence.3}"></option>
 					</select>
 				</div>
-
+				
 				<div class="form-group">
 					<label for="source" th:text="#{survey.source}">Come sei
 						venuto a conoscenza di questo gioco?</label> <select name="source"
@@ -135,6 +135,7 @@
 						<option value="other" th:text="#{survey.source.7}"></option>
 					</select>
 				</div>
+
  
 				<div class="form-group">
 					<label for="prev" th:text="#{survey.prev}">Hai partecipato
@@ -145,6 +146,13 @@
 						<option value="no" th:text="#{survey.prev.2}"></option>
 					</select>
 				</div>
+				
+			<div class="form-group">
+				<button id="check" type="button" class="btn btn-primary"
+					th:text="#{survey.next}" onClick="highlightIncomplete(false)">NEXT</button>
+			</div>				
+				
+				
 			</div>
 
 			<div class="second-page" style="display:none;">
@@ -157,12 +165,14 @@
 					</select>
 				</div>
 
-			</div>
-
 			<div class="form-group">
 				<button id="send" type="button" class="btn btn-primary"
 					th:text="#{survey.submit}">Submit</button>
 			</div>
+
+			</div>
+
+
 
 		</form>
 
@@ -188,8 +198,42 @@
     }
   });
   
+  function highlightIncomplete(blackonly) {
+	  var next = true;
+	  var qsn = $('fieldset').length;
+	  
+		for (i = 1; i <= qsn; i++) {
+			var v = $("input[name='q" + i + "']:checked")
+			var inp = $("span[id=el" + i + "]");
+			if (v.val() === undefined) {
+				inp.each(function() {
+				if (!blackonly) {
+					$(this).attr("style", "color:red;");
+				}
+				next = false;
+				});
+			} else {
+				inp.attr("style", "color:black;");
+			}
+		} 		  
+	  
+		$('select:visible').each(function() {
+			if ($(this).val().length === 0) {
+				if (!blackonly) {
+					$(this).attr("style", "color:red;");
+				}
+				next = false;
+			} else {
+				$(this).attr("style", "color:black;");
+			}
+		});			
+	  
+		if (!blackonly || !first) {
+			checkData()
+		}
+  }
+  
   function checkData() {
-	//var qsn = [[${questions}]]
 	var qsn = $('fieldset').length;
 	
 	var disabled = false;
@@ -225,8 +269,8 @@
     return disabled;
   }
   
-  $('select').change(checkData);
-  $('input').change(checkData);
+  $('select').change(highlightIncomplete);
+  $('input').change(highlightIncomplete);
   checkData();
 /*]]>*/
 </script>
