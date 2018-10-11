@@ -43,10 +43,10 @@
 							<ul class="nav navbar-nav">
 								<li><a> <img height="22" src="../img/foglia.svg"/> </a></li>
 
-								<li th:class="${view == 'prizes' ? 'active' :''}"><a href="./prizes"  th:text="#{web.prizes}">Premi</a></li>
-								<li th:class="${view == 'rules' ? 'active' :''}"><a href="./rules"  th:text="#{web.rules}">Regole</a></li>
-								<li th:class="${view == 'privacy' ? 'active' :''}"><a href="./privacy"  th:text="#{web.privacy}">Privacy</a></li>
-                <li th:class="${view == 'faq' ? 'active' :''}"><a href="./faq"  th:text="#{web.faq}">FAQ</a></li>
+								<li th:class="${view == 'prizes' ? 'active' :''}"><a th:href="|./prizes?lang=${lang}|"  th:text="#{web.prizes}">Premi</a></li>
+								<li th:class="${view == 'rules' ? 'active' :''}"><a th:href="|./rules?lang=${lang}|"  th:text="#{web.rules}">Regole</a></li>
+								<li th:class="${view == 'privacy' ? 'active' :''}"><a th:href="|./privacy?lang=${lang}|"  th:text="#{web.privacy}">Privacy</a></li>
+                <li th:class="${view == 'faq' ? 'active' :''}"><a th:href="|./faq?lang=${lang}|"  th:text="#{web.faq}">FAQ</a></li>
 
 							</ul>
 							<ul class="nav navbar-nav navbar-right">
@@ -141,7 +141,7 @@
                           </div>
                           <h4  th:text="#{web.rules.title3}" ></h4>
                           <div align="justify">
-                            <span  th:utext="#{web.rules.text3}"></span>&nbsp;<a href="../pdf/regolamento_playgo_2017.pdf" target="_system" th:text="#{web.rules.link}"></a>
+                            <span  th:utext="#{web.rules.text3}"></span>
                           </div>
                          </div>   
                       </div>  
@@ -160,7 +160,7 @@
                          <div class="panel-body">
                           <h4  th:text="#{web.privacy.title1}" ></h4>
                           <div align="justify">
-                            <span  th:utext="#{web.privacy.text1}"></span>&nbsp;<a href="../pdf/normativa.pdf" target="_system" th:text="#{web.privacy.link}"></a>.
+                            <span  th:utext="#{web.privacy.text1}"></span>
                           </div>
                          </div>   
                       </div>  
