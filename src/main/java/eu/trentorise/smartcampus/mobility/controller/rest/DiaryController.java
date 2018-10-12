@@ -288,6 +288,7 @@ public class DiaryController {
 				de2.setChallengeName(description);
 				de2.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());					
 				de2.setTimestamp(challengeConcept.getDateCompleted().getTime());
+				de2.setChallengeEnd(challengeConcept.getEnd().getTime());
 				result.add(de2);
 			}
 			de.setChallengeEnd(challengeConcept.getEnd().getTime());		
