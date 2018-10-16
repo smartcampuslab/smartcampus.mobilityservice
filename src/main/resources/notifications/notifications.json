@@ -15,12 +15,12 @@
 		"id": "PROPOSED",
 		"type" : "",
 		"title": {
-			"it": "Sfida in scadenza",
-			"en": "Challenge expiring"
+			"it": "Sfide",
+			"en": "Challenges"
 		},
 		"description": {
-			"it": "Ricordati di scegliere la tua sfida.",
-			"en": "Remember to choose your challenge."
+			"it": "Puoi scegliere la sfida per la prossima settimana!",
+			"en": "You can choose the challenge for next week!"
 		}
 	}
 ]
