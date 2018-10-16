@@ -290,7 +290,7 @@ public class TrackValidator {
 			}
 			return status;
 		} else {
-			status.setValidationOutcome(TravelValidity.PENDING);
+			status.setValidationOutcome(TravelValidity.INVALID);
 			return status;
 		}
 	}
