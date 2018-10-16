@@ -13,7 +13,7 @@
 	},
 	{
 		"id": "PROPOSED",
-		"type" : "",
+		"type" : "program_challenge",
 		"title": {
 			"it": "Sfide",
 			"en": "Challenges"
