@@ -91,7 +91,7 @@ public class NotificationsManager {
 		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
 	}
 	
-//	@Scheduled(cron="0 15 9 * * MON")
+	@Scheduled(cron="0 0 12 * * WED")
 	public void checkProposedPending() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			logger.info("Sending notifications for app " + appInfo.getAppId());
@@ -134,7 +134,7 @@ public class NotificationsManager {
 		}
 	}
 	
-	@Scheduled(fixedRate = 1000 * 60 * 1) 
+	@Scheduled(fixedRate = 1000 * 60 * 10) 
 	public void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
