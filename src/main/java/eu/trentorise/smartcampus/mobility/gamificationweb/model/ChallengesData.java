@@ -163,7 +163,7 @@ public class ChallengesData implements Comparable<ChallengesData> {
 
 	@Override
 	public int compareTo(ChallengesData o) {
-		return challId.compareTo(o.challId);
+		return new Long(startDate).compareTo(new Long(o.startDate));
 	}
 
 }
