@@ -273,6 +273,7 @@ public class ChallengesUtils {
     	
 		result.getChallengeData().values().forEach(x -> {
 			Collections.sort(x);
+			Collections.reverse(x);
 		});
     	
     	return result;
