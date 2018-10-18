@@ -153,7 +153,7 @@ public class RankingManager {
 		query.fields().include("socialId").include("nickname");
 
 		List<Player> players = template.find(query, Player.class, "player");
-		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));		
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
 		
 		List<ClassificationData> classificationList = Lists.newArrayList();
 		if (board.getBoard() != null) {
@@ -177,7 +177,7 @@ public class RankingManager {
 		query.fields().include("socialId").include("nickname");
 
 		List<Player> players = template.find(query, Player.class, "player");
-		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));		
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
 		
 		List<ClassificationData> classificationList = Lists.newArrayList();
 		for (ClassificationPosition pos : board.getBoard()) {

@@ -257,7 +257,7 @@ public class PlayerController {
 		
 		Player p = null;
 		String nickName = "";
-		p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		p = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		String language = "it";
 		if(p != null){
 			nickName = p.getNickname();
@@ -314,7 +314,7 @@ public class PlayerController {
 		
 		String gameId = getGameId(appId);
 		
-		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		Player p = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		final String lang;
 		if (p == null || p.getLanguage() == null || p.getLanguage().isEmpty()) {
 			lang = "it";
@@ -396,7 +396,7 @@ public class PlayerController {
 		
 		Player p = null;
 		String nickName = "";
-		p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		p = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		String language = "it";
 		if(p != null){
 			nickName = p.getNickname();
@@ -419,7 +419,7 @@ public class PlayerController {
 		boolean result = false;
 		String gameId = getGameId(appId);
 		
-		Player p = playerRepositoryDao.findByIdAndGameId(socialId, gameId);
+		Player p = playerRepositoryDao.findByPlayerIdAndGameId(socialId, gameId);
 		if (p != null && p.getNickname() != null && !p.getNickname().isEmpty()) {
 			logger.debug(String.format("Profile find result %s", p.toJSONString()));
 			result = true;
@@ -467,12 +467,12 @@ public class PlayerController {
 		String gameId = getGameId(appId);
 		logger.debug("External registration: found user profile with id " + id);
 		Player withNick = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
-		if (withNick != null && !withNick.getId().equals(id)) {
-			logger.debug("External registration: nickname conflict with user " + withNick.getId());
+		if (withNick != null && !withNick.getPlayerId().equals(id)) {
+			logger.debug("External registration: nickname conflict with user " + withNick.getPlayerId());
 			res.setStatus(HttpStatus.CONFLICT.value());
 			return null;
 		}
-		Player p = playerRepositoryDao.findByIdAndGameId(id, gameId);
+		Player p = playerRepositoryDao.findByPlayerIdAndGameId(id, gameId);
 		if (p != null) {
 			logger.debug("External registration: user exists");
 			res.setStatus(HttpStatus.CONFLICT.value());
@@ -589,7 +589,7 @@ public class PlayerController {
 
 		GameInfo game = gameSetup.findGameById(gameId);
 
-		Player player = playerRepositoryDao.findByIdAndGameId(playerId, gameId);
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(playerId, gameId);
 
 		if (player == null) {
 			return null;
@@ -599,7 +599,7 @@ public class PlayerController {
 		ResponseEntity<String> res = null;
 
 		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+			res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 			String data = res.getBody();
 
 			int greenLeaves = getGreenLeavesPoints(data);
@@ -611,7 +611,7 @@ public class PlayerController {
 		}
 
 		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+			res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 			List nots = mapper.readValue(res.getBody(), List.class);
 			List<Badge> badges = Lists.newArrayList();
@@ -648,7 +648,7 @@ public class PlayerController {
 
 		op.setNickname(player.getNickname());
 
-		res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		String allData = res.getBody();
 
@@ -676,38 +676,38 @@ public class PlayerController {
 		String gameId = appSetup.findAppById(appId).getGameId();
 		Iterable<Player> players = playerRepositoryDao.findAllByCheckedRecommendationAndGameId(true, gameId);
 		for (Player player : players) {
-			logger.debug("Checking recommendation for " + player.getId());
+			logger.debug("Checking recommendation for " + player.getPlayerId());
 			if (player.getPersonalData() != null) {
 				String nickname = (String) player.getPersonalData().get(NICK_RECOMMANDATION);
 				if (nickname != null && !nickname.isEmpty()) {
 					Player recommender = playerRepositoryDao.findByNicknameIgnoreCaseAndGameId(correctNameForQuery(nickname), gameId);
 					if (recommender != null) {
-						if (bannedChecker.isBanned(recommender.getId(), gameId)) {
-							logger.warn("Not sending for banned player " + recommender.getId());
+						if (bannedChecker.isBanned(recommender.getPlayerId(), gameId)) {
+							logger.warn("Not sending for banned player " + recommender.getPlayerId());
 							player.setCheckedRecommendation(false);
 							playerRepositoryDao.save(player);							
 							continue;
 						}						
 						RestTemplate restTemplate = new RestTemplate();
-						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getId(), HttpMethod.GET,
+						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET,
 								new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 						String data = res.getBody();
 
 						if (getGreenLeavesPoints(data) > 0) {
-							logger.info("Sending recommendation to gamification engine: " + player.getId() + " -> " + recommender.getId());
-							sendRecommendationToGamification(recommender.getId(), gameId, appId);
+							logger.info("Sending recommendation to gamification engine: " + player.getPlayerId() + " -> " + recommender.getPlayerId());
+							sendRecommendationToGamification(recommender.getPlayerId(), gameId, appId);
 							player.setCheckedRecommendation(false);
 							playerRepositoryDao.save(player);
 						} else {
-							logger.debug("Not Sending recommendation for " + player.getId() + " -> " + recommender.getId() + ", no points yet.");
+							logger.debug("Not Sending recommendation for " + player.getPlayerId() + " -> " + recommender.getPlayerId() + ", no points yet.");
 						}
 					} else {
-						logger.debug("Recommender not found for " + player.getId());
+						logger.debug("Recommender not found for " + player.getPlayerId());
 						player.setCheckedRecommendation(false);
 						playerRepositoryDao.save(player);
 					}
 				} else {
-					logger.debug("No recommender for " + player.getId());
+					logger.debug("No recommender for " + player.getPlayerId());
 					player.setCheckedRecommendation(false);
 					playerRepositoryDao.save(player);
 				}
@@ -785,7 +785,7 @@ public class PlayerController {
 		query.fields().include("socialId").include("nickname");
 
 		List<Player> players = template.find(query, Player.class, "player");
-		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getId, Player::getNickname));
+		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
 
 		pc.setClassificationList(data);
 		for (ClassificationData cd : data) {

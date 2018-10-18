@@ -111,7 +111,7 @@ public class NotificationsManager {
 		List<Player> players = playerRepository.findAllByGameId(appInfo.getGameId());
 		for (Player p: players) {
 			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())),
+			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())),
 					String.class);
 			String data = res.getBody();			
 			
@@ -126,8 +126,8 @@ public class NotificationsManager {
 			}
 			
 			if (proposed) {
-				logger.info("Sending notification to " + p.getId());
-				notificatioHelper.notify(buildNotification(p.getLanguage(), "PROPOSED"), p.getId(), NOTIFICATION_APP);
+				logger.info("Sending notification to " + p.getPlayerId());
+				notificatioHelper.notify(buildNotification(p.getLanguage(), "PROPOSED"), p.getPlayerId(), NOTIFICATION_APP);
 				continue;
 			}
 			
@@ -151,7 +151,7 @@ public class NotificationsManager {
 		}
 		
 		for (Notification not: nots) {
-			Player p = playerRepository.findByIdAndGameId(not.getPlayerId(), not.getGameId());
+			Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
 			
 			if (p != null) {
 				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not.getClass().getSimpleName());

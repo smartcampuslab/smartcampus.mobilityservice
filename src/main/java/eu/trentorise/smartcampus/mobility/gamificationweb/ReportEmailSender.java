@@ -25,8 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -116,11 +116,11 @@ public class ReportEmailSender {
 
 	private Map<String, List<WeekPrizeData>> weekPrizeData = new HashMap<>();
 	
-//	@GetMapping("/gamificationweb/test1")
-//	public void sendNotification() throws Exception {
-//		sendWeeklyNotification();
-//		System.out.println("DONE");
-//	}
+	@GetMapping("/gamificationweb/test1")
+	public void sendNotification() throws Exception {
+		sendWeeklyNotification();
+		System.out.println("DONE");
+	}
 //	
 //	@GetMapping("/gamificationweb/test2")
 //	public synchronized void sendPDFMail() throws Exception {
@@ -128,7 +128,7 @@ public class ReportEmailSender {
 //		System.out.println("DONE");
 //	}	
 	
-	@Scheduled(cron="0 0 16 * * FRI")
+//	@Scheduled(cron="0 0 16 * * FRI")
 	public void sendWeeklyNotification() throws Exception {
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -249,15 +249,15 @@ public class ReportEmailSender {
 				continue;
 			}
 
-			String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
-			String unsubcribeLink = utils.createUnsubscribeUrl(p.getId(), gameId);
+			String compileSurveyUrl = utils.createSurveyUrl(p.getPlayerId(), gameId, START_SURVEY, getPlayerLang(p));
+			String unsubcribeLink = utils.createUnsubscribeUrl(p.getPlayerId(), gameId);
 			List<Notification> notifications = null;
 			List<BadgesData> someBadge = null;
 			List<ChallengesData> challenges = null;
 			List<ChallengesData> lastWeekChallenges = null;
 			Locale mailLoc = Locale.ITALIAN;
 
-			String urlWSState = "gengine/state/" + gameId + "/" + p.getId();
+			String urlWSState = "gengine/state/" + gameId + "/" + p.getPlayerId();
 
 			String completeState = getAllChallenges(urlWSState, appId);
 			String language = p.getLanguage();
@@ -277,7 +277,7 @@ public class ReportEmailSender {
 				mailPrizeActualData = configUtils.getWeekPrizes(nextWeekConfData.getWeekNum(), ITA_LANG);
 			}
 
-			PlayerStatus completePlayerStatus = statusUtils.convertPlayerData(completeState, p.getId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
+			PlayerStatus completePlayerStatus = statusUtils.convertPlayerData(completeState, p.getPlayerId(), gameId, p.getNickname(), mobilityUrl + "/gamificationweb/", 0, language);
 			List<PointConcept> states = completePlayerStatus.getPointConcept();
 			int point_green = 0;
 			int point_green_w = 0;
@@ -302,7 +302,7 @@ public class ReportEmailSender {
 				lastWeekChallenges = challLists.getChallengeData().get(ChallengeDataType.OLD);
 			}
 
-			notifications = getBadgeNotifications(appId, p.getId());
+			notifications = getBadgeNotifications(appId, p.getPlayerId());
 
 			if (notifications != null && !notifications.isEmpty()) {
 				List<BadgesData> allBadge = getAllBadges(path);
@@ -358,11 +358,11 @@ public class ReportEmailSender {
 			logger.info(String.format("Profile found  %s", p.getNickname()));
 
 			if (!p.isSendMail()) {
-				logger.info("Mail non sent to " + p.getNickname() + " (" + p.getId() + "). Email notifications are disabled.");
+				logger.info("Mail non sent to " + p.getNickname() + " (" + p.getPlayerId() + "). Email notifications are disabled.");
 				continue;
 			}
 
-			String moduleName = certificatesDir + "/Certificato_TrentoRoveretoPlayAndGo_" + p.getId() + ".pdf";
+			String moduleName = certificatesDir + "/Certificato_TrentoRoveretoPlayAndGo_" + p.getPlayerId() + ".pdf";
 			try {
 				File finalModule = new File(moduleName);
 				// String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
@@ -391,13 +391,13 @@ public class ReportEmailSender {
 						try {
 							this.emailService.sendMailGamificationWithReport(playerName, finalModule, standardImages, mailto, mailRedirectUrl, showFinalEvent, mailLoc);
 
-							logger.info("Mail Sent to " + p.getNickname() + " (" + p.getId() + ").");
+							logger.info("Mail Sent to " + p.getNickname() + " (" + p.getPlayerId() + ").");
 						} catch (MessagingException e) {
 							logger.error(String.format("Error sending email : %s", e.getMessage()));
 						}
 					}
 				} catch (Exception ex) {
-					logger.info("Mail not sent to " + p.getNickname() + " (" + p.getId() + "). PDF not found.");
+					logger.info("Mail not sent to " + p.getNickname() + " (" + p.getPlayerId() + "). PDF not found.");
 				}
 
 			} catch (Exception e) {

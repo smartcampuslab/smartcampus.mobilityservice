@@ -99,7 +99,7 @@ public class FileController {
 				return;
 			}
 
-			player = playerRepository.findByIdAndGameId(userId, gameId);
+			player = playerRepository.findByPlayerIdAndGameId(userId, gameId);
 
 			if (player == null) {
 				logger.error("Player not found.");

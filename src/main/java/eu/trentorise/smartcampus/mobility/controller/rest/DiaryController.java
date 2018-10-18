@@ -137,7 +137,7 @@ public class DiaryController {
 		logger.info("Reading diary for user " + userId);
 
 		String gameId = appSetup.findAppById(appId).getGameId();
-		Player p = playerRepositoryDao.findByIdAndGameId(userId, gameId);
+		Player p = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 
 		List<DiaryEntry> result = Lists.newArrayList();
 
@@ -206,13 +206,13 @@ public class DiaryController {
 		if (rps != null) {
 			for (Player rp : rps) {
 				RestTemplate restTemplate = new RestTemplate();
-				ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + rp.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
+				ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + rp.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 						String.class);
 				String data = res.getBody();
 
 				int gl = getGreenLeavesPoints(data);
 				if (gl > 0) {
-					logger.info("Found recommended player " + rp.getId() + " with points: " + gl);
+					logger.info("Found recommended player " + rp.getPlayerId() + " with points: " + gl);
 					long timestamp = (long) rp.getPersonalData().get("timestamp");
 					DiaryEntry de = new DiaryEntry();
 					de.setType(DiaryEntryType.RECOMMENDED);
@@ -267,7 +267,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		String allData = res.getBody();
 
@@ -341,7 +341,7 @@ public class DiaryController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 
 		List nots = mapper.readValue(res.getBody(), List.class);
 		for (Object o : nots) {

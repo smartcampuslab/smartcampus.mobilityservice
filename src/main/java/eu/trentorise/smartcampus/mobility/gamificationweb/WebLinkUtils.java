@@ -51,6 +51,7 @@ public class WebLinkUtils {
 	@PostConstruct
 	public void init() throws Exception {
 		cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
+		System.err.println(cryptUtils.encrypt("15:5b7a885149c95d50c5f9d442"));
 	}
 	
 	/**

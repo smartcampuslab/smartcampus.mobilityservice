@@ -6,14 +6,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="player")
 public class Player {
 	
-	@Id
-	private String id;
+//	@Id
+//	private String id;
+	
+	private String playerId;
 	private String gameId;
 	
 	private String name;
@@ -33,11 +34,11 @@ public class Player {
 		super();
 	}
 
-	public Player(String pid, String gameId, String name, String surname, String nickname,
+	public Player(String playerId, String gameId, String name, String surname, String nickname,
 			//String mail, String language, boolean sendMail, PersonalData personalData, SurveyData surveyData, String type) {
 			String mail, String language, boolean sendMail, Map<String, Object> personalData, Map<String,Map<String,Object>> surveyData, boolean checkRecommendation) {
 		super();
-		this.id = pid;
+		this.playerId = playerId;
 		this.gameId = gameId;
 		this.name = name;
 		this.surname = surname;
@@ -82,14 +83,22 @@ public class Player {
 		this.mail = mail;
 	}
 
-	public String getId() {
-		return id;
+//	public String getId() {
+//		return id;
+//	}
+//
+//	public void getId(String pid) {
+//		this.id = pid;
+//	}
+	
+	public String getPlayerId() {
+		return playerId;
 	}
 
-	public void setId(String pid) {
-		this.id = pid;
+	public void setPlayerId(String playerId) {
+		this.playerId = playerId;
 	}
-	
+
 	public String getGameId() {
 		return gameId;
 	}

@@ -130,7 +130,7 @@ public class GamificationWebController {
 			String gameId = identity.gameId;
 			if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 				logger.info("Survey data. Found player : " + sId);
-				Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+				Player p = playerRepositoryDao.findByPlayerIdAndGameId(sId, gameId);
 				if (p.getSurveys().containsKey(survey)) {
 					model = new ModelAndView("web/survey_complete");
 					model.addObject("surveyComplete", true);
@@ -166,7 +166,7 @@ public class GamificationWebController {
 			String gameId = identity.gameId;
 			if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 				logger.info("Survey data. Found player : " + sId);
-					Player p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					Player p = playerRepositoryDao.findByPlayerIdAndGameId(sId, gameId);
 					if (!p.getSurveys().containsKey(survey)) {
 						p.addSurvey(survey, toSurveyData(formData));
 						sendSurveyToGamification(sId, gameId, survey);
@@ -229,7 +229,7 @@ public class GamificationWebController {
 				String gameId = identity.gameId;
 				if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 					logger.info("WS-GET. Method unsubscribeMail. Found player : " + sId);
-					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					p = playerRepositoryDao.findByPlayerIdAndGameId(sId, gameId);
 					user_language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 				}
 			} catch (Exception ex){
@@ -257,7 +257,7 @@ public class GamificationWebController {
 				String gameId = identity.gameId;
 				if(!StringUtils.isEmpty(sId)){	// case of incorrect encrypted string
 					logger.info("WS-GET. Method sendUnsubscribeMail. Found player : " + sId);
-					p = playerRepositoryDao.findByIdAndGameId(sId, gameId);
+					p = playerRepositoryDao.findByPlayerIdAndGameId(sId, gameId);
 					p.setSendMail(false);
 					playerRepositoryDao.save(p);
 					user_language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
