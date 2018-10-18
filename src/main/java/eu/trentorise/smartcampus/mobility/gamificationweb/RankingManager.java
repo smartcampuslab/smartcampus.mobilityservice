@@ -152,7 +152,7 @@ public class RankingManager {
 		
 		Criteria criteria = new Criteria("gameId").is(gameId);
 		Query query = new Query(criteria);
-		query.fields().include("nickname");
+		query.fields().include("nickname").include("playerId");
 
 		List<Player> players = template.find(query, Player.class, "player");
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
@@ -177,7 +177,7 @@ public class RankingManager {
 		
 		Criteria criteria = new Criteria("gameId").is(gameId);
 		Query query = new Query(criteria);
-		query.fields().include("nickname");
+		query.fields().include("nickname").include("playerId");
 
 		List<Player> players = template.find(query, Player.class, "player");
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
