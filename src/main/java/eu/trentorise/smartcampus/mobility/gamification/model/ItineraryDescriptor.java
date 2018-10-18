@@ -155,7 +155,7 @@ public class ItineraryDescriptor implements Comparable<ItineraryDescriptor> {
 
 	@Override
 	public int compareTo(ItineraryDescriptor o) {
-		return new Long(startTime).compareTo(new Long(o.startTime));
+		return new Long(o.startTime).compareTo(new Long(startTime));
 	}
 	
 	
