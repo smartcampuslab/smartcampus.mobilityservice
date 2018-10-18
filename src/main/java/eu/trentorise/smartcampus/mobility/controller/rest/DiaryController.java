@@ -53,6 +53,7 @@ import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.DiaryEnt
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry.TravelType;
 import eu.trentorise.smartcampus.mobility.gamification.model.BadgeNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept.ChallengeState;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance.ScoreStatus;
@@ -272,13 +273,17 @@ public class DiaryController {
 
 		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
+			if (!challengeConcept.getStateDate().containsKey(ChallengeState.ASSIGNED)) {
+				continue;
+			}
+			
 			String description = challengeUtils.fillDescription(challengeConcept, language);
 //			String longDescription = challengeUtils.fillLongDescription(challengeConcept, language);
-			
+
 			DiaryEntry de = new DiaryEntry();
 			de.setEntityId(challengeConcept.getName() + "_assigned");
 			de.setType(DiaryEntryType.CHALLENGE);
-			de.setTimestamp(challengeConcept.getStart().getTime());
+			de.setTimestamp(challengeConcept.getStateDate().get(ChallengeState.ASSIGNED).getTime());
 			de.setChallengeName(description);
 			de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
 			if (challengeConcept.isCompleted()) {
