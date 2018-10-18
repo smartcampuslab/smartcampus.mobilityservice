@@ -8,6 +8,11 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ChallengeConcept extends GameConcept {
+	
+    public static enum ChallengeState {
+        PROPOSED, ASSIGNED, ACTIVE, COMPLETED, FAILED, REFUSED, AUTO_DISCARDED
+    }	
+	
 	private String modelName;
 	private Map<String, Object> fields = new HashMap<String, Object>();
 	private Date start;
@@ -18,6 +23,9 @@ public class ChallengeConcept extends GameConcept {
 	private Date dateCompleted;
 	
 	private String state;
+	
+    private Map<ChallengeState, Date> stateDate = new HashMap<>();
+    private String origin;	
 
 	public String getModelName() {
 		return modelName;
@@ -76,6 +84,14 @@ public class ChallengeConcept extends GameConcept {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public Map<ChallengeState, Date> getStateDate() {
+		return stateDate;
+	}
+
+	public String getOrigin() {
+		return origin;
 	}
 
 	@Override
