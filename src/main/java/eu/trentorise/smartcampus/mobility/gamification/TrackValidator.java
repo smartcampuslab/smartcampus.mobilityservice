@@ -60,9 +60,6 @@ public class TrackValidator {
 	public static final double VALIDITY_THRESHOLD = 80; // %
 	public static final double ACCURACY_THRESHOLD = 150; // meters
 	
-	public static final int COVERAGE_THRESHOLD = 80; // %
-	private static final double CERTIFIED_COVERAGE_THRESHOLD = 60; // %
-	private static final double GUARANTEED_COVERAGE_THRESHOLD = 90; // %
 
 	public static final double MIN_COVERAGE_THRESHOLD = 30; // %
 
@@ -70,6 +67,13 @@ public class TrackValidator {
 	public static final long DATA_HOLE_THRESHOLD = 10*60; // seconds
 	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters 
 	private static final double MAX_AVG_SPEED_THRESHOLD = 200; // km/h
+	
+	public static final int COVERAGE_THRESHOLD = 80; // %
+	public static final int CERTIFIED_COVERAGE_THRESHOLD_VALID = 70;
+	public static final int CERTIFIED_COVERAGE_THRESHOLD_PENDING = 50;	
+	private static final double GUARANTEED_COVERAGE_THRESHOLD_VALID = 90; // %
+	private static final double GUARANTEED_COVERAGE_THRESHOLD_PENDING = 80; // %
+	
 	
 	/**
 	 * Preprocess tracked data: spline, remove outstanding points, remove potentially erroneous start / stop points 
@@ -263,17 +267,23 @@ public class TrackValidator {
 				coveredDistance += interval.getDistance() * subtrackPrecision / 100.0;
 			}
 			double coverage = 100.0 * matchedDistance / transportDistance;// status.getDistance();
-			if (checkCertificate) {
+			if (checkCertificate) { // bus
 				boolean certified = isCertifiedTrack(track); 
+				
 				if (certified && coverage >= COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);
-				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
+				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD_VALID) {
 					status.setValidationOutcome(TravelValidity.VALID);				
-				} else if (!certified && 100.0 * coveredDistance / transportDistance >= GUARANTEED_COVERAGE_THRESHOLD) {
-					status.setValidationOutcome(TravelValidity.VALID);				
-				} else {	
+				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD_PENDING) {
 					status.setValidationOutcome(TravelValidity.PENDING);				
+				} else if (!certified && 100.0 * coveredDistance / transportDistance >= GUARANTEED_COVERAGE_THRESHOLD_VALID) {
+					status.setValidationOutcome(TravelValidity.VALID);				
+				} else if (!certified && 100.0 * coveredDistance / transportDistance >= GUARANTEED_COVERAGE_THRESHOLD_PENDING) {
+					status.setValidationOutcome(TravelValidity.PENDING);				
+				} else {
+					status.setValidationOutcome(TravelValidity.INVALID);				
 				}
+				
 //				if (certified && coverage >= COVERAGE_THRESHOLD) {
 //					status.setValidationOutcome(TravelValidity.VALID);
 //				} else if (certified && 100.0 * coveredDistance / transportDistance >= CERTIFIED_COVERAGE_THRESHOLD) {
