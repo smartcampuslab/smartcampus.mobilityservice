@@ -150,8 +150,9 @@ public class RankingManager {
 			computeRanking(board);
 		}
 		
-		Query query = new Query();
-		query.fields().include("socialId").include("nickname");
+		Criteria criteria = new Criteria("gameId").is(gameId);
+		Query query = new Query(criteria);
+		query.fields().include("nickname");
 
 		List<Player> players = template.find(query, Player.class, "player");
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
