@@ -10,6 +10,7 @@ public class GameInfo implements Serializable {
 	private String password;
 	private String start;
 	private List<Shape> areas;
+	private Boolean send;
 
 	public String getId() {
 		return id;
@@ -49,6 +50,14 @@ public class GameInfo implements Serializable {
 
 	public void setAreas(List<Shape> areas) {
 		this.areas = areas;
+	}
+
+	public Boolean getSend() {
+		return send;
+	}
+
+	public void setSend(Boolean sendEmail) {
+		this.send = sendEmail;
 	}
 
 
