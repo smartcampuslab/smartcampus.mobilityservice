@@ -27,6 +27,7 @@ import com.google.common.io.Resources;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Avatar;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.AvatarRepository;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ImageUtils;
@@ -132,12 +133,13 @@ public class FileController {
 			
 			Binary bb = new Binary(cb);
 			Binary bbs = new Binary(cbs);
-			av.setId(userId + "@" + appId);
+//			av.setId(userId + "@" + appId);
 			av.setAvatarData(bb);
 			av.setAvatarDataSmall(bbs);
 			av.setContentType(data.getContentType());
 			av.setFileName(data.getOriginalFilename());
-			av.setAppId(appId);
+			av.setPlayerId(userId);
+			av.setGameId(findGameId(appId));
 
 			avatarRepository.save(av);
 		} catch (Exception e) {
@@ -149,7 +151,7 @@ public class FileController {
 
 	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public @ResponseBody void getPlayerAvatarDataSmall(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
-		Avatar avatar = avatarRepository.findOne(playerId + "@" + appId);
+		Avatar avatar = avatarRepository.findByPlayerIdAndGameId(playerId, findGameId(appId));
 		if (avatar == null || avatar.getAvatarDataSmall() == null) {
 			avatar = avatarRepository.findOne(DEFAULT_USER);
 		}
@@ -162,7 +164,7 @@ public class FileController {
 	
 	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}/big") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public @ResponseBody void getPlayerAvatarData(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
-		Avatar avatar = avatarRepository.findOne(playerId + "@" + appId);
+		Avatar avatar = avatarRepository.findByPlayerIdAndGameId(playerId, findGameId(appId));
 		if (avatar == null || avatar.getAvatarData() == null) {
 			avatar = avatarRepository.findOne(DEFAULT_USER);
 		}
@@ -178,4 +180,9 @@ public class FileController {
 		return principal;
 	}
 
+	private String findGameId(String appId) {
+		String gameId = appSetup.findAppById(appId).getGameId();
+		return gameId;
+	}
+	
 }
