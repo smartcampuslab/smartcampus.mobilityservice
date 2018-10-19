@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -782,8 +783,10 @@ public class PlayerController {
 			return pc;
 		}
 
-		Query query = new Query();
-		query.fields().include("socialId").include("nickname");
+		AppInfo app = appSetup.findAppById(appId);
+		Criteria criteria = new Criteria("gameId").is(app.getGameId());
+		Query query = new Query(criteria);
+		query.fields().include("nickname").include("playerId");
 
 		List<Player> players = template.find(query, Player.class, "player");
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
