@@ -97,6 +97,10 @@ public class NotificationsManager {
 			logger.info("Sending notifications for app " + appInfo.getAppId());
 			try {
 				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+					GameInfo game = gameSetup.findGameById(appInfo.getGameId());
+					if (game.getSend() == null || !game.getSend()) {
+						continue;
+					}
 					checkProposedPending(appInfo);
 				}
 			} catch (Exception e) {
@@ -142,6 +146,10 @@ public class NotificationsManager {
 		
 		for (AppInfo appInfo : appSetup.getApps()) {
 			if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+				GameInfo game = gameSetup.findGameById(appInfo.getGameId());
+				if (game.getSend() == null || !game.getSend()) {
+					continue;
+				}
 				nots.addAll(getNotifications(appInfo.getAppId()));
 			}
 		}

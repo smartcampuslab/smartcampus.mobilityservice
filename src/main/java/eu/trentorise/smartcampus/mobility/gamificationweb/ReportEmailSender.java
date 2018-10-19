@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -128,13 +129,19 @@ public class ReportEmailSender {
 //		System.out.println("DONE");
 //	}	
 	
-//	@Scheduled(cron="0 0 16 * * FRI")
+	@Scheduled(cron="0 0 16 * * FRI")
 	public void sendWeeklyNotification() throws Exception {
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
-			logger.info("Sending notifications for app " + appInfo.getAppId());
 			try {
 				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+					GameInfo game = gameSetup.findGameById(appInfo.getGameId());
+					if (game.getSend() == null || !game.getSend()) {
+						continue;
+					} else {
+						logger.info("Skipping email for " + appInfo.getAppId() + ", " + game.getId());
+					}
+					logger.info("Sending email for " + appInfo.getAppId() + ", " + game.getId());
 					sendWeeklyNotification(appInfo.getAppId());
 				}
 			} catch (Exception e) {
