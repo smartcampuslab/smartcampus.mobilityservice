@@ -504,6 +504,7 @@ public class PlayerController {
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
+				res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 				logger.error("Exception in user registration to gamification " + e.getMessage(), e);
 			}
 		}
