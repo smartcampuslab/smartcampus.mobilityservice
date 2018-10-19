@@ -137,9 +137,8 @@ public class ReportEmailSender {
 				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
 					GameInfo game = gameSetup.findGameById(appInfo.getGameId());
 					if (game.getSend() == null || !game.getSend()) {
-						continue;
-					} else {
 						logger.info("Skipping email for " + appInfo.getAppId() + ", " + game.getId());
+						continue;
 					}
 					logger.info("Sending email for " + appInfo.getAppId() + ", " + game.getId());
 					sendWeeklyNotification(appInfo.getAppId());
