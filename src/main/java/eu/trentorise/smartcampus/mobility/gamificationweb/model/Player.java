@@ -6,13 +6,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="player")
 public class Player {
 	
-//	@Id
-//	private String id;
+	@Id
+	private String id;
 	
 	private String playerId;
 	private String gameId;
@@ -83,13 +84,13 @@ public class Player {
 		this.mail = mail;
 	}
 
-//	public String getId() {
-//		return id;
-//	}
-//
-//	public void getId(String pid) {
-//		this.id = pid;
-//	}
+	public String getId() {
+		return id;
+	}
+
+	public void getId(String pid) {
+		this.id = pid;
+	}
 	
 	public String getPlayerId() {
 		return playerId;
@@ -157,14 +158,6 @@ public class Player {
 	public void setEventsCheckIn(List<Event> eventsCheckIn) {
 		this.eventsCheckIn = eventsCheckIn;
 	}
-
-//	public String getAvatar() {
-//		return avatar;
-//	}
-//
-//	public void setAvatar(String avatar) {
-//		this.avatar = avatar;
-//	}
 
 	public String toJSONString() {
 		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
