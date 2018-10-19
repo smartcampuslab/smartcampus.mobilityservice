@@ -144,31 +144,39 @@ public class RankingManager {
 	}
 
 	private List<ClassificationData> getFullClassification(String gameId, String appId) throws Exception {
-		String url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8");
-		ClassificationBoard board = getClassification(url, appId);
-		if (board != null) {
-			computeRanking(board);
-		}
-		
-		Criteria criteria = new Criteria("gameId").is(gameId);
-		Query query = new Query(criteria);
-		query.fields().include("nickname").include("playerId");
-
-		List<Player> players = template.find(query, Player.class, "player");
-		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
-		
 		List<ClassificationData> classificationList = Lists.newArrayList();
-		if (board.getBoard() != null) {
-			for (ClassificationPosition pos : board.getBoard()) {
-				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-				classificationList.add(cd);
+
+		try {
+			String url = "game/" + gameId + "/classification/" + URLEncoder.encode("global classification green", "UTF-8");
+			ClassificationBoard board = getClassification(url, appId);
+			if (board != null) {
+				computeRanking(board);
 			}
+
+			Criteria criteria = new Criteria("gameId").is(gameId);
+			Query query = new Query(criteria);
+			query.fields().include("nickname").include("playerId");
+
+			List<Player> players = template.find(query, Player.class, "player");
+			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
+
+			if (board.getBoard() != null) {
+				for (ClassificationPosition pos : board.getBoard()) {
+					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+					classificationList.add(cd);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error reading classification", e);
 		}
-		
+
 		return classificationList;
 	}
 	
 	private List<ClassificationData> getFullIncClassification(String gameId, String appId, Long timestamp) throws Exception {
+		List<ClassificationData> classificationList = Lists.newArrayList();
+		
+		try {
 		String url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp;
 		ClassificationBoard board = getClassification(url, appId);
 		if (board != null) {
@@ -182,11 +190,13 @@ public class RankingManager {
 		List<Player> players = template.find(query, Player.class, "player");
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
 		
-		List<ClassificationData> classificationList = Lists.newArrayList();
 		for (ClassificationPosition pos : board.getBoard()) {
 				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
 				classificationList.add(cd);
 			}
+		} catch (Exception e) {
+			logger.error("Error reading incclassification", e);
+		}
 		
 		return classificationList;
 	}
