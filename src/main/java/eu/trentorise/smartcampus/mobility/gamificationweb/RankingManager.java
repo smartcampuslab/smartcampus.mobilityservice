@@ -162,8 +162,10 @@ public class RankingManager {
 
 			if (board.getBoard() != null) {
 				for (ClassificationPosition pos : board.getBoard()) {
-					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-					classificationList.add(cd);
+					if (nicknames.get(pos.getPlayerId()) != null) {
+						ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+						classificationList.add(cd);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -191,8 +193,10 @@ public class RankingManager {
 		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
 		
 		for (ClassificationPosition pos : board.getBoard()) {
-				ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-				classificationList.add(cd);
+				if (nicknames.get(pos.getPlayerId()) != null) {
+					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+					classificationList.add(cd);
+				}
 			}
 		} catch (Exception e) {
 			logger.error("Error reading incclassification", e);
