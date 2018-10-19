@@ -14,7 +14,8 @@ public class Avatar {
 	private String contentType;
 	private String fileName;
 	
-	private String appId;
+	private String playerId;
+	private String gameId;
 
 	public String getId() {
 		return id;
@@ -56,12 +57,20 @@ public class Avatar {
 		this.fileName = fileName;
 	}
 
-	public String getAppId() {
-		return appId;
+	public String getPlayerId() {
+		return playerId;
 	}
 
-	public void setAppId(String appId) {
-		this.appId = appId;
+	public void setPlayerId(String playerId) {
+		this.playerId = playerId;
+	}
+
+	public String getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(String appId) {
+		this.gameId = appId;
 	}
 	
 }
