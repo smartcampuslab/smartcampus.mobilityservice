@@ -244,11 +244,15 @@ public class ChallengesUtils {
     				challengeData.setRow_status(row_status);
     				
 					if (type == 0) {
-						if (now >= start - MILLIS_IN_DAY) { // if challenge is started (with one day of offset for mail)
-							if (now < end - MILLIS_IN_DAY) { // if challenge is not ended
-								challenges.add(challengeData);
-							} else if (now < end + MILLIS_IN_DAY) { // CHAL_TS_OFFSET
-								oldChallenges.add(challengeData); // last week challenges
+						if ("ASSIGNED".equals(state)) {
+							if (now >= start - MILLIS_IN_DAY) { // if challenge is started (with one day of offset for mail)
+								if (now < end - MILLIS_IN_DAY) { // if challenge is not ended
+									// challenges.add(challengeData);
+									challengesMap.put(ChallengeDataType.ACTIVE, challengeData);
+								} else if (now < end + MILLIS_IN_DAY) { // CHAL_TS_OFFSET
+									// oldChallenges.add(challengeData); // last week challenges
+									challengesMap.put(ChallengeDataType.OLD, challengeData);
+								}
 							}
 						}
 					} else {

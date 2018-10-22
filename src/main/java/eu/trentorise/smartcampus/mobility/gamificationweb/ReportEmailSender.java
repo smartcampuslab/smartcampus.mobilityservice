@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -289,9 +291,15 @@ public class ReportEmailSender {
 			int point_green_w = 0;
 			if (states != null && states.size() > 0) {
 				point_green = states.get(0).getScore();
-				LocalDate ws = LocalDate.parse(currentWeekConfData.getWeekStart());
-				LocalDate we = LocalDate.parse(currentWeekConfData.getWeekEnd());
-				PointConceptPeriod pcp = states.get(0).getInstances().stream().filter(x -> now.isBefore(we) && now.isAfter(ws)).findFirst().orElse(null);
+				LocalDate cws = LocalDate.parse(currentWeekConfData.getWeekStart());
+				LocalDate cwe = LocalDate.parse(currentWeekConfData.getWeekEnd());
+				
+				PointConceptPeriod pcp = states.get(0).getInstances().stream().filter(x -> {
+					LocalDate ws = Instant.ofEpochMilli(x.getStart()).atZone(ZoneId.systemDefault()).toLocalDate();
+					LocalDate we = Instant.ofEpochMilli(x.getEnd()).atZone(ZoneId.systemDefault()).toLocalDate();
+					return (cwe.compareTo(we) <= 0) && (cws.compareTo(ws) == 0);
+				}).findFirst().orElse(null);
+				
 				if (pcp != null) {
 					point_green_w = pcp.getScore();
 				}
