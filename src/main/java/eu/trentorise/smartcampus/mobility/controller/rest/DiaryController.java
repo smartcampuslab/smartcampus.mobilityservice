@@ -283,7 +283,12 @@ public class DiaryController {
 			DiaryEntry de = new DiaryEntry();
 			de.setEntityId(challengeConcept.getName() + "_assigned");
 			de.setType(DiaryEntryType.CHALLENGE);
-			de.setTimestamp(challengeConcept.getStateDate().get(ChallengeState.ASSIGNED).getTime());
+			
+			if (challengeConcept.getStateDate() == null || !challengeConcept.getStateDate().containsKey(ChallengeState.ASSIGNED)) {
+				de.setTimestamp(challengeConcept.getStart().getTime());
+			} else {
+				de.setTimestamp(challengeConcept.getStateDate().get(ChallengeState.ASSIGNED).getTime());
+			}
 			de.setChallengeName(description);
 			de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
 			if (challengeConcept.isCompleted()) {
