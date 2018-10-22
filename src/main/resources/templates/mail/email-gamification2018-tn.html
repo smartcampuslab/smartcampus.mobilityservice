@@ -93,9 +93,7 @@
 			        </div>
 					<div th:if="${n_prizes eq null or !are_prizes}">
 						<b>
-							<p><u>I premi settimanali saranno sospesi durante le settimane 15 e 16 (dal 16/12/2017 al 29/12/2017).</u></p> 
-							<p>I punti Green Leaves ottenuti tramite il tracciamento dei percorsi e il superamento delle sfide settimanali saranno conteggiati nella classifica globale. L'assegnazione dei premi settimanali riprenderà a partire dalle 17^ settimana di gioco, con inizio sabato 30/12/2017.</p>
-							<p>Ti auguriamo un Natale sereno, continua a giocare per renderlo più verde e sostenibile.</p>
+						<!-- no prizes week -->
 						</b>
 					</div>			        
 			        <br/>
@@ -143,7 +141,7 @@
 			            Questa settimana non hai guadagnato nuovi badge! Gioca ancora per accumulare altri punti e ottenere nuovi badge!
 			        </h3>
 			        <h3>
-			        	Per vedere i tuoi risultati completi e le classifiche  aggiornate consulta la app Viaggia Play&amp;Go nella sezione Play&amp;Go->Punteggio. Per maggiori dettagli e informazioni sulla app visita il sito di smartcommunity oppure clicca <b><a href="http://www.smartcommunitylab.it/apps/viaggia-trento-playgo" th:href="${greengame_url}" target="_blank">QUI</a></b>.
+			        	Accedendo alla App Viaggia Play&amp;Go puoi vedere tutti i dettagli relativi ai tuoi risultati di gioco, alle classifiche e alle sfide.. Per maggiori dettagli e informazioni sulla app visita il sito di smartcommunity oppure clicca <b><a href="http://www.smartcommunitylab.it/apps/viaggia-trento-playgo" th:href="${greengame_url}" target="_blank">QUI</a></b>.
 			        </h3>
 			        <h4>
 			        	Se non desideri ricevere la seguente mail di notifica disattiva il servizio cliccando <b><a href="http://localhost:8080/gamificationweb/unsubscribeMail/3" th:href="${unsubscribtionLink}" target="_blank">QUI</a></b>.
