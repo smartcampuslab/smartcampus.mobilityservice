@@ -27,7 +27,6 @@ import com.google.common.io.Resources;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Avatar;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.storage.AvatarRepository;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 import eu.trentorise.smartcampus.mobility.util.ImageUtils;
@@ -122,7 +121,10 @@ public class FileController {
 				return;				
 			}
 			
-			Avatar av = new Avatar();
+			Avatar av = avatarRepository.findByPlayerIdAndGameId(userId, gameId);
+			if (av == null) {
+				av = new Avatar();
+			}
 			
 			BufferedImage bs = ImageIO.read(data.getInputStream());
 			
