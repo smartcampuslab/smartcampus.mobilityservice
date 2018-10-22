@@ -88,7 +88,7 @@ public class Player {
 		return id;
 	}
 
-	public void getId(String pid) {
+	public void setId(String pid) {
 		this.id = pid;
 	}
 	
