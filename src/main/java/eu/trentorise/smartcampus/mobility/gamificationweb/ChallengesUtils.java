@@ -151,18 +151,18 @@ public class ChallengesUtils {
 					int bonusScore = 0;
 					String periodName = "";
 					String counterName = "";
-					int target = 0;
-					int periodTarget = 0;
+					double target = 0;
+					double periodTarget = 0;
 					String badgeCollectionName = "";
 					int initialBadgeNum = 0;
 					if(challenge.getFields() != null){
 						bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0)).intValue();
 						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");
 						counterName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
-						target =  ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0)).intValue(); 
+						target =  ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_TARGET,0)).doubleValue(); 
 						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
 						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue();
-						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).intValue();
+						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).doubleValue();
 					}
 
 					if (target == 0) {
@@ -176,7 +176,7 @@ public class ChallengesUtils {
 	    			ChallengesData challengeData = new ChallengesData();
 	    			challengeData.setChallId(name);
 
-    				challengeData.setChallTarget(target);
+    				challengeData.setChallTarget((int)target);
     				challengeData.setType(modelName);
     				challengeData.setActive(now < end);
     				challengeData.setSuccess(completed);
@@ -193,14 +193,14 @@ public class ChallengesUtils {
     				
     				switch (modelName) {
     					case CHAL_MODEL_REPETITIVE_BEAV:
-		    				int successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, target); 
+		    				double successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, target); 
 		    				row_status = round(successes, 2);
 		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
-		    				challengeData.setChallTarget(periodTarget);
+		    				challengeData.setChallTarget((int)periodTarget);
 	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
-		    				int earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, start, end); 
+		    				double earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, start, end); 
 		    				row_status = round(earned, 2);
 		    				status = Math.min(100, (int)(100.0 * earned / target));
 	    					break;
@@ -209,9 +209,9 @@ public class ChallengesUtils {
 		    				int count = getEarnedBadgesFromList(bcc_list, badgeCollectionName, initialBadgeNum);
 		    				if(!challengeData.getActive()){	// NB: fix to avoid situation with challenge not win and count > target
 		    					if(completed){
-		    						count = target;
+		    						count = (int)target;
 		    					} else {
-		    						count = target - 1;
+		    						count = (int)target - 1;
 		    					}
 		    				}
 		    				row_status = round(count, 2);
@@ -219,8 +219,9 @@ public class ChallengesUtils {
 		    				break;
 	    				}
 	    				case CHAL_MODEL_SURVEY: {
-		    				if(completed){
-	    						row_status = 1; status = 100;
+		    				if(completed) {
+	    						row_status = 1; 
+	    						status = 100;
 	    					}
 		    				// survey link to be passed
 		    				String link = utils.createSurveyUrl(playerId, gameId, (String)challenge.getFields().get("surveyType"), language);
@@ -317,9 +318,9 @@ public class ChallengesUtils {
 	}
 	
 	// Method retrieveCorrectStatusFromCounterName: used to get the correct player status starting from counter name field
-	private int retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd){
+	private double retrieveCorrectStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd){
 		Range<Long> challengeRange = Range.open(chalStart, chalEnd);
-		int actualStatus = 0; // km or trips
+		double actualStatus = 0; // km or trips
 		if(cName != null && !cName.isEmpty()){
 			for(PointConcept pt : pointConcept){
 				if(cName.equals(pt.getName()) && periodType.equals(pt.getPeriodType())){
@@ -339,7 +340,7 @@ public class ChallengesUtils {
 		return actualStatus;
 	}
 	
-	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, int target){
+	private int retrieveRepeatitiveStatusFromCounterName(String cName, String periodType, List<PointConcept> pointConcept, Long chalStart, Long chalEnd, double target){
 		Range<Long> challengeRange = Range.open(chalStart, chalEnd);
 		int countSuccesses = 0; // km or trips
 		if(cName != null && !cName.isEmpty()){
