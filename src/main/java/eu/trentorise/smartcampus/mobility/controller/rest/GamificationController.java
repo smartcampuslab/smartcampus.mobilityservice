@@ -764,14 +764,14 @@ public class GamificationController {
 		String appId = ((AppDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getApp().getAppId();
 		String text = (String)body.get("html");
 		Boolean all = (Boolean) body.get("all");
-		String emailsString = (String)body.get("emails");
-		Set<String> emails = StringUtils.commaDelimitedListToSet(emailsString);
 		String subj = (String)body.get("subject");
 		
 		try {
 			if (all) {
 				emailSender.sendGenericMailToAll(text, subj, appId);
 			} else {
+				String emailsString = (String)body.get("emails");
+				Set<String> emails = StringUtils.commaDelimitedListToSet(emailsString);				
 				emailSender.sendGenericMailToUsers(text, subj, appId, emails);
 			}
 		} catch (Exception e) {
