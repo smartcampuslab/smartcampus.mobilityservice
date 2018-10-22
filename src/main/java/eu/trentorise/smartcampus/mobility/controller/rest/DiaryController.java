@@ -284,7 +284,7 @@ public class DiaryController {
 			de.setEntityId(challengeConcept.getName() + "_assigned");
 			de.setType(DiaryEntryType.CHALLENGE);
 			
-			if (challengeConcept.getStateDate() == null || !challengeConcept.getStateDate().containsKey(ChallengeState.ASSIGNED)) {
+			if (challengeConcept.getStateDate().get(ChallengeState.ASSIGNED) == null) {
 				de.setTimestamp(challengeConcept.getStart().getTime());
 			} else {
 				de.setTimestamp(challengeConcept.getStateDate().get(ChallengeState.ASSIGNED).getTime());
