@@ -497,11 +497,16 @@ public class PlayerController {
 				if (email != null) {
 					logger.info("Added user (mobile registration) " + email);
 				}
-				logger.info("Assigning survey challenge");
-				assignSurveyChallenge(id, gameId, appId);
-				logger.info("Assigning initial challenge");
-				assignInitialChallenge(id, gameId, appId);
-				logger.info("Saving player");
+				
+				AppInfo app = appSetup.findAppById(appId);
+				GameInfo game = gameSetup.findGameById(app.getGameId());
+				if (game.getSend() != null && game.getSend()) {
+					logger.info("Assigning survey challenge");
+					assignSurveyChallenge(id, gameId, appId);
+					logger.info("Assigning initial challenge");
+					assignInitialChallenge(id, gameId, appId);
+					logger.info("Saving player");
+				}
 				playerRepositoryDao.save(p);
 				return p;
 			} catch (Exception e) {
