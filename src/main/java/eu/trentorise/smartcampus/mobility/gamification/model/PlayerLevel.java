@@ -3,6 +3,7 @@ package eu.trentorise.smartcampus.mobility.gamification.model;
 public class PlayerLevel {
     private String levelName;
     private String levelValue;
+    private int levelIndex;
     private String pointConcept;
     private double startLevelScore;
     private double endLevelScore;
@@ -12,13 +13,15 @@ public class PlayerLevel {
     }
     
     public PlayerLevel(String levelName, String pointConcept, String levelValue,
-            double toNextLevel, double startLevelScore, double endLevelScore) {
+            Double toNextLevel, Double startLevelScore, Double endLevelScore) {
         this.levelName = levelName;
         this.pointConcept = pointConcept;
         this.levelValue = levelValue;
-        this.toNextLevel = toNextLevel;
-        this.startLevelScore = startLevelScore;
-        this.endLevelScore = endLevelScore;
+
+        // check if value is persisted or give a valid one
+        this.toNextLevel = toNextLevel != null ? toNextLevel : 0;
+        this.startLevelScore = startLevelScore != null ? startLevelScore : 0;
+        this.endLevelScore = endLevelScore != null ? endLevelScore : 0;
     }
 
     public String getLevelName() {
