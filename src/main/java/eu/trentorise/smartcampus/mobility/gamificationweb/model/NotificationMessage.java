@@ -1,5 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
+import java.util.List;
 import java.util.Map;
 
 public class NotificationMessage {
@@ -8,6 +9,8 @@ public class NotificationMessage {
 	private String type;
 	private Map<String, String> title;
 	private Map<String, String> description;
+	
+	private Map<String, List<NotificationMessageExtra>> extras;
 
 	public String getId() {
 		return id;
@@ -40,5 +43,15 @@ public class NotificationMessage {
 	public void setDescription(Map<String, String> description) {
 		this.description = description;
 	}
+
+	public Map<String, List<NotificationMessageExtra>> getExtras() {
+		return extras;
+	}
+
+	public void setExtras(Map<String, List<NotificationMessageExtra>> extras) {
+		this.extras = extras;
+	}
+
+
 
 }

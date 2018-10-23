@@ -23,6 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.stringtemplate.v4.ST;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,6 +38,7 @@ import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.Notification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.NotificationMessage;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.NotificationMessageExtra;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Timestamp;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -131,14 +133,15 @@ public class NotificationsManager {
 			
 			if (proposed) {
 				logger.info("Sending notification to " + p.getPlayerId());
-				notificatioHelper.notify(buildNotification(p.getLanguage(), "PROPOSED"), p.getPlayerId(), NOTIFICATION_APP);
+				eu.trentorise.smartcampus.communicator.model.Notification notification = buildSimpleNotification(p.getLanguage(), "PROPOSED");
+				notificatioHelper.notify(notification, p.getPlayerId(), NOTIFICATION_APP);
 				continue;
 			}
 			
 		}
 	}
 	
-	@Scheduled(fixedRate = 1000 * 60 * 10) 
+	@Scheduled(fixedRate = 1000 * 60 * 10)
 	public void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
@@ -162,7 +165,7 @@ public class NotificationsManager {
 			Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
 			
 			if (p != null) {
-				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not.getClass().getSimpleName());
+				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not);
 				if (notification != null) {
 					logger.info("Sending notification to " + not.getPlayerId());
 					notificatioHelper.notify(notification, not.getPlayerId(), NOTIFICATION_APP);
@@ -179,7 +182,6 @@ public class NotificationsManager {
 		for (Class clz: notificationClasses) {
 		nots.addAll(getNotifications(appId, clz));
 		}
-//		nots.addAll(getNotifications(appId, ChallengeAssignedNotification.class));
 		
 		return nots;
 	}
@@ -239,24 +241,99 @@ public class NotificationsManager {
 		return nots;
 	}
 	
-	public eu.trentorise.smartcampus.communicator.model.Notification buildNotification(String lang, String type) {
+	private eu.trentorise.smartcampus.communicator.model.Notification buildNotification(String lang, Notification not) {
+		String type = not.getClass().getSimpleName();
+		Map<String, String> extraData = buildExtraData(not);
+		
 		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
 		
 		NotificationMessage message = notificationsMessages.get(type);
 			
-		fillNotification(result, lang, message);
+		fillNotification(result, lang, message, extraData);
 		
 		return result;
 	}
 	
-	private void fillNotification(eu.trentorise.smartcampus.communicator.model.Notification notification, String lang, NotificationMessage message) {
+	private eu.trentorise.smartcampus.communicator.model.Notification buildSimpleNotification(String lang, String type) {
+		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
+		
+		NotificationMessage message = notificationsMessages.get(type);
+			
+		fillNotification(result, lang, message, null);
+		
+		return result;
+	}	
+	
+	private Map<String, String> buildExtraData(Notification not) {
+		Map<String, String> result = Maps.newTreeMap();
+		
+		switch (not.getClass().getSimpleName()) {
+		case "LevelGainedNotification":
+			result.put("levelName", ((LevelGainedNotification)not).getLevelName());
+			result.put("levelIndex", ((LevelGainedNotification)not).getLevelIndex() != null ? ((LevelGainedNotification)not).getLevelIndex().toString() : "");
+			break;
+		}
+		
+		
+		return result;
+	}	
+	
+	private void fillNotification(eu.trentorise.smartcampus.communicator.model.Notification notification, String lang, NotificationMessage message, Map<String, String> extraData) {
 		if (message != null) {
 			notification.setTitle(message.getTitle().get(lang));
-			notification.setDescription(message.getDescription().get(lang));
+			notification.setDescription(fillDescription(lang, message, extraData));
 			Map<String, Object> content = Maps.newTreeMap();
 			content.put("type", message.getType());
 			notification.setContent(content);
 		}
+	}
+	
+	private String fillDescription(String lang, NotificationMessage message, Map<String, String> extraData) {
+		StringBuilder descr = new StringBuilder(message.getDescription().get(lang));
+		String result = null;
+
+		if (message.getExtras() != null && extraData != null) {
+
+			List<NotificationMessageExtra> extras = message.getExtras().get(lang);
+
+			List<NotificationMessageExtra> append = extras.stream().filter(x -> "APPEND".equals(x.getType())).collect(Collectors.toList());
+
+			for (NotificationMessageExtra extra : append) {
+				boolean ok = true;
+				if (extra.getValue() != null) {
+					String keyValue = extraData.get(extra.getKey());
+					if (keyValue != null && !keyValue.equals(extra.getValue())) {
+						ok = false;
+					}
+				}
+				if (ok) {
+					descr.append(extra.getString());
+				}
+			}
+
+			ST st = new ST(descr.toString());
+
+			List<NotificationMessageExtra> replace = extras.stream().filter(x -> "REPLACE".equals(x.getType())).collect(Collectors.toList());
+
+			for (NotificationMessageExtra extra : replace) {
+				boolean ok = true;
+				if (extra.getValue() != null) {
+					String keyValue = extraData.get(extra.getKey());
+					if (keyValue != null && !keyValue.equals(extra.getKey())) {
+						ok = false;
+					}
+				}
+				if (ok) {
+					st.add(extra.getKey(), extraData.get(extra.getString()));
+				}
+			}
+
+			result = st.render();
+		} else {
+			result = descr.toString();
+		}
+
+		return result;
 	}
 	
 	private String getGameId(String appId) {

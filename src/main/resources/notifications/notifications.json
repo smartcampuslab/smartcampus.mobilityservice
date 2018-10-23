@@ -1,19 +1,109 @@
 [
 	{
 		"id": "LevelGainedNotification",
-		"type" : "level",
+		"type": "level",
 		"title": {
 			"it": "Livello",
 			"en": "Level"
 		},
 		"description": {
-			"it": "Complimenti! Hai raggiunto un nuovo livello.",
-			"en": "Congratulations! You have reached a new level."
+			"it": "Complimenti: hai raggiunto il livello <levelName>.",
+			"en": "Great news: you reached the level <levelName>."
+		},
+		"extras": 
+{
+			"it": [
+				{
+					"type": "REPLACE",
+					"key": "levelName",
+					"value": null,
+					"string": "levelName"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "1",
+					"string": " Hai sbloccato le sfide settimanali!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "2",
+					"string": " Ora puoi scegliere fra DUE sfide a settimana!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "3",
+					"string": " Ora puoi scegliere fra TRE sfide a settimana!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "5",
+					"string": " Hai sbloccato le sfide di coppia!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "6",
+					"string": " Hai sbloccato una nuova tipologia di sfida di coppia!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "7",
+					"string": " Hai sbloccato una nuova tipologia di sfida di coppia!"
+				}
+			],
+			"en": [
+				{
+					"type": "REPLACE",
+					"key": "levelName",
+					"value": null,
+					"string": "levelName"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "1",
+					"string": " You unlocked weekly challenges!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "2",
+					"string": " Now you can choose between TWO challenges per week!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "3",
+					"string": " Now you can choose between THREE challenges per week!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "5",
+					"string": " You have unlocked multi-player challenges!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "6",
+					"string": " You have unlocked a new type of multi-player challenge!"
+				},
+				{
+					"type": "APPEND",
+					"key": "levelIndex",
+					"value": "7",
+					"string": " You have unlocked a new type of multi-player challenge!"
+				}]
 		}
 	},
 	{
 		"id": "PROPOSED",
-		"type" : "program_challenge",
+		"type": "program_challenge",
 		"title": {
 			"it": "Sfide",
 			"en": "Challenges"
