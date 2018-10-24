@@ -260,22 +260,22 @@ public class GeolocationsProcessor {
 		
 		String day = splitKey[1];
 
-		TrackedInstance res = getStoredTrackedInstance(key, travelId, multimodalId, day, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
-
-		if (geolocationsByItinerary.get(key) != null) {
-			logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to result.");
-		}
-		for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
-			res.getGeolocationEvents().add(geoloc);
-		}
-
-		// boolean canSave = true;
-		//
-		
 		Lock lock = striped.get(travelId);
 		
 		try {
 			lock.lock();
+
+			TrackedInstance res = getStoredTrackedInstance(key, travelId, multimodalId, day, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+
+			if (geolocationsByItinerary.get(key) != null) {
+				logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to result.");
+			}
+			for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
+				res.getGeolocationEvents().add(geoloc);
+			}
+
+			// boolean canSave = true;
+			//
 
 			if (res.getItinerary() != null) {
 				sendPlanned(res, userId, travelId, day, appId);
