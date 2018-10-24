@@ -51,8 +51,6 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @Component
 public class NotificationsManager {
 
-	private static final String NOTIFICATION_APP = "mobility.trentoplaygo.test";
-	
 	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class};
 
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
@@ -96,7 +94,6 @@ public class NotificationsManager {
 	@Scheduled(cron="0 0 12 * * WED")
 	public void checkProposedPending() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
-			logger.info("Sending notifications for app " + appInfo.getAppId());
 			try {
 				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
 					GameInfo game = gameSetup.findGameById(appInfo.getGameId());
@@ -112,6 +109,8 @@ public class NotificationsManager {
 	}	
 	
 	public void checkProposedPending(AppInfo appInfo) throws Exception {
+		logger.info("Sending notifications for app " + appInfo.getAppId());
+		
 		List<eu.trentorise.smartcampus.communicator.model.Notification> nots = Lists.newArrayList();
 		
 		List<Player> players = playerRepository.findAllByGameId(appInfo.getGameId());
@@ -134,7 +133,7 @@ public class NotificationsManager {
 			if (proposed) {
 				logger.info("Sending notification to " + p.getPlayerId());
 				eu.trentorise.smartcampus.communicator.model.Notification notification = buildSimpleNotification(p.getLanguage(), "PROPOSED");
-				notificatioHelper.notify(notification, p.getPlayerId(), NOTIFICATION_APP);
+				notificatioHelper.notify(notification, p.getPlayerId(), appInfo.getMessagingAppId());
 				continue;
 			}
 			
@@ -153,23 +152,24 @@ public class NotificationsManager {
 				if (game.getSend() == null || !game.getSend()) {
 					continue;
 				}
-				nots.addAll(getNotifications(appInfo.getAppId()));
-			}
-		}
-		
-		if (!nots.isEmpty()) {
-			logger.info("Read " + nots.size() + " notifications.");
-		}
-		
-		for (Notification not: nots) {
-			Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
-			
-			if (p != null) {
-				eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not);
-				if (notification != null) {
-					logger.info("Sending notification to " + not.getPlayerId());
-					notificatioHelper.notify(notification, not.getPlayerId(), NOTIFICATION_APP);
+				nots = getNotifications(appInfo.getAppId());
+				
+				if (!nots.isEmpty()) {
+					logger.info("Read " + nots.size() + " notifications for " + appInfo.getAppId());
 				}
+				
+				for (Notification not: nots) {
+					Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
+					
+					if (p != null) {
+						eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not);
+						if (notification != null) {
+							logger.info("Sending notification to " + not.getPlayerId());
+							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+						}
+					}
+				}				
+				
 			}
 		}
 	}
