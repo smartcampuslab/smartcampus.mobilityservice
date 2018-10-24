@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -289,18 +290,20 @@ public class ReportEmailSender {
 			int point_green = 0;
 			int point_green_w = 0;
 			if (states != null && states.size() > 0) {
-				point_green = states.get(0).getScore();
-				LocalDate cws = LocalDate.parse(currentWeekConfData.getWeekStart());
-				LocalDate cwe = LocalDate.parse(currentWeekConfData.getWeekEnd());
-				
-				PointConceptPeriod pcp = states.get(0).getInstances().stream().filter(x -> {
-					LocalDate ws = Instant.ofEpochMilli(x.getStart()).atZone(ZoneId.systemDefault()).toLocalDate();
-					LocalDate we = Instant.ofEpochMilli(x.getEnd()).atZone(ZoneId.systemDefault()).toLocalDate();
-					return (cwe.compareTo(we) <= 0) && (cws.compareTo(ws) == 0);
-				}).findFirst().orElse(null);
-				
-				if (pcp != null) {
-					point_green_w = pcp.getScore();
+				if (currentWeekConfData.getWeekStart() != null && currentWeekConfData.getWeekEnd() != null) {
+					point_green = states.get(0).getScore();
+					LocalDate cws = LocalDate.parse(currentWeekConfData.getWeekStart());
+					LocalDate cwe = LocalDate.parse(currentWeekConfData.getWeekEnd());
+
+					PointConceptPeriod pcp = states.get(0).getInstances().stream().filter(x -> {
+						LocalDate ws = Instant.ofEpochMilli(x.getStart()).atZone(ZoneId.systemDefault()).toLocalDate();
+						LocalDate we = Instant.ofEpochMilli(x.getEnd()).atZone(ZoneId.systemDefault()).toLocalDate();
+						return (cwe.compareTo(we) <= 0) && (cws.compareTo(ws) == 0);
+					}).findFirst().orElse(null);
+
+					if (pcp != null) {
+						point_green_w = pcp.getScore();
+					}
 				}
 			}
 			
