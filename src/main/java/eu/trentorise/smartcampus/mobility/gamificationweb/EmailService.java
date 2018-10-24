@@ -94,6 +94,7 @@ public class EmailService {
     	
         // Prepare the evaluation context
         final Context ctx = new Context(locale);
+        ctx.setVariable("lang", locale.getLanguage());
         ctx.setVariable("name", recipientName);
         ctx.setVariable("g_point", point_green);
         ctx.setVariable("g_point_w", point_green_w);
