@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
@@ -318,13 +319,16 @@ public class ReportEmailSender {
 				lastWeekChallenges = challLists.getChallengeData().get(ChallengeDataType.OLD);
 			}
 
-			notifications = getBadgeNotifications(appId, p.getPlayerId());
+//			notifications = getBadgeNotifications(appId, p.getPlayerId());
+//
+//			if (notifications != null && !notifications.isEmpty()) {
+//				List<BadgesData> allBadge = getAllBadges(path);
+//				someBadge = checkCorrectBadges(allBadge, notifications);
+//			}
 
-			if (notifications != null && !notifications.isEmpty()) {
-				List<BadgesData> allBadge = getAllBadges(path);
-				someBadge = checkCorrectBadges(allBadge, notifications);
-			}
-
+			List<BadgesData> allBadge = getAllBadges(path);
+			someBadge = filterBadges(allBadge, completePlayerStatus);
+			
 			String mailto = null;
 			mailto = p.getMail();
 			String playerName = p.getNickname();
@@ -335,7 +339,7 @@ public class ReportEmailSender {
 			if (mailSend && playerName != null && !playerName.isEmpty()) { // && !noMailingPlayers.contains(p.getSocialId())
 				try {
 					this.emailService.sendMailGamification(playerName, point_green, point_green_w, nextWeekConfData, 
-							current_week_theme, (notifications != null ? someBadge : null), challenges, lastWeekChallenges, mailPrizeActualData, standardImages, mailto,
+							current_week_theme, someBadge, challenges, lastWeekChallenges, mailPrizeActualData, standardImages, mailto,
 							mailRedirectUrl, compileSurveyUrl, unsubcribeLink, mailLoc);
 				} catch (MessagingException e) {
 					logger.error(String.format("Errore invio mail : %s", e.getMessage()));
@@ -436,6 +440,18 @@ public class ReportEmailSender {
 		return correctBadges;
 	}
 
+	private List<BadgesData> filterBadges(List<BadgesData> allB, PlayerStatus status) throws IOException {
+		List<BadgesData> correctBadges = Lists.newArrayList();
+		for (BadgeCollectionConcept collection: status.getBadgeCollectionConcept()) {
+			if (collection.getBadgeEarned() != null) {
+				List<String> badgeNames = collection.getBadgeEarned().stream().map(x -> x.getName()).collect(Collectors.toList());
+				correctBadges.addAll(allB.stream().filter(x -> badgeNames.contains(x.getTextId())).collect(Collectors.toList()));
+			}
+		}
+		
+		return correctBadges;
+	}	
+	
 	@SuppressWarnings("serial")
 	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
