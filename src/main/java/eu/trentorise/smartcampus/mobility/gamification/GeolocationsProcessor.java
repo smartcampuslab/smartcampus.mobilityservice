@@ -278,9 +278,9 @@ public class GeolocationsProcessor {
 			lock.lock();
 
 			if (res.getItinerary() != null) {
-				savePlanned(res, userId, travelId, day, appId);
+				sendPlanned(res, userId, travelId, day, appId);
 			} else if (res.getFreeTrackingTransport() != null) {
-				saveFreeTracking(res, userId, travelId, appId);
+				sendFreeTracking(res, userId, travelId, appId);
 			}
 			//
 
@@ -353,7 +353,7 @@ public class GeolocationsProcessor {
 		return res;
 	}
 
-	private void savePlanned(TrackedInstance res, String userId, String travelId, String day, String appId) throws Exception {
+	private void sendPlanned(TrackedInstance res, String userId, String travelId, String day, String appId) throws Exception {
 
 		if (!res.getComplete()) {
 			ValidationResult vr = gamificationValidator.validatePlannedJourney(res.getItinerary(), res.getGeolocationEvents(), appId);
@@ -376,7 +376,7 @@ public class GeolocationsProcessor {
 		}
 	}
 
-	private void saveFreeTracking(TrackedInstance res, String userId, String travelId, String appId) throws Exception {
+	private void sendFreeTracking(TrackedInstance res, String userId, String travelId, String appId) throws Exception {
 		if (!res.getComplete()) {
 			ValidationResult vr = gamificationValidator.validateFreeTracking(res.getGeolocationEvents(), res.getFreeTrackingTransport(), appId);
 //			if (vr != null && !TravelValidity.INVALID.equals(vr.getTravelValidity())) {
