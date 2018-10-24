@@ -151,21 +151,23 @@ public class RankingManager {
 			ClassificationBoard board = getClassification(url, appId);
 			if (board != null) {
 				computeRanking(board);
-			}
 
-			Criteria criteria = new Criteria("gameId").is(gameId);
-			Query query = new Query(criteria);
-			query.fields().include("nickname").include("playerId");
+				Criteria criteria = new Criteria("gameId").is(gameId);
+				Query query = new Query(criteria);
+				query.fields().include("nickname").include("playerId");
 
-			List<Player> players = template.find(query, Player.class, "player");
-			Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
+				List<Player> players = template.find(query, Player.class, "player");
+				Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
 
-			if (board.getBoard() != null) {
-				for (ClassificationPosition pos : board.getBoard()) {
-					if (nicknames.get(pos.getPlayerId()) != null) {
-						ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-						classificationList.add(cd);
+				if (board.getBoard() != null) {
+					for (ClassificationPosition pos : board.getBoard()) {
+						if (nicknames.get(pos.getPlayerId()) != null) {
+							ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+							classificationList.add(cd);
+						}
 					}
+				} else {
+					logger.error("Empty board");
 				}
 			}
 		} catch (Exception e) {
@@ -177,35 +179,37 @@ public class RankingManager {
 	
 	private List<ClassificationData> getFullIncClassification(String gameId, String appId, Long timestamp) throws Exception {
 		List<ClassificationData> classificationList = Lists.newArrayList();
-		
-		try {
-		String url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp;
-		ClassificationBoard board = getClassification(url, appId);
-		if (board != null) {
-			computeRanking(board);
-		}
-		
-		Criteria criteria = new Criteria("gameId").is(gameId);
-		Query query = new Query(criteria);
-		query.fields().include("nickname").include("playerId");
 
-		List<Player> players = template.find(query, Player.class, "player");
-		Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));		
-		
-		for (ClassificationPosition pos : board.getBoard()) {
-				if (nicknames.get(pos.getPlayerId()) != null) {
-					ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
-					classificationList.add(cd);
+		try {
+			String url = "game/" + gameId + "/incclassification/" + URLEncoder.encode("week classification green", "UTF-8") + "?timestamp=" + timestamp;
+			ClassificationBoard board = getClassification(url, appId);
+			if (board != null) {
+				computeRanking(board);
+
+				Criteria criteria = new Criteria("gameId").is(gameId);
+				Query query = new Query(criteria);
+				query.fields().include("nickname").include("playerId");
+
+				List<Player> players = template.find(query, Player.class, "player");
+				Map<String, String> nicknames = players.stream().collect(Collectors.toMap(Player::getPlayerId, Player::getNickname));
+
+				for (ClassificationPosition pos : board.getBoard()) {
+					if (nicknames.get(pos.getPlayerId()) != null) {
+						ClassificationData cd = new ClassificationData(pos.getPlayerId(), nicknames.get(pos.getPlayerId()), (int) pos.getScore(), pos.getPosition());
+						classificationList.add(cd);
+					}
 				}
+			} else {
+				logger.error("Empty board");
 			}
 		} catch (Exception e) {
 			logger.error("Error reading incclassification", e);
 		}
-		
+
 		return classificationList;
 	}
 	
-	public ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
+	private ClassificationBoard getClassification(@RequestParam String urlWS, String appId) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("WS-GET. Method " + urlWS); // Added for log ws calls info
 													// in preliminary phase of
