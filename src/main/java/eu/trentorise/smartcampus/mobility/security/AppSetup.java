@@ -111,8 +111,8 @@ public class AppSetup {
 								Thread.sleep(10000);
 							} catch (InterruptedException e1) {
 							}
-//							logger.warn("Failed to register app" + signature.getAppId());
-//							e.printStackTrace();
+							logger.warn("Failed to register app" + signature.getAppId());
+							e.printStackTrace();
 						}
 					} while (!ok);
 					
