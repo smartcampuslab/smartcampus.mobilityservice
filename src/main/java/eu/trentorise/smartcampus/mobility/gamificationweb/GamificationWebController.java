@@ -87,18 +87,24 @@ public class GamificationWebController {
 	@RequestMapping(method = RequestMethod.GET, value = {"/gamificationweb","/gamificationweb/"})	///{socialId}
 	public 
 	ModelAndView web(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
-		return new ModelAndView("redirect:/gamificationweb/rules");
+		ModelAndView model = new ModelAndView("redirect:/gamificationweb/rules");
+		model.addObject("lang", lang);
+		return model;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/cookie_license")	///{socialId}
 	public 
 	ModelAndView cookieLicense(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
-		return new ModelAndView("web/cookie_license");
+		ModelAndView model = new ModelAndView("web/cookie_license");
+		model.addObject("lang", lang);
+		return model;
 	}
 	@RequestMapping(method = RequestMethod.GET, value = "/gamificationweb/cookie_info")	///{socialId}
 	public 
 	ModelAndView cookieInfo(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false, defaultValue="it") String lang) {
-		return new ModelAndView("web/cookie_info");
+		ModelAndView model = new ModelAndView("web/cookie_info");
+		model.addObject("lang", lang);
+		return model;
 	}
 
 	
@@ -108,7 +114,7 @@ public class GamificationWebController {
 		RequestContextUtils.getLocaleResolver(request).setLocale(request, response, Locale.forLanguageTag(lang));
 
 		ModelAndView model = new ModelAndView("web/index");
-		model.addObject("language", lang);
+		model.addObject("lang", lang);
 		WeekConfData week = configUtils.getCurrentWeekConf();
 		if (week != null) {
 			model.addObject("week", week.getWeekNum());
