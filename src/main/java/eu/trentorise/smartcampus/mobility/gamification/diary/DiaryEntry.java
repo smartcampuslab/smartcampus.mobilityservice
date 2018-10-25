@@ -48,6 +48,7 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 	private String badgeCollection;
 	
 	private String challengeName;
+	private Long challengeStart;
 	private Long challengeEnd;
 //	private Boolean challengeCompleted;
 //	private Long challengeCompletedDate;
@@ -205,6 +206,14 @@ public class DiaryEntry implements Comparable<DiaryEntry> {
 
 	public void setChallengeName(String challengeName) {
 		this.challengeName = challengeName;
+	}
+
+	public Long getChallengeStart() {
+		return challengeStart;
+	}
+
+	public void setChallengeStart(Long challengeStart) {
+		this.challengeStart = challengeStart;
 	}
 
 	public Long getChallengeEnd() {
