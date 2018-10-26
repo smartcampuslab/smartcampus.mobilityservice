@@ -254,7 +254,7 @@ public class NotificationsManager {
 		return result;
 	}
 	
-	private eu.trentorise.smartcampus.communicator.model.Notification buildSimpleNotification(String lang, String type) {
+	public eu.trentorise.smartcampus.communicator.model.Notification buildSimpleNotification(String lang, String type) {
 		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
 		
 		NotificationMessage message = notificationsMessages.get(type);
