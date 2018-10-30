@@ -51,6 +51,8 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanning
 import eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
+import eu.trentorise.smartcampus.mobility.security.GameInfo;
+import eu.trentorise.smartcampus.mobility.security.GameSetup;
 
 @Configuration
 @EnableWebMvc
@@ -85,6 +87,9 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
 	private AppSetup appSetup;
+	
+	@Autowired
+	private GameSetup gameSetup;		
 	
 	public MobilityConfig() {
 		super();
@@ -204,11 +209,21 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 
 		@Override
 		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
 			String appId = request.getHeader("appId");
-			AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
-			if (app == null || app.getGameId() == null) {
-				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			if (appId != null && !appId.isEmpty()) {
+				AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
+				if (app == null || app.getGameId() == null) {
+					response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				} else {
+					GameInfo game = gameSetup.findGameById(app.getGameId());
+					if (game == null || game.getSend() == null || !game.getSend()) {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+					}
+				}
 			}
+
+			filterChain.doFilter(request, response);
 		}
 	}
 	
