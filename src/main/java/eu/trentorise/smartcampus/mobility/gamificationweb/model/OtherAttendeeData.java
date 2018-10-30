@@ -1,6 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
-public class CompetitionData {
+public class OtherAttendeeData {
 	private int status = 0;
 	private double row_status = 0L;
 

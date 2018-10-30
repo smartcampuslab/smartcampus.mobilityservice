@@ -20,7 +20,7 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int bonus = 0;
 	private long challCompletedDate = 0;
 	
-	private CompetitionData competitionData;
+	private OtherAttendeeData otherAttendeeData;
 	
 	public ChallengesData(){
 		super();
@@ -157,12 +157,12 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		this.challCompletedDate = challCompletedDate;
 	}
 
-	public CompetitionData getCompetitionData() {
-		return competitionData;
+	public OtherAttendeeData getOtherAttendeeData() {
+		return otherAttendeeData;
 	}
 
-	public void setCompetitionData(CompetitionData competitionData) {
-		this.competitionData = competitionData;
+	public void setOtherAttendeeData(OtherAttendeeData competitionData) {
+		this.otherAttendeeData = competitionData;
 	}
 
 	@Override

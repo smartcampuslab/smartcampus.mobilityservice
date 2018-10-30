@@ -29,9 +29,11 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeLongDescrStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.CompetitionData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherAttendeeData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
 @Component
 public class ChallengesUtils {
@@ -51,6 +53,7 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_INITIAL_BADGE_NUM = "initialBadgeNum";
 	private static final String CHAL_FIELDS_OTHER_ATTENDEE_SCORES = "otherAttendeeScores";
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
+	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
 	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
@@ -81,6 +84,9 @@ public class ChallengesUtils {
 	private Map<String, List> challengeDictionaryMap;
 	private Map<String, String> challengeReplacements;
 
+	@Autowired
+	private PlayerRepositoryDao playerRepository;
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@PostConstruct
 	private void init() throws Exception {
@@ -240,7 +246,31 @@ public class ChallengesUtils {
 		    				break;
 	    				}
 	    				case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE : {
-	    					CompetitionData cd = new CompetitionData();
+	    					row_status = (Double)challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
+	    					double other_row_status = (Double)otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+	    					double total = row_status + other_row_status;
+	    					int other_status = 0;
+	    					if (total != 0) {
+	    						status = (int)(100 *row_status / total);
+	    						other_status = 100 - status;
+	    					}
+	    					
+	    					String otherPlayerId = (String)otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID); 
+	    					Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);
+	    					
+	    					String nickname = null;
+	    					if (otherPlayer != null) {
+	    						nickname = otherPlayer.getNickname();
+	    					}
+	    					
+	    					OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
+	    					otherAttendeeData.setRow_status(other_row_status);
+	    					otherAttendeeData.setStatus(other_status);
+	    					otherAttendeeData.setPlayerId(otherPlayerId);
+	    					otherAttendeeData.setNickname(nickname);
+	    					
+	    					challengeData.setOtherAttendeeData(otherAttendeeData);
+	    					break;
 	    				}	    				
 	    				// boolean status: 100 or 0
 	    				case CHAL_MODEL_COMPLETE_BADGE_COLL: 
