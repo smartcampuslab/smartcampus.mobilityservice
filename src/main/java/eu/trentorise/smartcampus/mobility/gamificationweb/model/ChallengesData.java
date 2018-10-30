@@ -20,6 +20,8 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int bonus = 0;
 	private long challCompletedDate = 0;
 	
+	private CompetitionData competitionData;
+	
 	public ChallengesData(){
 		super();
 	}
@@ -155,6 +157,14 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		this.challCompletedDate = challCompletedDate;
 	}
 
+	public CompetitionData getCompetitionData() {
+		return competitionData;
+	}
+
+	public void setCompetitionData(CompetitionData competitionData) {
+		this.competitionData = competitionData;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
@@ -166,4 +176,6 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		return new Long(startDate).compareTo(new Long(o.startDate));
 	}
 
+	
+	
 }

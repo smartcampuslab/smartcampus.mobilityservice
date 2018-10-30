@@ -29,6 +29,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeLongDescrStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.CompetitionData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
 
@@ -48,6 +49,9 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_TARGET = "target";
 	private static final String CHAL_FIELDS_PERIOD_TARGET = "periodTarget";
 	private static final String CHAL_FIELDS_INITIAL_BADGE_NUM = "initialBadgeNum";
+	private static final String CHAL_FIELDS_OTHER_ATTENDEE_SCORES = "otherAttendeeScores";
+	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
+	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
 	// new challenge types
@@ -60,6 +64,7 @@ public class ChallengesUtils {
 	private static final String CHAL_MODEL_POICHECKIN = "poiCheckin";
 	private static final String CHAL_MODEL_CHECKIN = "checkin";
 	private static final String CHAL_MODEL_CLASSPOSITION = "leaderboardPosition";
+	private static final String CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE = "groupCompetitivePerformance";
 	
 	// week delta in milliseconds
 //	private static final Long W_DELTA = 2000L;
@@ -155,6 +160,8 @@ public class ChallengesUtils {
 					double periodTarget = 0;
 					String badgeCollectionName = "";
 					int initialBadgeNum = 0;
+					Map<String, Object> otherAttendeeScores = null;
+					
 					if(challenge.getFields() != null){
 						bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0)).intValue();
 						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");
@@ -163,6 +170,10 @@ public class ChallengesUtils {
 						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
 						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue();
 						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).doubleValue();
+						List otherAttendeeScoresList = (List)challenge.getFields().getOrDefault(CHAL_FIELDS_OTHER_ATTENDEE_SCORES, Collections.EMPTY_LIST);
+						if (!otherAttendeeScoresList.isEmpty()) {
+							otherAttendeeScores = (Map)otherAttendeeScoresList.get(0);
+						}
 					}
 
 					if (target == 0) {
@@ -228,6 +239,9 @@ public class ChallengesUtils {
 		    				challenge.getFields().put("surveylink", link);
 		    				break;
 	    				}
+	    				case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE : {
+	    					CompetitionData cd = new CompetitionData();
+	    				}	    				
 	    				// boolean status: 100 or 0
 	    				case CHAL_MODEL_COMPLETE_BADGE_COLL: 
 	    				case CHAL_MODEL_POICHECKIN: 
