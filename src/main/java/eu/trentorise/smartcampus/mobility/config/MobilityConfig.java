@@ -8,7 +8,13 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +32,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -42,6 +49,8 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.NewTrentoPlannin
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
 
 @Configuration
 @EnableWebMvc
@@ -74,6 +83,9 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 //	@Value("${imagesDir}")
 //	private String imagesDir;		
 
+	@Autowired
+	private AppSetup appSetup;
+	
 	public MobilityConfig() {
 		super();
 	}
@@ -182,4 +194,23 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
+	
+	@Bean
+	public OncePerRequestFilter noContentFilter() {
+		return new CheckHeaderFilter();
+	}		
+	
+	private class CheckHeaderFilter extends OncePerRequestFilter {
+
+		@Override
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+			String appId = request.getHeader("appId");
+			AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
+			if (app == null || app.getGameId() == null) {
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			}
+		}
+	}
+	
+	
 }
