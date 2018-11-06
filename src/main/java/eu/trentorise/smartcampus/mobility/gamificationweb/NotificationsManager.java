@@ -19,7 +19,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -35,6 +34,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationAcceptedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.Notification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.NotificationMessage;
@@ -51,7 +51,7 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @Component
 public class NotificationsManager {
 
-	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class};
+	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class};
 
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
 	
@@ -91,7 +91,7 @@ public class NotificationsManager {
 		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
 	}
 	
-	@Scheduled(cron="0 0 12 * * WED")
+//	@Scheduled(cron="0 0 12 * * WED")
 	public void checkProposedPending() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			try {
@@ -108,40 +108,74 @@ public class NotificationsManager {
 		}
 	}	
 	
-	public void checkProposedPending(AppInfo appInfo) throws Exception {
+	public void sendDirectInvitation(String appId, Player toPlayer, String type, Map<String, String> extraData) {
+		AppInfo appInfo = appSetup.findAppById(appId);
+		
+		logger.info("Sending notification to " + toPlayer.getPlayerId());
+		eu.trentorise.smartcampus.communicator.model.Notification notification = null;
+		
+		try {
+			notification = buildSimpleNotification(toPlayer.getLanguage(), type, extraData);
+		} catch (Exception e) {
+			logger.error("Error building notification", e);
+		}
+		
+		if (notification != null) {
+			try {
+				notificatioHelper.notify(notification, toPlayer.getPlayerId(), appInfo.getMessagingAppId());
+			} catch (Exception e) {
+				logger.error("Error sending notification", e);
+			}
+		}
+	}
+	
+	private void checkProposedPending(AppInfo appInfo) throws Exception {
 		logger.info("Sending notifications for app " + appInfo.getAppId());
-		
+
 		List<eu.trentorise.smartcampus.communicator.model.Notification> nots = Lists.newArrayList();
-		
+
 		List<Player> players = playerRepository.findAllByGameId(appInfo.getGameId());
-		for (Player p: players) {
+		for (Player p : players) {
 			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())),
-					String.class);
-			String data = res.getBody();			
-			
+			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getPlayerId(), HttpMethod.GET,
+					new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())), String.class);
+			String data = res.getBody();
+
 			List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
-			
+
 			boolean proposed = false;
-			for (ChallengeConcept challengeConcept: challengeConcepts) {
+			for (ChallengeConcept challengeConcept : challengeConcepts) {
 				if ("PROPOSED".equals(challengeConcept.getState())) {
 					proposed = true;
 					break;
 				}
 			}
-			
+
 			if (proposed) {
 				logger.info("Sending notification to " + p.getPlayerId());
-				eu.trentorise.smartcampus.communicator.model.Notification notification = buildSimpleNotification(p.getLanguage(), "PROPOSED");
-				notificatioHelper.notify(notification, p.getPlayerId(), appInfo.getMessagingAppId());
-				continue;
+				eu.trentorise.smartcampus.communicator.model.Notification notification = null;
+				try {
+					notification = buildSimpleNotification(p.getLanguage(), "PROPOSED", null);
+				} catch (Exception e) {
+					logger.error("Error building notification", e);
+				}
+
+				if (notification != null) {
+					try {
+						notificatioHelper.notify(notification, p.getPlayerId(), appInfo.getMessagingAppId());
+						continue;
+					} catch (Exception e) {
+						logger.error("Error sending notification", e);
+					}
+				}
 			}
-			
+
 		}
 	}
 	
-	@Scheduled(fixedRate = 1000 * 60 * 10)
-	public void getNotifications() throws Exception {
+//	@Scheduled(fixedRate = 1000 * 60 * 10)
+	@PostConstruct
+	private void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
 		List<Notification> nots = Lists.newArrayList();
@@ -162,10 +196,20 @@ public class NotificationsManager {
 					Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
 					
 					if (p != null) {
-						eu.trentorise.smartcampus.communicator.model.Notification notification = buildNotification(p.getLanguage(), not);
+						eu.trentorise.smartcampus.communicator.model.Notification notification = null;
+
+						try {
+							notification = buildNotification(p.getLanguage(), not);
+						} catch (Exception e) {
+							logger.error("Error building notification", e);
+						}
 						if (notification != null) {
 							logger.info("Sending notification to " + not.getPlayerId());
+							try {
 							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+							} catch (Exception e) {
+								logger.error("Error sending notification", e);
+							}								
 						}
 					}
 				}				
@@ -214,6 +258,7 @@ public class NotificationsManager {
 	}
 	
 	private <T> List<Notification> getNotifications(String appId, long from, long to, Class<T> clz) throws Exception {
+		try {
 		logger.debug("Reading notifications from " + from + " to " + to);
 		
 		String gameId = getGameId(appId);
@@ -222,7 +267,6 @@ public class NotificationsManager {
 		ResponseEntity<String> res = null;
 		
 		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to;
-		logger.debug("URL: " + url);
 		
 		try {
 			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
@@ -239,6 +283,10 @@ public class NotificationsManager {
 		logger.debug("Reading " + nots.size() + " notifications.");
 		
 		return nots;
+		} catch (Exception e) {
+			logger.error("Error retrieving notifications", e);
+			return Lists.newArrayList();
+		}
 	}
 	
 	private eu.trentorise.smartcampus.communicator.model.Notification buildNotification(String lang, Notification not) {
@@ -254,12 +302,12 @@ public class NotificationsManager {
 		return result;
 	}
 	
-	public eu.trentorise.smartcampus.communicator.model.Notification buildSimpleNotification(String lang, String type) {
+	private eu.trentorise.smartcampus.communicator.model.Notification buildSimpleNotification(String lang, String type, Map<String, String> extraData) {
 		eu.trentorise.smartcampus.communicator.model.Notification result = new eu.trentorise.smartcampus.communicator.model.Notification();
 		
 		NotificationMessage message = notificationsMessages.get(type);
 			
-		fillNotification(result, lang, message, null);
+		fillNotification(result, lang, message, extraData);
 		
 		return result;
 	}	
@@ -272,8 +320,10 @@ public class NotificationsManager {
 			result.put("levelName", ((LevelGainedNotification)not).getLevelName());
 			result.put("levelIndex", ((LevelGainedNotification)not).getLevelIndex() != null ? ((LevelGainedNotification)not).getLevelIndex().toString() : "");
 			break;
+		case "ChallengeInvitationAcceptedNotification": 
+			Player guest = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationAcceptedNotification)not).getGuestId(), not.getGameId());
+			result.put("assigneeName", guest.getNickname());
 		}
-		
 		
 		return result;
 	}	
