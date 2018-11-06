@@ -19,6 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -35,6 +36,7 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationAcceptedNotification;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationRefusedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.Notification;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.NotificationMessage;
@@ -51,7 +53,7 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @Component
 public class NotificationsManager {
 
-	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class};
+	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class};
 
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
 	
@@ -91,7 +93,7 @@ public class NotificationsManager {
 		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
 	}
 	
-//	@Scheduled(cron="0 0 12 * * WED")
+	@Scheduled(cron="0 0 12 * * WED")
 	public void checkProposedPending() throws Exception {
 		for (AppInfo appInfo : appSetup.getApps()) {
 			try {
@@ -173,8 +175,7 @@ public class NotificationsManager {
 		}
 	}
 	
-//	@Scheduled(fixedRate = 1000 * 60 * 10)
-	@PostConstruct
+	@Scheduled(fixedRate = 1000 * 60 * 1)
 	private void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
@@ -206,7 +207,7 @@ public class NotificationsManager {
 						if (notification != null) {
 							logger.info("Sending notification to " + not.getPlayerId());
 							try {
-							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+//							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
 							} catch (Exception e) {
 								logger.error("Error sending notification", e);
 							}								
@@ -314,17 +315,24 @@ public class NotificationsManager {
 	
 	private Map<String, String> buildExtraData(Notification not) {
 		Map<String, String> result = Maps.newTreeMap();
-		
+
 		switch (not.getClass().getSimpleName()) {
 		case "LevelGainedNotification":
-			result.put("levelName", ((LevelGainedNotification)not).getLevelName());
-			result.put("levelIndex", ((LevelGainedNotification)not).getLevelIndex() != null ? ((LevelGainedNotification)not).getLevelIndex().toString() : "");
+			result.put("levelName", ((LevelGainedNotification) not).getLevelName());
+			result.put("levelIndex", ((LevelGainedNotification) not).getLevelIndex() != null ? ((LevelGainedNotification) not).getLevelIndex().toString() : "");
 			break;
-		case "ChallengeInvitationAcceptedNotification": 
-			Player guest = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationAcceptedNotification)not).getGuestId(), not.getGameId());
+		case "ChallengeInvitationAcceptedNotification": {
+			Player guest = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationAcceptedNotification) not).getGuestId(), not.getGameId());
 			result.put("assigneeName", guest.getNickname());
+			break;
 		}
-		
+		case "ChallengeInvitationRefusedNotification": {
+			Player guest = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationRefusedNotification) not).getGuestId(), not.getGameId());
+			result.put("assigneeName", guest.getNickname());
+			break;
+		}
+		}
+
 		return result;
 	}	
 	
