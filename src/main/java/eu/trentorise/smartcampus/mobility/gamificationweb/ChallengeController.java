@@ -183,7 +183,7 @@ public class ChallengeController {
 	}
 	
 	@PostMapping("/gamificationweb/invitation")
-	public void sendInvitation(@RequestHeader(required = true, value = "appId") String appId, @RequestBody Invitation invitation, HttpServletRequest request, HttpServletResponse response) {
+	public void sendInvitation(@RequestHeader(required = true, value = "appId") String appId, @RequestBody Invitation invitation, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String token = tokenExtractor.extractHeaderToken(request);
 		BasicProfile user = null;
 		try {
@@ -234,7 +234,11 @@ public class ChallengeController {
 		
 		RestTemplate restTemplate = new RestTemplate();
 
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation", HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
+		String url = gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation";
+		logger.info("URL: " + url);
+		logger.info("BODY: " + mapper.writeValueAsString(ci));
+		
+		ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
 		
 		if (result.getStatusCode() == HttpStatus.OK) {
 			Map<String, String> extraData = Maps.newTreeMap();
