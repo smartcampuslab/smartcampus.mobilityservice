@@ -54,6 +54,7 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_OTHER_ATTENDEE_SCORES = "otherAttendeeScores";
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
 	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
+	private static final String CHAL_FIELDS_PROPOSER = "proposer";
 	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
@@ -254,6 +255,9 @@ public class ChallengesUtils {
 	    						status = (int)(100 *row_status / total);
 	    						other_status = 100 - status;
 	    					}
+	    					
+	    					String proposer = (String)challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+	    					challengeData.setProposerId(proposer);
 	    					
 	    					String otherPlayerId = (String)otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID); 
 	    					Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);

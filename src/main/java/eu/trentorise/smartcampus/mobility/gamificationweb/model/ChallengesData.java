@@ -20,6 +20,7 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int bonus = 0;
 	private long challCompletedDate = 0;
 	
+	private String proposerId;
 	private OtherAttendeeData otherAttendeeData;
 	
 	public ChallengesData(){
@@ -155,6 +156,14 @@ public class ChallengesData implements Comparable<ChallengesData> {
 
 	public void setChallCompletedDate(long challCompletedDate) {
 		this.challCompletedDate = challCompletedDate;
+	}
+
+	public String getProposerId() {
+		return proposerId;
+	}
+
+	public void setProposerId(String creatorId) {
+		this.proposerId = creatorId;
 	}
 
 	public OtherAttendeeData getOtherAttendeeData() {
