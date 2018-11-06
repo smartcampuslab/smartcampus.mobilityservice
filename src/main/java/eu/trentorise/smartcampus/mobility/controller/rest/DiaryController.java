@@ -290,7 +290,9 @@ public class DiaryController {
 				de.setTimestamp(challengeConcept.getStateDate().get(ChallengeState.ASSIGNED).getTime());
 			}
 			de.setChallengeName(description);
-			de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
+			if (challengeConcept.getFields().containsKey("bonusScore")) {
+				de.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
+			}
 			de.setChallengeStart(challengeConcept.getStart().getTime());
 			de.setChallengeEnd(challengeConcept.getEnd().getTime());
 			if (challengeConcept.isCompleted()) {
@@ -298,7 +300,9 @@ public class DiaryController {
 				de2.setEntityId(challengeConcept.getName() + "_won");
 				de2.setType(DiaryEntryType.CHALLENGE_WON);
 				de2.setChallengeName(description);
-				de2.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());					
+				if (challengeConcept.getFields().containsKey("bonusScore")) {
+					de2.setChallengeBonus(((Number)challengeConcept.getFields().get("bonusScore")).intValue());
+				}
 				de2.setTimestamp(challengeConcept.getDateCompleted().getTime());
 				de2.setChallengeStart(challengeConcept.getStart().getTime());
 				de2.setChallengeEnd(challengeConcept.getEnd().getTime());
