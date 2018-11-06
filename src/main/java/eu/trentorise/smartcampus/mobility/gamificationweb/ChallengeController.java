@@ -210,6 +210,10 @@ public class ChallengeController {
 			return;			
 		}		
 		
+		if (attendee.getId().equals(player.getId())) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return;	
+		}
 		
 		ChallengeInvitation ci = new ChallengeInvitation();
 		ci.setGameId(gameId);
