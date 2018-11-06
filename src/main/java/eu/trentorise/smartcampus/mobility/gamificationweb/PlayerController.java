@@ -1,12 +1,10 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
 import java.nio.charset.Charset;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,18 +65,12 @@ import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
-import eu.trentorise.smartcampus.mobility.gamification.model.Invitation;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeConcept;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation.ChallengePlayer;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation.PointConceptRef;
-import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation.Reward;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ClassificationData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherPlayer;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
@@ -104,10 +95,6 @@ import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 @EnableScheduling
 public class PlayerController {
 	
-	private enum InvitationStatus {
-		accept,refuse,cancel
-	}
-
 	private static final String NICK_RECOMMANDATION = "nick_recommandation";
 	private static final String TIMESTAMP = "timestamp";
 	
@@ -127,6 +114,7 @@ public class PlayerController {
 	@Autowired
 	@Value("${aacURL}")
 	private String aacURL;
+	
 	protected BasicProfileService profileService;
 
 	@Autowired
@@ -236,166 +224,7 @@ public class PlayerController {
 		}
 	}
 
-	@GetMapping("/gamificationweb/challenge/type/{playerId}")
-	public @ResponseBody List<ChallengeChoice> getChallengesStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
-		String gameId = getGameId(appId);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
-		
-		String res = result.getBody();
-		
-		Inventory inventory = mapper.readValue(res , Inventory.class);
-
-		return inventory.getChallengeChoices();
-	}	
 	
-	@GetMapping("/gamificationweb/challenges")
-	public @ResponseBody eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept getChallenges(@RequestHeader(required = true, value = "appId") String appId, @RequestParam(required=false) ChallengeDataType filter, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String token = tokenExtractor.extractHeaderToken(request);
-		logger.debug("WS-get status user token " + token);
-		BasicProfile user = null;
-		try {
-			user = profileService.getBasicProfile(token);
-			if (user == null) {
-				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return null;
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return null;
-		}
-		String userId = user.getUserId();
-		String gameId = getGameId(appId);
-		
-		Player p = null;
-		String nickName = "";
-		p = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
-		String language = "it";
-		if(p != null){
-			nickName = p.getNickname();
-			language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
-		}
-
-		String statusUrl = "state/" + gameId + "/" + userId;
-		String allData = getAll(statusUrl, appId);
-		
-		PlayerStatus ps =  statusUtils.convertPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
-		if (filter != null) {
-			ps.getChallengeConcept().getChallengeData().entrySet().removeIf(x -> !filter.equals(x.getKey()));
-		}
-		
-		return ps.getChallengeConcept();
-	}	
-	
-	@PutMapping("/gamificationweb/challenge/choose/{challengeId}")
-	public void chooseChallenge(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeId, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String token = tokenExtractor.extractHeaderToken(request);
-		logger.debug("WS-get status user token " + token);
-		BasicProfile user = null;
-		try {
-			user = profileService.getBasicProfile(token);
-			if (user == null) {
-				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return;
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return;
-		}
-		String userId = user.getUserId();
-		String gameId = getGameId(appId);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		String partialUrl = "game/" + gameId + "/player/" + userId + "/challenges/" + challengeId + "/accept";
-		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());		
-	}
-	
-	@PostMapping("/gamificationweb/invitation")
-	public void sendInvitation(@RequestHeader(required = true, value = "appId") String appId, @RequestBody Invitation invitation, HttpServletRequest request, HttpServletResponse response) {
-		String token = tokenExtractor.extractHeaderToken(request);
-		BasicProfile user = null;
-		try {
-			user = profileService.getBasicProfile(token);
-			if (user == null) {
-				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return;
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return;
-		}
-		String userId = user.getUserId();
-		String gameId = getGameId(appId);		
-		
-		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
-		if (player == null) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value());
-			return;			
-		}
-		Player attendee = playerRepositoryDao.findByPlayerIdAndGameId(invitation.getAttendeeId(), gameId);
-		if (attendee == null) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value());
-			return;			
-		}		
-		
-		
-		ChallengeInvitation ci = new ChallengeInvitation();
-		ci.setGameId(gameId);
-		ci.setProposer(new ChallengePlayer(userId));
-		ci.getGuests().add(new ChallengePlayer(invitation.getAttendeeId()));
-		ci.setChallengeName(invitation.getChallengeName());
-		ci.setChallengeModelName(invitation.getChallengeModelName().toString()); // "groupCompetitivePerformance"
-		
-		LocalDateTime day = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.SATURDAY)).truncatedTo(ChronoUnit.DAYS);
-		ci.setChallengeStart(new Date(day.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli())); // next saturday
-		day = day.plusWeeks(1).minusSeconds(1);
-		ci.setChallengeEnd(new Date(day.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli())); // 2 fridays
-		
-		ci.setChallengePointConcept(new PointConceptRef(invitation.getChallengePointConcept(), "weekly")); // "Walk_Km"
-		
-		Reward reward = new Reward();
-		ci.setReward(reward); // from body
-		
-		RestTemplate restTemplate = new RestTemplate();
-
-		try {
-			System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ci));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation", HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
-	}
-
-	@PostMapping("/gamificationweb/invitation/status/{challengeName}/{status}")
-	public void changeInvitationStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeName, @PathVariable InvitationStatus status, HttpServletRequest request, HttpServletResponse response) {
-		String token = tokenExtractor.extractHeaderToken(request);
-		BasicProfile user = null;
-		try {
-			user = profileService.getBasicProfile(token);
-			if (user == null) {
-				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return;
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return;
-		}
-		String userId = user.getUserId();
-		String gameId = getGameId(appId);		
-		
-		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
-		if (player == null) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value());
-			return;			
-		}		
-		
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation/" + status + "/" + challengeName, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-	}
 	
 	
 	@GetMapping("/gamificationweb/status/other/{playerId}")
@@ -918,9 +747,6 @@ public class PlayerController {
 		return pc;
 	}		
 	
-
-	
-
 	private String getGameId(String appId) {
 		if (appId != null) {
 			AppInfo ai = appSetup.findAppById(appId);
