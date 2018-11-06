@@ -10,8 +10,7 @@
 			"it": "Complimenti: hai raggiunto il livello <levelName>.",
 			"en": "Great news: you reached the level <levelName>."
 		},
-		"extras": 
-{
+		"extras": {
 			"it": [
 				{
 					"type": "REPLACE",
@@ -98,7 +97,8 @@
 					"key": "levelIndex",
 					"value": "7",
 					"string": " You have unlocked a new type of multi-player challenge!"
-				}]
+				}
+			]
 		}
 	},
 	{
@@ -112,5 +112,96 @@
 			"it": "Puoi scegliere la sfida per la prossima settimana!",
 			"en": "You can choose the challenge for next week!"
 		}
-	}
+	},
+	{
+		"id": "INVITATION",
+		"type": "new_invite",
+		"title": {
+			"it": "Invito",
+			"en": "Invitation"
+		},
+		"description": {
+			"it": "Hai ricevuto l'invito per una sfida da <challengerName>!",
+			"en": ""
+		},
+		"extras": {
+			"it": [
+				{
+					"type": "REPLACE",
+					"key": "challengerName",
+					"value": null,
+					"string": "challengerName"
+				}
+			],
+			"en": [
+				{
+					"type": "REPLACE",
+					"key": "challengerName",
+					"value": null,
+					"string": "challengerName"
+				}
+			]
+		}
+	},
+	{
+		"id": "ChallengeInvitationAcceptedNotification",
+		"type": "reply_accepted",
+		"title": {
+			"it": "Accettazione",
+			"en": "Acceptation"
+		},
+		"description": {
+			"it": "<assigneeName> ha accettato la sfida!",
+			"en": "<assigneeName> accepted your challenge!"
+		},
+		"extras": {
+			"it": [
+				{
+					"type": "REPLACE",
+					"key": "assigneeName",
+					"value": null,
+					"string": "assigneeName"
+				}
+			],
+			"en": [
+				{
+					"type": "REPLACE",
+					"key": "assigneeName",
+					"value": null,
+					"string": "assigneeName"
+				}
+			]
+		}
+	},
+	{
+		"id": "ChallengeInvitationRefusedNotification",
+		"type": "reply_denied",
+		"title": {
+			"it": "Rifiuto",
+			"en": "Refusal"
+		},
+		"description": {
+			"it": "<assigneeName> ha rifiutato la sfida!",
+			"en": "<assigneeName> refused your challenge!"
+		},
+		"extras": {
+			"it": [
+				{
+					"type": "REPLACE",
+					"key": "assigneeName",
+					"value": null,
+					"string": "assigneeName"
+				}
+			],
+			"en": [
+				{
+					"type": "REPLACE",
+					"key": "assigneeName",
+					"value": null,
+					"string": "assigneeName"
+				}
+			]
+		}
+	}	
+		
 ]
