@@ -4,8 +4,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.mobility.gamificationweb.NotificationsManager;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
+import eu.trentorise.smartcampus.mobility.security.AppInfo;
+import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.service.NotificationHelper;
 import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
@@ -15,7 +23,7 @@ public class TestController {
 //	private static final String NOTIFICATION_APP = "mobility.trentoplaygo.test";
 	
 	@Autowired
-	private NotificationsManager notificatioManager;		
+	private NotificationsManager notificationManager;		
 	
 	@Autowired
 	private NotificationHelper notificatioHelper;	
@@ -23,7 +31,17 @@ public class TestController {
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
 	
+	@Autowired
+	private AppSetup appSetup;	
+	
 	private static Log logger = LogFactory.getLog(TestController.class);
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/test/notification")
+	public @ResponseBody void notification(@RequestParam(required = true) String playerId, @RequestHeader(required = true, value = "appId") String appId) throws Exception {
+		Player p = playerRepositoryDao.findByPlayerIdAndGameId(playerId, getGameId(appId));
+		
+		notificationManager.sendDirectNotification(appId, p, "INVITATION", null);
+	}
 	
 //	@RequestMapping(method = RequestMethod.GET, value = "/test/notification")
 //	public @ResponseBody void notification(@RequestParam(required = true) String id, @RequestParam(required = false) String title, @RequestParam(required = false) String description, @RequestParam(required = false) String type, @RequestParam(required = true) String notificationAppId) throws Exception {
@@ -62,5 +80,18 @@ public class TestController {
 //		notificatioHelper.notify(notification, NOTIFICATION_APP);
 //		
 //	}	
+	
+	
+	private String getGameId(String appId) {
+		if (appId != null) {
+			AppInfo ai = appSetup.findAppById(appId);
+			if (ai == null) {
+				return null;
+			}
+			String gameId = ai.getGameId();
+			return gameId;
+		}
+		return null;
+	}		
 	
 }
