@@ -7,7 +7,6 @@ public class Invitation {
 	}		
 	
 	private String attendeeId;
-	private String challengeName;
 	private ChallengeModelNames challengeModelName;
 	private String challengePointConcept;
 
@@ -17,14 +16,6 @@ public class Invitation {
 
 	public void setAttendeeId(String attendee) {
 		this.attendeeId = attendee;
-	}
-
-	public String getChallengeName() {
-		return challengeName;
-	}
-
-	public void setChallengeName(String challengeName) {
-		this.challengeName = challengeName;
 	}
 
 	public ChallengeModelNames getChallengeModelName() {
