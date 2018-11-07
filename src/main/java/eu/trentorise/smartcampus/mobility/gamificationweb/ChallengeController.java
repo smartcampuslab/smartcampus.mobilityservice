@@ -34,9 +34,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
@@ -101,9 +103,14 @@ public class ChallengeController {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}	
 	
+	private Map<String, Reward> rewards;
+	
 	@PostConstruct
-	public void init() {
+	public void init() throws Exception {
 		profileService = new BasicProfileService(aacURL);
+		
+		rewards = mapper.readValue(Resources.getResource("challenges/rewards.json"), new TypeReference<Map<String, Reward>>() {
+		});
 	}
 	
 	@GetMapping("/gamificationweb/challenge/type/{playerId}")
@@ -229,7 +236,7 @@ public class ChallengeController {
 		
 		ci.setChallengePointConcept(new PointConceptRef(invitation.getChallengePointConcept(), "weekly")); // "Walk_Km"
 		
-		Reward reward = new Reward();
+		Reward reward = rewards.get(ci.getChallengeModelName());
 		ci.setReward(reward); // from body
 		
 		RestTemplate restTemplate = new RestTemplate();
