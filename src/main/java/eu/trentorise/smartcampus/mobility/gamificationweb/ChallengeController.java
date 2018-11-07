@@ -226,7 +226,6 @@ public class ChallengeController {
 		ci.setGameId(gameId);
 		ci.setProposer(new ChallengePlayer(userId));
 		ci.getGuests().add(new ChallengePlayer(invitation.getAttendeeId()));
-		ci.setChallengeName(invitation.getChallengeName());
 		ci.setChallengeModelName(invitation.getChallengeModelName().toString()); // "groupCompetitivePerformance"
 		
 		LocalDateTime day = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.SATURDAY)).truncatedTo(ChronoUnit.DAYS);
