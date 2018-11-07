@@ -110,7 +110,7 @@ public class NotificationsManager {
 		}
 	}	
 	
-	public void sendDirectInvitation(String appId, Player toPlayer, String type, Map<String, String> extraData) {
+	public void sendDirectNotification(String appId, Player toPlayer, String type, Map<String, String> extraData) {
 		AppInfo appInfo = appSetup.findAppById(appId);
 		
 		logger.info("Sending notification to " + toPlayer.getPlayerId());

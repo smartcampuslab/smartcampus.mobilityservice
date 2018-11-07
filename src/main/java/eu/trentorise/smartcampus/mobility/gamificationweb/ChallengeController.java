@@ -243,7 +243,7 @@ public class ChallengeController {
 		if (result.getStatusCode() == HttpStatus.OK) {
 			Map<String, String> extraData = Maps.newTreeMap();
 			extraData.put("challengerName", player.getNickname());
-			notificationsManager.sendDirectInvitation(appId, attendee, "INVITATION", extraData);			
+			notificationsManager.sendDirectNotification(appId, attendee, "INVITATION", extraData);			
 		}
 		
 	}
