@@ -35,24 +35,6 @@
 					"key": "levelIndex",
 					"value": "3",
 					"string": " Ora puoi scegliere fra TRE sfide a settimana!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "5",
-					"string": " Hai sbloccato le sfide di coppia!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "6",
-					"string": " Hai sbloccato una nuova tipologia di sfida di coppia!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "7",
-					"string": " Hai sbloccato una nuova tipologia di sfida di coppia!"
 				}
 			],
 			"en": [
@@ -79,24 +61,6 @@
 					"key": "levelIndex",
 					"value": "3",
 					"string": " Now you can choose between THREE challenges per week!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "5",
-					"string": " You have unlocked multi-player challenges!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "6",
-					"string": " You have unlocked a new type of multi-player challenge!"
-				},
-				{
-					"type": "APPEND",
-					"key": "levelIndex",
-					"value": "7",
-					"string": " You have unlocked a new type of multi-player challenge!"
 				}
 			]
 		}
