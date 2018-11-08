@@ -121,8 +121,8 @@
 			"en": "Invitation"
 		},
 		"description": {
-			"it": "Hai ricevuto l'invito per una sfida da <challengerName>!",
-			"en": ""
+			"it": "<opponent> ti ha invitato ad una sfida di coppia. Cosa rispondi?",
+			"en": "<opponent> invited you to a multi-player challenge. What's your answer?"
 		},
 		"extras": {
 			"it": [
@@ -148,11 +148,11 @@
 		"type": "reply_accepted",
 		"title": {
 			"it": "Accettazione",
-			"en": "Acceptation"
+			"en": "Acceptance"
 		},
 		"description": {
-			"it": "<assigneeName> ha accettato la sfida!",
-			"en": "<assigneeName> accepted your challenge!"
+			"it": "<assigneeName> ha accettato il tuo invito. Che vinca il migliore!",
+			"en": "<assigneeName> accepted your invitation. May the best player win!"
 		},
 		"extras": {
 			"it": [
@@ -181,8 +181,8 @@
 			"en": "Refusal"
 		},
 		"description": {
-			"it": "<assigneeName> ha rifiutato la sfida!",
-			"en": "<assigneeName> refused your challenge!"
+			"it": "<assigneeName> ha rifiutato il tuo invito. Affrettati a scegliere un'altra sfida! ",
+			"en": "<assigneeName> rejected your invitation. Choose another challenge!"
 		},
 		"extras": {
 			"it": [

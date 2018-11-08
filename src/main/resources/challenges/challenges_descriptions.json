@@ -501,4 +501,34 @@
 		"it": "Per vincere la sfida la tua posizione nella classifica settimanale dovra' essere compresa tra il <posMin>° e il <posMax>° posto alla fine di questa settimana di gioco.",
 		"en": "To succeed in this challenge, your position in the weekly leaderboard must be in between place <posMin> and place <posMax> at the end of the current game week."
 	}
-}]
+},
+
+{
+	"modelName": "groupCompetitivePerformance",
+	"filter": "green leaves",
+	"description": {
+		"it": "Per vincere la sfida, guadagna più punti green leaves del tuo avversario. Otterrai un bonus del <percentage>% sul totale dei punti guadagnati in settimana.",
+		"en": "To win this challenge, gain more green leaves point than your opponent. The winner will get a <percentage>% bonus of all the points got during the week."
+
+	}
+},
+{
+	"modelName": "groupCompetitivePerformance",
+	"filter": "Bike_Km",
+	"description": {
+		"it": "Per vincere la sfida, fai più kilometri in bici del tuo avversario. Otterrai un bonus del <percentage>% sul totale dei punti guadagnati in settimana.",
+		"en": "To win this challenge, do more bike km than your opponent. The winner will get a <percentage>% bonus of all the points got during the week."
+
+	}
+},
+{
+	"modelName": "groupCompetitivePerformance",
+	"filter": "Walk_Km",
+	"description": {
+		"it": "Per vincere la sfida, cammina più kilometri del tuo avversario. Otterrai un bonus del <percentage>% sul totale dei punti guadagnati in settimana.",
+		"en": "To win this challenge, walk more km than your opponent. The winner will get a <percentage>% bonus of all the points got during the week."
+
+	}
+}
+
+]
