@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,9 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
@@ -787,12 +784,10 @@ public class GamificationController {
 	}
 
 	@RequestMapping("/console/useritinerary/{userId}")
-	public @ResponseBody Map<String, Collection<ItineraryDescriptor>> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
+	public @ResponseBody List<ItineraryDescriptor> getItineraryListForUser(@PathVariable String userId, @RequestHeader(required = true, value = "appId") String appId,
 			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints,
 			@RequestParam(required = false) Boolean unapprovedOnly, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) Boolean toCheck,
 			@RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId) throws Exception {
-		
-		Multimap<String, ItineraryDescriptor> itineraryMap = LinkedHashMultimap.create();
 		List<ItineraryDescriptor> list = new ArrayList<ItineraryDescriptor>();
 
 		try {
@@ -821,7 +816,7 @@ public class GamificationController {
 					}
 				}
 
-				Collections.reverse(instances);
+//				Collections.reverse(instances);
 //				instances = aggregateFollowingTrackedInstances(instances);
 //				gamificationValidator.findOverlappedTrips(instances);
 				for (TrackedInstance o : instances) {
@@ -877,26 +872,17 @@ public class GamificationController {
 							o.setDeviceInfo(mapper.writeValueAsString(map));
 						}
 					}
-					
-					itineraryMap.put(o.getMultimodalId() != null ? o.getMultimodalId() : "", descr);
-					
-//					list.add(descr);
+					list.add(descr);
 				}
 			}
 
-//			Collections.sort(list);
-			itineraryMap.asMap().keySet().forEach(x -> list.addAll(itineraryMap.get(x)));
-			
-			
-			Collections.reverse(list);
+			Collections.sort(list);
+//			Collections.reverse(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
-		
-		Map<String, Collection<ItineraryDescriptor>> result = itineraryMap.asMap();
-		
-		return result;
+		return list;
 	}
 
 	@RequestMapping("/console/users")

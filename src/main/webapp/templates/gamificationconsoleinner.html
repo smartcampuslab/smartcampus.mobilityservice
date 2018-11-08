@@ -113,22 +113,26 @@
 								</div>
 							</div>
 							<div ng-if="selectedUser == user">
-							<div ng-repeat="(multimodalId, multimodal) in userMap[user]" class="panel panel-default user-row">
-								<div style="background-color:rgb(40,100,200);color:white">{{multimodalId}}</div>
-								<div ng-repeat="itinerary in multimodal" class="itinerary-row">
+								<div ng-repeat="itinerary in userMap[user]" class="itinerary-row">
 									<div ng-class="{'incomplete': itinerary.instance.complete == false}">
 										<div ng-click="selectInstance(itinerary.instance)" class="instance-row"
-											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}">
+											ng-class="{'selected':selectedInstance == itinerary.instance, 'valid': hasValidStyle(itinerary.instance), 'invalid': hasInvalidStyle(itinerary.instance), 'pending': hasPendingStyle(itinerary.instance)}"
+										>
 											<div class="row">
 												<div class="col-md-6 itinerary-def">
-													{{itinerary.tripName}}<em style="color: darkred;">{{itinerary.instance.validationResult.validationStatus.error === null ? '' : ': ' + itinerary.instance.validationResult.validationStatus.error}}</em>
+													{{itinerary.tripName}} <span ng-show="!itinerary.instance.validationResult.matchedLocations && itinerary.instance.itinerary"
+														class="glyphicon glyphicon-move" title="Mismatched locations" data-toggle="tooltip"
+													></span> <span ng-show="!itinerary.instance.validationResult.matchedActivities && itinerary.instance.itinerary" class="glyphicon glyphicon-plane"
+														title="Mismatched activities" data-toggle="tooltip"
+													></span> <span ng-show="itinerary.instance.validationResult.tooFast" class="glyphicon glyphicon-road" title="Too fast" data-toggle="tooltip"></span> 
+													<span ng-show="!itinerary.instance.validationResult.inAreas" class="glyphicon glyphicon-flag" title="Not in areas" data-toggle="tooltip"></span>
 													<br />
 													<i>Type: </i><b>{{itinerary.instance.itinerary == null ? ('Free tracking - ' + itinerary.instance.freeTrackingTransport) : 'Planned'}}</b>
 													<i>{{itinerary.instance.validationResult.plannedAsFreeTracking ? '(as free tracking)' : ''}}</i>
 												</div>
 												<div class="col-md-6 text-right">
 												<span ng-if="itinerary.instance.suspect == true" class="label label-danger"><b>SUSPECT</b></span>												
-												<!-- <span ng-if="itinerary.instance.groupId != 0" class="label label-primary">Group {{itinerary.instance.groupId}}</span> -->
+												<!--<span ng-if="itinerary.instance.groupId != 0" class="label label-primary">Group {{itinerary.instance.groupId}}</span> !-->
 													<b>{{(itinerary.instance.day ? itinerary.instance.day : '--') + " " + (itinerary.startTime|date:'HH:mm')}}</b> <span
 														ng-show="itinerary.instance.validationResult.tooFewPoints && itinerary.instance.itinerary" class="glyphicon glyphicon-exclamation-sign"
 														title="Too few points" data-toggle="tooltip"
@@ -160,7 +164,6 @@
 								</div>
 							</div>
 							</div>
-						</div>
 						<div></div>
 					</div>
 				</div>
