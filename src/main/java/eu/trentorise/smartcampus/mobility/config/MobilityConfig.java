@@ -213,9 +213,9 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 			String appId = request.getHeader("appId");
 			if (appId != null && !appId.isEmpty()) {
 				AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
-				if (app == null || app.getGameId() == null) {
+				if (app == null) {
 					response.sendError(HttpServletResponse.SC_FORBIDDEN);
-				} else {
+				} else if (app.getGameId() != null) {
 					GameInfo game = gameSetup.findGameById(app.getGameId());
 					if (game == null || game.getSend() == null || !game.getSend()) {
 						response.sendError(HttpServletResponse.SC_FORBIDDEN);
