@@ -204,8 +204,6 @@ public class ChallengesUtils {
     				challengeData.setBonus(bonusScore);
     				challengeData.setChallCompletedDate(dateCompleted);
 	    			
-    				challengeData.setChallDesc(fillDescription(challenge, language));
-    				
     				double row_status = 0D;
     				int status = 0;
     				
@@ -265,6 +263,7 @@ public class ChallengesUtils {
 	    					String nickname = null;
 	    					if (otherPlayer != null) {
 	    						nickname = otherPlayer.getNickname();
+	    						challenge.getFields().put("opponent", nickname);
 	    					}
 	    					
 	    					OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
@@ -274,6 +273,7 @@ public class ChallengesUtils {
 	    					otherAttendeeData.setNickname(nickname);
 	    					
 	    					challengeData.setOtherAttendeeData(otherAttendeeData);
+	    					
 	    					break;
 	    				}	    				
 	    				// boolean status: 100 or 0
@@ -287,6 +287,8 @@ public class ChallengesUtils {
 	    					}
 	    				}
     				}
+    				
+    				challengeData.setChallDesc(fillDescription(challenge, language));
     				challengeData.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(challengeData.getType()), language));
 
     				challengeData.setStatus(status);
@@ -357,6 +359,9 @@ public class ChallengesUtils {
 			}
 			case CHAL_MODEL_CHECKIN: {
 				return "checkinType";
+			}
+			case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE: {
+				return "challengePointConceptName";
 			}
 			default: {
 				return null;
