@@ -11,7 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -152,29 +154,31 @@ public class FileController {
 	}
 
 	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public @ResponseBody void getPlayerAvatarDataSmall(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
+	public ResponseEntity getPlayerAvatarDataSmall(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
 		Avatar avatar = avatarRepository.findByPlayerIdAndGameId(playerId, findGameId(appId));
 		if (avatar == null || avatar.getAvatarDataSmall() == null) {
 			avatar = avatarRepository.findOne(DEFAULT_USER);
 		}
 		
-		response.getOutputStream().write(avatar.getAvatarDataSmall().getData());
-		response.setContentLength(avatar.getAvatarDataSmall().getData().length);
-		response.setContentType(avatar.getContentType());
-
+		response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=86400");
+		response.setHeader(HttpHeaders.CONTENT_TYPE, avatar.getContentType());
+		response.setIntHeader(HttpHeaders.CONTENT_LENGTH, avatar.getAvatarDataSmall().getData().length);
+		
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(avatar.getContentType())).body(avatar.getAvatarDataSmall().getData());		
 	}	
 	
 	@GetMapping(value = "/gamificationweb/player/avatar/{appId}/{playerId}/big") //, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public @ResponseBody void getPlayerAvatarData(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
+	public ResponseEntity getPlayerAvatarData(@PathVariable String appId, @PathVariable String playerId, HttpServletResponse response) throws Exception {
 		Avatar avatar = avatarRepository.findByPlayerIdAndGameId(playerId, findGameId(appId));
 		if (avatar == null || avatar.getAvatarData() == null) {
 			avatar = avatarRepository.findOne(DEFAULT_USER);
 		}
 		
-		response.getOutputStream().write(avatar.getAvatarData().getData());
-		response.setContentLength(avatar.getAvatarData().getData().length);
-		response.setContentType(avatar.getContentType());
-
+		response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=86400");
+		response.setHeader(HttpHeaders.CONTENT_TYPE, avatar.getContentType());
+		response.setIntHeader(HttpHeaders.CONTENT_LENGTH, avatar.getAvatarData().getData().length);
+		
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(avatar.getContentType())).body(avatar.getAvatarData().getData());
 	}		
 	
 	protected String getUserId() {
