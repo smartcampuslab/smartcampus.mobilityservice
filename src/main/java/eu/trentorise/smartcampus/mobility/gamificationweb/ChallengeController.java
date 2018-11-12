@@ -385,6 +385,11 @@ public class ChallengeController {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			return;
 		}
+		Player other = playerRepositoryDao.findByPlayerIdAndGameId(otherPlayerId, gameId);
+		if (other == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return;
+		}		
 		
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/block/" + otherPlayerId, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
@@ -412,6 +417,11 @@ public class ChallengeController {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			return;
 		}
+		Player other = playerRepositoryDao.findByPlayerIdAndGameId(otherPlayerId, gameId);
+		if (other == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return;
+		}			
 		
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/unblock/" + otherPlayerId, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
