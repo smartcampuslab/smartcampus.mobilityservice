@@ -37,13 +37,11 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -60,11 +58,7 @@ import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeAssignmentDTO;
-import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
-import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
-import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
-import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
 import eu.trentorise.smartcampus.mobility.gamification.model.PlayerLevel;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
@@ -176,41 +170,6 @@ public class PlayerController {
 		
 	}		
 	
-	
-	@PutMapping("/gamificationweb/challenge/unlock/{type}")
-	public @ResponseBody List<ChallengeChoice> activateChallengeType(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String type, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String token = tokenExtractor.extractHeaderToken(request);
-		logger.debug("WS-get status user token " + token);
-		BasicProfile user = null;
-		try {
-			user = profileService.getBasicProfile(token);
-			if (user == null) {
-				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-				return null;
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return null;
-		}
-		String playerId = user.getUserId();		
-		String gameId = getGameId(appId);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ItemChoice choice = new ItemChoice(ChoiceType.CHALLENGE_MODEL, type);
-		
-		try {
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
-		
-		String res = result.getBody();
-		
-		Inventory inventory = mapper.readValue(res , Inventory.class);
-
-		return inventory.getChallengeChoices();
-		} catch (HttpClientErrorException e) {
-			response.setStatus(e.getRawStatusCode());
-			return null;
-		}
-	}
 	
 	@Scheduled(fixedDelay = 5 * 60 * 1000) 
 	public synchronized void checkRecommendations() throws Exception {
