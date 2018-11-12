@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,16 +33,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
+import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
 import eu.trentorise.smartcampus.mobility.gamification.model.Invitation;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept.ChallengeDataType;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation;
@@ -49,6 +54,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitat
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation.PointConceptRef;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeInvitation.Reward;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerBlackList;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PlayerStatus;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -125,6 +131,42 @@ public class ChallengeController {
 		Inventory inventory = mapper.readValue(res , Inventory.class);
 
 		return inventory.getChallengeChoices();
+	}	
+	
+	@PutMapping("/gamificationweb/challenge/unlock/{type}")
+	public @ResponseBody List<ChallengeChoice> activateChallengeType(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String type, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		logger.debug("WS-get status user token " + token);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String playerId = user.getUserId();		
+		playerId = "8";
+		String gameId = getGameId(appId);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ItemChoice choice = new ItemChoice(ChoiceType.CHALLENGE_MODEL, type);
+		
+		try {
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
+		
+		String res = result.getBody();
+		
+		Inventory inventory = mapper.readValue(res , Inventory.class);
+
+		return inventory.getChallengeChoices();
+		} catch (HttpClientErrorException e) {
+			response.setStatus(e.getRawStatusCode());
+			return null;
+		}
 	}	
 	
 	@GetMapping("/gamificationweb/challenges")
@@ -280,6 +322,143 @@ public class ChallengeController {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation/" + status + "/" + challengeName, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
 	}	
+	
+	@GetMapping("/gamificationweb/blacklist")
+	public @ResponseBody List<Map<String, String>> getBlackList(@RequestHeader(required = true, value = "appId") String appId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);		
+		
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
+		if (player == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;
+		}
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/blacklist", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
+		
+		PlayerBlackList pbl = mapper.readValue(result.getBody(), PlayerBlackList.class);
+		
+		List<Map<String, String>> res = Lists.newArrayList();
+		pbl.getBlockedPlayers().forEach(x -> {
+			Player p = playerRepositoryDao.findByPlayerIdAndGameId(x, gameId);
+			Map<String, String> pd = Maps.newTreeMap();
+			pd.put("id", x);
+			pd.put("nickname", p.getNickname());
+			res.add(pd);
+		});
+		
+		return res;
+	}
+	
+	@PostMapping("/gamificationweb/blacklist/{otherPlayerId}")
+	public @ResponseBody void addToBlackList(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String otherPlayerId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);		
+		
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
+		if (player == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return;
+		}
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/block/" + otherPlayerId, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
+	}	
+	
+	@DeleteMapping("/gamificationweb/blacklist/{otherPlayerId}")
+	public @ResponseBody void deleteFromBlackList(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String otherPlayerId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);		
+		
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
+		if (player == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return;
+		}
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/unblock/" + otherPlayerId, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
+	}		
+	
+	@GetMapping("/gamificationweb/challengables")
+	public @ResponseBody List<Map<String, String>> getChallengables(@RequestHeader(required = true, value = "appId") String appId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);		
+		
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
+		if (player == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;
+		}
+		
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/systemList", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
+		
+		List<String> ps = mapper.readValue(result.getBody(), List.class);
+		
+		List<Map<String, String>> res = Lists.newArrayList();
+		ps.forEach(x -> {
+			Player p = playerRepositoryDao.findByPlayerIdAndGameId(x, gameId);
+			if (p != null) {
+				Map<String, String> pd = Maps.newTreeMap();
+				pd.put("id", x);
+				pd.put("nickname", p.getNickname());
+				res.add(pd);
+			}
+		});
+		
+		return res;
+	}	
+	
 	
 	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
