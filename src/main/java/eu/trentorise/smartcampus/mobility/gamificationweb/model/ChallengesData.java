@@ -11,6 +11,7 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int challTarget = 0;
 	private int status = 0;
 	private double row_status = 0L;
+	private String unit;
 	private String type = "";
 	private Boolean active = false;
 	private Boolean success = false;
@@ -25,25 +26,6 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	
 	public ChallengesData(){
 		super();
-	}
-
-	public ChallengesData(String challId, String challDesc, String challCompleteDesc, int challTarget, int status, double row_status,
-			String type, Boolean active, Boolean success, long startDate, long endDate, int daysToEnd, int bonus, long challCompletedDate) {
-		super();
-		this.challId = challId;
-		this.challDesc = challDesc;
-		this.challCompleteDesc = challCompleteDesc;
-		this.challTarget = challTarget;
-		this.status = status;
-		this.row_status = row_status;
-		this.type = type;
-		this.active = active;
-		this.success = success;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.daysToEnd = daysToEnd;
-		this.bonus = bonus;
-		this.challCompletedDate = challCompletedDate;
 	}
 
 	public String getChallId() {
@@ -142,6 +124,14 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		this.row_status = row_status;
 	}
 	
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
 	public int getBonus() {
 		return bonus;
 	}

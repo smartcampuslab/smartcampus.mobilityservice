@@ -55,6 +55,8 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
 	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
 	private static final String CHAL_FIELDS_PROPOSER = "proposer";
+	private static final String CHAL_FIELDS_CHALLENGE_SCORE_NAME = "challengeScoreName";
+	
 	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
@@ -203,6 +205,7 @@ public class ChallengesUtils {
     				challengeData.setDaysToEnd(calculateRemainingDays(end, now));
     				challengeData.setBonus(bonusScore);
     				challengeData.setChallCompletedDate(dateCompleted);
+    				challengeData.setUnit(counterName);
 	    			
     				double row_status = 0D;
     				int status = 0;
@@ -253,6 +256,9 @@ public class ChallengesUtils {
 	    						status = (int)(100 *row_status / total);
 	    						other_status = 100 - status;
 	    					}
+	    					
+	    					String unit = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+	    					challengeData.setUnit(unit);
 	    					
 	    					String proposer = (String)challenge.getFields().get(CHAL_FIELDS_PROPOSER);
 	    					challengeData.setProposerId(proposer);
