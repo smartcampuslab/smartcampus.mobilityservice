@@ -469,6 +469,11 @@ public class ChallengeController {
 		return res;
 	}	
 	
+	@GetMapping("/gamificationweb/challenges/rewards")
+	public @ResponseBody Map<String, Reward> getRewards(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
+		return rewards;
+	}	
+	
 	
 	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
