@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,7 @@ import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 import com.google.common.io.Resources;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.DummyPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.NewTrentoPlanningPolicy;
@@ -117,6 +119,8 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 //		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), "mobility-domain");
 		MongoTemplate template = new MongoTemplate(getMongoClient(), "mobility-domain");
 		template.indexOps("trackedInstances").ensureIndex(new Index("day", Direction.ASC));
+//		template.setWriteConcern(new WriteConcern(1).withJournal(false).withWTimeout(200, TimeUnit.MILLISECONDS));
+		template.setWriteConcern(new WriteConcern(1).withWTimeout(200, TimeUnit.MILLISECONDS));
 		return template;
 	}
 	
