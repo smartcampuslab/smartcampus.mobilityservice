@@ -113,7 +113,7 @@ public class NotificationsManager {
 	public void sendDirectNotification(String appId, Player toPlayer, String type, Map<String, String> extraData) {
 		AppInfo appInfo = appSetup.findAppById(appId);
 		
-		logger.info("Sending notification to " + toPlayer.getPlayerId());
+		logger.info("Sending direct notification '" + type + "' to " + toPlayer.getPlayerId());
 		eu.trentorise.smartcampus.communicator.model.Notification notification = null;
 		
 		try {
@@ -154,7 +154,7 @@ public class NotificationsManager {
 			}
 
 			if (proposed) {
-				logger.info("Sending notification to " + p.getPlayerId());
+				logger.info("Sending PROPOSED notification to " + p.getPlayerId());
 				eu.trentorise.smartcampus.communicator.model.Notification notification = null;
 				try {
 					notification = buildSimpleNotification(p.getLanguage(), "PROPOSED", null);
@@ -205,7 +205,7 @@ public class NotificationsManager {
 							logger.error("Error building notification", e);
 						}
 						if (notification != null) {
-							logger.info("Sending notification to " + not.getPlayerId());
+							logger.info("Sending '" + not.getClass().getSimpleName() + "' notification to " + not.getPlayerId());
 							try {
 //							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
 							} catch (Exception e) {
