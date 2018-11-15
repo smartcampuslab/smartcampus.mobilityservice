@@ -149,7 +149,6 @@ public class ChallengeController {
 			return null;
 		}
 		String playerId = user.getUserId();		
-		playerId = "8";
 		String gameId = getGameId(appId);
 		
 		RestTemplate restTemplate = new RestTemplate();
