@@ -267,7 +267,7 @@ public class NotificationsManager {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> res = null;
 		
-		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to;
+		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to + "&size=1000";
 		
 		try {
 			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
