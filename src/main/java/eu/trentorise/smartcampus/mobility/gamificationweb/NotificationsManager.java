@@ -175,7 +175,7 @@ public class NotificationsManager {
 		}
 	}
 	
-	@Scheduled(fixedRate = 1000 * 60 * 1)
+	@Scheduled(fixedDelay = 1000 * 60 * 10)
 	private void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
