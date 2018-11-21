@@ -56,6 +56,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.model.Badge;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeAssignmentDTO;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
@@ -104,6 +105,9 @@ public class PlayerController {
 
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
+	
+	@Autowired
+	private GamificationCache gamificationCache;	
 
 	@Autowired
 	@Value("${aacURL}")
@@ -288,10 +292,9 @@ public class PlayerController {
 			language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 		}
 
-		String statusUrl = "state/" + gameId + "/" + userId;
-		String allData = getAll(statusUrl, appId);
+		String data = gamificationCache.getPlayerState(userId, appId);
 		
-		PlayerStatus ps =  statusUtils.convertPlayerData(allData, userId, gameId, nickName, mobilityUrl, 1, language);
+		PlayerStatus ps =  statusUtils.convertPlayerData(data, userId, gameId, nickName, mobilityUrl, 1, language);
 		
 		return ps;
 	}
@@ -485,13 +488,12 @@ public class PlayerController {
 		if (player == null) {
 			return null;
 		}
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> res = null;
 
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> res = null;			
+		
 		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-			String data = res.getBody();
+			String data = gamificationCache.getPlayerState(playerId, appId);
 
 			int greenLeaves = getGreenLeavesPoints(data);
 			op.setGreenLeaves(greenLeaves);
@@ -502,9 +504,9 @@ public class PlayerController {
 		}
 
 		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-
-			List nots = mapper.readValue(res.getBody(), List.class);
+			String data = gamificationCache.getPlayerNotifications(player.getPlayerId(), appId);
+			
+			List nots = mapper.readValue(data, List.class);
 			List<Badge> badges = Lists.newArrayList();
 			for (Object o : nots) {
 				if (((Map) o).containsKey("badge")) {
@@ -539,11 +541,9 @@ public class PlayerController {
 
 		op.setNickname(player.getNickname());
 
-		res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		String data = gamificationCache.getPlayerState(playerId, appId);
 
-		String allData = res.getBody();
-
-		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
+		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			
 			if (challengeConcept.isCompleted()) {
@@ -579,10 +579,7 @@ public class PlayerController {
 							playerRepositoryDao.save(player);							
 							continue;
 						}						
-						RestTemplate restTemplate = new RestTemplate();
-						ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET,
-								new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-						String data = res.getBody();
+						String data = gamificationCache.getPlayerState(player.getPlayerId(), appId);
 
 						if (getGreenLeavesPoints(data) > 0) {
 							logger.info("Sending recommendation to gamification engine: " + player.getPlayerId() + " -> " + recommender.getPlayerId());
@@ -625,21 +622,21 @@ public class PlayerController {
 		logger.info("Sent player registration to gamification engine(mobile-access) " + tmp_res.getStatusCode());
 	}
 	
-	private String getAll(@RequestParam String urlWS, String appId) {
-		RestTemplate restTemplate = new RestTemplate();
-		logger.debug("WS-GET. Method " + urlWS);
-		String result = "";
-		ResponseEntity<String> res = null;
-		try {
-			res = restTemplate.exchange(gamificationUrl + "gengine/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
-		} catch (Exception ex) {
-			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
-		}
-		if (res != null) {
-			result = res.getBody();
-		}
-		return result;
-	}	
+//	private String getAll(@RequestParam String urlWS, String appId) {
+//		RestTemplate restTemplate = new RestTemplate();
+//		logger.debug("WS-GET. Method " + urlWS);
+//		String result = "";
+//		ResponseEntity<String> res = null;
+//		try {
+//			res = restTemplate.exchange(gamificationUrl + "gengine/" + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
+//		} catch (Exception ex) {
+//			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
+//		}
+//		if (res != null) {
+//			result = res.getBody();
+//		}
+//		return result;
+//	}	
 	
 	private PlayerClassification getCachedPlayerClassification(String playerId, String appId, Long timestamp, Integer start, Integer end) throws ExecutionException {
 		List<ClassificationData> data = null;

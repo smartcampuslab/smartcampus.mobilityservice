@@ -34,6 +34,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationAcceptedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationRefusedNotification;
@@ -79,6 +80,9 @@ public class NotificationsManager {
 	
 	@Autowired
 	private NotificationHelper notificatioHelper;
+	
+	@Autowired
+	private GamificationCache gamificationCache;		
 	
 	private ObjectMapper mapper = new ObjectMapper(); {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -138,10 +142,7 @@ public class NotificationsManager {
 
 		List<Player> players = playerRepository.findAllByGameId(appInfo.getGameId());
 		for (Player p : players) {
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + appInfo.getGameId() + "/" + p.getPlayerId(), HttpMethod.GET,
-					new HttpEntity<Object>(null, createHeaders(appInfo.getAppId())), String.class);
-			String data = res.getBody();
+			String data = gamificationCache.getPlayerState(p.getPlayerId(), appInfo.getAppId());
 
 			List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
 

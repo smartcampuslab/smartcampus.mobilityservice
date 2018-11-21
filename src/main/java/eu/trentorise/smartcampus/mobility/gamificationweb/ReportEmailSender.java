@@ -22,20 +22,16 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgeCollectionConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.BadgesData;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept;
@@ -113,6 +109,9 @@ public class ReportEmailSender {
 	
 	@Autowired
 	private ConfigUtils configUtils;
+	
+	@Autowired
+	private GamificationCache gamificationCache;		
 
 	private static final Logger logger = Logger.getLogger(ReportEmailSender.class);
 
@@ -130,7 +129,7 @@ public class ReportEmailSender {
 //		System.out.println("DONE");
 //	}	
 	
-//	@Scheduled(cron="0 0 17 * * FRI")
+	@Scheduled(cron="0 0 17 * * FRI")
 	public void sendWeeklyNotification() throws Exception {
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -264,9 +263,8 @@ public class ReportEmailSender {
 			List<ChallengesData> lastWeekChallenges = null;
 			Locale mailLoc = Locale.ITALIAN;
 
-			String urlWSState = "gengine/state/" + gameId + "/" + p.getPlayerId();
-
-			String completeState = getAllChallenges(urlWSState, appId);
+			String completeState = gamificationCache.getPlayerState(p.getId(), appId);
+			
 			String language = p.getLanguage();
 			if (language == null || language.isEmpty()) {
 				language = ITA_LANG;
@@ -464,53 +462,6 @@ public class ReportEmailSender {
 		};
 	}
 
-	/**
-	 * Method used to retrieve the state of a specific user and to send the find data via mail
-	 * 
-	 * @param urlWS:
-	 *            url of the ws
-	 * @return string complete state
-	 * @throws InterruptedException
-	 */
-	private String getAllChallenges(String urlWS, String appId) throws InterruptedException {
-		RestTemplate restTemplate = new RestTemplate();
-		logger.debug("Challenges WS GET " + urlWS);
-		String result = "";
-		ResponseEntity<String> tmp_res = null;
-		try {
-			tmp_res = restTemplate.exchange(gamificationUrl + urlWS, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);
-		} catch (Exception ex) {
-			logger.error(String.format("Exception in proxyController get ws. Method: %s. Details: %s", urlWS, ex.getMessage()));
-		}
-		result = tmp_res.getBody();
-		return result;
-	}
-
-	@SuppressWarnings("rawtypes")
-	private List<Notification> getBadgeNotifications(String appId, String userId) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		
-		AppInfo app = appSetup.findAppById(appId);
-		
-		String url = gamificationUrl + "notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=BadgeNotification&fromTs=0";
-		
-		RestTemplate restTemplate = new RestTemplate();
-		
-		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
-		
-		List nots = mapper.readValue(res.getBody(), List.class);
-		List<Notification> notifications = Lists.newArrayList();
-		
-		for (Object not: nots) {
-			Notification msg = mapper.convertValue(not, Notification.class);
-			notifications.add(msg);
-		}		
-		
-		return notifications;
-		
-	}	
-	
 	private String getGameId(String appId) {
 		if (appId != null) {
 			AppInfo ai = appSetup.findAppById(appId);

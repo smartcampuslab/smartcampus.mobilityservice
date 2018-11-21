@@ -34,13 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
@@ -82,6 +78,9 @@ public class GamificationManager {
 	
 	@Autowired
 	private BannedChecker bannedChecker;
+	
+	@Autowired
+	private GamificationCache gamificationCache;		
 
 	@Autowired(required = false)
 	@Value("${gamification.url}")
@@ -325,24 +324,21 @@ public class GamificationManager {
 			return result;
 		}
 		
-//		GameInfo game = gameSetup.findGameById(app.getGameId());
+		String data = gamificationCache.getPlayerNotifications(userId, appId);
 		
-//		logger.info("Get score notifications for " + userId);
-		
-		String url = gamificationUrl + "/notification/game/" + app.getGameId() + "/player/" + userId + "?includeTypes=MessageNotification&size=10000";
-		
-		RestTemplate restTemplate = new RestTemplate();
-		
-		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);		
-		
-		List nots = mapper.readValue(res.getBody(), List.class);
-		
+		Map<String, List> notsMap = mapper.readValue(data, Map.class);
+		List nots = null;
+		if (notsMap.containsKey("MessageNotification")) {
+			nots = (List)mapper.convertValue(notsMap.get("MessageNotification"), List.class);
+		} else {
+			nots = Collections.EMPTY_LIST;
+		}
 
 		for (Object not: nots) {
 			MessageNotification msg = mapper.convertValue(not, MessageNotification.class);
-			Map data = msg.getData();
-			if (data.get("travelId") != null) {
-				result.put((String)data.get("travelId"), (Double)data.get("score"));
+			Map msgData = msg.getData();
+			if (msgData.get("travelId") != null) {
+				result.put((String)msgData.get("travelId"), (Double)msgData.get("score"));
 			} else {
 				logger.warn("TravelId null in GE for user = " + userId + ", app = " + appId);
 			}

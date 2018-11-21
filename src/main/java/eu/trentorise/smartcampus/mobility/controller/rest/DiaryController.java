@@ -20,11 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
@@ -35,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +42,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.GamificationManager;
 import eu.trentorise.smartcampus.mobility.gamification.TrackValidator;
 import eu.trentorise.smartcampus.mobility.gamification.diary.DiaryEntry;
@@ -113,6 +110,9 @@ public class DiaryController {
 
 	@Autowired
 	private ChallengesUtils challengeUtils;
+	
+	@Autowired
+	private GamificationCache gamificationCache;
 	
 	private ObjectMapper mapper = new ObjectMapper();
 
@@ -205,10 +205,7 @@ public class DiaryController {
 		List<Player> rps = playerRepositoryDao.findByNicknameRecommendationIgnoreCaseAndGameId(p.getNickname(), gameId);
 		if (rps != null) {
 			for (Player rp : rps) {
-				RestTemplate restTemplate = new RestTemplate();
-				ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + rp.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
-						String.class);
-				String data = res.getBody();
+				String data = gamificationCache.getPlayerState(rp.getPlayerId(), appId);
 
 				int gl = getGreenLeavesPoints(data);
 				if (gl > 0) {
@@ -265,13 +262,9 @@ public class DiaryController {
 
 		String language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 
-		RestTemplate restTemplate = new RestTemplate();
-		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/state/" + gameId + "/" + p.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+		String data = gamificationCache.getPlayerState(p.getPlayerId(), appId);
 
-		String allData = res.getBody();
-
-		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(allData);
+		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			if (!challengeConcept.getStateDate().containsKey(ChallengeState.ASSIGNED)) {
 				continue;
@@ -351,39 +344,49 @@ public class DiaryController {
 	private List<DiaryEntry> getBadgeNotifications(Player player, String appId) throws Exception {
 		List<DiaryEntry> result = Lists.newArrayList();
 
-		RestTemplate restTemplate = new RestTemplate();
-		String gameId = appSetup.findAppById(appId).getGameId();
-		ResponseEntity<String> res = restTemplate.exchange(gamificationUrl + "gengine/notification/" + gameId + "/" + player.getPlayerId(), HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-
-		List nots = mapper.readValue(res.getBody(), List.class);
+		String data = gamificationCache.getPlayerNotifications(player.getPlayerId(), appId);
+		
+		Map<String, List> notsMap = mapper.readValue(data, Map.class);
+		List nots = null;
+		if (notsMap.containsKey("BadgeNotification")) {
+			nots = (List)mapper.convertValue(notsMap.get("BadgeNotification"), List.class);
+		} else {
+			nots = Collections.EMPTY_LIST;
+		}		
+		
 		for (Object o : nots) {
-			if (((Map) o).containsKey("badge")) {
-				BadgeNotification not = mapper.convertValue(o, BadgeNotification.class);
-				
-				if (badgesCache.getBadge(not.getBadge()) == null) {
-					logger.error("Badge not found: " + not.getBadge());
-					continue;
-				}				
-				
-				DiaryEntry de = new DiaryEntry();
-				de.setType(DiaryEntryType.BADGE);
-				de.setTimestamp(not.getTimestamp());
-				de.setBadge(not.getBadge());
-				de.setBadgeText(badgesCache.getBadge(not.getBadge()).getText().get(player.getLanguage()));
-				de.setBadgeCollection(not.getCollectionName());
-				de.setEntityId(not.getCollectionName() + "_" + not.getBadge());
-				result.add(de);
-			} else if (((Map) o).containsKey("levelName")) {
-				LevelGainedNotification not = mapper.convertValue(o, LevelGainedNotification.class);
-				
-				DiaryEntry de = new DiaryEntry();
-				de.setType(DiaryEntryType.NEW_LEVEL);
-				de.setTimestamp(not.getTimestamp());
-				de.setLevelName(not.getLevelName());
-				de.setEntityId(not.getLevelType() + "_" + not.getLevelName());
-				result.add(de);				
+			BadgeNotification not = mapper.convertValue(o, BadgeNotification.class);
+
+			if (badgesCache.getBadge(not.getBadge()) == null) {
+				logger.error("Badge not found: " + not.getBadge());
+				continue;
 			}
-				
+
+			DiaryEntry de = new DiaryEntry();
+			de.setType(DiaryEntryType.BADGE);
+			de.setTimestamp(not.getTimestamp());
+			de.setBadge(not.getBadge());
+			de.setBadgeText(badgesCache.getBadge(not.getBadge()).getText().get(player.getLanguage()));
+			de.setBadgeCollection(not.getCollectionName());
+			de.setEntityId(not.getCollectionName() + "_" + not.getBadge());
+			result.add(de);
+		}
+
+		if (notsMap.containsKey("LevelGainedNotification")) {
+			nots = (List) mapper.convertValue(notsMap.get("LevelGainedNotification"), List.class);
+		} else {
+			nots = Collections.EMPTY_LIST;
+		}
+
+		for (Object o : nots) {
+			LevelGainedNotification not = mapper.convertValue(o, LevelGainedNotification.class);
+
+			DiaryEntry de = new DiaryEntry();
+			de.setType(DiaryEntryType.NEW_LEVEL);
+			de.setTimestamp(not.getTimestamp());
+			de.setLevelName(not.getLevelName());
+			de.setEntityId(not.getLevelType() + "_" + not.getLevelName());
+			result.add(de);
 		}
 
 		return result;
