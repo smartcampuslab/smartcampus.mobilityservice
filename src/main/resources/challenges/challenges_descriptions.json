@@ -526,5 +526,31 @@
 			"it": "Al termine della settimana, il giocatore che avrà percorso più kilometri a piedi tra te e <opponent> sarà il vincitore della sfida e guadagnerà un bonus del <rewardPercentage>% sui punti green leaves totali ottenuti in settimana, con un limite massimo di <rewardThreshold> green leaves.",
 			"en": "At the end of the week, the player that walks for more kilometers between you and <opponent> will be the winner of the challenge and will get a <rewardPercentage>% bonus of all the points obtained during the week, with a treshold of <rewardThreshold> green leaves."
 		}
+
+	},
+	{
+		"modelName": "groupCompetitiveTime",
+		"filter": "green leaves",
+		"description": {
+			"it": "!Al termine della settimana, il giocatore che avrà guadagnato più punti green leaves tra te e <opponent> sarà il vincitore della sfida e guadagnerà un bonus del <rewardPercentage>% sui punti green leaves totali ottenuti in settimana, con un limite massimo di <rewardThreshold> green leaves.",
+			"en": "!At the end of the week, the player that gets more green leaves points between you and <opponent> will be the winner of the challenge and will get a <rewardPercentage>% bonus of all the points obtained during the week, with a treshold of <rewardThreshold> green leaves."
+		}
+	},
+	{
+		"modelName": "groupCompetitiveTime",
+		"filter": "Bike_Km",
+		"description": {
+			"it": "!Al termine della settimana, il giocatore che avrà percorso più kilometri in bici tra te e <opponent> sarà il vincitore della sfida e guadagnerà un bonus del <rewardPercentage>% sui punti green leaves totali ottenuti in settimana, con un limite massimo di <rewardThreshold> green leaves.",
+			"en": "!At the end of the week, the player that does more bike kilometers between you and <opponent> will be the winner of the challenge and will get a <rewardPercentage>% bonus of all the points obtained during the week, with a treshold of <rewardThreshold> green leaves."
+		}
+	},
+	{
+		"modelName": "groupCompetitiveTime",
+		"filter": "Walk_Km",
+		"description": {
+			"it": "!Al termine della settimana, il giocatore che avrà percorso più kilometri a piedi tra te e <opponent> sarà il vincitore della sfida e guadagnerà un bonus del <rewardPercentage>% sui punti green leaves totali ottenuti in settimana, con un limite massimo di <rewardThreshold> green leaves.",
+			"en": "!At the end of the week, the player that walks for more kilometers between you and <opponent> will be the winner of the challenge and will get a <rewardPercentage>% bonus of all the points obtained during the week, with a treshold of <rewardThreshold> green leaves."
+		}
 	}
+
 ]

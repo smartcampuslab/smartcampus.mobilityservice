@@ -176,5 +176,31 @@
 			"it": "Fai più kilometri a piedi del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
 			"en": "Walk more km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
 		}
-	}
+	},
+	
+	{
+		"name": "groupCompetitiveTime",
+		"filter": "green leaves",
+		"description": {
+			"it": "!Guadagna più punti green leaves del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
+			"en": "!To win this challenge, gain more green leaves point than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+		}
+	},
+	{
+		"name": "groupCompetitiveTime",
+		"filter": "Bike_Km",
+		"description": {
+			"it": "!Fai più kilometri in bici del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
+			"en": "!Do more bike km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+		}
+	},
+	{
+		"name": "groupCompetitiveTime",
+		"filter": "Walk_Km",
+		"description": {
+			"it": "!Fai più kilometri a piedi del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
+			"en": "!Walk more km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+		}
+	}	
+	
 ]
