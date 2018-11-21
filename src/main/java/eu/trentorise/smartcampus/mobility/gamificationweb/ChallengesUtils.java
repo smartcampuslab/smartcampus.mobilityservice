@@ -53,6 +53,7 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_INITIAL_BADGE_NUM = "initialBadgeNum";
 	private static final String CHAL_FIELDS_OTHER_ATTENDEE_SCORES = "otherAttendeeScores";
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
+	private static final String CHAL_FIELDS_CHALLENGE_TARGET = "challengeTarget";
 	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
 	private static final String CHAL_FIELDS_PROPOSER = "proposer";
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE_NAME = "challengeScoreName";
@@ -71,6 +72,7 @@ public class ChallengesUtils {
 	private static final String CHAL_MODEL_CHECKIN = "checkin";
 	private static final String CHAL_MODEL_CLASSPOSITION = "leaderboardPosition";
 	private static final String CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE = "groupCompetitivePerformance";
+	private static final String CHAL_MODEL_GROUP_COMPETITIVE_TIME = "groupCompetitiveTime";
 	
 	// week delta in milliseconds
 //	private static final Long W_DELTA = 2000L;
@@ -281,7 +283,42 @@ public class ChallengesUtils {
 	    					challengeData.setOtherAttendeeData(otherAttendeeData);
 	    					
 	    					break;
-	    				}	    				
+	    				}	    		
+					case CHAL_MODEL_GROUP_COMPETITIVE_TIME: {
+						row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
+						double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+						double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+						int other_status = 0;
+						if (challengeTarget != 0) {
+							status = (int) (100 * row_status / challengeTarget);
+							other_status = (int) (100 * other_row_status / challengeTarget);
+						}
+
+						String unit = (String) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+						challengeData.setUnit(unit);
+
+						String proposer = (String) challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+						challengeData.setProposerId(proposer);
+
+						String otherPlayerId = (String) otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID);
+						Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);
+
+						String nickname = null;
+						if (otherPlayer != null) {
+							nickname = otherPlayer.getNickname();
+							challenge.getFields().put("opponent", nickname);
+						}
+
+						OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
+						otherAttendeeData.setRow_status(other_row_status);
+						otherAttendeeData.setStatus(other_status);
+						otherAttendeeData.setPlayerId(otherPlayerId);
+						otherAttendeeData.setNickname(nickname);
+
+						challengeData.setOtherAttendeeData(otherAttendeeData);
+
+						break;
+					}	
 	    				// boolean status: 100 or 0
 	    				case CHAL_MODEL_COMPLETE_BADGE_COLL: 
 	    				case CHAL_MODEL_POICHECKIN: 
@@ -366,9 +403,9 @@ public class ChallengesUtils {
 			case CHAL_MODEL_CHECKIN: {
 				return "checkinType";
 			}
-			case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE: {
+			case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE:
+			case CHAL_MODEL_GROUP_COMPETITIVE_TIME:
 				return "challengePointConceptName";
-			}
 			default: {
 				return null;
 			}
