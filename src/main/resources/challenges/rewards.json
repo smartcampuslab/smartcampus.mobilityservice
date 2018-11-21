@@ -9,5 +9,16 @@
 		"targetPointConcept": {
 			"name": "green leaves"
 		}
-	}
+	},
+	"groupCompetitiveTime": {
+		"percentage": 50.0,
+		"threshold": 250.0,
+		"calculationPointConcept": {
+			"name": "green leaves",
+			"period": "weekly"
+		},
+		"targetPointConcept": {
+			"name": "green leaves"
+		}
+	}	
 }
