@@ -58,7 +58,6 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
-import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -406,15 +405,13 @@ public class DiaryController {
 
 
 		Query query = new Query(criteria);
+		query.fields().exclude("geolocationEvents");
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		for (TrackedInstance instance : instances) {
 			DiaryEntry de = new DiaryEntry();
 			de.setType(DiaryEntryType.TRAVEL);
 			long timestamp = 0;
-			if (instance.getGeolocationEvents() != null && !instance.getGeolocationEvents().isEmpty()) {
-				Geolocation event = instance.getGeolocationEvents().iterator().next();
-				timestamp = event.getRecorded_at().getTime();
-			} else if (instance.getDay() != null && instance.getTime() != null) {
+			if (instance.getDay() != null && instance.getTime() != null) {
 				String dt = instance.getDay() + " " + instance.getTime();
 				timestamp = fullSdf.parse(dt).getTime();
 			} else if (instance.getDay() != null) {
