@@ -399,15 +399,13 @@ public class DiaryController {
 
 
 		Query query = new Query(criteria);
+		query.fields().exclude("geolocationEvents");
 		List<TrackedInstance> instances = storage.searchDomainObjects(query, TrackedInstance.class);
 		for (TrackedInstance instance : instances) {
 			DiaryEntry de = new DiaryEntry();
 			de.setType(DiaryEntryType.TRAVEL);
 			long timestamp = 0;
-			if (instance.getGeolocationEvents() != null && !instance.getGeolocationEvents().isEmpty()) {
-				Geolocation event = instance.getGeolocationEvents().iterator().next();
-				timestamp = event.getRecorded_at().getTime();
-			} else if (instance.getDay() != null && instance.getTime() != null) {
+			if (instance.getDay() != null && instance.getTime() != null) {
 				String dt = instance.getDay() + " " + instance.getTime();
 				timestamp = fullSdf.parse(dt).getTime();
 			} else if (instance.getDay() != null) {

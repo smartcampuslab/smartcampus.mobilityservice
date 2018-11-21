@@ -134,6 +134,9 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 //		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), "mobility-domain");
 		MongoTemplate template = new MongoTemplate(getMongoClient(), "mobility-domain");
 		template.indexOps("trackedInstances").ensureIndex(new Index("day", Direction.ASC));
+		template.indexOps("trackedInstances").ensureIndex(new Index("time", Direction.ASC));
+		template.indexOps("trackedInstances").ensureIndex(new Index("userId", Direction.ASC));
+		template.indexOps("trackedInstances").ensureIndex(new Index("appId", Direction.ASC));
 		return template;
 	}
 	
