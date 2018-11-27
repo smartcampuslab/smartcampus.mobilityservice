@@ -68,9 +68,9 @@ spring:
       
 rabbitmq:
   host: localhost
-  virtualhost: /
+  virtualhost: playgo
   port: 5672
-  user: guest
-  password: guest
+  user: 
+  password: 
   geExchangeName: ge-notifications
   geRoutingKeyPrefix: game
