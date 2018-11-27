@@ -20,21 +20,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.HttpEntity;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.stringtemplate.v4.ST;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -94,10 +89,6 @@ public class NotificationsManager {
 	
 	@Value("${rabbitmq.geRoutingKeyPrefix}")
 	private String rabbitMQroutingKeyPrefix;
-	
-//	@Autowired
-//	@Value("${rabbitmq.consumerTag}")
-//	private String rabbitMQConsumerTag;		
 	
 	@Autowired
 	private AppSetup appSetup;
@@ -177,7 +168,7 @@ public class NotificationsManager {
 								try {
 									 processNotification(body);
 								} catch (Exception e) {
-									e.printStackTrace();
+									logger.error("Error processing message", e);
 								}
 							}
 						};
@@ -307,31 +298,27 @@ public class NotificationsManager {
 
 		Optional<String> opt = notificationClassesMap.keySet().stream().filter(x -> type.contains(x)).findFirst();
 
-		logger.info("T: " + type);
-		
 		if (opt.isPresent()) {
 			Class clz = notificationClassesMap.get(opt.get());
 			Notification not = (Notification) mapper.convertValue(obj, clz);
 			
-			logger.info("ID: " + not.getGameId());
-			
 			Criteria criteria = new Criteria("gameId").is(not.getGameId()).and("type").is(type);
 			Query query = new Query(criteria);
 			
-//			Update update = new Update();
-//			update.set("timestamp", System.currentTimeMillis()); // not.getTimestamp() + 1);
-//			template.upsert(query, update, Timestamp.class);
+			Update update = new Update();
+			update.set("timestamp", not.getTimestamp());
+			template.upsert(query, update, Timestamp.class);
 			
-			Timestamp old = template.findOne(query, Timestamp.class);
-			
-			long time = not.getTimestamp();
-			if (old == null) {
-				old = new Timestamp(not.getGameId(), type, time);
-			}
-			if (not.getTimestamp() >= old.getTimestamp()){
-				old.setTimestamp(time);
-				template.save(old);
-			}
+//			Timestamp old = template.findOne(query, Timestamp.class);
+//			
+//			long time = not.getTimestamp();
+//			if (old == null) {
+//				old = new Timestamp(not.getGameId(), type, time);
+//			}
+//			if (not.getTimestamp() >= old.getTimestamp()){
+//				old.setTimestamp(time);
+//				template.save(old);
+//			}
 			
 			GameInfo game = gameSetup.findGameById(not.getGameId());
 
@@ -367,119 +354,119 @@ public class NotificationsManager {
 	}
 	
 //	@Scheduled(fixedDelay = 1000 * 60 * 10)
-	private void getNotifications() throws Exception {
-		logger.debug("Reading notifications.");
-		
-		List<Notification> nots = Lists.newArrayList();
-		
-		for (AppInfo appInfo : appSetup.getApps()) {
-			if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
-				GameInfo game = gameSetup.findGameById(appInfo.getGameId());
-				if (game.getSend() == null || !game.getSend()) {
-					continue;
-				}
-				nots = getNotifications(appInfo.getAppId());
-				
-				if (!nots.isEmpty()) {
-					logger.info("Read " + nots.size() + " notifications for " + appInfo.getAppId());
-				}
-				
-				for (Notification not: nots) {
-					Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
-					
-					if (p != null) {
-						eu.trentorise.smartcampus.communicator.model.Notification notification = null;
-
-						try {
-							notification = buildNotification(p.getLanguage(), not);
-						} catch (Exception e) {
-							logger.error("Error building notification", e);
-						}
-						if (notification != null) {
-							logger.info("Sending '" + not.getClass().getSimpleName() + "' notification to " + not.getPlayerId());
-							try {
-							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
-							} catch (Exception e) {
-								logger.error("Error sending notification", e);
-							}								
-						}
-					}
-				}				
-				
-			}
-		}
-	}
-	
-	private <T> List<Notification> getNotifications(String appId) throws Exception {
-		logger.debug("Reading notifications for " + appId);
-		
-		List<Notification> nots = Lists.newArrayList();
-		
-		for (Class clz: notificationClasses) {
-		nots.addAll(getNotifications(appId, clz));
-		}
-		
-		return nots;
-	}
-	
-	private <T> List<Notification> getNotifications(String appId, Class<T> clz) throws Exception {
-		logger.debug("Reading notifications for type " + ((Class)clz).getSimpleName());
-		
-		String gameId = getGameId(appId);
-
-		Criteria criteria = new Criteria("gameId").is(gameId).and("type").is(((Class)clz).getSimpleName());
-		Query query = new Query(criteria);
-		Timestamp old = template.findOne(query, Timestamp.class);
-
-		long from = -1;
-		long to = System.currentTimeMillis();
-
-		if (old != null) {
-			from = old.getTimestamp() + 1;
-		} else {
-			from = to - 1000 * 60 * 60 * 24;
-			old = new Timestamp(gameId, ((Class)clz).getSimpleName(), to);
-		}
-
-		List<Notification> nots = getNotifications(appId, 0, to, clz);
-
-		old.setTimestamp(to);
-		template.save(old);
-
-		return nots;
-	}
-	
-	private <T> List<Notification> getNotifications(String appId, long from, long to, Class<T> clz) throws Exception {
-		try {
-		logger.debug("Reading notifications from " + from + " to " + to);
-		
-		String gameId = getGameId(appId);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> res = null;
-		
-		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to + "&size=1000";
-		
-		try {
-			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		logger.debug("Result: " + res.getStatusCodeValue());
-		
-		TypeFactory factory = mapper.getTypeFactory();
-		JavaType listOfT = factory.constructCollectionType(List.class, clz);
-		List<Notification> nots = mapper.readValue(res.getBody(), listOfT);		
-		
-		logger.debug("Reading " + nots.size() + " notifications.");
-		
-		return nots;
-		} catch (Exception e) {
-			logger.error("Error retrieving notifications", e);
-			return Lists.newArrayList();
-		}
-	}
+//	private void getNotifications() throws Exception {
+//		logger.debug("Reading notifications.");
+//		
+//		List<Notification> nots = Lists.newArrayList();
+//		
+//		for (AppInfo appInfo : appSetup.getApps()) {
+//			if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+//				GameInfo game = gameSetup.findGameById(appInfo.getGameId());
+//				if (game.getSend() == null || !game.getSend()) {
+//					continue;
+//				}
+//				nots = getNotifications(appInfo.getAppId());
+//				
+//				if (!nots.isEmpty()) {
+//					logger.info("Read " + nots.size() + " notifications for " + appInfo.getAppId());
+//				}
+//				
+//				for (Notification not: nots) {
+//					Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
+//					
+//					if (p != null) {
+//						eu.trentorise.smartcampus.communicator.model.Notification notification = null;
+//
+//						try {
+//							notification = buildNotification(p.getLanguage(), not);
+//						} catch (Exception e) {
+//							logger.error("Error building notification", e);
+//						}
+//						if (notification != null) {
+//							logger.info("Sending '" + not.getClass().getSimpleName() + "' notification to " + not.getPlayerId());
+//							try {
+//							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+//							} catch (Exception e) {
+//								logger.error("Error sending notification", e);
+//							}								
+//						}
+//					}
+//				}				
+//				
+//			}
+//		}
+//	}
+//	
+//	private <T> List<Notification> getNotifications(String appId) throws Exception {
+//		logger.debug("Reading notifications for " + appId);
+//		
+//		List<Notification> nots = Lists.newArrayList();
+//		
+//		for (Class clz: notificationClasses) {
+//		nots.addAll(getNotifications(appId, clz));
+//		}
+//		
+//		return nots;
+//	}
+//	
+//	private <T> List<Notification> getNotifications(String appId, Class<T> clz) throws Exception {
+//		logger.debug("Reading notifications for type " + ((Class)clz).getSimpleName());
+//		
+//		String gameId = getGameId(appId);
+//
+//		Criteria criteria = new Criteria("gameId").is(gameId).and("type").is(((Class)clz).getSimpleName());
+//		Query query = new Query(criteria);
+//		Timestamp old = template.findOne(query, Timestamp.class);
+//
+//		long from = -1;
+//		long to = System.currentTimeMillis();
+//
+//		if (old != null) {
+//			from = old.getTimestamp() + 1;
+//		} else {
+//			from = to - 1000 * 60 * 60 * 24;
+//			old = new Timestamp(gameId, ((Class)clz).getSimpleName(), to);
+//		}
+//
+//		List<Notification> nots = getNotifications(appId, 0, to, clz);
+//
+//		old.setTimestamp(to);
+//		template.save(old);
+//
+//		return nots;
+//	}
+//	
+//	private <T> List<Notification> getNotifications(String appId, long from, long to, Class<T> clz) throws Exception {
+//		try {
+//		logger.debug("Reading notifications from " + from + " to " + to);
+//		
+//		String gameId = getGameId(appId);
+//		
+//		RestTemplate restTemplate = new RestTemplate();
+//		ResponseEntity<String> res = null;
+//		
+//		String url = gamificationUrl + "/notification/game/" + gameId + "?includeTypes=" + ((Class)clz).getSimpleName() + "&fromTs=" + from + "&toTs=" + to + "&size=1000";
+//		
+//		try {
+//			res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		logger.debug("Result: " + res.getStatusCodeValue());
+//		
+//		TypeFactory factory = mapper.getTypeFactory();
+//		JavaType listOfT = factory.constructCollectionType(List.class, clz);
+//		List<Notification> nots = mapper.readValue(res.getBody(), listOfT);		
+//		
+//		logger.debug("Reading " + nots.size() + " notifications.");
+//		
+//		return nots;
+//		} catch (Exception e) {
+//			logger.error("Error retrieving notifications", e);
+//			return Lists.newArrayList();
+//		}
+//	}
 	
 	private eu.trentorise.smartcampus.communicator.model.Notification buildNotification(String lang, Notification not) {
 		String type = not.getClass().getSimpleName();
