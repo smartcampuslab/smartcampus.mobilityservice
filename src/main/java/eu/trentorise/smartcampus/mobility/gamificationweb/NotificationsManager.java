@@ -341,7 +341,7 @@ public class NotificationsManager {
 						
 						try {
 							logger.info("Sending '" + not.getClass().getSimpleName() + "' notification to " + not.getPlayerId() + " (" + appInfo.getAppId() + ")");
-//							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
 						} catch (Exception e) {
 							logger.error("Error sending notification", e);
 						}
