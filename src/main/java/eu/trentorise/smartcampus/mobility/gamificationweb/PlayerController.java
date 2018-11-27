@@ -857,7 +857,7 @@ public class PlayerController {
 			if (stateMap.containsKey("PointConcept")) {
 				List<PointConcept> conceptList = mapper.convertValue(stateMap.get("PointConcept"), new TypeReference<List<PointConcept>>(){});
 				Optional<PointConcept> greenLeaves = conceptList.stream().filter(x -> "green leaves".equals(x.getName())).findFirst();
-				return greenLeaves.isPresent() ? greenLeaves.get().getScore() : 0;
+				return greenLeaves.isPresent() ? (int)greenLeaves.get().getScore() : 0;
 			}
 		}
 		return 0;

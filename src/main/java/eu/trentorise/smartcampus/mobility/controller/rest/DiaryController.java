@@ -61,7 +61,6 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.BadgesCache;
 import eu.trentorise.smartcampus.mobility.gamificationweb.ChallengesUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
-import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationStatus.MODE_TYPE;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
@@ -236,7 +235,7 @@ public class DiaryController {
 				for (Object o : conceptList) {
 					PointConcept concept = mapper.convertValue(o, PointConcept.class);
 					if ("green leaves".equals(concept.getName())) {
-						return concept.getScore();
+						return (int)concept.getScore();
 					}
 				}
 			}

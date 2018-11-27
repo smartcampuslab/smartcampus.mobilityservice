@@ -2,11 +2,11 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 public class PointConceptPeriod {
 	
-	private int score;
+	private double score;
 	private long start;
 	private long end;
 	
-	public int getScore() {
+	public double getScore() {
 		return score;
 	}
 
@@ -18,7 +18,7 @@ public class PointConceptPeriod {
 		return end;
 	}
 
-	public void setScore(int score) {
+	public void setScore(double score) {
 		this.score = score;
 	}
 
@@ -34,7 +34,7 @@ public class PointConceptPeriod {
 		super();
 	}
 
-	public PointConceptPeriod(int score, long start, long end) {
+	public PointConceptPeriod(double score, long start, long end) {
 		super();
 		this.score = score;
 		this.start = start;

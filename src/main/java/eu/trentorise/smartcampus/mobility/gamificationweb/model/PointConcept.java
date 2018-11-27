@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 public class PointConcept {
 
 	private String name;
-	private int score;
+	private double score;
 	private String periodType;
 	private long start;
 	private long periodDuration;
@@ -18,7 +18,7 @@ public class PointConcept {
 		return name;
 	}
 
-	public int getScore() {
+	public double getScore() {
 		return score;
 	}
 
@@ -26,7 +26,7 @@ public class PointConcept {
 		this.name = name;
 	}
 
-	public void setScore(int score) {
+	public void setScore(double score) {
 		this.score = score;
 	}
 
@@ -74,7 +74,7 @@ public class PointConcept {
 		super();
 	}
 
-	public PointConcept(String name, int score, String periodType, long start, long periodDuration,
+	public PointConcept(String name, double score, String periodType, long start, long periodDuration,
 			String periodIdentifier, List<PointConceptPeriod> instances) {
 		super();
 		this.name = name;
