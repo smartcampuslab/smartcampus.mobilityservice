@@ -126,7 +126,7 @@ public class StatusUtils {
 		for (Map gePointMap: gePointsMap) {
 			PointConcept pc = new PointConcept();
 			pc.setName((String)gePointMap.get(PC_NAME));
-			pc.setScore(((Double)gePointMap.get(PC_SCORE)).intValue());
+			pc.setScore(((Double)gePointMap.get(PC_SCORE)));
 			pc.setPeriodType(PC_WEEKLY);
 			
 			Map periods = (Map)gePointMap.get(PC_PERIODS);

@@ -288,7 +288,7 @@ public class ReportEmailSender {
 			int point_green_w = 0;
 			if (states != null && states.size() > 0) {
 				if (currentWeekConfData.getWeekStart() != null && currentWeekConfData.getWeekEnd() != null) {
-					point_green = states.get(0).getScore();
+					point_green = (int)states.get(0).getScore();
 					LocalDate cws = LocalDate.parse(currentWeekConfData.getWeekStart());
 					LocalDate cwe = LocalDate.parse(currentWeekConfData.getWeekEnd());
 
@@ -299,7 +299,7 @@ public class ReportEmailSender {
 					}).findFirst().orElse(null);
 
 					if (pcp != null) {
-						point_green_w = pcp.getScore();
+						point_green_w = (int)pcp.getScore();
 					}
 				}
 			}

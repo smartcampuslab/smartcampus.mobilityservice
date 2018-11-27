@@ -232,7 +232,7 @@ public class DiaryController {
 				for (Object o : conceptList) {
 					PointConcept concept = mapper.convertValue(o, PointConcept.class);
 					if ("green leaves".equals(concept.getName())) {
-						return concept.getScore();
+						return (int)concept.getScore();
 					}
 				}
 			}

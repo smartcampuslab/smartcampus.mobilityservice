@@ -1,8 +1,13 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,7 +37,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
@@ -54,13 +66,38 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @Component
 public class NotificationsManager {
 
-	private static final Class[] notificationClasses = new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class};
-
+	private static final List<Class> notificationClasses = Lists.newArrayList(new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class});
+	private Map<String, Class> notificationClassesMap;
+	
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
 	
-	@Autowired
 	@Value("${gamification.url}")
 	private String gamificationUrl;
+	
+	@Value("${rabbitmq.host}")
+	private String rabbitMQHost;	
+
+	@Value("${rabbitmq.virtualhost}")
+	private String rabbitMQVirtualHost;		
+	
+	@Value("${rabbitmq.port}")
+	private Integer rabbitMQPort;
+	
+	@Value("${rabbitmq.user}")
+	private String rabbitMQUser;
+	
+	@Value("${rabbitmq.password}")
+	private String rabbitMQPassword;	
+	
+	@Value("${rabbitmq.geExchangeName}")
+	private String rabbitMQExchangeName;		
+	
+	@Value("${rabbitmq.geRoutingKeyPrefix}")
+	private String rabbitMQroutingKeyPrefix;
+	
+//	@Autowired
+//	@Value("${rabbitmq.consumerTag}")
+//	private String rabbitMQConsumerTag;		
 	
 	@Autowired
 	private AppSetup appSetup;
@@ -82,7 +119,7 @@ public class NotificationsManager {
 	private NotificationHelper notificatioHelper;
 	
 	@Autowired
-	private GamificationCache gamificationCache;		
+	private GamificationCache gamificationCache;	
 	
 	private ObjectMapper mapper = new ObjectMapper(); {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -92,10 +129,93 @@ public class NotificationsManager {
 
 	@PostConstruct
 	public void init() throws Exception {
+		notificationClassesMap = Maps.newTreeMap();
+		notificationClasses.forEach(x -> {
+			notificationClassesMap.put(x.getSimpleName(), x);
+		});
 		List<NotificationMessage> messages = mapper.readValue(Resources.getResource("notifications/notifications.json"), new TypeReference<List<NotificationMessage>>() {
 		});
 		notificationsMessages = messages.stream().collect(Collectors.toMap(NotificationMessage::getId, Function.identity()));
+		initRabbitMQ();
 	}
+	
+	private void initRabbitMQ() throws Exception {
+		Timer timer = new Timer();
+
+		TimerTask tt = new TimerTask() {
+
+			@Override
+			public void run() {
+
+				boolean ok = true;
+
+				do {
+					logger.info("Connecting to RabbitMQ");
+					try {
+						ConnectionFactory connectionFactory = new ConnectionFactory();
+						connectionFactory.setUsername(rabbitMQUser);
+						connectionFactory.setPassword(rabbitMQPassword);
+						connectionFactory.setVirtualHost(rabbitMQVirtualHost);
+						connectionFactory.setHost(rabbitMQHost);
+						connectionFactory.setPort(rabbitMQPort);
+						connectionFactory.setAutomaticRecoveryEnabled(true);
+
+						Connection connection = connectionFactory.newConnection();
+						Channel rabbitMQChannel = connection.createChannel();
+						rabbitMQChannel.basicQos(1);
+						rabbitMQChannel.exchangeDeclare(rabbitMQExchangeName, "direct", true);
+
+						Set<String> queues = Sets.newHashSet();
+						Set<String> gameIds = appSetup.getApps().stream().map(x -> x.getGameId()).collect(Collectors.toSet());
+						
+						DefaultConsumer consumer = new DefaultConsumer(rabbitMQChannel) {
+							@Override
+							public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] b) throws IOException {
+								long deliveryTag = envelope.getDeliveryTag();
+
+								String body = new String(b);
+								try {
+									 processNotification(body);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						};
+						
+						for (String gameId : gameIds) {
+							if (gameId == null) {
+								continue;
+							}
+							GameInfo game = gameSetup.findGameById(gameId);
+							if (game == null) { // || game.getSend() == null || !game.getSend()) {
+								continue;
+							}
+
+							// String queueName = rabbitMQChannel.queueDeclare().getQueue();
+							String queueName = rabbitMQChannel.queueDeclare("queue-" + gameId, true, false, false, null).getQueue();
+							rabbitMQChannel.queueBind(queueName, rabbitMQExchangeName, rabbitMQroutingKeyPrefix + "-" + gameId);
+
+							boolean autoAck = true;
+							String consumerTag = rabbitMQChannel.basicConsume(queueName, autoAck, "", consumer);
+							queues.add(queueName);
+						}
+						ok = true;
+						logger.info("Connected to RabbitMQ queues: " + queues);
+					} catch (Exception e) {
+						logger.error("Problems connecting to RabbitMQ: " + e.getMessage());
+						ok = false;
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e1) {
+						}
+					}
+				} while (!ok);
+			}
+		};
+
+		timer.schedule(tt, 5000);
+	}
+	
 	
 	@Scheduled(cron="0 0 12 * * WED")
 	public void checkProposedPending() throws Exception {
@@ -176,7 +296,77 @@ public class NotificationsManager {
 		}
 	}
 	
-	@Scheduled(fixedDelay = 1000 * 60 * 10)
+	private void processNotification(String body) throws Exception {
+		Map<String, Object> map = (Map<String, Object>) mapper.readValue(body, Map.class);
+		String type = (String) map.get("type");
+		Map obj = (Map) map.get("obj");
+		if (type == null || obj == null) {
+			logger.error("Bad notification content: " + body);
+			return;
+		}
+
+		Optional<String> opt = notificationClassesMap.keySet().stream().filter(x -> type.contains(x)).findFirst();
+
+		logger.info("T: " + type);
+		
+		if (opt.isPresent()) {
+			Class clz = notificationClassesMap.get(opt.get());
+			Notification not = (Notification) mapper.convertValue(obj, clz);
+			
+			logger.info("ID: " + not.getGameId());
+			
+			Criteria criteria = new Criteria("gameId").is(not.getGameId()).and("type").is(type);
+			Query query = new Query(criteria);
+			
+//			Update update = new Update();
+//			update.set("timestamp", System.currentTimeMillis()); // not.getTimestamp() + 1);
+//			template.upsert(query, update, Timestamp.class);
+			
+			Timestamp old = template.findOne(query, Timestamp.class);
+			
+			long time = not.getTimestamp();
+			if (old == null) {
+				old = new Timestamp(not.getGameId(), type, time);
+			}
+			if (not.getTimestamp() >= old.getTimestamp()){
+				old.setTimestamp(time);
+				template.save(old);
+			}
+			
+			GameInfo game = gameSetup.findGameById(not.getGameId());
+
+			Player p = playerRepository.findByPlayerIdAndGameId(not.getPlayerId(), not.getGameId());
+
+			if (p != null) {
+				eu.trentorise.smartcampus.communicator.model.Notification notification = null;
+
+				try {
+					notification = buildNotification(p.getLanguage(), not);
+				} catch (Exception e) {
+					logger.error("Error building notification", e);
+				}
+				if (notification != null) {
+					List<AppInfo> apps = appSetup.findAppsByGameId(not.getGameId());
+					for (AppInfo appInfo : apps) {
+						if (game.getSend() == null || !game.getSend()) {
+							continue;
+						}
+						
+						try {
+							logger.info("Sending '" + not.getClass().getSimpleName() + "' notification to " + not.getPlayerId() + " (" + appInfo.getAppId() + ")");
+//							notificatioHelper.notify(notification, not.getPlayerId(), appInfo.getMessagingAppId());
+						} catch (Exception e) {
+							logger.error("Error sending notification", e);
+						}
+					}
+				}
+			} else {
+				logger.equals("Player " + not.getPlayerId() + " not found");
+			}
+		}
+	}
+	
+//	@Scheduled(fixedDelay = 1000 * 60 * 10)
 	private void getNotifications() throws Exception {
 		logger.debug("Reading notifications.");
 		
@@ -251,7 +441,7 @@ public class NotificationsManager {
 			old = new Timestamp(gameId, ((Class)clz).getSimpleName(), to);
 		}
 
-		List<Notification> nots = getNotifications(appId, from, to, clz);
+		List<Notification> nots = getNotifications(appId, 0, to, clz);
 
 		old.setTimestamp(to);
 		template.save(old);

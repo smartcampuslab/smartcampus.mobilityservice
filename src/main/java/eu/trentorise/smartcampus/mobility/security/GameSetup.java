@@ -45,7 +45,7 @@ public class GameSetup {
 			for (GameInfo game : games) {
 				gamesMap.put(game.getId(), game);
 			}
-		}		
+		}
 	}
 
 	public Resource getResource() {
