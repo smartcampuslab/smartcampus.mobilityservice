@@ -2,7 +2,9 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChallengeInvitation {
 
@@ -146,6 +148,7 @@ public class ChallengeInvitation {
     public static class Reward {
         private double percentage;
         private double threshold;
+        private Map<String, Double> bonusScore = new HashMap<>();
         private PointConceptRef calculationPointConcept;
         private PointConceptRef targetPointConcept;
 
@@ -181,7 +184,15 @@ public class ChallengeInvitation {
             this.threshold = threshold;
         }
 
-        @Override
+        public Map<String, Double> getBonusScore() {
+			return bonusScore;
+		}
+
+		public void setBonusScore(Map<String, Double> bonusScore) {
+			this.bonusScore = bonusScore;
+		}
+
+		@Override
         public String toString() {
             return String.format(
                     "{percentage=%s, threshold=%s, calculationPointConcept=%s, targetPointConcept=%s}",
