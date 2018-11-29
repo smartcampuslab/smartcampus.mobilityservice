@@ -452,7 +452,7 @@ public class ChallengeController {
 		}
 		
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/systemList", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/challengers", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
 		
 		List<String> ps = mapper.readValue(result.getBody(), List.class);
 		
