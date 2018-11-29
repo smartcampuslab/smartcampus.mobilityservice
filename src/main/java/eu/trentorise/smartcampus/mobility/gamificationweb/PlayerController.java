@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -503,22 +504,22 @@ public class PlayerController {
 			logger.error("Error retrieving player state", e);
 		}
 
+
 		try {
 			String data = gamificationCache.getPlayerNotifications(player.getPlayerId(), appId);
-			
-			List nots = mapper.readValue(data, List.class);
-			List<Badge> badges = Lists.newArrayList();
-			for (Object o : nots) {
-				if (((Map) o).containsKey("badge")) {
-					Badge not = mapper.convertValue(o, Badge.class);
-					badges.add(not);
-				}
+			Map<String, List> notsMap = mapper.readValue(data, Map.class);
+			List<Badge> badges = null;
+			if (notsMap.containsKey("BadgeNotification")) {
+				badges = mapper.convertValue(notsMap.get("BadgeNotification"), new TypeReference<List<Badge>>() {
+				});
+			} else {
+				badges = Collections.EMPTY_LIST;
 			}
 			op.setBadgeCollectionConcept(buildBadgeCollectionConcepts(badges));
 		} catch (Exception e) {
 			logger.error("Error retrieving badges", e);
-		}
-
+		}		
+		
 		long now = System.currentTimeMillis();
 		try {
 			StatisticsGroup statistics = statisticsBuilder.computeStatistics(playerId, appId, 0, System.currentTimeMillis(), AggregationGranularity.total);
