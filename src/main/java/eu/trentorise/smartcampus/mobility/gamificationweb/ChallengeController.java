@@ -44,6 +44,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
+import eu.trentorise.smartcampus.mobility.gamification.model.GameStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
@@ -277,6 +278,7 @@ public class ChallengeController {
 		ci.setChallengePointConcept(new PointConceptRef(invitation.getChallengePointConcept(), "weekly")); // "Walk_Km"
 		
 		Reward reward = rewards.get(ci.getChallengeModelName());
+		// TODO: from algorithm
 		ci.setReward(reward); // from body
 		
 		RestTemplate restTemplate = new RestTemplate();
@@ -473,6 +475,20 @@ public class ChallengeController {
 		return rewards;
 	}	
 	
+//	@GetMapping("/gamificationweb/challenges/statistics")
+//	public @ResponseBody List<GameStatistics> getStatistics(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
+//		return getStatistics(appId);
+//	}	
+	
+	private List<GameStatistics> getStatistics(String appId) throws Exception {
+		String gameId = getGameId(appId);
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/statistics", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
+		
+		List<GameStatistics> stats = mapper.readValue(result.getBody(),  new TypeReference<List<GameStatistics>>() {});
+		
+		return stats;
+	}
 	
 	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
