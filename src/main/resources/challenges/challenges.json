@@ -178,54 +178,56 @@
 		}
 	},
 	
+	
 	{
 		"name": "groupCompetitiveTime",
 		"filter": "green leaves",
 		"description": {
-			"it": "!Guadagna più punti green leaves del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "!To win this challenge, gain more green leaves point than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Guadagna <challengeTarget> green leaves prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
+			"en": "Gain <challengeTarget> green leaves point faster than your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
 		}
 	},
+	
 	{
 		"name": "groupCompetitiveTime",
 		"filter": "Bike_Km",
 		"description": {
-			"it": "!Fai più kilometri in bici del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "!Do more bike km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Fai <challengeTarget> km in bici prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
+			"en": "Bike <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
 		}
 	},
 	{
 		"name": "groupCompetitiveTime",
 		"filter": "Walk_Km",
 		"description": {
-			"it": "!Fai più kilometri a piedi del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "!Walk more km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Fai <challengeTarget> km a piedi prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
+			"en": "Walk <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
 		}
 	},
 	
+	
 	{
-		"name": "groupCooperative",
+		"name": "groupCoperative",
 		"filter": "green leaves",
 		"description": {
-			"it": "?Guadagna più punti green leaves del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "?To win this challenge, gain more green leaves point than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Unite le forze e guadagnate almeno <target> green leaves. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
+			"en": "Join the forces: gain at least <target> green leaves together with <opponent>. If you win, you'll both get <reward> green leaves."
 		}
 	},
 	{
-		"name": "groupCooperative",
+		"name": "groupCoperative",
 		"filter": "Bike_Km",
 		"description": {
-			"it": "?Fai più kilometri in bici del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "?Do more bike km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Unite le forze e fate almeno <target> km in bici. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
+			"en": "Join forces: bike at least <target> km between you and <opponent>. If you win, you'll both get <reward> green leaves."
 		}
 	},
 	{
-		"name": "groupCooperative",
+		"name": "groupCoperative",
 		"filter": "Walk_Km",
 		"description": {
-			"it": "?Fai più kilometri a piedi del tuo avversario <opponent>. Otterrai un bonus del <rewardPercentage>% sul totale dei punti guadagnati in settimana.",
-			"en": "?Walk more km than your opponent <opponent>. The winner will get a <rewardPercentage>% bonus of all the points got during the week."
+			"it": "Unite le forze e fate almeno <target> km a piedi. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
+			"en": "Join forces: walk at least <target> km between you and <opponent>. If you win, you'll both get <reward> green leaves."
 		}
-	}			
-	
+	}
 ]
