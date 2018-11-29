@@ -139,7 +139,7 @@ public class StatisticsBuilder {
 	private List<TrackedInstance> findAll(String userId, String appId) {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);//.and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
 		criteria.orOperator(
-				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
+				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
@@ -154,7 +154,7 @@ public class StatisticsBuilder {
 	private List<TrackedInstance> find(String userId, String appId, String from, String to) {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 		criteria.orOperator(
-				new Criteria("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID).and("changedValidity").is(null),
+				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID).and("changedValidity").is(null),
 				new Criteria("changedValidity").is(TravelValidity.VALID));
 		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
 		Query query = new Query(criteria);
