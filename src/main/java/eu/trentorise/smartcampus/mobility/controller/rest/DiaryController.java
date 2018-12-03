@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
@@ -346,16 +347,15 @@ public class DiaryController {
 		String data = gamificationCache.getPlayerNotifications(player.getPlayerId(), appId);
 		
 		Map<String, List> notsMap = mapper.readValue(data, Map.class);
-		List nots = null;
+		List<BadgeNotification> nots = null;
 		if (notsMap.containsKey("BadgeNotification")) {
-			nots = (List)mapper.convertValue(notsMap.get("BadgeNotification"), List.class);
+			nots = mapper.convertValue(notsMap.get("BadgeNotification"), new TypeReference<List<BadgeNotification>>() {
+			});
 		} else {
 			nots = Collections.EMPTY_LIST;
 		}		
 		
-		for (Object o : nots) {
-			BadgeNotification not = mapper.convertValue(o, BadgeNotification.class);
-
+		for (BadgeNotification not : nots) {
 			if (badgesCache.getBadge(not.getBadge()) == null) {
 				logger.error("Badge not found: " + not.getBadge());
 				continue;

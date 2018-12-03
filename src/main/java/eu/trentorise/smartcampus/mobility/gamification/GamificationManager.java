@@ -38,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -327,15 +328,15 @@ public class GamificationManager {
 		String data = gamificationCache.getPlayerNotifications(userId, appId);
 		
 		Map<String, List> notsMap = mapper.readValue(data, Map.class);
-		List nots = null;
+		List<MessageNotification> nots = null;
 		if (notsMap.containsKey("MessageNotification")) {
-			nots = (List)mapper.convertValue(notsMap.get("MessageNotification"), List.class);
+			nots = (List)mapper.convertValue(notsMap.get("MessageNotification"), new TypeReference<List<MessageNotification>>() {
+			});
 		} else {
 			nots = Collections.EMPTY_LIST;
 		}
 
-		for (Object not: nots) {
-			MessageNotification msg = mapper.convertValue(not, MessageNotification.class);
+		for (MessageNotification msg: nots) {
 			Map msgData = msg.getData();
 			if (msgData.get("travelId") != null) {
 				result.put((String)msgData.get("travelId"), (Double)msgData.get("score"));
