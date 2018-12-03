@@ -295,10 +295,10 @@ public class ChallengesUtils {
 								other_status = (int) (100 * other_row_status / challengeTarget);
 							}
 	
-							String unit = (String) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+							String unit = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
 							challengeData.setUnit(unit);
 	
-							String proposer = (String) challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+							String proposer = (String)challenge.getFields().get(CHAL_FIELDS_PROPOSER);
 							challengeData.setProposerId(proposer);
 	
 							String otherPlayerId = (String) otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID);
