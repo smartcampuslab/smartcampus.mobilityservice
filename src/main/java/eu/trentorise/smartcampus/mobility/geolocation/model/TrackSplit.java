@@ -137,6 +137,9 @@ public class TrackSplit {
 			if (t > 0) {
 				d += prevDist;
 				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
+				if (t > 10 * 60 * 1000) {
+					speed = speedThreshold;
+				}
 //				System.err.println(speed);;
 				// going slow, switch modality
 				if (speed < speedThreshold) {
