@@ -49,8 +49,8 @@ import it.sayservice.platform.smartplanner.data.message.Leg;
  */
 public class TrackValidator {
 
-	private static final int WALK_SPEED_THRESHOLD = 20; // km/h
-	private static final int BIKE_SPEED_THRESHOLD = 65; // km/h
+	private static final int WALK_SPEED_THRESHOLD = 12; // km/h
+	private static final int BIKE_SPEED_THRESHOLD = 30; // km/h
 
 	private static final int WALK_AVG_SPEED_THRESHOLD = 15; // km/h
 	private static final double WALK_GUARANTEED_AVG_SPEED_THRESHOLD = 7; // km/h
