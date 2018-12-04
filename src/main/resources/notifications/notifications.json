@@ -92,17 +92,17 @@
 			"it": [
 				{
 					"type": "REPLACE",
-					"key": "challengerName",
+					"key": "opponent",
 					"value": null,
-					"string": "challengerName"
+					"string": "opponent"
 				}
 			],
 			"en": [
 				{
 					"type": "REPLACE",
-					"key": "challengerName",
+					"key": "opponent",
 					"value": null,
-					"string": "challengerName"
+					"string": "opponent"
 				}
 			]
 		}
