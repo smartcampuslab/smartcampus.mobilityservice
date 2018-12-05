@@ -3,7 +3,18 @@ package eu.trentorise.smartcampus.mobility.gamification.model;
 public class Invitation {
 
 	public enum ChallengeModelNames {
-		groupCompetitivePerformance, groupCompetitiveTime;
+		groupCompetitivePerformance(false), groupCompetitiveTime(true), groupCooperative(true);
+		
+		private boolean customPrizes;
+		
+		private ChallengeModelNames(boolean customPrizes) {
+			this.customPrizes = customPrizes;
+		}
+
+		public boolean isCustomPrizes() {
+			return customPrizes;
+		}
+		
 	}		
 	
 	private String attendeeId;
