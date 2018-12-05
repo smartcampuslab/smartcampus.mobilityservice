@@ -18,6 +18,7 @@ public class ChallengeInvitation {
     private Date challengeEnd;
     private PointConceptRef challengePointConcept;
     private Reward reward;
+    private double challengeTarget = -1;
 
     public String getGameId() {
         return gameId;
@@ -91,7 +92,15 @@ public class ChallengeInvitation {
         this.challengeName = challengeName;
     }
 
-    public static class PointConceptRef {
+    public double getChallengeTarget() {
+		return challengeTarget;
+	}
+
+	public void setChallengeTarget(double challengeTarget) {
+		this.challengeTarget = challengeTarget;
+	}
+
+	public static class PointConceptRef {
         private String name;
         private String period;
 
