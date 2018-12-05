@@ -321,7 +321,7 @@ public class ChallengesUtils {
 							break;
 						}	
 						case CHAL_MODEL_GROUP_COOPERATIVE: {
-							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE) + (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
 							int other_status = 0;
@@ -617,6 +617,51 @@ public class ChallengesUtils {
 
 		return st.render();
 	}
+	
+	public String fillDescription(String name, String filterField, Map<String, Object> params, String lang) {
+		ChallengeStructure challengeStructure = challengeStructureMap.getOrDefault(name + "#" + filterField, null);
+		ST st = new ST(challengeStructure.getDescription().get(lang));
+		
+		String description = "";
+		if (challengeStructure != null) {
+			for (String field : params.keySet()) {
+				Object o = params.get(field);
+				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
+			}			
+			
+			for (String key: challengeReplacements.keySet()) {
+				description = description.replaceAll(key, challengeReplacements.get(key));
+			}		
+			
+			return st.render();
+		} else {
+			logger.error("Cannot find structure for challenge preview: '" + name + "', " + filterField);
+			return "";
+		}		
+	}
+	
+	public String fillLongDescription(String name, String filterField, Map<String, Object> params, String lang) {
+		ChallengeLongDescrStructure challengeStructure = challengeLongStructureMap.getOrDefault(name + "#" + filterField, null);
+		ST st = new ST(challengeStructure.getDescription().get(lang));
+		
+		String description = "";
+		if (challengeStructure != null) {
+			for (String field : params.keySet()) {
+				Object o = params.get(field);
+				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
+			}			
+			
+			for (String key: challengeReplacements.keySet()) {
+				description = description.replaceAll(key, challengeReplacements.get(key));
+			}		
+			
+			return st.render();
+		} else {
+			logger.error("Cannot find structure for challenge preview: '" + name + "', " + filterField);
+			return "";
+		}		
+	}	
+	
 	private String instantiateWord(String word, boolean negative, String lang) {
 		if (word != null) {
 			List versions = challengeDictionaryMap.get(word.toLowerCase());
