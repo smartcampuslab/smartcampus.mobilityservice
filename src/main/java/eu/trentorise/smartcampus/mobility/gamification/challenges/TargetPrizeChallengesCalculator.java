@@ -1,6 +1,5 @@
 package eu.trentorise.smartcampus.mobility.gamification.challenges;
 
-import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
@@ -10,13 +9,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,9 +20,7 @@ import eu.trentorise.smartcampus.mobility.gamification.model.GameStatistics;
 import eu.trentorise.smartcampus.mobility.gamificationweb.StatusUtils;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
-import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameInfo;
 import eu.trentorise.smartcampus.mobility.security.GameSetup;
 
 @Component
@@ -174,41 +165,7 @@ public class TargetPrizeChallengesCalculator {
 	}
 
 	private List<GameStatistics> getStatistics(String appId) throws Exception {
-		String gameId = getGameId(appId);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/statistics", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
-		
-		List<GameStatistics> stats = mapper.readValue(result.getBody(),  new TypeReference<List<GameStatistics>>() {});
-		
-//		System.err.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(stats));
-		
-		return stats;
+		return gamificationCache.getStatistics(appId);
 	}	
-	
-	private String getGameId(String appId) {
-		if (appId != null) {
-			AppInfo ai = appSetup.findAppById(appId);
-			if (ai == null) {
-				return null;
-			}
-			String gameId = ai.getGameId();
-			return gameId;
-		}
-		return null;
-	}
-	
-	HttpHeaders createHeaders(String appId) {
-		return new HttpHeaders() {
-			{
-				AppInfo app = appSetup.findAppById(appId);
-				GameInfo game = gameSetup.findGameById(app.getGameId());
-				String auth = game.getUser() + ":" + game.getPassword();
-				byte[] encodedAuth = Base64.encode(auth.getBytes(Charset.forName("UTF-8")));
-				String authHeader = "Basic " + new String(encodedAuth);
-				set("Authorization", authHeader);
-				set("Content-Type", "application/json");
-			}
-		};
-	}		
 	
 }
