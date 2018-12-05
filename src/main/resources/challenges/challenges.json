@@ -207,7 +207,7 @@
 	
 	
 	{
-		"name": "groupCoperative",
+		"name": "groupCooperative",
 		"filter": "green leaves",
 		"description": {
 			"it": "Unite le forze e guadagnate almeno <target> green leaves. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
@@ -215,7 +215,7 @@
 		}
 	},
 	{
-		"name": "groupCoperative",
+		"name": "groupCooperative",
 		"filter": "Bike_Km",
 		"description": {
 			"it": "Unite le forze e fate almeno <target> km in bici. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
@@ -223,7 +223,7 @@
 		}
 	},
 	{
-		"name": "groupCoperative",
+		"name": "groupCooperative",
 		"filter": "Walk_Km",
 		"description": {
 			"it": "Unite le forze e fate almeno <target> km a piedi. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",

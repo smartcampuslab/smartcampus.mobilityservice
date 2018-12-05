@@ -544,7 +544,7 @@
 		}
 	},
 	{
-		"modelName": "groupCoperative",
+		"modelName": "groupCooperative",
 		"filter": "green leaves",
 		"description": {
 			"it": "Se riuscirete a guadagnare almeno <challengeTarget> green leaves, sommando le green leaves tue e di <opponent>, vi aggiudicherete la sfida e vincerete entrambi il premio di <reward> green leaves.",
@@ -552,7 +552,7 @@
 		}
 	},
 	{
-		"modelName": "groupCoperative",
+		"modelName": "groupCooperative",
 		"filter": "Bike_Km",
 		"description": {
 			"it": "Se riuscirete a fare almeno <target> km in bici, sommando i km fatti da te e da <opponent>, vi aggiudicherete la sfida e vincerete entrambi il premio di <reward> green leaves.",
@@ -560,7 +560,7 @@
 		}
 	},
 	{
-		"modelName": "groupCoperative",
+		"modelName": "groupCooperative",
 		"filter": "Walk_Km",
 		"description": {
 			"it": "Se riuscirete a fare almeno <target> km a piedi, sommando i km fatti da te e da <opponent>, vi aggiudicherete la sfida e vincerete entrambi il premio di <reward> green leaves.",
