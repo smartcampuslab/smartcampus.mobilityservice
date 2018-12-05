@@ -120,7 +120,7 @@ public class StatusUtils {
 		return ps;
 	}
 
-	private List<PointConcept> convertGEPointConcept(List<Map> gePointsMap) {
+	public List<PointConcept> convertGEPointConcept(List<Map> gePointsMap) {
 		List<PointConcept> result = Lists.newArrayList();
 		
 		for (Map gePointMap: gePointsMap) {
