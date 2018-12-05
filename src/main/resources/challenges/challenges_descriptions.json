@@ -144,14 +144,6 @@
 		}
 	},
 	{
-		"modelName": "absoluteIncrement",
-		"filter": "green leaves",
-		"description": {
-			"it": "Per vincere la sfida accumula almeno <target> punti green leaves nel corso del periodo di validita' della sfida.",
-			"en": "To win this challenge you need to earn at least <target> green leaves points in between the beginning and end time of the challenge."
-		}
-	},
-	{
 		"modelName": "percentageIncrement",
 		"filter": "Bike_Km",
 		"description": {
@@ -239,6 +231,14 @@
 			"en": "To win this challenge, we take into account the total number of itineraries you have done with Viaggia Play&Go withouth using the car and which you have taken in between the beginning and end time for this challenge."
 		}
 	},
+	{
+		"modelName": "percentageIncrement",
+		"filter": "green leaves",
+		"description": {
+			"it": "Per vincere la sfida vale il numero di punti green leaves guadagnati durante il periodo di validita' della sfida.",
+			"en": "To win this challenge, we take into account the total number of green leaves points you have earned in between the beginning and end time for this challenge."
+		}
+	},	
 	{
 		"modelName": "absoluteIncrement",
 		"filter": "ZeroImpact_Trips",
@@ -391,6 +391,14 @@
 			"en": "To win this challenge, we take into account the total number of itineraries you have done using park and ride with Viaggia Play&Go and which you have taken in between the beginning and end time for this challenge. Park&Ride parkings are: Stazione FS Villazzano, Ex-Zuffo, Monte Baldo, Via Lidorno, Ghiaie via Fersina, Via Ragazzi del '99, Via Alessandro Manzoni - Rovereto, Parcheggio Municipio - Rovereto."
 		}
 	},
+	{
+		"modelName": "absoluteIncrement",
+		"filter": "green leaves",
+		"description": {
+			"it": "Per vincere la sfida accumula almeno <target> punti green leaves nel corso del periodo di validita' della sfida.",
+			"en": "To win this challenge you need to earn at least <target> green leaves points in between the beginning and end time of the challenge."
+		}
+	},	
 	{
 		"modelName": "nextBadge",
 		"filter": "park and ride pioneer",
