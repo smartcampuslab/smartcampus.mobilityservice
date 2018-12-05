@@ -175,8 +175,8 @@
 			"en": "Cancellation"
 		},
 		"description": {
-			"it": "<challengerName> ha cancellato il suo invito.",
-			"en": "<challengerName> cancelled the invitation."
+			"it": "<challengerName> ha cancellato il suo invito. Affrettati a scegliere un'altra sfida!",
+			"en": "<challengerName> cancelled the challenge invitation. Choose another challenge!"
 		},
 		"extras": {
 			"it": [
