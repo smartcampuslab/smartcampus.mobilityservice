@@ -45,7 +45,6 @@ import com.google.common.io.Resources;
 
 import eu.trentorise.smartcampus.mobility.gamification.challenges.TargetPrizeChallengesCalculator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
-import eu.trentorise.smartcampus.mobility.gamification.model.GameStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory.ItemChoice.ChoiceType;
@@ -96,6 +95,9 @@ public class ChallengeController {
 	
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
+
+	@Autowired
+	private ChallengesUtils challengeUtils;		
 	
 	@Autowired
 	private StatusUtils statusUtils;	
@@ -309,6 +311,67 @@ public class ChallengeController {
 		
 	}
 
+	@PostMapping("/gamificationweb/invitation/preview")
+	public @ResponseBody Map<String, String> getGroupChallengePreview(@RequestHeader(required = true, value = "appId") String appId, @RequestBody Invitation invitation, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String token = tokenExtractor.extractHeaderToken(request);
+		BasicProfile user = null;
+		try {
+			user = profileService.getBasicProfile(token);
+			if (user == null) {
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				return null;
+			}
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		String userId = user.getUserId();
+		String gameId = getGameId(appId);		
+		
+		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
+		if (player == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;	
+		}
+		Player attendee = playerRepositoryDao.findByPlayerIdAndGameId(invitation.getAttendeeId(), gameId);
+		if (attendee == null) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;	
+		}		
+		
+		if (attendee.getId().equals(player.getId())) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;
+		}
+		
+		Reward reward = rewards.get(invitation.getChallengeModelName().toString());
+		
+		Map<String, Object> pars = Maps.newTreeMap();
+		pars.put("opponent", attendee.getName());
+		pars.put("rewardPercentage", reward.getPercentage());
+		pars.put("rewardThreshold", reward.getThreshold());
+		
+		if (invitation.getChallengeModelName().isCustomPrizes()) {
+			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
+			logger.info("Calculated prize for preview " + userId + "/" + attendee.getId() + ": " + prizes);
+			Map<String, Double> bonusScore = Maps.newTreeMap();
+			pars.put("rewardBonusScore", prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
+			pars.put("reward", prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
+			pars.put("challengerBonusScore", prizes.get(TargetPrizeChallengesCalculator.PLAYER2_PRZ));
+			pars.put("challengeTarget", prizes.get(TargetPrizeChallengesCalculator.TARGET));
+			pars.put("target", prizes.get(TargetPrizeChallengesCalculator.TARGET));
+		}
+		
+		String descr = challengeUtils.fillDescription(invitation.getChallengeModelName().toString(), invitation.getChallengePointConcept(), pars, player.getLanguage());
+		String longDescr = challengeUtils.fillLongDescription(invitation.getChallengeModelName().toString(), invitation.getChallengePointConcept(), pars, player.getLanguage());
+		
+		Map<String, String> result = Maps.newTreeMap();
+		result.put("description", descr);
+		result.put("longDescription", longDescr);
+		
+		return result;
+	}	
+	
 	@PostMapping("/gamificationweb/invitation/status/{challengeName}/{status}")
 	public void changeInvitationStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeName, @PathVariable InvitationStatus status, HttpServletRequest request, HttpServletResponse response) {
 		String token = tokenExtractor.extractHeaderToken(request);
@@ -486,21 +549,6 @@ public class ChallengeController {
 	public @ResponseBody Map<String, Reward> getRewards(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 		return rewards;
 	}	
-	
-//	@GetMapping("/gamificationweb/challenges/statistics")
-//	public @ResponseBody List<GameStatistics> getStatistics(@RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
-//		return getStatistics(appId);
-//	}	
-	
-	private List<GameStatistics> getStatistics(String appId) throws Exception {
-		String gameId = getGameId(appId);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/statistics", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
-		
-		List<GameStatistics> stats = mapper.readValue(result.getBody(),  new TypeReference<List<GameStatistics>>() {});
-		
-		return stats;
-	}
 	
 	private String getAll(@RequestParam String urlWS, String appId) {
 		RestTemplate restTemplate = new RestTemplate();
