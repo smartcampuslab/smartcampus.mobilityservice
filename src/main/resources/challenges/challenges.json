@@ -184,7 +184,7 @@
 		"filter": "green leaves",
 		"description": {
 			"it": "Guadagna <challengeTarget> green leaves prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
-			"en": "Gain <challengeTarget> green leaves point faster than your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
+			"en": "Gain <challengeTarget> green leaves point faster than your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If you lose, <opponent> will get <challengerBonusScore> green leaves."
 		}
 	},
 	
@@ -193,7 +193,7 @@
 		"filter": "Bike_Km",
 		"description": {
 			"it": "Fai <challengeTarget> km in bici prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
-			"en": "Bike <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
+			"en": "Bike <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If you lose, <opponent> will get <challengerBonusScore> green leaves."
 		}
 	},
 	{
@@ -201,7 +201,7 @@
 		"filter": "Walk_Km",
 		"description": {
 			"it": "Fai <challengeTarget> km a piedi prima del tuo avversario <opponent>. Se vinci otterrai un bonus di <rewardBonusScore> green leaves, se vince <opponent> otterrà <challengerBonusScore> green leaves.",
-			"en": "Walk <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If <opponent> wins, she-he will get <challengerBonusScore> green leaves."
+			"en": "Walk <challengeTarget> km before your opponent <opponent>. If you win, you'll get <rewardBonusScore> green leaves. If you lose, <opponent> will get <challengerBonusScore> green leaves."
 		}
 	},
 	
