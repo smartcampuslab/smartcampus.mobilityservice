@@ -137,7 +137,7 @@ public class TrackSplit {
 			if (t > 0) {
 				d += prevDist;
 				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
-				if (t > 10 * 60 * 1000) {
+				if (t > 10 * 60 * 1000 && d > 0.1) {
 					speed = speedThreshold;
 				}
 //				System.err.println(speed);;
