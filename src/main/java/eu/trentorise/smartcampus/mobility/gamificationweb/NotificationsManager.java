@@ -62,7 +62,7 @@ import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 @Component
 public class NotificationsManager {
 
-	private static final List<Class> notificationClasses = Lists.newArrayList(new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class});
+	private static final List<Class> notificationClasses = Lists.newArrayList(new Class[] { LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class, ChallengeInvitationCanceledNotification.class});
 	private Map<String, Class> notificationClassesMap;
 	
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
