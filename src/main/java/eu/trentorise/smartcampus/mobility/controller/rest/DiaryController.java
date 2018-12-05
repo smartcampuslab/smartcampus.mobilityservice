@@ -468,6 +468,7 @@ public class DiaryController {
 				long score = scores.get(instance.getId()).longValue();
 				de.setTravelScore(score);
 				if (!ScoreStatus.ASSIGNED.equals(instance.getScoreStatus())) {
+					logger.info("Set assigned status to trip " + instance.getId());
 					instance.setScore(score);
 					instance.setScoreStatus(ScoreStatus.ASSIGNED);
 					storage.saveTrackedInstance(instance);
