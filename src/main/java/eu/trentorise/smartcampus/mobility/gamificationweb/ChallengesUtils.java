@@ -322,10 +322,12 @@ public class ChallengesUtils {
 						}	
 						case CHAL_MODEL_GROUP_COOPERATIVE: {
 							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE) + (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
 							int other_status = 0;
 							if (challengeTarget != 0) {
 								status = (int) (100 * row_status / challengeTarget);
+								other_status = (int) (100 * other_row_status / challengeTarget);
 							}
 	
 							String unit = (String) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
@@ -344,8 +346,8 @@ public class ChallengesUtils {
 							}
 	
 							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
-							otherAttendeeData.setRow_status(row_status);
-							otherAttendeeData.setStatus(status);
+							otherAttendeeData.setRow_status(other_row_status);
+							otherAttendeeData.setStatus(other_status);
 							otherAttendeeData.setPlayerId(otherPlayerId);
 							otherAttendeeData.setNickname(nickname);
 	
