@@ -44,6 +44,7 @@ import com.rabbitmq.client.Envelope;
 import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationAcceptedNotification;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationCanceledNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeInvitationRefusedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.LevelGainedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.Notification;
@@ -495,10 +496,11 @@ public class NotificationsManager {
 		Map<String, String> result = Maps.newTreeMap();
 
 		switch (not.getClass().getSimpleName()) {
-		case "LevelGainedNotification":
+		case "LevelGainedNotification": {
 			result.put("levelName", ((LevelGainedNotification) not).getLevelName());
 			result.put("levelIndex", ((LevelGainedNotification) not).getLevelIndex() != null ? ((LevelGainedNotification) not).getLevelIndex().toString() : "");
 			break;
+		}
 		case "ChallengeInvitationAcceptedNotification": {
 			Player guest = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationAcceptedNotification) not).getGuestId(), not.getGameId());
 			result.put("assigneeName", guest.getNickname());
@@ -509,10 +511,15 @@ public class NotificationsManager {
 			result.put("assigneeName", guest.getNickname());
 			break;
 		}
+		case "ChallengeInvitationCanceledNotification": {
+			Player proposer = playerRepository.findByPlayerIdAndGameId(((ChallengeInvitationCanceledNotification) not).getProposerId(), not.getGameId());
+			result.put("challengerName", proposer.getNickname());
+			break;
+		}
 		}
 
 		return result;
-	}	
+	}
 	
 	private void fillNotification(eu.trentorise.smartcampus.communicator.model.Notification notification, String lang, NotificationMessage message, Map<String, String> extraData) {
 		if (message != null) {
