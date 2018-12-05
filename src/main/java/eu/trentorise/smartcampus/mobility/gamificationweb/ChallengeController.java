@@ -43,6 +43,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamification.challenges.TargetPrizeChallengesCalculator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.GameStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
@@ -101,6 +102,9 @@ public class ChallengeController {
 	
 	@Autowired
 	private NotificationsManager notificationsManager;
+	
+	@Autowired
+	private TargetPrizeChallengesCalculator tpcc;	
 	
 	private BasicProfileService profileService;
 	
@@ -278,14 +282,22 @@ public class ChallengeController {
 		ci.setChallengePointConcept(new PointConceptRef(invitation.getChallengePointConcept(), "weekly")); // "Walk_Km"
 		
 		Reward reward = rewards.get(ci.getChallengeModelName());
-		// TODO: from algorithm
+		
+		if (invitation.getChallengeModelName().isCustomPrizes()) {
+			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
+			logger.info("Calculated prize for " + userId + "/" + attendee.getId() + ": " + prizes);
+			Map<String, Double> bonusScore = Maps.newTreeMap();
+			bonusScore.put(userId, prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
+			bonusScore.put(attendee.getId(), prizes.get(TargetPrizeChallengesCalculator.PLAYER2_PRZ));
+			reward.setBonusScore(bonusScore);
+			ci.setChallengeTarget(prizes.get(TargetPrizeChallengesCalculator.TARGET));
+		}
+
 		ci.setReward(reward); // from body
 		
 		RestTemplate restTemplate = new RestTemplate();
 
 		String url = gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation";
-		logger.info("URL: " + url);
-		logger.info("BODY: " + mapper.writeValueAsString(ci));
 		
 		ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
 		
