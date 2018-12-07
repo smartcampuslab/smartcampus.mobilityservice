@@ -57,6 +57,7 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
 	private static final String CHAL_FIELDS_PROPOSER = "proposer";
 	private static final String CHAL_FIELDS_CHALLENGE_SCORE_NAME = "challengeScoreName";
+	private static final String CHAL_FIELDS_CHALLENGE_REWARD = "rewardBonusScore";
 	
 	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
@@ -330,6 +331,8 @@ public class ChallengesUtils {
 								other_status = (int) (100 * other_row_status / challengeTarget);
 							}
 	
+							Double reward = (Double) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, "");
+							
 							String unit = (String) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
 							challengeData.setUnit(unit);
 	
@@ -343,6 +346,8 @@ public class ChallengesUtils {
 							if (otherPlayer != null) {
 								nickname = otherPlayer.getNickname();
 								challenge.getFields().put("opponent", nickname);
+								challenge.getFields().put("reward", reward);
+								challenge.getFields().put("target", target);
 							}
 	
 							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
