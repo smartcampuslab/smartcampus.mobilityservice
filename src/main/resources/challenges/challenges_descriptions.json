@@ -537,6 +537,14 @@
 	},
 	{
 		"modelName": "groupCompetitiveTime",
+		"filter": "green leaves",
+		"description": {
+			"it": "Il giocatore che avrà guadagnato per primo <challengeTarget> green leaves si aggiudicherà la sfida. Il bonus in punti green leaves è calcolato in base alla difficoltà della sfida e per questo motivo pùo essere diverso per te e <opponent>.",
+			"en": "The fastest player to earn <challengeTarget> green leaves will be the winner of the challenge. The green leaves reward depends on the difficulty of the challenge and thus might be different for you and <opponent>."
+		}
+	},
+	{
+		"modelName": "groupCompetitiveTime",
 		"filter": "Bike_Km",
 		"description": {
 			"it": "Il giocatore che avrà fatto per primo <challengeTarget> km in bici si aggiudicherà la sfida. Il bonus in punti green leaves è calcolato in base alla difficoltà della sfida e per questo motivo pùo essere diverso per te e <opponent>.",
