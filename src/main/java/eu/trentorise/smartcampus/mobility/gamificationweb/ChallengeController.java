@@ -373,7 +373,7 @@ public class ChallengeController {
 	}	
 	
 	@PostMapping("/gamificationweb/invitation/status/{challengeName}/{status}")
-	public void changeInvitationStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeName, @PathVariable InvitationStatus status, HttpServletRequest request, HttpServletResponse response) {
+	public void changeInvitationStatus(@RequestHeader(required = true, value = "appId") String appId, @PathVariable String challengeName, @PathVariable InvitationStatus status, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String token = tokenExtractor.extractHeaderToken(request);
 		BasicProfile user = null;
 		try {
