@@ -301,12 +301,18 @@ public class ChallengeController {
 
 		String url = gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/invitation";
 		
-		ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
+		ResponseEntity<String> result = null;
+		
+		try {
+		result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
 		
 		if (result.getStatusCode() == HttpStatus.OK) {
 			Map<String, String> extraData = Maps.newTreeMap();
 			extraData.put("opponent", player.getNickname());
 			notificationsManager.sendDirectNotification(appId, attendee, "INVITATION", extraData);			
+		}
+		} catch (HttpClientErrorException e) {
+			response.sendError(e.getRawStatusCode());
 		}
 		
 	}
@@ -421,7 +427,7 @@ public class ChallengeController {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			return null;
 		}
-		
+
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/blacklist", HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
 		
@@ -430,10 +436,12 @@ public class ChallengeController {
 		List<Map<String, String>> res = Lists.newArrayList();
 		pbl.getBlockedPlayers().forEach(x -> {
 			Player p = playerRepositoryDao.findByPlayerIdAndGameId(x, gameId);
-			Map<String, String> pd = Maps.newTreeMap();
-			pd.put("id", x);
-			pd.put("nickname", p.getNickname());
-			res.add(pd);
+			if (p != null) {
+				Map<String, String> pd = Maps.newTreeMap();
+				pd.put("id", x);
+				pd.put("nickname", p.getNickname());
+				res.add(pd);
+			}
 		});
 		
 		return res;
