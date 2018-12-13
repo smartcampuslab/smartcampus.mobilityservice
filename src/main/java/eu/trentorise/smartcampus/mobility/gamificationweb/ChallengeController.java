@@ -312,7 +312,11 @@ public class ChallengeController {
 			notificationsManager.sendDirectNotification(appId, attendee, "INVITATION", extraData);			
 		}
 		} catch (HttpClientErrorException e) {
+			logger.error("GE returned " + e.getRawStatusCode());
 			response.sendError(e.getRawStatusCode());
+		} catch (Exception e2) {
+			logger.error("Error sending invitation", e2);
+			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		}
 		
 	}
