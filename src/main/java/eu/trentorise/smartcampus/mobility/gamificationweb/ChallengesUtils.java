@@ -207,7 +207,6 @@ public class ChallengesUtils {
     				challengeData.setStartDate(start);
     				challengeData.setEndDate(end);
     				challengeData.setDaysToEnd(calculateRemainingDays(end, now));
-    				challengeData.setBonus(bonusScore);
     				challengeData.setChallCompletedDate(dateCompleted);
     				challengeData.setUnit(counterName);
 	    			
@@ -284,6 +283,8 @@ public class ChallengesUtils {
 	    					
 	    					challengeData.setOtherAttendeeData(otherAttendeeData);
 	    					
+//	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
+	    					
 	    					break;
 	    				}	    		
 						case CHAL_MODEL_GROUP_COMPETITIVE_TIME: {
@@ -318,6 +319,8 @@ public class ChallengesUtils {
 							otherAttendeeData.setNickname(nickname);
 	
 							challengeData.setOtherAttendeeData(otherAttendeeData);
+							
+	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
 	
 							break;
 						}	
@@ -357,6 +360,8 @@ public class ChallengesUtils {
 							otherAttendeeData.setNickname(nickname);
 	
 							challengeData.setOtherAttendeeData(otherAttendeeData);
+							
+	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
 	
 							break;
 						}						
@@ -375,6 +380,7 @@ public class ChallengesUtils {
     				challengeData.setChallDesc(fillDescription(challenge, language));
     				challengeData.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(challengeData.getType()), language));
 
+    				challengeData.setBonus(bonusScore);
     				challengeData.setStatus(status);
     				challengeData.setRow_status(row_status);
     				
