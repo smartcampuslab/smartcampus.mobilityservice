@@ -42,6 +42,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
+import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeAssignedNotification;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeCompletedNotication;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeConcept;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeFailedNotication;
@@ -66,7 +67,7 @@ public class NotificationsManager {
 
 	private static final List<Class> notificationClasses = Lists.newArrayList(new Class[] 
 	{ LevelGainedNotification.class, ChallengeInvitationAcceptedNotification.class, ChallengeInvitationRefusedNotification.class, ChallengeInvitationCanceledNotification.class,
-			ChallengeCompletedNotication.class, ChallengeFailedNotication.class });
+		ChallengeAssignedNotification.class, ChallengeCompletedNotication.class, ChallengeFailedNotication.class });
 	private Map<String, Class> notificationClassesMap;
 	
 	private static transient final Logger logger = Logger.getLogger(NotificationsManager.class);
@@ -520,6 +521,9 @@ public class NotificationsManager {
 			result.put("challengerName", proposer.getNickname());
 			break;
 		}
+		case "ChallengeAssignedNotification":
+			result.put("challengeId", ((ChallengeAssignedNotification)not).getChallengeName());
+			break;		
 		case "ChallengeCompletedNotication":
 			result.put("challengeId", ((ChallengeCompletedNotication)not).getChallengeName());
 			break;

@@ -198,7 +198,20 @@
 		}
 	},
 	
-	
+	{
+		"id": "ChallengeAssignedNotification",
+		"type": "challenge_assigned",
+		"title": {
+			"it": "Nuova sfida",
+			"en": "New challenge"
+		},
+		"description": {
+			"it": "Ti è stata assegnata una nuova sfida!",
+			"en": "You have been assigned a new challenge!"
+		},
+		"extras": {
+		}
+	},	
 	{
 		"id": "ChallengeCompletedNotication",
 		"type": "challenge_complete",
