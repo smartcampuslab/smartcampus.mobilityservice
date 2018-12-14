@@ -196,6 +196,40 @@
 				}
 			]
 		}
-	}	
+	},
+	
+	
+	{
+		"id": "ChallengeCompletedNotication",
+		"type": "challenge_complete",
+		"title": {
+			"it": "Vittoria",
+			"en": "Victory"
+		},
+		"description": {
+			"it": "Hai vinto una sfida!",
+			"en": "You won a challenge!"
+		},
+		"extras": {
+		}
+	},
+	{
+		"id": "ChallengeFailedNotication",
+		"type": "challenge_failed",
+		"title": {
+			"it": "Sconfitta",
+			"en": "Defeat"
+		},
+		"description": {
+			"it": "Hai perso una sfida!",
+			"en": "You lost a challenge!"
+		},
+		"extras": {
+		}
+	}			
+	
+	
+	
+		
 		
 ]
