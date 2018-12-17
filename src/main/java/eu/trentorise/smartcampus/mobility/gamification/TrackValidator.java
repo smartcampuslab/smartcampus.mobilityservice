@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.assertj.core.util.Lists;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.TrackSplit;
@@ -74,6 +80,7 @@ public class TrackValidator {
 	private static final double GUARANTEED_COVERAGE_THRESHOLD_VALID = 90; // %
 	private static final double GUARANTEED_COVERAGE_THRESHOLD_PENDING = 80; // %
 	
+	private static transient final Logger logger = Logger.getLogger(TrackValidator.class);
 	
 	/**
 	 * Preprocess tracked data: spline, remove outstanding points, remove potentially erroneous start / stop points 
@@ -141,7 +148,10 @@ public class TrackValidator {
 		
 		// preprocess
 		status.computeAccuracy(points);
+		points = removeStarredClusters(points);
 		points = preprocessTrack(points);
+
+		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
 		status.updateMetrics(points);
 
 		if (points.size() < 2) {
@@ -169,6 +179,121 @@ public class TrackValidator {
 		
 		return points;
 	}
+	
+	public static List<Geolocation> removeStarredClusters(List<Geolocation> origPoints) {
+		List<Geolocation> points = new ArrayList<Geolocation>(origPoints);
+		Collections.sort(points);		
+		List<List<Geolocation>> groups = computeAngles(points);
+		Multimap<Geolocation, Geolocation> barycenterMap = ArrayListMultimap.create();
+		
+		for (List<Geolocation> group: groups) {
+			Geolocation barycenter = buildBarycenterGeolocation(group);
+			for (Geolocation point: group) {
+				barycenterMap.put(barycenter, point);
+			}
+		}
+		
+		Geolocation prev = null;
+		List<Geolocation> newPoints = Lists.newArrayList();
+		for (int i = 0; i < points.size(); i++) {
+			Geolocation barycenter = null;
+			for (Geolocation bar: barycenterMap.keySet()) {
+				if (barycenterMap.get(bar).contains(points.get(i))) {
+					barycenter = bar;
+					break;
+				}
+			}
+			if (barycenter != null) {
+				if (prev == null) {
+					newPoints.add(barycenter);
+					prev = barycenter;
+				} else if (barycenter != prev){
+					newPoints.add(barycenter);
+					prev = barycenter;
+				}
+			} else {
+				newPoints.add(points.get(i));
+				prev = null;
+			}
+		}	
+		
+		if (origPoints.size() != newPoints.size()) {
+			logger.info("Original polyline: " + GamificationHelper.encodePoly(origPoints));
+			logger.info("Reduced polyline: " + GamificationHelper.encodePoly(newPoints));
+		}
+		
+		return newPoints;
+	}
+	
+	public static List<List<Geolocation>> computeAngles(List<Geolocation> points) {
+		List<List<Geolocation>> groups = Lists.newArrayList();
+		List<Integer> angles1 = Lists.newArrayList();
+		List<Integer> indexes = Lists.newArrayList();
+		for (int i = 1; i < points.size() - 1; i++) {
+			double d1 = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude());
+			double d2 = GamificationHelper.harvesineDistance(points.get(i).getLatitude(), points.get(i).getLongitude(), points.get(i + 1).getLatitude(), points.get(i + 1).getLongitude());
+			double d3 = GamificationHelper.harvesineDistance(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude(), points.get(i + 1).getLatitude(), points.get(i + 1).getLongitude());
+
+			double a1 = (Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2)));
+
+			angles1.add((int)Math.toDegrees(a1));
+		}
+
+		for (int i = 0; i < angles1.size(); i++) {
+			if (Math.abs(angles1.get(i)) < 90) {
+				indexes.add(i);
+			}
+		}
+
+		int start = -1;
+		int end = -1;
+		for (int i = 1; i < indexes.size(); i++) {
+			if (indexes.get(i) - indexes.get(i - 1) == 1 && start == -1) {
+				start = i - 1;
+			}
+			if (start != -1 && indexes.get(i) - indexes.get(i - 1) > 3) {
+				end = i - 1;
+			}
+			if (i == indexes.size() - 1 && start != -1) {
+				end = i;
+			}
+			if (start != -1 && end != -1 && (end - start >= 20)) {
+//				System.err.println(start + " / " + end + " => " + indexes.get(start) + " / " + indexes.get(end));
+				List<Geolocation> group = Lists.newArrayList();
+				for (int j = indexes.get(start); j <= indexes.get(end); j++) {
+					group.add(points.get(j));
+				}
+				groups.add(group);
+			}
+			if (start != -1 && end != -1) {
+				start = -1;
+				end = -1;
+			}
+		}
+		
+		return groups;
+	}
+	
+	private static Geolocation buildBarycenterGeolocation(Collection<Geolocation> points) {
+		double result[] = new double[]{0,0};
+		long time[] = new long[]{0};
+		long acc[] = new long[]{0};
+		points.stream().forEach(p -> {
+			result[0] = result[0] + p.getLatitude();
+			result[1] = result[1] + p.getLongitude();
+			time[0] += p.getRecorded_at().getTime();
+			acc[0] += p.getAccuracy();
+		});
+		result[0] /= points.size();
+		result[1] /= points.size();
+		time[0] /= points.size();
+		acc[0] /= points.size();
+		
+		Geolocation geoloc = new Geolocation(result[0], result[1], new Date(time[0]));
+		geoloc.setAccuracy(acc[0]);
+		
+		return geoloc;
+	}	
 
 	/**
 	 * Validate free tracking: train. Take reference train shapes as input.
