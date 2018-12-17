@@ -16,30 +16,14 @@
 
 package eu.trentorise.smartcampus.mobility.test.gamification;
 
-import static org.junit.Assert.*;
-import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-
-import java.util.Collections;
-import java.util.List;
-
-import org.bson.types.ObjectId;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import eu.trentorise.smartcampus.mobility.gamification.statistics.AggregationGranularity;
-import eu.trentorise.smartcampus.mobility.gamification.statistics.GlobalStatistics;
 import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
-import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsGroup;
-import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
-import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
-import eu.trentorise.smartcampus.mobility.storage.RecurrentJourneyObject;
 import eu.trentorise.smartcampus.mobility.test.RemoteTestConfig;
-import eu.trentorise.smartcampus.mobility.test.TestConfig;
 
 /**
  * @author raman
@@ -59,22 +43,22 @@ public class TestStats {
 	public void init() {
 	}
 	
-	@Test
-	public void testStats() throws Exception {
-		StatisticsGroup 
-		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.total);
-		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
-		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.month);
-		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
-		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.week);
-		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
-		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.day);
-		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
-	}
-	@Test
-	public void testGlobalStats() throws Exception {
-		GlobalStatistics globalStatistics = statBuilder.getGlobalStatistics(USER,"1970/01/01", true);
-		assertTrue("Global stats should not be empty", globalStatistics.getStats().size() > 0 && globalStatistics.getStats().get(AggregationGranularity.total) != null && !globalStatistics.getStats().get(AggregationGranularity.total).isEmpty());
-	}	
+//	@Test
+//	public void testStats() throws Exception {
+//		StatisticsGroup 
+//		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.total);
+//		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
+//		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.month);
+//		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
+//		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.week);
+//		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
+//		stats = statBuilder.computeStatistics(USER, 0, System.currentTimeMillis(), AggregationGranularity.day);
+//		assertTrue("Total stats should not be empty", stats.getStats().size() > 0);
+//	}
+//	@Test
+//	public void testGlobalStats() throws Exception {
+//		GlobalStatistics globalStatistics = statBuilder.getGlobalStatistics(USER,"1970/01/01", true);
+//		assertTrue("Global stats should not be empty", globalStatistics.getStats().size() > 0 && globalStatistics.getStats().get(AggregationGranularity.total) != null && !globalStatistics.getStats().get(AggregationGranularity.total).isEmpty());
+//	}	
 
 }

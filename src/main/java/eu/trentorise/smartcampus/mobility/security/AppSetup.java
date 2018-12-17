@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.naming.ConfigurationException;
@@ -140,6 +141,10 @@ public class AppSetup {
 
 	public void setAppsMap(Map<String, AppInfo> appsMap) {
 		this.appsMap = appsMap;
+	}
+	
+	public List<AppInfo> findAppsByGameId(String gameId) {
+		return apps.stream().filter(x -> gameId.equals(x.getGameId())).collect(Collectors.toList());
 	}
 
 	@Override

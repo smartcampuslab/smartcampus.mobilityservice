@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
@@ -62,26 +63,43 @@ public class GeolocationsProcessor {
 
 	public void storeGeolocationEvents(GeolocationsEvent geolocationsEvent, String appId, String userId, String gameId) throws Exception {
 		// logger.info("Receiving geolocation events, token = " + token + ", " + geolocationsEvent.getLocation().size() + " events");
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 
-		int pointCount = 0;
-		if (geolocationsEvent.getLocation() != null) {
-			pointCount = geolocationsEvent.getLocation().size();
-		}
-		logger.info("Storing " + pointCount + " geolocations for " + userId + ", " + geolocationsEvent.getDevice());
+		Lock lock = striped.get(userId);
 
-		checkEventsOrder(geolocationsEvent, userId);
+		try {
+			lock.lock();			
+			int pointCount = 0;
+			if (geolocationsEvent.getLocation() != null) {
+				pointCount = geolocationsEvent.getLocation().size();
+			}
+			logger.info("Received " + pointCount + " geolocations for " + userId + ", " + geolocationsEvent.getDevice());
 
-		Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
-		Map<String, String> freeTracks = new HashMap<String, String>();
-		Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
-		String deviceInfo = mapper.writeValueAsString(geolocationsEvent.getDevice());
+			checkEventsOrder(geolocationsEvent, userId);
 
-		groupByItinerary(geolocationsEvent, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
+			Map<String, String> freeTracks = new HashMap<String, String>();
+			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
+			String deviceInfo = mapper.writeValueAsString(geolocationsEvent.getDevice());
 
-		for (String key : geolocationsByItinerary.keySet()) {
-			saveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
+			groupByItinerary(geolocationsEvent, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+
+		
+			List<TrackedInstance> instances = Lists.newArrayList();
+			for (String key : geolocationsByItinerary.keySet()) {
+				TrackedInstance ti = saveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
+				if (ti != null) {
+					instances.add(ti);
+				}
+			}
+
+			for (TrackedInstance ti : instances) {
+				sendTrackedInstance(userId, appId, ti);
+			}
+
+		} finally {
+			lock.unlock();
 		}
 	}
 
@@ -131,7 +149,10 @@ public class GeolocationsProcessor {
 		Long now = System.currentTimeMillis();
 		Map<String, Object> device = geolocationsEvent.getDevice();
 
+		Multimap<String, Long> freeTrackStartsByKey = ArrayListMultimap.create();
+		
 		if (geolocationsEvent.getLocation() != null) {
+			int skipped = 0;
 			for (Location location : geolocationsEvent.getLocation()) {
 				String locationTravelId = null;
 				Long locationTs = null;
@@ -164,25 +185,35 @@ public class GeolocationsProcessor {
 
 				// discard event older than 2 days
 				if (now - 2 * 24 * 3600 * 1000 > location.getTimestamp().getTime()) {
-					logger.warn("Timestamp too old, skipping.");
+					skipped++;
 					continue;
 				}
 
 				Geolocation geolocation = buildGeolocation(location, userId, locationTravelId, device, now);
 				
-				String day = shortSdf.format(new Date(locationTs));
-				String key = geolocation.getTravelId() + (geolocation.getMultimodalId() != null ? ("#" + geolocation.getMultimodalId()):"") + "@" + day;
+				
+				String key = geolocation.getTravelId() + (geolocation.getMultimodalId() != null ? ("#" + geolocation.getMultimodalId()):""); // + "@" + day;
 				geolocationsByItinerary.put(key, geolocation);
 				if (StringUtils.hasText((String) location.getExtras().get("transportType"))) {
 					freeTracks.put(key, (String) location.getExtras().get("transportType"));
 				}
 
-				freeTrackStarts.put(key, locationTs);
+				freeTrackStartsByKey.put(key, locationTs);
 
 				// storage.saveGeolocation(geolocation);
 			}
+			
+			for (String key: freeTrackStartsByKey.keySet()) {
+				Long min = freeTrackStartsByKey.get(key).stream().min(Long::compare).orElse(0L);
+				freeTrackStarts.put(key, min);
+			}
+			
+			if (skipped > 0) {
+				logger.warn("Timestamps too old, skipped " + skipped + " locations.");
+			}
 		}
 
+		logger.info("Group keys: " + geolocationsByItinerary.keySet());
 		if (geolocationsByItinerary.keySet() == null || geolocationsByItinerary.keySet().isEmpty()) {
 			logger.error("No geolocationsByItinerary set.");
 		}
@@ -246,60 +277,67 @@ public class GeolocationsProcessor {
 		return geolocation;
 	}
 
-	private void saveTrackedInstance(String key, String userId, String appId, String deviceInfo, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
+	private TrackedInstance saveTrackedInstance(String key, String userId, String appId, String deviceInfo, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
 			Map<String, Long> freeTrackStarts) throws Exception {
 		String splitKey[] = key.split("@");
 		String travelId = splitKey[0];
 		String multimodalId = null;
-		
+
 		String splitId[] = travelId.split("#");
 		if (splitId.length == 2) {
 			travelId = splitId[0];
 			multimodalId = splitId[1];
 		}
-		
-		String day = splitKey[1];
 
-		Lock lock = striped.get(travelId);
-		
-		try {
-			lock.lock();
+		TrackedInstance res = null;
 
-			TrackedInstance res = getStoredTrackedInstance(key, travelId, multimodalId, day, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+		res = getStoredTrackedInstance(key, travelId, multimodalId, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
 
+		if (res.getComplete() != null && res.getComplete()) {
+			logger.info("Skipping complete trip " + res.getId());
+			return null;
+		} else {
 			if (geolocationsByItinerary.get(key) != null) {
-				logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to result.");
+				logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to existing " + res.getGeolocationEvents().size() + ".");
+				res.getGeolocationEvents().addAll(geolocationsByItinerary.get(key));
+				logger.info("Resulting events: " + res.getGeolocationEvents().size());
 			}
-			for (Geolocation geoloc : geolocationsByItinerary.get(key)) {
-				res.getGeolocationEvents().add(geoloc);
-			}
-
-			// boolean canSave = true;
-			//
-
-			if (res.getItinerary() != null) {
-				sendPlanned(res, userId, travelId, day, appId);
-			} else if (res.getFreeTrackingTransport() != null) {
-				sendFreeTracking(res, userId, travelId, appId);
-			}
-			//
 
 			res.setAppId(appId);
 			res.setDeviceInfo(deviceInfo);
 			storage.saveTrackedInstance(res);
 
 			logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
-		} finally {
-			lock.unlock();
 		}
-	}
 
-	private TrackedInstance getStoredTrackedInstance(String key, String travelId, String multimodalId, String day, String userId, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
+		return res;
+
+	}
+	
+	private void sendTrackedInstance(String userId, String appId, TrackedInstance res) throws Exception {
+		if (res.getItinerary() != null) {
+			sendPlanned(res, userId, res.getClientId(), res.getDay(), appId);
+		} else if (res.getFreeTrackingTransport() != null) {
+			sendFreeTracking(res, userId, res.getClientId(), appId);
+		}
+
+		storage.saveTrackedInstance(res);
+
+	}
+	
+
+	private TrackedInstance getStoredTrackedInstance(String key, String travelId, String multimodalId, String userId, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
 			Map<String, Long> freeTrackStarts) throws Exception {
+		
+		String day = shortSdf.format(freeTrackStarts.get(key));
+		String time = timeSdf.format(freeTrackStarts.get(key));
+		
 		Map<String, Object> pars = new TreeMap<String, Object>();
 		pars.put("clientId", travelId);
 		pars.put("day", day);
 		pars.put("userId", userId);
+		
+		logger.info("Pars: " + pars);
 
 		TrackedInstance res = storage.searchDomainObject(pars, TrackedInstance.class);
 		if (res == null) {
@@ -307,6 +345,7 @@ public class GeolocationsProcessor {
 			res = new TrackedInstance();
 			res.setClientId(travelId);
 			res.setDay(day);
+			res.setTime(time);
 			res.setUserId(userId);
 			res.setId(ObjectId.get().toString());
 			pars.remove("day");
@@ -323,8 +362,8 @@ public class GeolocationsProcessor {
 					logger.warn("No existing SavedTrip found.");
 				}
 			} else {
+				logger.warn("Found ItineraryObject.");
 				res.setItinerary(res2);
-				res.setTime(timeSdf.format(geolocationsByItinerary.get(key).iterator().next().getRecorded_at()));
 			}
 			if (res.getItinerary() == null) {
 				if (travelId.contains("_temporary_")) {

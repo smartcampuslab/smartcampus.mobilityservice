@@ -23,7 +23,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig {
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("eu.trentorise.smartcampus.mobility.controller.rest")).paths(PathSelectors.ant("/**")).build()
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("eu.trentorise.smartcampus.mobility")).paths(PathSelectors.ant("/**")).build()
 				.securitySchemes(Lists.newArrayList(apiKey()))
 		        .securityContexts(Arrays.asList(securityContext()));
 	}

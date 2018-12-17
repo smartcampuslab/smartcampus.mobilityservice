@@ -208,6 +208,10 @@ public class TrackSplit {
 		else slowIntervals.getLast()[1] = track.size();
 		
 		slowIntervals = new LinkedList<>(slowIntervals.stream().filter(intv -> track.get(intv[1]-1).getRecorded_at().getTime() - track.get(intv[0]).getRecorded_at().getTime() > minTrackThreshold).collect(Collectors.toList()));
+		
+//		slowIntervals.stream().forEach(x -> {
+//			System.err.println("\t" + x[0] + "," + x[1] + " / ");
+//		});
 	}	
 	public List<List<Geolocation>> slowFragments(){
 		List<List<Geolocation>> res = new ArrayList<List<Geolocation>>();

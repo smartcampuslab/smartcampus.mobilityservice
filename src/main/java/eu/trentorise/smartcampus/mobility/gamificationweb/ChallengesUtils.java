@@ -29,8 +29,11 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeConcept
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeLongDescrStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengeStructure;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.ChallengesData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.OtherAttendeeData;
+import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
+import eu.trentorise.smartcampus.mobility.storage.PlayerRepositoryDao;
 
 @Component
 public class ChallengesUtils {
@@ -48,6 +51,15 @@ public class ChallengesUtils {
 	private static final String CHAL_FIELDS_TARGET = "target";
 	private static final String CHAL_FIELDS_PERIOD_TARGET = "periodTarget";
 	private static final String CHAL_FIELDS_INITIAL_BADGE_NUM = "initialBadgeNum";
+	private static final String CHAL_FIELDS_OTHER_ATTENDEE_SCORES = "otherAttendeeScores";
+	private static final String CHAL_FIELDS_CHALLENGE_SCORE = "challengeScore";
+	private static final String CHAL_FIELDS_CHALLENGE_TARGET = "challengeTarget";
+	private static final String CHAL_FIELDS_PLAYER_ID = "playerId";
+	private static final String CHAL_FIELDS_PROPOSER = "proposer";
+	private static final String CHAL_FIELDS_CHALLENGE_SCORE_NAME = "challengeScoreName";
+	private static final String CHAL_FIELDS_CHALLENGE_REWARD = "rewardBonusScore";
+	
+	
 //	private static final String CHAL_FIELDS_POS_MIN = "posMin";
 //	private static final String CHAL_FIELDS_POS_MAX = "posMax";
 	// new challenge types
@@ -60,6 +72,9 @@ public class ChallengesUtils {
 	private static final String CHAL_MODEL_POICHECKIN = "poiCheckin";
 	private static final String CHAL_MODEL_CHECKIN = "checkin";
 	private static final String CHAL_MODEL_CLASSPOSITION = "leaderboardPosition";
+	private static final String CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE = "groupCompetitivePerformance";
+	private static final String CHAL_MODEL_GROUP_COMPETITIVE_TIME = "groupCompetitiveTime";
+	private static final String CHAL_MODEL_GROUP_COOPERATIVE = "groupCooperative";
 	
 	// week delta in milliseconds
 //	private static final Long W_DELTA = 2000L;
@@ -76,6 +91,9 @@ public class ChallengesUtils {
 	private Map<String, List> challengeDictionaryMap;
 	private Map<String, String> challengeReplacements;
 
+	@Autowired
+	private PlayerRepositoryDao playerRepository;
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@PostConstruct
 	private void init() throws Exception {
@@ -155,6 +173,8 @@ public class ChallengesUtils {
 					double periodTarget = 0;
 					String badgeCollectionName = "";
 					int initialBadgeNum = 0;
+					Map<String, Object> otherAttendeeScores = null;
+					
 					if(challenge.getFields() != null){
 						bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_BONUS_SCORE, 0)).intValue();
 						periodName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_NAME,"");
@@ -163,6 +183,10 @@ public class ChallengesUtils {
 						badgeCollectionName = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_COUNTER_NAME,"");
 						initialBadgeNum = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_INITIAL_BADGE_NUM,0)).intValue();
 						periodTarget = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_PERIOD_TARGET,0)).doubleValue();
+						List otherAttendeeScoresList = (List)challenge.getFields().getOrDefault(CHAL_FIELDS_OTHER_ATTENDEE_SCORES, Collections.EMPTY_LIST);
+						if (!otherAttendeeScoresList.isEmpty()) {
+							otherAttendeeScores = (Map)otherAttendeeScoresList.get(0);
+						}
 					}
 
 					if (target == 0) {
@@ -183,11 +207,9 @@ public class ChallengesUtils {
     				challengeData.setStartDate(start);
     				challengeData.setEndDate(end);
     				challengeData.setDaysToEnd(calculateRemainingDays(end, now));
-    				challengeData.setBonus(bonusScore);
     				challengeData.setChallCompletedDate(dateCompleted);
+    				challengeData.setUnit(counterName);
 	    			
-    				challengeData.setChallDesc(fillDescription(challenge, language));
-    				
     				double row_status = 0D;
     				int status = 0;
     				
@@ -228,6 +250,121 @@ public class ChallengesUtils {
 		    				challenge.getFields().put("surveylink", link);
 		    				break;
 	    				}
+	    				case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE : {
+	    					row_status = (Double)challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
+	    					double other_row_status = (Double)otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+	    					double total = row_status + other_row_status;
+	    					int other_status = 0;
+	    					if (total != 0) {
+	    						status = (int)(100 *row_status / total);
+	    						other_status = 100 - status;
+	    					}
+	    					
+	    					String unit = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+	    					challengeData.setUnit(unit);
+	    					
+	    					String proposer = (String)challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+	    					challengeData.setProposerId(proposer);
+	    					
+	    					String otherPlayerId = (String)otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID); 
+	    					Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);
+	    					
+	    					String nickname = null;
+	    					if (otherPlayer != null) {
+	    						nickname = otherPlayer.getNickname();
+	    						challenge.getFields().put("opponent", nickname);
+	    					}
+	    					
+	    					OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
+	    					otherAttendeeData.setRow_status(other_row_status);
+	    					otherAttendeeData.setStatus(other_status);
+	    					otherAttendeeData.setPlayerId(otherPlayerId);
+	    					otherAttendeeData.setNickname(nickname);
+	    					
+	    					challengeData.setOtherAttendeeData(otherAttendeeData);
+	    					
+//	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
+	    					
+	    					break;
+	    				}	    		
+						case CHAL_MODEL_GROUP_COMPETITIVE_TIME: {
+							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
+							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+							int other_status = 0;
+							if (challengeTarget != 0) {
+								status = (int) (100 * row_status / challengeTarget);
+								other_status = (int) (100 * other_row_status / challengeTarget);
+							}
+	
+							String unit = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+							challengeData.setUnit(unit);
+	
+							String proposer = (String)challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+							challengeData.setProposerId(proposer);
+	
+							String otherPlayerId = (String) otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID);
+							Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);
+	
+							String nickname = null;
+							if (otherPlayer != null) {
+								nickname = otherPlayer.getNickname();
+								challenge.getFields().put("opponent", nickname);
+							}
+	
+							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
+							otherAttendeeData.setRow_status(other_row_status);
+							otherAttendeeData.setStatus(other_status);
+							otherAttendeeData.setPlayerId(otherPlayerId);
+							otherAttendeeData.setNickname(nickname);
+	
+							challengeData.setOtherAttendeeData(otherAttendeeData);
+							
+	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
+	
+							break;
+						}	
+						case CHAL_MODEL_GROUP_COOPERATIVE: {
+							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
+							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
+							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+							int other_status = 0;
+							if (challengeTarget != 0) {
+								status = (int) (100 * row_status / challengeTarget);
+								other_status = (int) (100 * other_row_status / challengeTarget);
+							}
+	
+							Double reward = (Double) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, "");
+							
+							String unit = (String) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
+							challengeData.setUnit(unit);
+	
+							String proposer = (String) challenge.getFields().get(CHAL_FIELDS_PROPOSER);
+							challengeData.setProposerId(proposer);
+	
+							String otherPlayerId = (String) otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID);
+							Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);
+	
+							String nickname = null;
+							if (otherPlayer != null) {
+								nickname = otherPlayer.getNickname();
+								challenge.getFields().put("opponent", nickname);
+								challenge.getFields().put("reward", reward);
+								challenge.getFields().put("target", target);
+							}
+	
+							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
+							otherAttendeeData.setRow_status(other_row_status);
+							otherAttendeeData.setStatus(other_status);
+							otherAttendeeData.setPlayerId(otherPlayerId);
+							otherAttendeeData.setNickname(nickname);
+	
+							challengeData.setOtherAttendeeData(otherAttendeeData);
+							
+	    					bonusScore = ((Number)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, 0)).intValue();
+	
+							break;
+						}						
 	    				// boolean status: 100 or 0
 	    				case CHAL_MODEL_COMPLETE_BADGE_COLL: 
 	    				case CHAL_MODEL_POICHECKIN: 
@@ -239,8 +376,11 @@ public class ChallengesUtils {
 	    					}
 	    				}
     				}
+    				
+    				challengeData.setChallDesc(fillDescription(challenge, language));
     				challengeData.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(challengeData.getType()), language));
 
+    				challengeData.setBonus(bonusScore);
     				challengeData.setStatus(status);
     				challengeData.setRow_status(row_status);
     				
@@ -310,6 +450,10 @@ public class ChallengesUtils {
 			case CHAL_MODEL_CHECKIN: {
 				return "checkinType";
 			}
+			case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE:
+			case CHAL_MODEL_GROUP_COMPETITIVE_TIME:
+			case CHAL_MODEL_GROUP_COOPERATIVE:
+				return "challengePointConceptName";
 			default: {
 				return null;
 			}
@@ -484,6 +628,51 @@ public class ChallengesUtils {
 
 		return st.render();
 	}
+	
+	public String fillDescription(String name, String filterField, Map<String, Object> params, String lang) {
+		ChallengeStructure challengeStructure = challengeStructureMap.getOrDefault(name + "#" + filterField, null);
+		ST st = new ST(challengeStructure.getDescription().get(lang));
+		
+		String description = "";
+		if (challengeStructure != null) {
+			for (String field : params.keySet()) {
+				Object o = params.get(field);
+				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
+			}			
+			
+			for (String key: challengeReplacements.keySet()) {
+				description = description.replaceAll(key, challengeReplacements.get(key));
+			}		
+			
+			return st.render();
+		} else {
+			logger.error("Cannot find structure for challenge preview: '" + name + "', " + filterField);
+			return "";
+		}		
+	}
+	
+	public String fillLongDescription(String name, String filterField, Map<String, Object> params, String lang) {
+		ChallengeLongDescrStructure challengeStructure = challengeLongStructureMap.getOrDefault(name + "#" + filterField, null);
+		ST st = new ST(challengeStructure.getDescription().get(lang));
+		
+		String description = "";
+		if (challengeStructure != null) {
+			for (String field : params.keySet()) {
+				Object o = params.get(field);
+				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
+			}			
+			
+			for (String key: challengeReplacements.keySet()) {
+				description = description.replaceAll(key, challengeReplacements.get(key));
+			}		
+			
+			return st.render();
+		} else {
+			logger.error("Cannot find structure for challenge preview: '" + name + "', " + filterField);
+			return "";
+		}		
+	}	
+	
 	private String instantiateWord(String word, boolean negative, String lang) {
 		if (word != null) {
 			List versions = challengeDictionaryMap.get(word.toLowerCase());

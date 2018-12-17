@@ -11,6 +11,7 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int challTarget = 0;
 	private int status = 0;
 	private double row_status = 0L;
+	private String unit;
 	private String type = "";
 	private Boolean active = false;
 	private Boolean success = false;
@@ -20,27 +21,11 @@ public class ChallengesData implements Comparable<ChallengesData> {
 	private int bonus = 0;
 	private long challCompletedDate = 0;
 	
+	private String proposerId;
+	private OtherAttendeeData otherAttendeeData;
+	
 	public ChallengesData(){
 		super();
-	}
-
-	public ChallengesData(String challId, String challDesc, String challCompleteDesc, int challTarget, int status, double row_status,
-			String type, Boolean active, Boolean success, long startDate, long endDate, int daysToEnd, int bonus, long challCompletedDate) {
-		super();
-		this.challId = challId;
-		this.challDesc = challDesc;
-		this.challCompleteDesc = challCompleteDesc;
-		this.challTarget = challTarget;
-		this.status = status;
-		this.row_status = row_status;
-		this.type = type;
-		this.active = active;
-		this.success = success;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.daysToEnd = daysToEnd;
-		this.bonus = bonus;
-		this.challCompletedDate = challCompletedDate;
 	}
 
 	public String getChallId() {
@@ -139,6 +124,14 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		this.row_status = row_status;
 	}
 	
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
 	public int getBonus() {
 		return bonus;
 	}
@@ -155,6 +148,22 @@ public class ChallengesData implements Comparable<ChallengesData> {
 		this.challCompletedDate = challCompletedDate;
 	}
 
+	public String getProposerId() {
+		return proposerId;
+	}
+
+	public void setProposerId(String creatorId) {
+		this.proposerId = creatorId;
+	}
+
+	public OtherAttendeeData getOtherAttendeeData() {
+		return otherAttendeeData;
+	}
+
+	public void setOtherAttendeeData(OtherAttendeeData competitionData) {
+		this.otherAttendeeData = competitionData;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder tsb = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
@@ -163,7 +172,13 @@ public class ChallengesData implements Comparable<ChallengesData> {
 
 	@Override
 	public int compareTo(ChallengesData o) {
-		return new Long(startDate).compareTo(new Long(o.startDate));
+		int res = new Long(startDate).compareTo(new Long(o.startDate));
+		if (res == 0) {
+			res = challId.compareTo(o.challId);
+		}
+		return res;
 	}
 
+	
+	
 }

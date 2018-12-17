@@ -104,7 +104,7 @@ public class GamificationHelper {
 			double d3 = harvesineDistance(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude(), points.get(i + 1).getLatitude(), points.get(i + 1).getLongitude());
 
 			double a = Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2));
-
+			
 			if (a < 0.017453292519943 * 3) {
 				index = i;
 			} else if (a < 0.017453292519943 * 30 && s1 > 4 * averageSpeed && s2 > 4 * averageSpeed && i != 1 && i != points.size() - 2) {
@@ -170,11 +170,15 @@ public class GamificationHelper {
 		}
 		double[] lats = computeLats(p1, p2, distance);
 		double[] lngs = computeLngs(p1, p2, distance);
+
 //		Date[] recordedAt = computeRecordedAt(p1, p2);
 		Geolocation p1n = new Geolocation(lats[0], lngs[0], p1.getRecorded_at());
 		p1n.setCertificate(p1.getCertificate());
 		Geolocation p2n = new Geolocation(lats[1], lngs[1], p2.getRecorded_at());
 		p2n.setCertificate(p2.getCertificate());
+		long acc = (p1.getAccuracy() + p2.getAccuracy()) / 2;
+		p1n.setAccuracy(acc);
+		p2n.setAccuracy(acc);
 		result.add(p1n);
 		result.add(p2n);
 

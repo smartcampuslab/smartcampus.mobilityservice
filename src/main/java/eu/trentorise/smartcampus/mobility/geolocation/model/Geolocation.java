@@ -2,8 +2,6 @@ package eu.trentorise.smartcampus.mobility.geolocation.model;
 
 import java.util.Date;
 
-import it.sayservice.platform.smartplanner.data.message.TType;
-
 
 public class Geolocation implements Comparable<Geolocation> {
 
@@ -37,7 +35,7 @@ public class Geolocation implements Comparable<Geolocation> {
 
 	private String certificate;
 	
-	double[] geocoding;
+	private double[] geocoding;
 	
 	public Geolocation() {
 	}
@@ -47,8 +45,8 @@ public class Geolocation implements Comparable<Geolocation> {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.recorded_at = recorded_at;
+		this.geocoding = new double[]{longitude,latitude};
 	}
-
 
 
 	public String getUserId() {
@@ -257,11 +255,15 @@ public class Geolocation implements Comparable<Geolocation> {
 			return false;
 		return true;
 	}
+	
+	
     
     @Override
     public String toString() {
-    	return latitude + "," + longitude;
+    	return latitude + "," + longitude + "@" + recorded_at;
     }
+
+	
 
 	@Override
 	public int compareTo(Geolocation o) {

@@ -15,9 +15,9 @@ public class Timestamp {
 	public Timestamp() {
 	}
 
-	public Timestamp(String appId, String type, Long timestamp) {
+	public Timestamp(String gameId, String type, Long timestamp) {
 		super();
-		this.gameId = appId;
+		this.gameId = gameId;
 		this.type = type;
 		this.timestamp = timestamp;
 	}

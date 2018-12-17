@@ -327,7 +327,7 @@ public class TTDescriptor {
 				try {
 					time = timeToInt(str[1]);
 				} catch (Exception e) {
-					logger.error("Incorrect stop time string: "+ Arrays.toString(str));
+					logger.debug("Incorrect stop time string: "+ Arrays.toString(str));
 					continue;
 				}
 				minMap.put(str[0], Math.min(time, minMap.getOrDefault(str[0], Integer.MAX_VALUE)));
