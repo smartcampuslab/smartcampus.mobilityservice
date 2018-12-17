@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.assertj.core.util.Lists;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
