@@ -69,35 +69,39 @@ public class GeolocationsProcessor {
 		Lock lock = striped.get(userId);
 
 		try {
-			lock.lock();			
+			lock.lock();
 			int pointCount = 0;
 			if (geolocationsEvent.getLocation() != null) {
 				pointCount = geolocationsEvent.getLocation().size();
 			}
 			logger.info("Received " + pointCount + " geolocations for " + userId + ", " + geolocationsEvent.getDevice());
 
-			checkEventsOrder(geolocationsEvent, userId);
+			boolean virtual = (boolean) geolocationsEvent.getDevice().getOrDefault("isVirtual", false);
 
-			Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
-			Map<String, String> freeTracks = new HashMap<String, String>();
-			Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
-			String deviceInfo = mapper.writeValueAsString(geolocationsEvent.getDevice());
+			if (!virtual) {
+				checkEventsOrder(geolocationsEvent, userId);
 
-			groupByItinerary(geolocationsEvent, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+				Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
+				Map<String, String> freeTracks = new HashMap<String, String>();
+				Map<String, Long> freeTrackStarts = new HashMap<String, Long>();
+				String deviceInfo = mapper.writeValueAsString(geolocationsEvent.getDevice());
 
-		
-			List<TrackedInstance> instances = Lists.newArrayList();
-			for (String key : geolocationsByItinerary.keySet()) {
-				TrackedInstance ti = saveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
-				if (ti != null) {
-					instances.add(ti);
+				groupByItinerary(geolocationsEvent, userId, geolocationsByItinerary, freeTracks, freeTrackStarts);
+
+				List<TrackedInstance> instances = Lists.newArrayList();
+				for (String key : geolocationsByItinerary.keySet()) {
+					TrackedInstance ti = saveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
+					if (ti != null) {
+						instances.add(ti);
+					}
 				}
-			}
 
-			for (TrackedInstance ti : instances) {
-				sendTrackedInstance(userId, appId, ti);
+				for (TrackedInstance ti : instances) {
+					sendTrackedInstance(userId, appId, ti);
+				}
+			} else {
+				logger.error("Device of user " + userId + " is virtual: " + geolocationsEvent.getDevice());
 			}
-
 		} finally {
 			lock.unlock();
 		}
