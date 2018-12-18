@@ -631,10 +631,11 @@ public class ChallengesUtils {
 	
 	public String fillDescription(String name, String filterField, Map<String, Object> params, String lang) {
 		ChallengeStructure challengeStructure = challengeStructureMap.getOrDefault(name + "#" + filterField, null);
-		ST st = new ST(challengeStructure.getDescription().get(lang));
 		
 		String description = "";
 		if (challengeStructure != null) {
+			ST st = new ST(challengeStructure.getDescription().get(lang));
+			
 			for (String field : params.keySet()) {
 				Object o = params.get(field);
 				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
@@ -653,10 +654,11 @@ public class ChallengesUtils {
 	
 	public String fillLongDescription(String name, String filterField, Map<String, Object> params, String lang) {
 		ChallengeLongDescrStructure challengeStructure = challengeLongStructureMap.getOrDefault(name + "#" + filterField, null);
-		ST st = new ST(challengeStructure.getDescription().get(lang));
 		
 		String description = "";
 		if (challengeStructure != null) {
+			ST st = new ST(challengeStructure.getDescription().get(lang));
+			
 			for (String field : params.keySet()) {
 				Object o = params.get(field);
 				st.add(field, o instanceof Number ? ((Number) o).intValue() : (o instanceof String ? instantiateWord(o.toString(), false, lang) : o));
