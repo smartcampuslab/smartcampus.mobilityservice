@@ -52,8 +52,8 @@ public class DifficultyCalculator {
         Integer zone = computeZone(values, baseline);
         Integer targetZone = computeZone(values, target);
 
-        Integer diffZone = targetZone - zone;
-        if (diffZone == 0) {
+        int diffZone = targetZone - zone;
+        if (diffZone <= 0) {
             return EASY;
         }
         if (diffZone == 1) {
