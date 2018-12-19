@@ -28,7 +28,6 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConcept;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.PointConceptPeriod;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameSetup;
 
 @Component
 public class TargetPrizeChallengesCalculator {
@@ -56,46 +55,15 @@ public class TargetPrizeChallengesCalculator {
 	@Autowired
 	private AppSetup appSetup;
 
-	@Autowired
-	private GameSetup gameSetup;
-
-	// private DateTime execDate;
-	// private LocalDate lastMonday;
-
-	// private DateTime execDate;
-	// private DateTime lastMonday;
-
 	private GameStatistics gs;
 
 	private DifficultyCalculator dc;
-
-	// private String appId;
-	// private String gameId;
-	// private RecommendationSystem rs;
-
-	// public void prepare(String host, String username, String password, String appId) {
-	//// this.appId = appId;
-	//// this.gameId = getGameId(appId);
-	//
-	// LocalDate now = LocalDate.now();
-	// lastMonday = now.minusDays(7).with(ChronoField.DAY_OF_WEEK, 1);
-	// }
-	//
-	// // TODO remove
-	// public void prepare(String appId) {
-	//// execDate = new DateTime();
-	//// this.appId = appId;
-	//// this.gameId = getGameId(appId);
-	//
-	// LocalDate now = LocalDate.now();
-	// lastMonday = LocalDate.now().minusDays(7).with(ChronoField.DAY_OF_WEEK, 1);
-	// }
 
 	public Map<String, Double> targetPrizeChallengesCompute(String pId_1, String pId_2, String appId, String counter, String type) throws Exception {
 
 		prepare();
 
-		// String gameId = getGameId(appId);
+
 
 		Map<Integer, Double> quantiles = getQuantiles(appId, counter);
 //		System.err.println(quantiles);
@@ -113,28 +81,52 @@ public class TargetPrizeChallengesCalculator {
 		double player2_bas = res2.getSecond();
 
 		double target;
-		if (type.equals("groupCompetitiveTime")) {
-			target = roundTarget(counter, (player1_tgt + player2_tgt) / 2.0);
+        if (type.equals("groupCompetitiveTime")) {
+            target = roundTarget(counter,(player1_tgt + player2_tgt) / 2.0);
 
-			res.put("target", target);
-			res.put("player1_prz", evaluate(target, player1_bas, counter, quantiles));
-			res.put("player2_prz", evaluate(target, player2_bas, counter, quantiles));
-		} else if (type.equals("groupCooperative")) {
-			target = roundTarget(counter, player1_tgt + player2_tgt);
+            target = checkMaxTargetCompetitive(counter, target);
 
-			double player1_prz = evaluate(player1_tgt, player1_bas, counter, quantiles);
-			double player2_prz = evaluate(player2_tgt, player2_bas, counter, quantiles);
-			double prz = Math.max(player1_prz, player2_prz);
+            res.put("target", target);
+                    res.put("player1_prz", evaluate(target, player1_bas, counter, quantiles));
+            res.put("player2_prz",  evaluate(target, player2_bas, counter, quantiles));
+        }
+        else if (type.equals("groupCooperative")) {
+            target =roundTarget(counter, player1_tgt + player2_tgt);
 
-			res.put("target", target);
-			res.put("player1_prz", prz);
-			res.put("player2_prz", prz);
-		} else if (type.equals("groupCompetitivePerformance")) {
-			// p("WRONG TYPE");
-		}
+            target = checkMaxTargetCooperative(counter, target);
 
-		return res;
-	}
+            double player1_prz = evaluate(player1_tgt, player1_bas, counter, quantiles);
+            double player2_prz = evaluate(player2_tgt, player2_bas, counter, quantiles);
+            double prz = Math.max(player1_prz, player2_prz);
+
+            res.put("target", target);
+            res.put("player1_prz", prz);
+            res.put("player2_prz", prz);
+        }  
+        return res;
+    }
+
+    private double checkMaxTargetCompetitive(String counter, double v) {
+            if ("Walk_Km".equals(counter))
+                return Math.min(70, v);
+            if ("Bike_Km".equals(counter))
+                return Math.min(210, v);
+            if ("green leaves".equals(counter))
+                return Math.min(3000, v);
+
+            return 0.0;
+        }
+
+    private double checkMaxTargetCooperative(String counter, double v) {
+        if ("Walk_Km".equals(counter))
+            return Math.min(140, v);
+        if ("Bike_Km".equals(counter))
+            return Math.min(420, v);
+        if ("green leaves".equals(counter))
+            return Math.min(6000, v);
+
+        return 0.0;
+    }
 
 	private Double checkMinTarget(String counter, Double v) {
 		if ("Walk_Km".equals(counter))
@@ -147,10 +139,6 @@ public class TargetPrizeChallengesCalculator {
 		// p("WRONG COUNTER");
 		return 0.0;
 	}
-
-	// private Map<Integer, Double> getQuantiles2(String gameId, String counter) {
-	// return rs.getStats().getQuantiles(counter);
-	// }
 
 	private Map<Integer, Double> getQuantiles(String appId, String counter) throws Exception {
 		// Da sistemare richiesta per dati della settimana precedente, al momento non presenti
