@@ -43,6 +43,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 
+import eu.trentorise.smartcampus.mobility.gamification.GamificationCache;
 import eu.trentorise.smartcampus.mobility.gamification.challenges.TargetPrizeChallengesCalculator;
 import eu.trentorise.smartcampus.mobility.gamification.model.ChallengeChoice;
 import eu.trentorise.smartcampus.mobility.gamification.model.Inventory;
@@ -106,6 +107,9 @@ public class ChallengeController {
 	private NotificationsManager notificationsManager;
 	
 	@Autowired
+	private GamificationCache gamificationCache;	
+	
+	@Autowired
 	private TargetPrizeChallengesCalculator tpcc;	
 	
 	private BasicProfileService profileService;
@@ -155,14 +159,16 @@ public class ChallengeController {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			return null;
 		}
-		String playerId = user.getUserId();		
+		String userId = user.getUserId();		
 		String gameId = getGameId(appId);
+		
+		gamificationCache.invalidatePlayer(userId, appId);
 		
 		RestTemplate restTemplate = new RestTemplate();
 		ItemChoice choice = new ItemChoice(ChoiceType.CHALLENGE_MODEL, type);
 		
 		try {
-		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + playerId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
+		ResponseEntity<String> result = restTemplate.exchange(gamificationUrl + "data/game/" + gameId + "/player/" + userId + "/inventory/activate", HttpMethod.POST, new HttpEntity<Object>(choice, createHeaders(appId)), String.class);
 		
 		String res = result.getBody();
 		
@@ -231,6 +237,8 @@ public class ChallengeController {
 		String userId = user.getUserId();
 		String gameId = getGameId(appId);
 		
+		gamificationCache.invalidatePlayer(userId, appId);
+		
 		RestTemplate restTemplate = new RestTemplate();
 		String partialUrl = "game/" + gameId + "/player/" + userId + "/challenges/" + challengeId + "/accept";
 		ResponseEntity<String> tmp_res = restTemplate.exchange(gamificationUrl + "data/" + partialUrl, HttpMethod.POST, new HttpEntity<Object>(null, createHeaders(appId)), String.class);
@@ -252,7 +260,9 @@ public class ChallengeController {
 			return;
 		}
 		String userId = user.getUserId();
-		String gameId = getGameId(appId);		
+		String gameId = getGameId(appId);	
+		
+		gamificationCache.invalidatePlayer(userId, appId);		
 		
 		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		if (player == null) {
@@ -399,6 +409,8 @@ public class ChallengeController {
 		String userId = user.getUserId();
 		String gameId = getGameId(appId);		
 		
+		gamificationCache.invalidatePlayer(userId, appId);		
+		
 		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		if (player == null) {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -466,7 +478,9 @@ public class ChallengeController {
 			return;
 		}
 		String userId = user.getUserId();
-		String gameId = getGameId(appId);		
+		String gameId = getGameId(appId);	
+		
+		gamificationCache.invalidatePlayer(userId, appId);		
 		
 		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		if (player == null) {
@@ -498,7 +512,9 @@ public class ChallengeController {
 			return;
 		}
 		String userId = user.getUserId();
-		String gameId = getGameId(appId);		
+		String gameId = getGameId(appId);	
+		
+		gamificationCache.invalidatePlayer(userId, appId);		
 		
 		Player player = playerRepositoryDao.findByPlayerIdAndGameId(userId, gameId);
 		if (player == null) {

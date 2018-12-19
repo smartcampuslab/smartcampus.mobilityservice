@@ -179,6 +179,11 @@ public class GamificationCache {
 		}
 	}	
 	
+	public void invalidatePlayer(String playerId, String appId) {
+		playerState.invalidate(playerId + "@" + appId);
+		playerNotifications.invalidate(playerId + "@" + appId);
+	}
+	
 	public List<GameStatistics> getStatistics(String appId) {
 		try {
 			return statistics.get(appId);

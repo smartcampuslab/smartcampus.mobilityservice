@@ -57,6 +57,9 @@ public class GeolocationsProcessor {
 	@Autowired
 	private GamificationManager gamificationManager;
 	
+	@Autowired
+	private GamificationCache gamificationCache;		
+	
 	private Striped<Lock> striped = Striped.lock(20);
 
 	private static Log logger = LogFactory.getLog(GeolocationsProcessor.class);
@@ -79,6 +82,8 @@ public class GeolocationsProcessor {
 			boolean virtual = (boolean) geolocationsEvent.getDevice().getOrDefault("isVirtual", false);
 
 			if (!virtual) {
+				gamificationCache.invalidatePlayer(userId, appId);
+				
 				checkEventsOrder(geolocationsEvent, userId);
 
 				Multimap<String, Geolocation> geolocationsByItinerary = ArrayListMultimap.create();
