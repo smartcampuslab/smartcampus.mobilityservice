@@ -297,10 +297,10 @@ public class ChallengeController {
 		
 		if (invitation.getChallengeModelName().isCustomPrizes()) {
 			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
-			logger.info("Calculated prize for " + userId + "/" + attendee.getId() + ": " + prizes);
+			logger.info("Calculated prize for " + userId + "/" + invitation.getAttendeeId() + ": " + prizes);
 			Map<String, Double> bonusScore = Maps.newTreeMap();
 			bonusScore.put(userId, prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
-			bonusScore.put(attendee.getId(), prizes.get(TargetPrizeChallengesCalculator.PLAYER2_PRZ));
+			bonusScore.put(invitation.getAttendeeId(), prizes.get(TargetPrizeChallengesCalculator.PLAYER2_PRZ));
 			reward.setBonusScore(bonusScore);
 			ci.setChallengeTarget(prizes.get(TargetPrizeChallengesCalculator.TARGET));
 		}
@@ -373,7 +373,7 @@ public class ChallengeController {
 		
 		if (invitation.getChallengeModelName().isCustomPrizes()) {
 			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
-			logger.info("Calculated prize for preview " + userId + "/" + attendee.getId() + ": " + prizes);
+			logger.info("Calculated prize for preview " + userId + "/" + invitation.getAttendeeId() + ": " + prizes);
 			Map<String, Double> bonusScore = Maps.newTreeMap();
 			pars.put("rewardBonusScore", prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
 			pars.put("reward", prizes.get(TargetPrizeChallengesCalculator.PLAYER1_PRZ));
