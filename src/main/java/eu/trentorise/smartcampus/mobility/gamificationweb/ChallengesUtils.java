@@ -200,7 +200,6 @@ public class ChallengesUtils {
 	    			ChallengesData challengeData = new ChallengesData();
 	    			challengeData.setChallId(name);
 
-    				challengeData.setChallTarget((int)target);
     				challengeData.setType(modelName);
     				challengeData.setActive(now < end);
     				challengeData.setSuccess(completed);
@@ -291,6 +290,7 @@ public class ChallengesUtils {
 							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+							target = (int)challengeTarget;
 							int other_status = 0;
 							if (challengeTarget != 0) {
 								status = (int) (100 * row_status / challengeTarget);
@@ -328,6 +328,7 @@ public class ChallengesUtils {
 							row_status = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double other_row_status = (Double) otherAttendeeScores.get(CHAL_FIELDS_CHALLENGE_SCORE);
 							double challengeTarget = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+							target = (int)challengeTarget;
 							int other_status = 0;
 							if (challengeTarget != 0) {
 								status = (int) (100 * row_status / challengeTarget);
@@ -377,6 +378,7 @@ public class ChallengesUtils {
 	    				}
     				}
     				
+    				challengeData.setChallTarget((int)target);
     				challengeData.setChallDesc(fillDescription(challenge, language));
     				challengeData.setChallCompleteDesc(fillLongDescription(challenge, getFilterByType(challengeData.getType()), language));
 
