@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -568,6 +570,14 @@ public class ChallengeController {
 				pd.put("nickname", p.getNickname());
 				res.add(pd);
 			}
+		});
+		
+		Collections.sort(res, new Comparator<Map>() {
+			@Override
+			public int compare(Map o1, Map o2) {
+				return ((String)o1.get("nickname")).compareToIgnoreCase((String)o2.get("nickname"));
+			}
+			
 		});
 		
 		return res;
