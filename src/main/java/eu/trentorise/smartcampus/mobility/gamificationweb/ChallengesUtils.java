@@ -424,20 +424,22 @@ public class ChallengesUtils {
 			Collections.reverse(x);
 		});	
 		
-		Collections.sort(result.getChallengeData().get(ChallengeDataType.PROPOSED), new Comparator<ChallengesData>() {
+		if (result.getChallengeData().containsKey(ChallengeDataType.PROPOSED)) {
+			Collections.sort(result.getChallengeData().get(ChallengeDataType.PROPOSED), new Comparator<ChallengesData>() {
 
-			@Override
-			public int compare(ChallengesData o1, ChallengesData o2) {
-				String isGroup1 = o1.getProposerId() == null ? "1" : "0";
-				String isGroup2 = o2.getProposerId() == null ? "1" : "0";
-				int res = new String(isGroup1 + o1.getStartDate()).compareTo(new String(isGroup2 + o2.getStartDate()));
-				if (res == 0) {
-					res = o1.getChallId().compareTo(o2.getChallId());
+				@Override
+				public int compare(ChallengesData o1, ChallengesData o2) {
+					String isGroup1 = o1.getProposerId() == null ? "1" : "0";
+					String isGroup2 = o2.getProposerId() == null ? "1" : "0";
+					int res = new String(isGroup1 + o1.getStartDate()).compareTo(new String(isGroup2 + o2.getStartDate()));
+					if (res == 0) {
+						res = o1.getChallId().compareTo(o2.getChallId());
+					}
+					return res;
 				}
-				return res;
-			}
-			
-		});
+
+			});
+		}
 		
 		
     	
