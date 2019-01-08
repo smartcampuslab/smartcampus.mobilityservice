@@ -68,7 +68,7 @@ public class GamificationCache {
 					logger.info("Loaded player state: " + ids[0]);
 					return data;
 				} catch (Exception e) {
-					logger.error("Error populating player state cache.");
+					logger.error("Error populating player state cache: ", e);
 					throw e;
 				}
 			}
@@ -101,7 +101,7 @@ public class GamificationCache {
 					logger.info("Loaded player notifications: " + ids[0]);
 					return data;
 				} catch (Exception e) {
-					logger.error("Error populating player notifications cache.");
+					logger.error("Error populating player notifications cache:", e);
 					throw e;
 				}
 			}
@@ -134,7 +134,7 @@ public class GamificationCache {
 					logger.info("Loaded statistics: " + id);
 					return data;
 				} catch (Exception e) {
-					logger.error("Error populating statistics cache.");
+					logger.error("Error populating statistics cache: ", e);
 					throw e;
 				}
 			}
