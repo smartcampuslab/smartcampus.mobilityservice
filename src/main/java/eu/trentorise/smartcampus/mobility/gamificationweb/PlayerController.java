@@ -182,7 +182,7 @@ public class PlayerController {
 			try {
 				checkRecommendations(appInfo.getAppId());
 			} catch (Exception e) {
-				logger.error("Error checking recommendations for " + appInfo.getAppId());
+				logger.error("Error checking recommendations for " + appInfo.getAppId() + ": " , e);
 				e.printStackTrace();
 			}
 		}
