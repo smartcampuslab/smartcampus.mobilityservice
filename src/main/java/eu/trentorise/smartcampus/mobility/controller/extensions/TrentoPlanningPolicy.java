@@ -74,7 +74,7 @@ public class TrentoPlanningPolicy implements PlanningPolicy {
 			// TODO: handle retry
 			if (type.equals(TType.TRANSIT) || type.equals(TType.BUS)) {
 				if (pr.getRouteType().equals(RType.leastWalking)) {
-					pr.setSmartplannerParameter(SmartplannerParameter.maxWalkDistance, 1000);
+					pr.setSmartplannerParameter(SmartplannerParameter.maxWalkDistance, 500);
 				}
 			}
 			
