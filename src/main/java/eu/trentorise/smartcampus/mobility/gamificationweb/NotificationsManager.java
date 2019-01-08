@@ -550,7 +550,7 @@ public class NotificationsManager {
 		StringBuilder descr = new StringBuilder(message.getDescription().get(lang));
 		String result = null;
 
-		if (message.getExtras() != null && extraData != null) {
+		if (message.getExtras() != null && message.getExtras().get(lang) != null && extraData != null) {
 
 			List<NotificationMessageExtra> extras = message.getExtras().get(lang);
 
