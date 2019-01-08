@@ -351,9 +351,9 @@ public class ChallengesUtils {
 							if (otherPlayer != null) {
 								nickname = otherPlayer.getNickname();
 								challenge.getFields().put("opponent", nickname);
-								challenge.getFields().put("reward", reward);
-								challenge.getFields().put("target", target);
 							}
+							challenge.getFields().put("reward", reward);
+							challenge.getFields().put("target", target);
 	
 							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
 							otherAttendeeData.setRow_status(other_row_status);
@@ -445,6 +445,48 @@ public class ChallengesUtils {
     	
     	return result;
     }
+	
+	public void fillMissingFields(ChallengeConcept challenge, String gameId) {
+		List otherAttendeeScoresList = (List)challenge.getFields().getOrDefault(CHAL_FIELDS_OTHER_ATTENDEE_SCORES, Collections.EMPTY_LIST);
+		Map<String, Object> otherAttendeeScores = null;
+		
+		if (!otherAttendeeScoresList.isEmpty()) {
+			otherAttendeeScores = (Map)otherAttendeeScoresList.get(0);
+		} else {
+			return;
+		}
+
+		String otherPlayerId = (String)otherAttendeeScores.get(CHAL_FIELDS_PLAYER_ID); 
+		Player otherPlayer = playerRepository.findByPlayerIdAndGameId(otherPlayerId, gameId);		
+		
+		switch (challenge.getModelName()) {
+		case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE : {
+			if (otherPlayer != null) {
+				String nickname = otherPlayer.getNickname();
+				challenge.getFields().put("opponent", nickname);
+			}			
+			break;
+		}
+		case CHAL_MODEL_GROUP_COMPETITIVE_TIME : {
+			if (otherPlayer != null) {
+				String nickname = otherPlayer.getNickname();
+				challenge.getFields().put("opponent", nickname);
+			}			
+			break;
+		}
+		case CHAL_MODEL_GROUP_COOPERATIVE : {
+			Double reward = (Double) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, "");
+			Double target = (Double) challenge.getFields().get(CHAL_FIELDS_CHALLENGE_TARGET);
+			if (otherPlayer != null) {
+				String nickname = otherPlayer.getNickname();
+				challenge.getFields().put("opponent", nickname);
+			}
+			challenge.getFields().put("reward", reward);
+			challenge.getFields().put("target", target);
+			break;
+			}			
+		}		
+	}
 	
 	
 	private String getFilterByType(String type) {

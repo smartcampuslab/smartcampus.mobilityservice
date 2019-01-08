@@ -263,12 +263,14 @@ public class DiaryController {
 		String language = (p.getLanguage() != null && !p.getLanguage().isEmpty()) ? p.getLanguage() : "it";
 
 		String data = gamificationCache.getPlayerState(p.getPlayerId(), appId);
-
+		
 		List<ChallengeConcept> challengeConcepts = challengeUtils.parse(data);
 		for (ChallengeConcept challengeConcept: challengeConcepts) {
 			if (!challengeConcept.getStateDate().containsKey(ChallengeState.ASSIGNED)) {
 				continue;
 			}
+			
+			challengeUtils.fillMissingFields(challengeConcept, getGameId(appId));
 			
 			String description = challengeUtils.fillDescription(challengeConcept, language);
 //			String longDescription = challengeUtils.fillLongDescription(challengeConcept, language);
@@ -540,6 +542,18 @@ public class DiaryController {
 		
 		return result;
 	}
+	
+	private String getGameId(String appId) {
+		if (appId != null) {
+			AppInfo ai = appSetup.findAppById(appId);
+			if (ai == null) {
+				return null;
+			}
+			String gameId = ai.getGameId();
+			return gameId;
+		}
+		return null;
+	}	
 	
 	HttpHeaders createHeaders(String appId) {
 		return new HttpHeaders() {
