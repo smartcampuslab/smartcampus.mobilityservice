@@ -39,6 +39,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -88,6 +89,10 @@ public class GamificationManager {
 	private String gamificationUrl;
 	
 	private Set<String> publishQueue = Sets.newConcurrentHashSet();
+	
+	private ObjectMapper mapper = new ObjectMapper(); {
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}	
 	
 	public synchronized boolean sendFreeTrackingDataToGamificationEngine(String appId, String playerId, String travelId, Collection<Geolocation> geolocationEvents, String ttype, Map<String, Object> trackingData) {
 		logger.info("Send free tracking data for user " + playerId + ", trip " + travelId);
@@ -316,8 +321,6 @@ public class GamificationManager {
 		Map<String, Double> result = Maps.newTreeMap();
 		
 		try {
-		ObjectMapper mapper = new ObjectMapper();
-		
 		AppInfo app = appSetup.findAppById(appId);
 		
 		if (app == null) {
