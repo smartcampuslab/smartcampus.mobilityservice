@@ -65,7 +65,7 @@ public class GamificationCache {
 				try {
 					String[] ids = id.split("@");
 					String data = loadPlayerState(ids[0], ids[1]);
-					logger.info("Loaded player state: " + ids[0]);
+					logger.debug("Loaded player state: " + ids[0]);
 					return data;
 				} catch (Exception e) {
 					logger.error("Error populating player state cache: ", e);
@@ -98,7 +98,7 @@ public class GamificationCache {
 				try {
 					String[] ids = id.split("@");
 					String data = loadNotifications(ids[0], ids[1]);
-					logger.info("Loaded player notifications: " + ids[0]);
+					logger.debug("Loaded player notifications: " + ids[0]);
 					return data;
 				} catch (Exception e) {
 					logger.error("Error populating player notifications cache:", e);
@@ -131,7 +131,7 @@ public class GamificationCache {
 			public List<GameStatistics> load(String id) throws Exception {
 				try {
 					List<GameStatistics> data = loadStatistics(id);
-					logger.info("Loaded statistics: " + id);
+					logger.debug("Loaded statistics: " + id);
 					return data;
 				} catch (Exception e) {
 					logger.error("Error populating statistics cache: ", e);
