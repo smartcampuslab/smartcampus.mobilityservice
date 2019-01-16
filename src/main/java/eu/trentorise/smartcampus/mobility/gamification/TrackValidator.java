@@ -258,7 +258,6 @@ public class TrackValidator {
 				end = i;
 			}
 			if (start != -1 && end != -1 && (end - start >= 20)) {
-//				System.err.println(start + " / " + end + " => " + indexes.get(start) + " / " + indexes.get(end));
 				List<Geolocation> group = Lists.newArrayList();
 				for (int j = indexes.get(start); j <= indexes.get(end); j++) {
 					group.add(points.get(j));
@@ -507,7 +506,7 @@ public class TrackValidator {
 				return status;
 			}	
 		}
-		status.updateSlowSplit(trackSplit, true);
+		status.updateSlowSplit(trackSplit, false);
 		// distance should be non-trivial
 		double distance = status.getEffectiveDistances().get(mode);
 		// min distance 
