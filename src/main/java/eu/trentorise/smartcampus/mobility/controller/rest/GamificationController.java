@@ -821,6 +821,15 @@ public class GamificationController {
 //				gamificationValidator.findOverlappedTrips(instances);
 				for (TrackedInstance o : instances) {
 					
+					if (o.getValidationResult().getValidationStatus().getPolyline() == null) {
+						List<Geolocation> points = Lists.newArrayList(o.getGeolocationEvents());
+						points = TrackValidator.removeStarredClusters(points);
+						points = TrackValidator.preprocessTrack(points);
+						String polyline = GamificationHelper.encodePoly(points);
+						logger.debug("Generated polyline for " + o.getId() + " = " + polyline);
+						o.getValidationResult().getValidationStatus().setPolyline(polyline);
+					}
+					
 //					TODO reenabled
 					if (o.getSuspect() == null) {
 						o.setSuspect(gamificationValidator.isSuspect(o));

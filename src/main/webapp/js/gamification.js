@@ -519,8 +519,22 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			$scope.scores = "[" + computeFreeTrackingScore(coordinates, instance.freeTrackingTransport);
 		}
 		if ($scope.fixpaths) {
+			var polyline = instance.validationResult.validationStatus.polyline
+			if (polyline) {
+				var path = google.maps.geometry.encoding.decodePath(polyline);
+				var line = new google.maps.Polyline({
+					path : path,
+					strokeColor : 'DeepPink',
+					strokeOpacity : 0.8,
+					strokeWeight : 5,
+					map : $scope.map
+				});
+				$scope.layers.push(line);
+			} else {
 			coordinates = removeOutliers(coordinates);
 			coordinates = transform(coordinates);
+			}
+			
 			
 			if (instance.freeTrackingTransport) {
 				$scope.scores += "," + computeFreeTrackingScore(coordinates, instance.freeTrackingTransport) + "]";
@@ -595,11 +609,13 @@ gamificationConsole.controller('GameCtrl', function($scope, $timeout, $http) {
 			}
 		}
 		
+		var opacity = $scope.fixpaths ? 0.75 : 1.0;
+		
 		var path = new google.maps.Polyline({
 			path : coordinates,
 			geodesic : true,
 			strokeColor : 'blue',
-			strokeOpacity : 1.0,
+			strokeOpacity : opacity,
 			strokeWeight : 2
 		});
 		$scope.layers.push(path);
