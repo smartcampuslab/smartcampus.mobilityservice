@@ -108,6 +108,7 @@ public class GeolocationsProcessor {
 				for (TrackedInstance ti : instances) {
 					sendTrackedInstance(userId, appId, ti);
 					storage.saveTrackedInstance(ti);
+					logger.info("Saved geolocation events, user: " + userId + ", travel: " + ti.getId() + ", " + ti.getGeolocationEvents().size() + " events.");
 				}
 			} else {
 				logger.error("Device of user " + userId + " is virtual: " + geolocationsEvent.getDevice());
@@ -319,9 +320,6 @@ public class GeolocationsProcessor {
 
 			res.setAppId(appId);
 			res.setDeviceInfo(deviceInfo);
-//			storage.saveTrackedInstance(res);
-
-			logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 		}
 
 		return res;
