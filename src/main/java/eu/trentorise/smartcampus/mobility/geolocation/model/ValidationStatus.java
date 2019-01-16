@@ -83,6 +83,8 @@ public class ValidationStatus {
 	
 	private boolean certified;
 	
+	private String polyline;
+	
 	/**
 	 * Compute percentage of points with high accuracy
 	 * @param points
@@ -433,6 +435,12 @@ public class ValidationStatus {
 		this.validationOutcome = validationOutcome;
 	}
 
+	public String getPolyline() {
+		return polyline;
+	}
+	public void setPolyline(String polyline) {
+		this.polyline = polyline;
+	}
 	public ERROR_TYPE getError() {
 		return error;
 	}
