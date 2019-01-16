@@ -217,10 +217,10 @@ public class TrackValidator {
 			}
 		}	
 		
-		if (origPoints.size() != newPoints.size()) {
-			logger.info("Original polyline: " + GamificationHelper.encodePoly(origPoints));
-			logger.info("Reduced polyline: " + GamificationHelper.encodePoly(newPoints));
-		}
+//		if (origPoints.size() != newPoints.size()) {
+//			logger.debug("Original polyline: " + GamificationHelper.encodePoly(origPoints));
+//			logger.debug("Reduced polyline: " + GamificationHelper.encodePoly(newPoints));
+//		}
 		
 		return newPoints;
 	}
