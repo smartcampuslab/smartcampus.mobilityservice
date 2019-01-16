@@ -79,7 +79,11 @@ public class GeolocationsProcessor {
 			}
 			logger.info("Received " + pointCount + " geolocations for " + userId + ", " + geolocationsEvent.getDevice());
 
-			boolean virtual = (boolean) geolocationsEvent.getDevice().getOrDefault("isVirtual", false);
+			boolean virtual = false;
+			
+			if (geolocationsEvent.getDevice() != null) {
+				virtual = (boolean) geolocationsEvent.getDevice().getOrDefault("isVirtual", false);
+			}
 
 			if (!virtual) {
 				gamificationCache.invalidatePlayer(userId, appId);
@@ -95,7 +99,7 @@ public class GeolocationsProcessor {
 
 				List<TrackedInstance> instances = Lists.newArrayList();
 				for (String key : geolocationsByItinerary.keySet()) {
-					TrackedInstance ti = saveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
+					TrackedInstance ti = preSaveTrackedInstance(key, userId, appId, deviceInfo, geolocationsByItinerary, freeTracks, freeTrackStarts);
 					if (ti != null) {
 						instances.add(ti);
 					}
@@ -103,6 +107,7 @@ public class GeolocationsProcessor {
 
 				for (TrackedInstance ti : instances) {
 					sendTrackedInstance(userId, appId, ti);
+					storage.saveTrackedInstance(ti);
 				}
 			} else {
 				logger.error("Device of user " + userId + " is virtual: " + geolocationsEvent.getDevice());
@@ -286,7 +291,7 @@ public class GeolocationsProcessor {
 		return geolocation;
 	}
 
-	private TrackedInstance saveTrackedInstance(String key, String userId, String appId, String deviceInfo, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
+	private TrackedInstance preSaveTrackedInstance(String key, String userId, String appId, String deviceInfo, Multimap<String, Geolocation> geolocationsByItinerary, Map<String, String> freeTracks,
 			Map<String, Long> freeTrackStarts) throws Exception {
 		String splitKey[] = key.split("@");
 		String travelId = splitKey[0];
@@ -314,7 +319,7 @@ public class GeolocationsProcessor {
 
 			res.setAppId(appId);
 			res.setDeviceInfo(deviceInfo);
-			storage.saveTrackedInstance(res);
+//			storage.saveTrackedInstance(res);
 
 			logger.info("Saved geolocation events, user: " + userId + ", travel: " + res.getId() + ", " + res.getGeolocationEvents().size() + " events.");
 		}
@@ -329,9 +334,7 @@ public class GeolocationsProcessor {
 		} else if (res.getFreeTrackingTransport() != null) {
 			sendFreeTracking(res, userId, res.getClientId(), appId);
 		}
-
-		storage.saveTrackedInstance(res);
-
+//		storage.saveTrackedInstance(res);
 	}
 	
 
