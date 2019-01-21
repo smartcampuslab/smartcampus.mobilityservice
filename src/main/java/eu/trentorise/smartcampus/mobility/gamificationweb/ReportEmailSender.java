@@ -129,7 +129,7 @@ public class ReportEmailSender {
 //		System.out.println("DONE");
 //	}	
 	
-	@Scheduled(cron="0 0 17 * * FRI")
+	@Scheduled(cron="0 50 10 * * MON")
 	public void sendWeeklyNotification() throws Exception {
 		logger.info("Sending weekly notifications");
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -263,7 +263,7 @@ public class ReportEmailSender {
 			List<ChallengesData> lastWeekChallenges = null;
 			Locale mailLoc = Locale.ITALIAN;
 
-			String completeState = gamificationCache.getPlayerState(p.getId(), appId);
+			String completeState = gamificationCache.getPlayerState(p.getPlayerId(), appId);
 			
 			String language = p.getLanguage();
 			if (language == null || language.isEmpty()) {
