@@ -45,6 +45,8 @@ public class TargetPrizeChallengesCalculator {
 	@Autowired
 	private StatusUtils statusUtils;
 	
+	private LocalDate lastMonday = LocalDate.now().minusDays(7).with(ChronoField.DAY_OF_WEEK, 1);
+	
 	private static double FAKE = 0.0;
 
 	private ObjectMapper mapper = new ObjectMapper();
@@ -63,26 +65,38 @@ public class TargetPrizeChallengesCalculator {
 
 		prepare();
 
-
-
 		Map<Integer, Double> quantiles = getQuantiles(appId, counter);
 //		System.err.println(quantiles);
 
 		Map<String, Double> res = Maps.newTreeMap();
 
-		String data1 = gamificationCache.getPlayerState(pId_1, appId);
-		Pair<Double, Double> res1 = forecast(res, "player1", data1, counter);
-		double player1_tgt = res1.getFirst();
-		double player1_bas = res1.getSecond();
+//		String data1 = gamificationCache.getPlayerState(pId_1, appId);
+//		Pair<Double, Double> res1 = forecast(res, "player1", data1, counter);
+//		double player1_tgt = res1.getFirst();
+//		double player1_bas = res1.getSecond();
+//
+//		String data2 = gamificationCache.getPlayerState(pId_2, appId);
+//		Pair<Double, Double> res2 = forecast(res, "player2", data2, counter);
+//		double player2_tgt = res2.getFirst();
+//		double player2_bas = res2.getSecond();
+		
+//        Player player1 = facade.getPlayerState(gameId, pId_1);
+		String player1 = gamificationCache.getPlayerState(pId_1, appId);
+        Pair<Double, Double> res1 = forecastMode(player1, counter);
+        double player1_tgt = res1.getFirst();
+        double player1_bas = res1.getSecond();
+        res.put("player1_tgt", player1_tgt);
 
-		String data2 = gamificationCache.getPlayerState(pId_2, appId);
-		Pair<Double, Double> res2 = forecast(res, "player2", data2, counter);
-		double player2_tgt = res2.getFirst();
-		double player2_bas = res2.getSecond();
+//        Player player2 = facade.getPlayerState(gameId, pId_2);
+        String player2 = gamificationCache.getPlayerState(pId_2, appId);
+        Pair<Double, Double> res2 = forecastMode(player2, counter);
+        double player2_tgt = res2.getFirst();
+        double player2_bas = res2.getSecond();
+        res.put("player2_tgt", player2_tgt);		
 
 		double target;
         if (type.equals("groupCompetitiveTime")) {
-            target = roundTarget(counter,(player1_tgt + player2_tgt) / 2.0);
+            target = ChallengesConfig.roundTarget(counter,(player1_tgt + player2_tgt) / 2.0);
 
             target = checkMaxTargetCompetitive(counter, target);
 
@@ -91,7 +105,7 @@ public class TargetPrizeChallengesCalculator {
             res.put("player2_prz",  evaluate(target, player2_bas, counter, quantiles));
         }
         else if (type.equals("groupCooperative")) {
-            target =roundTarget(counter, player1_tgt + player2_tgt);
+            target = ChallengesConfig.roundTarget(counter, player1_tgt + player2_tgt);
 
             target = checkMaxTargetCooperative(counter, target);
 
@@ -155,13 +169,87 @@ public class TargetPrizeChallengesCalculator {
 		dc = new DifficultyCalculator();
 	}
 
-	private Pair<Double, Double> forecast(Map<String, Double> res, String nm, String state, String counter) throws Exception {
+	private Pair<Double, Double> forecastMode(String state, String counter) throws Exception {
+
+        // Check date of registration, decide which method to use
+        int week_playing = getWeekPlaying(state, counter);
+
+        if (week_playing == 1) {
+            Double baseline = getWeeklyContentMode(state, counter, lastMonday);
+            return new Pair<Double, Double>(baseline*ChallengesConfig.booster, baseline);
+        } else if (week_playing == 2) {
+            return forecastModeSimple(state, counter);
+        }
+
+        return forecastWMA(Math.min(ChallengesConfig.week_n, week_playing), state, counter);
+    }
+
+    // Weighted moving average
+    private Pair<Double, Double> forecastWMA(int v, String state, String counter) throws Exception {
+
+    	LocalDate date = lastMonday;
+
+        double den = 0;
+        double num = 0;
+        for (int ix = 0; ix < v; ix++) {
+            // weight * value
+            Double c = getWeeklyContentMode(state, counter, date);
+            den += (v -ix) * c;
+            num += (v -ix);
+
+            date = date.minusDays(7);
+        }
+
+        double baseline = den / num;
+
+        double pv = baseline * ChallengesConfig.booster;
+
+        return new Pair<Double, Double>(pv, baseline);
+    }
+
+    private int getWeekPlaying(String state, String counter) throws Exception {
+
+    	LocalDate date = lastMonday;
+        int i = 0;
+        while (i < 100) {
+            // weight * value
+            Double c = getWeeklyContentMode(state, counter, date);
+            if (c.equals(-1.0))
+                break;
+            i++;
+            date = date.minusDays(7);
+        }
+
+        return i;
+    }
+
+    public Pair<Double, Double> forecastModeSimple(String state, String counter) throws Exception {
+
+    	LocalDate date = lastMonday;
+        Double currentValue = getWeeklyContentMode(state, counter, date);
+        date = date.minusDays(7);
+        Double lastValue = getWeeklyContentMode(state, counter, date);
+
+        double slope = (lastValue - currentValue) / lastValue;
+        slope = Math.abs(slope) * 0.8;
+        if (slope > 0.3)
+            slope = 0.3;
+
+        double value = currentValue * (1 + slope);
+        if (value == 0 || Double.isNaN(value))
+            value = 1;
+
+
+        return new Pair<Double, Double>(value, currentValue);
+    }
+
+    // old approach
+    private Pair<Double, Double> forecastOld(Map<String, Double> res, String nm, String state, String counter) throws Exception {	
+//	private Pair<Double, Double> forecast(Map<String, Double> res, String nm, String state, String counter) throws Exception {
 
 		// Last 3 values?
 		int v = 3;
 		double[][] d = new double[v][];
-
-		LocalDate date = LocalDate.now().minusDays(7).with(ChronoField.DAY_OF_WEEK, 1);
 
 		double wma = 0;
 		int wma_d = 0;
@@ -169,10 +257,10 @@ public class TargetPrizeChallengesCalculator {
 		for (int i = 0; i < v; i++) {
 			int ix = v - (i + 1);
 			d[ix] = new double[2];
-			Double c = getWeeklyPlayerStateMode(state, counter, date);
+			Double c = getWeeklyContentMode(state, counter, lastMonday);
 			d[ix][1] = c;
 			d[ix][0] = ix + 1;
-			date = date.minusDays(7);
+			lastMonday = lastMonday.minusDays(7);
 			res.put(nm + "_base_" + ix, c);
 
 			wma += (v - i) * c;
@@ -231,7 +319,7 @@ public class TargetPrizeChallengesCalculator {
 		return Math.ceil(prize * ChallengesConfig.competitiveChallengesBooster / 10.0) * 10;
 	}
 
-	public Double getWeeklyPlayerStateMode(String status, String mode, LocalDate execDate) throws Exception {
+	public Double getWeeklyContentMode(String status, String mode, LocalDate execDate) throws Exception {
 		Map<String, Object> stateMap = mapper.readValue(status, Map.class);
 		Map<String, Object> state = (Map<String, Object>) stateMap.get("state");
 		List<Map> gePointsMap = mapper.convertValue(state.get("PointConcept"), new TypeReference<List<Map>>() {
@@ -261,19 +349,19 @@ public class TargetPrizeChallengesCalculator {
 		return stats.stream().filter(x -> counter.equals(x.getPointConceptName())).collect(Collectors.toList());
 	}
 
-	private static double roundTarget(String mode, double improvementValue) {
-		if (mode.endsWith("_Trips")) {
-			improvementValue = Math.ceil(improvementValue);
-		} else {
-			if (improvementValue > 1000)
-				improvementValue = Math.ceil(improvementValue / 100) * 100;
-			else if (improvementValue > 100)
-				improvementValue = Math.ceil(improvementValue / 10) * 10;
-			else
-				improvementValue = Math.ceil(improvementValue);
-		}
-		return improvementValue;
-	}
+//	private static double roundTarget(String mode, double improvementValue) {
+//		if (mode.endsWith("_Trips")) {
+//			improvementValue = Math.ceil(improvementValue);
+//		} else {
+//			if (improvementValue > 1000)
+//				improvementValue = Math.ceil(improvementValue / 100) * 100;
+//			else if (improvementValue > 100)
+//				improvementValue = Math.ceil(improvementValue / 10) * 10;
+//			else
+//				improvementValue = Math.ceil(improvementValue);
+//		}
+//		return improvementValue;
+//	}
 
 	private String getGameId(String appId) {
 		if (appId != null) {

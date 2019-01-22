@@ -57,6 +57,15 @@ public class ChallengesConfig {
 
     /**
      * --------------------------------------
+     * challenge generation
+     * --------------------------------------
+     */
+
+    public static final double booster = 1.3;
+    public static final int week_n = 5;    
+    
+    /**
+     * --------------------------------------
      * dynamic configuration
      * --------------------------------------
      */
@@ -203,5 +212,19 @@ public class ChallengesConfig {
     public static String getChallengeNamePrefix() {
         return challengeNamePrefix;
     }
+    
+    public static double roundTarget(String mode, double improvementValue) {
+        if (mode.endsWith("_Trips")) {
+            improvementValue = Math.ceil(improvementValue);
+        } else {
+            if (improvementValue > 1000)
+                improvementValue = Math.ceil(improvementValue / 100) * 100;
+            else if (improvementValue > 100)
+                improvementValue = Math.ceil(improvementValue / 10) * 10;
+            else
+                improvementValue = Math.ceil(improvementValue);
+        }
+        return improvementValue;
+    }    
 
 }
