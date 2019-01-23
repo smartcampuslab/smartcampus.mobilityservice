@@ -216,14 +216,14 @@ public class ChallengesUtils {
     				switch (modelName) {
     					case CHAL_MODEL_REPETITIVE_BEAV:
 		    				double successes = retrieveRepeatitiveStatusFromCounterName(counterName, periodName, pointConcept, start, end, target); 
-		    				row_status = round(successes, 2);
+		    				row_status = successes;
 		    				status = Math.min(100, (int)(100.0 * successes / periodTarget));
 		    				challengeData.setChallTarget((int)periodTarget);
 	    					break;
 	    				case CHAL_MODEL_PERCENTAGE_INC:
 	    				case CHAL_MODEL_ABSOLUTE_INC: {
 		    				double earned = retrieveCorrectStatusFromCounterName(counterName, periodName, pointConcept, start, end); 
-		    				row_status = round(earned, 2);
+		    				row_status = earned;
 		    				status = Math.min(100, (int)(100.0 * earned / target));
 	    					break;
 	    				}
@@ -236,7 +236,7 @@ public class ChallengesUtils {
 		    						count = (int)target - 1;
 		    					}
 		    				}
-		    				row_status = round(count, 2);
+		    				row_status = count;
 		    				status = Math.min(100, (int)(100.0 * count / target));
 		    				break;
 	    				}
@@ -276,7 +276,7 @@ public class ChallengesUtils {
 	    					}
 	    					
 	    					OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
-	    					otherAttendeeData.setRow_status(other_row_status);
+	    					otherAttendeeData.setRow_status(round(other_row_status, 2));
 	    					otherAttendeeData.setStatus(other_status);
 	    					otherAttendeeData.setPlayerId(otherPlayerId);
 	    					otherAttendeeData.setNickname(nickname);
@@ -314,7 +314,7 @@ public class ChallengesUtils {
 							}
 	
 							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
-							otherAttendeeData.setRow_status(other_row_status);
+							otherAttendeeData.setRow_status(round(other_row_status, 2));
 							otherAttendeeData.setStatus(other_status);
 							otherAttendeeData.setPlayerId(otherPlayerId);
 							otherAttendeeData.setNickname(nickname);
@@ -356,7 +356,7 @@ public class ChallengesUtils {
 							challenge.getFields().put("target", target);
 	
 							OtherAttendeeData otherAttendeeData = new OtherAttendeeData();
-							otherAttendeeData.setRow_status(other_row_status);
+							otherAttendeeData.setRow_status(round(other_row_status, 2));
 							otherAttendeeData.setStatus(other_status);
 							otherAttendeeData.setPlayerId(otherPlayerId);
 							otherAttendeeData.setNickname(nickname);
@@ -385,7 +385,7 @@ public class ChallengesUtils {
 
     				challengeData.setBonus(bonusScore);
     				challengeData.setStatus(status);
-    				challengeData.setRow_status(row_status);
+    				challengeData.setRow_status(round(row_status, 2));
     				
 					if (type == 0) {
 						if ("ASSIGNED".equals(state)) {
