@@ -256,7 +256,7 @@ public class ChallengesUtils {
 	    					double total = row_status + other_row_status;
 	    					int other_status = 0;
 	    					if (total != 0) {
-	    						status = (int)(100 *row_status / total);
+	    						status = (int)(100 * row_status / total);
 	    						other_status = 100 - status;
 	    					}
 	    					
@@ -297,6 +297,12 @@ public class ChallengesUtils {
 								status = (int) (100 * row_status / challengeTarget);
 								other_status = (int) (100 * other_row_status / challengeTarget);
 							}
+							
+							if (status + other_status > 100) {
+								float coeff = (float)(status + other_status) / 100;
+								status = Math.round(status / coeff);
+								other_status = Math.round(other_status / coeff);
+							}							
 	
 							String unit = (String)challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_SCORE_NAME, "");
 							challengeData.setUnit(unit);
@@ -334,6 +340,13 @@ public class ChallengesUtils {
 							if (challengeTarget != 0) {
 								status = (int) (100 * row_status / challengeTarget);
 								other_status = (int) (100 * other_row_status / challengeTarget);
+								
+								if (status + other_status > 100) {
+									float coeff = (float)(status + other_status) / 100;
+									status = Math.round(status / coeff);
+									other_status = Math.round(other_status / coeff);
+								}
+								
 							}
 	
 							Double reward = (Double) challenge.getFields().getOrDefault(CHAL_FIELDS_CHALLENGE_REWARD, "");
