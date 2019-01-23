@@ -66,30 +66,17 @@ public class TargetPrizeChallengesCalculator {
 		prepare();
 
 		Map<Integer, Double> quantiles = getQuantiles(appId, counter);
-//		System.err.println(quantiles);
 
 		Map<String, Double> res = Maps.newTreeMap();
 
-//		String data1 = gamificationCache.getPlayerState(pId_1, appId);
-//		Pair<Double, Double> res1 = forecast(res, "player1", data1, counter);
-//		double player1_tgt = res1.getFirst();
-//		double player1_bas = res1.getSecond();
-//
-//		String data2 = gamificationCache.getPlayerState(pId_2, appId);
-//		Pair<Double, Double> res2 = forecast(res, "player2", data2, counter);
-//		double player2_tgt = res2.getFirst();
-//		double player2_bas = res2.getSecond();
-		
-//        Player player1 = facade.getPlayerState(gameId, pId_1);
 		String player1 = gamificationCache.getPlayerState(pId_1, appId);
-        Pair<Double, Double> res1 = forecastMode(player1, counter);
+        Pair<Double, Double> res1 = getForecast("player1", res, player1, counter);
         double player1_tgt = res1.getFirst();
         double player1_bas = res1.getSecond();
         res.put("player1_tgt", player1_tgt);
 
-//        Player player2 = facade.getPlayerState(gameId, pId_2);
         String player2 = gamificationCache.getPlayerState(pId_2, appId);
-        Pair<Double, Double> res2 = forecastMode(player2, counter);
+        Pair<Double, Double> res2 = getForecast("player2", res, player2, counter);
         double player2_tgt = res2.getFirst();
         double player2_bas = res2.getSecond();
         res.put("player2_tgt", player2_tgt);		
@@ -100,9 +87,9 @@ public class TargetPrizeChallengesCalculator {
 
             target = checkMaxTargetCompetitive(counter, target);
 
-            res.put("target", target);
-                    res.put("player1_prz", evaluate(target, player1_bas, counter, quantiles));
-            res.put("player2_prz",  evaluate(target, player2_bas, counter, quantiles));
+            res.put(TARGET, target);
+            res.put(PLAYER1_PRZ, evaluate(target, player1_bas, counter, quantiles));
+            res.put(PLAYER2_PRZ,  evaluate(target, player2_bas, counter, quantiles));
         }
         else if (type.equals("groupCooperative")) {
             target = ChallengesConfig.roundTarget(counter, player1_tgt + player2_tgt);
@@ -113,12 +100,26 @@ public class TargetPrizeChallengesCalculator {
             double player2_prz = evaluate(player2_tgt, player2_bas, counter, quantiles);
             double prz = Math.max(player1_prz, player2_prz);
 
-            res.put("target", target);
-            res.put("player1_prz", prz);
-            res.put("player2_prz", prz);
+            res.put(TARGET, target);
+            res.put(PLAYER1_PRZ, prz);
+            res.put(PLAYER2_PRZ, prz);
         }  
         return res;
     }
+	
+    private Pair<Double, Double> getForecast(String nm, Map<String, Double> res, String state, String counter) throws Exception {
+        Pair<Double, Double> forecast = forecastMode(state, counter);
+
+        double tgt = forecast.getFirst();
+        double bas = forecast.getSecond();
+
+        tgt = checkMinTarget(counter, tgt);
+
+        res.put(nm + "_tgt", tgt);
+        res.put(nm + "_bas", bas);
+
+        return new Pair<>(tgt, bas);
+    }	
 
     private double checkMaxTargetCompetitive(String counter, double v) {
             if ("Walk_Km".equals(counter))
