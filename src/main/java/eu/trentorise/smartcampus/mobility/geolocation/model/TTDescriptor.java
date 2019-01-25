@@ -57,6 +57,8 @@ public class TTDescriptor {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TTDescriptor.class);
 	
+	private static final int MAX_DESCRIPTORS = 5;
+	
 	private Map<Integer, String> routeMap = new HashMap<>();
 	private Map<String, Integer> routeIDMap = new HashMap<>();
 	private Map<String, Integer> shapeIDMap = new HashMap<>();
@@ -180,21 +182,18 @@ public class TTDescriptor {
 			}
 		} 
 		
-		if (occurences.size() > 5) {
+		if (occurences.size() > MAX_DESCRIPTORS) {
 			List<TTLineDescriptor> list = new ArrayList<>(occurences.keySet());
-			list.sort((a,b) -> {
-				return    (occurences.get(b)[2] - occurences.get(a)[2]) != 0 
-						? (occurences.get(b)[2] - occurences.get(a)[2]) 
-						: (occurences.get(b)[0] - occurences.get(a)[0]); 
-			});
-			descriptors = list.subList(0, 5);
+			sortOccurences(list, occurences);
+			
+			descriptors = list.subList(0, MAX_DESCRIPTORS);
 			int maxOccur = occurences.get(list.get(0))[2];
 			if (maxOccur == 0) {
-				descriptors = list.subList(0, 5);
+				descriptors = list.subList(0, MAX_DESCRIPTORS);
 			} else {
 				int count = 0;
 				for (TTLineDescriptor d : list) if (occurences.get(d)[2] == maxOccur) count++;
-				if (count < 5) descriptors = list.subList(0, 5);
+				if (count < MAX_DESCRIPTORS) descriptors = list.subList(0, MAX_DESCRIPTORS);
 				else descriptors = list.subList(0, count);
 			}
 		} else {
@@ -259,21 +258,18 @@ public class TTDescriptor {
 			}
 		} 
 		
-		if (occurences.size() > 5) {
+		if (occurences.size() > MAX_DESCRIPTORS) {
 			List<TTLineDescriptor> list = new ArrayList<>(occurences.keySet());
-			list.sort((a,b) -> {
-				return    (occurences.get(b)[2] - occurences.get(a)[2]) != 0 
-						? (occurences.get(b)[2] - occurences.get(a)[2]) 
-						: (occurences.get(b)[0] - occurences.get(a)[0]); 
-			});
-			descriptors = list.subList(0, 5);
+			sortOccurences(list, occurences);
+			
+			descriptors = list.subList(0, MAX_DESCRIPTORS);
 			int maxOccur = occurences.get(list.get(0))[2];
 			if (maxOccur == 0) {
-				descriptors = list.subList(0, 5);
+				descriptors = list.subList(0, MAX_DESCRIPTORS);
 			} else {
 				int count = 0;
 				for (TTLineDescriptor d : list) if (occurences.get(d)[2] == maxOccur) count++;
-				if (count < 5) descriptors = list.subList(0, 5);
+				if (count < MAX_DESCRIPTORS) descriptors = list.subList(0, MAX_DESCRIPTORS);
 				else descriptors = list.subList(0, count);
 			}
 		} else {
@@ -281,11 +277,35 @@ public class TTDescriptor {
 		}
 		
 		Map<String,String> polys = Maps.newTreeMap();
-		descriptors.forEach(x -> polys.put(routeMap.get(x.route), polylineMap.get(x.shape)));
+		descriptors.forEach(x -> {
+			polys.put(routeMap.get(x.route) + "#" + x.shape, polylineMap.get(x.shape));
+		});
 		
 		return polys;
 	}	
 	
+	
+	private void sortOccurences(List<TTLineDescriptor> list, Map<TTLineDescriptor, int[]> occurences) {
+		Map<TTLineDescriptor, Integer> score = Maps.newHashMap();
+		
+		list.sort((a,b) -> {
+			return    (occurences.get(b)[0] - occurences.get(a)[0]) != 0 
+					? (occurences.get(b)[0] - occurences.get(a)[0]) 
+					: (occurences.get(b)[2] - occurences.get(a)[2]); 
+		});
+		list.stream().forEach(x -> score.put(x, list.indexOf(x)));
+		list.sort((a,b) -> {
+			return    (occurences.get(b)[2] - occurences.get(a)[2]) != 0 
+					? (occurences.get(b)[2] - occurences.get(a)[2]) 
+					: (occurences.get(b)[0] - occurences.get(a)[0]); 
+		});
+		list.stream().forEach(x -> score.put(x, score.get(x) + list.indexOf(x)));
+		
+		list.sort((a,b) -> {
+			return score.get(a) - score.get(b);
+		});
+
+	}
 	
 	/**
 	 * @param shape
