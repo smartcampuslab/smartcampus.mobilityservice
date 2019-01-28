@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -21,14 +22,22 @@ import eu.trentorise.smartcampus.mobility.security.CustomTokenExtractor;
 
 @Configuration
 @ComponentScan("eu.trentorise.smartcampus.resourceprovider")
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	@Order(1)
+	@Override
+	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 	    auth
 	    .authenticationProvider(getCustomAuthenticationProvider())
 	    .authenticationProvider(getCustomResourceAuthenticationProvider());
 
+	}		
+	
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
 	}	
 	
 	
@@ -75,28 +84,28 @@ public class SecurityConfig {
     	
     }    
     
-    @Configuration
-    @Order(20)
-	public static class OAuthSecurityConfig1 extends WebSecurityConfigurerAdapter {
-    	
-        @Bean(name="resourceFilter")
-        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
-        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
-        	rf.setAuthenticationManager(authenticationManager());
-        	rf.setTokenExtractor(new CustomTokenExtractor());
-        	rf.setStateless(false);
-        	return rf;
-        }    	
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-    		http.antMatcher("/gamification/freetracking/**").authorizeRequests().antMatchers("/gamification/freetracking/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	    		
-    	}        	
-    }    
+//    @Configuration
+//    @Order(20)
+//	public static class OAuthSecurityConfig1 extends WebSecurityConfigurerAdapter {
+//    	
+//        @Bean(name="resourceFilter")
+//        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+//        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+//        	rf.setAuthenticationManager(authenticationManager());
+//        	rf.setTokenExtractor(new CustomTokenExtractor());
+//        	rf.setStateless(false);
+//        	return rf;
+//        }    	
+//    	
+//    	@Override
+//    	public void configure(HttpSecurity http) throws Exception {
+//    		http.csrf().disable();
+//    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//
+//    		http.antMatcher("/gamification/freetracking/**").authorizeRequests().antMatchers("/gamification/freetracking/**").fullyAuthenticated().and()
+//    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	    		
+//    	}        	
+//    }    
     
     @Configuration
     @Order(21)
@@ -168,100 +177,100 @@ public class SecurityConfig {
     	}        	
     }          
     
-    @Configuration
-    @Order(24)
-	public static class OAuthSecurityConfig5 extends WebSecurityConfigurerAdapter {
-    	
-        @Bean(name="resourceFilter")
-        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
-        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
-        	rf.setAuthenticationManager(authenticationManager());
-        	rf.setTokenExtractor(new CustomTokenExtractor());
-        	rf.setStateless(false);
-        	return rf;
-        }        	
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    		
-    		http.antMatcher("/gamification/statistics/**").authorizeRequests().antMatchers("/gamification/statistics/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
-
-    	}        	
-    }     
+//    @Configuration
+//    @Order(24)
+//	public static class OAuthSecurityConfig5 extends WebSecurityConfigurerAdapter {
+//    	
+//        @Bean(name="resourceFilter")
+//        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+//        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+//        	rf.setAuthenticationManager(authenticationManager());
+//        	rf.setTokenExtractor(new CustomTokenExtractor());
+//        	rf.setStateless(false);
+//        	return rf;
+//        }        	
+//    	
+//    	@Override
+//    	public void configure(HttpSecurity http) throws Exception {
+//    		http.csrf().disable();
+//    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//    		
+//    		http.antMatcher("/gamification/statistics/**").authorizeRequests().antMatchers("/gamification/statistics/**").fullyAuthenticated().and()
+//    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
+//
+//    	}        	
+//    }     
     
-    @Configuration
-    @Order(25)
-	public static class OAuthSecurityConfig6 extends WebSecurityConfigurerAdapter {
-    	
-        @Bean(name="resourceFilter")
-        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
-        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
-        	rf.setAuthenticationManager(authenticationManager());
-        	rf.setTokenExtractor(new CustomTokenExtractor());
-        	rf.setStateless(false);
-        	return rf;
-        }        	
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    		
-    		http.antMatcher("/diary/**").authorizeRequests().antMatchers("/diary/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
-
-    	}        	
-    }     
+//    @Configuration
+//    @Order(25)
+//	public static class OAuthSecurityConfig6 extends WebSecurityConfigurerAdapter {
+//    	
+//        @Bean(name="resourceFilter")
+//        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+//        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+//        	rf.setAuthenticationManager(authenticationManager());
+//        	rf.setTokenExtractor(new CustomTokenExtractor());
+//        	rf.setStateless(false);
+//        	return rf;
+//        }        	
+//    	
+//    	@Override
+//    	public void configure(HttpSecurity http) throws Exception {
+//    		http.csrf().disable();
+//    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//    		
+//    		http.antMatcher("/diary/**").authorizeRequests().antMatchers("/diary/**").fullyAuthenticated().and()
+//    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	
+//
+//    	}        	
+//    }     
     
     
-    @Configuration
-    @Order(26)
-	public static class OAuthSecurityConfig7 extends WebSecurityConfigurerAdapter {
-    	
-        @Bean(name="resourceFilter")
-        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
-        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
-        	rf.setAuthenticationManager(authenticationManager());
-        	rf.setTokenExtractor(new CustomTokenExtractor());
-        	rf.setStateless(false);
-        	return rf;
-        }      	
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    		
-    		http.antMatcher("/gamification/temporary/**").authorizeRequests().antMatchers("/gamification/temporary/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
-    	}        	
-    }    
+//    @Configuration
+//    @Order(26)
+//	public static class OAuthSecurityConfig7 extends WebSecurityConfigurerAdapter {
+//    	
+//        @Bean(name="resourceFilter")
+//        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+//        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+//        	rf.setAuthenticationManager(authenticationManager());
+//        	rf.setTokenExtractor(new CustomTokenExtractor());
+//        	rf.setStateless(false);
+//        	return rf;
+//        }      	
+//    	
+//    	@Override
+//    	public void configure(HttpSecurity http) throws Exception {
+//    		http.csrf().disable();
+//    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//    		
+//    		http.antMatcher("/gamification/temporary/**").authorizeRequests().antMatchers("/gamification/temporary/**").fullyAuthenticated().and()
+//    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
+//    	}        	
+//    }    
     
-    @Configuration
-    @Order(27)
-	public static class OAuthSecurityConfig8 extends WebSecurityConfigurerAdapter {
-    	
-        @Bean(name="resourceFilter")
-        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
-        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
-        	rf.setAuthenticationManager(authenticationManager());
-        	rf.setTokenExtractor(new CustomTokenExtractor());
-        	rf.setStateless(false);
-        	return rf;
-        }      	
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http.csrf().disable();
-    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    		
-    		http.antMatcher("/gamification/geolocations/**").authorizeRequests().antMatchers("/gamification/geolocations/**").fullyAuthenticated().and()
-    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
-    	}        	
-    }        
+//    @Configuration
+//    @Order(27)
+//	public static class OAuthSecurityConfig8 extends WebSecurityConfigurerAdapter {
+//    	
+//        @Bean(name="resourceFilter")
+//        public OAuth2AuthenticationProcessingFilter getResourceFilter() throws Exception {
+//        	OAuth2AuthenticationProcessingFilter rf = new OAuth2AuthenticationProcessingFilter();
+//        	rf.setAuthenticationManager(authenticationManager());
+//        	rf.setTokenExtractor(new CustomTokenExtractor());
+//        	rf.setStateless(false);
+//        	return rf;
+//        }      	
+//    	
+//    	@Override
+//    	public void configure(HttpSecurity http) throws Exception {
+//    		http.csrf().disable();
+//    		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//    		
+//    		http.antMatcher("/gamification/geolocations/**").authorizeRequests().antMatchers("/gamification/geolocations/**").fullyAuthenticated().and()
+//    		.addFilterBefore(getResourceFilter(), RequestHeaderAuthenticationFilter.class);	     		
+//    	}        	
+//    }        
     
     
     @Configuration

@@ -27,10 +27,10 @@ public class TokenHelper extends RemoteConnector {
 	@Value("${aacURL}")
 	private String aacURL;
 	@Autowired
-	@Value("${smartcampus.clientId}")
+	@Value("${mobility.clientId}")
 	private String clientId;
 	@Autowired
-	@Value("${smartcampus.clientSecret}")
+	@Value("${mobility.clientSecret}")
 	private String clientSecret;
 
 	private AACService aacService;

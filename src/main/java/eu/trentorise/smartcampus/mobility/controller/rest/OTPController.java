@@ -25,15 +25,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.io.ByteStreams;
 
@@ -45,10 +45,10 @@ import eu.trentorise.smartcampus.network.JsonUtils;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.TransitTimeTable;
 
-@Controller
+@RestController
 public class OTPController  {
 
-	private Logger logger = Logger.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private SmartPlannerHelper smartPlannerHelper;
@@ -65,7 +65,7 @@ public class OTPController  {
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static final int DAY = 1000*60*60*24-1;
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getroutes/{agencyId}")
+	@GetMapping("/getroutes/{agencyId}")
 	public @ResponseBody
 	void getRoutes(HttpServletResponse response, @PathVariable String agencyId) throws Exception{
 		try {
@@ -85,7 +85,7 @@ public class OTPController  {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getstops/{agencyId}/{routeId}")
+	@GetMapping("/getstops/{agencyId}/{routeId}")
 	public @ResponseBody
 	void getStops(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId) throws Exception{
 		try {
@@ -104,7 +104,7 @@ public class OTPController  {
 		}
 	}	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getstops/{agencyId}/{routeId}/{latitude}/{longitude}/{radius:.+}")
+	@GetMapping("/getstops/{agencyId}/{routeId}/{latitude}/{longitude}/{radius:.+}")
 	public @ResponseBody
 	void getStops(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable double latitude, @PathVariable double longitude, @PathVariable double radius) throws Exception {
 		try {
@@ -123,7 +123,7 @@ public class OTPController  {
 		}
 	}			
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/geostops/{agencyId}")
+	@GetMapping("/geostops/{agencyId}")
 	public @ResponseBody
 	List<Stop> getGeolocalizedStops(
 			HttpServletRequest request, 
@@ -152,7 +152,7 @@ public class OTPController  {
 	
 	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettimetable/{agencyId}/{routeId}/{stopId:.*}")
+	@GetMapping("/gettimetable/{agencyId}/{routeId}/{stopId:.*}")
 	public @ResponseBody
 	void getTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable String stopId) throws Exception{
 		try {
@@ -171,7 +171,7 @@ public class OTPController  {
 		}
 	}	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getlimitedtimetable/{agencyId}/{stopId}/{maxResults:.*}")
+	@GetMapping("/getlimitedtimetable/{agencyId}/{stopId}/{maxResults:.*}")
 	public @ResponseBody
 	void getLimitedTimeTable(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String stopId, @PathVariable Integer maxResults) throws Exception{
 		try {
@@ -188,7 +188,7 @@ public class OTPController  {
 		}
 	}		
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettransittimes/{agencyId}/{routeId}/{from}/{to}")
+	@GetMapping("/gettransittimes/{agencyId}/{routeId}/{from}/{to}")
 	public @ResponseBody
 	void getTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
@@ -205,7 +205,7 @@ public class OTPController  {
 		}
 	}		
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettransittimes/{agencyId}/{routeId}/{from}/{to}/extended")
+	@GetMapping("/gettransittimes/{agencyId}/{routeId}/{from}/{to}/extended")
 	public @ResponseBody
 	void getExtendedTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
@@ -223,7 +223,7 @@ public class OTPController  {
 	}	
 	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/timetable/{agencyId}/{routeId}")
+	@GetMapping("/timetable/{agencyId}/{routeId}")
 	public @ResponseBody
 	void getTodayTransitTimes(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId)  {
 		try {
@@ -242,7 +242,7 @@ public class OTPController  {
 		}
 	}			
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/gettransitdelays/{agencyId}/{routeId}/{from}/{to}")
+	@GetMapping("/gettransitdelays/{agencyId}/{routeId}/{from}/{to}")
 	public @ResponseBody
 	void getTransitDelays(HttpServletResponse response, @PathVariable String agencyId, @PathVariable String routeId, @PathVariable Long from, @PathVariable Long to)  {
 		try {
@@ -263,7 +263,7 @@ public class OTPController  {
 
 	// /////////////////////////////////////////////////////////////////////////////
 	
-		@RequestMapping(method = RequestMethod.GET, value = "/getparkingsbyagency/{agencyId}")
+		@GetMapping("/getparkingsbyagency/{agencyId}")
 		public @ResponseBody
 		void getParkingsByAgency(HttpServletResponse response, @PathVariable String agencyId) throws Exception {
 			try {
@@ -284,7 +284,7 @@ public class OTPController  {
 			}
 		}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/bikesharing/{comune}")
+	@GetMapping("/bikesharing/{comune}")
 	public @ResponseBody
 	void bikeSharingByComune(HttpServletResponse response, @PathVariable String comune) throws Exception {
 		response.setContentType("application/json; charset=utf-8");
@@ -295,7 +295,7 @@ public class OTPController  {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/getbikesharingbyagency/{agencyId}")
+	@GetMapping("/getbikesharingbyagency/{agencyId}")
 		public @ResponseBody
 		void getBikeSharingByAgency(HttpServletRequest request, HttpServletResponse response, HttpSession session, @PathVariable String agencyId) throws Exception {
 			try {
@@ -314,7 +314,7 @@ public class OTPController  {
 			}
 		}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/getroadinfobyagency/{agencyId}/{from}/{to}")
+	@GetMapping("/getroadinfobyagency/{agencyId}/{from}/{to}")
 		public @ResponseBody
 		void getRoadInfoByAgency(HttpServletResponse response, @PathVariable String agencyId, @PathVariable Long from, @PathVariable Long to) throws Exception {
 			try {
@@ -334,7 +334,7 @@ public class OTPController  {
 			}
 		}	
 
-	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/{latitude}/{longitude}/{radius}")
+	@GetMapping("/getTaxiStation/{latitude}/{longitude}/{radius}")
 	public @ResponseBody void getTaxiStations(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, @PathVariable double latitude, @PathVariable double longitude,
 			@PathVariable double radius) throws Exception {
@@ -350,7 +350,7 @@ public class OTPController  {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/")
+	@GetMapping("/getTaxiStation/")
 	public @ResponseBody void getAllTaxiStations(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws Exception {
 		try {
@@ -365,7 +365,7 @@ public class OTPController  {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
-	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiStation/{agencyId:.*}")
+	@GetMapping("/getTaxiStation/{agencyId:.*}")
 	public @ResponseBody void getAgencyTaxiStations(@PathVariable String agencyId, HttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws Exception {
 		try {
@@ -381,7 +381,7 @@ public class OTPController  {
 	}
 	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiAgencyContacts/")
+	@GetMapping("/getTaxiAgencyContacts/")
 	public @ResponseBody void getTaxiAgencyContacts(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws Exception {
 		try {
@@ -396,7 +396,7 @@ public class OTPController  {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
-	@RequestMapping(method = RequestMethod.GET, value = "/getTaxiAgencyContacts/{agencyId:.*}")
+	@GetMapping("/getTaxiAgencyContacts/{agencyId:.*}")
 	public @ResponseBody void getTaxiAgencyContacts(@PathVariable String agencyId, HttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws Exception {
 		try {
@@ -410,7 +410,7 @@ public class OTPController  {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}	
-  	@RequestMapping(method = RequestMethod.GET, value = "/gtfs/{agencyId}", produces = "application/zip")
+  	@GetMapping(value = "/gtfs/{agencyId}", produces = "application/zip")
   	public @ResponseBody
   	void getGTFS(HttpServletRequest request, HttpServletResponse response, HttpSession session,  @PathVariable String agencyId) {
   		try {

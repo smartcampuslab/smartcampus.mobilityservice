@@ -15,6 +15,12 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
@@ -22,14 +28,9 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 public class AlertUpdater {
 	
-	static Logger log = Logger.getLogger(AlertUpdater.class);
+	static Logger log = LoggerFactory.getLogger(AlertUpdater.class);
 
 	public static RecurrentAlertsSent updateAlerts(Alert alert, RecurrentAlertsSent alerts) {
 		if (alerts == null) {

@@ -19,11 +19,9 @@ import org.springframework.stereotype.Component;
 import com.mongodb.BasicDBObject;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
-import eu.trentorise.smartcampus.mobility.gamification.model.PlanObject;
-import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
-import eu.trentorise.smartcampus.mobility.gamification.model.TrackedInstance;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
+import eu.trentorise.smartcampus.mobility.model.PlanObject;
 import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertsSent;
 import eu.trentorise.smartcampus.network.JsonUtils;
@@ -66,12 +64,6 @@ public class DomainStorage {
 		if (cls == Geolocation.class) {
 			return GEOLOCATIONS;
 		}
-		if (cls == TrackedInstance.class) {
-			return TRACKED;
-		}	
-		if (cls == SavedTrip.class) {
-			return SAVED;
-		}	
 		if (cls == CompilablePolicyData.class) {
 			return COMPILED_POLICY;
 		}		
@@ -91,7 +83,7 @@ public class DomainStorage {
 	public void deleteItinerary(String clientdId) {
 		BasicDBObject query = new BasicDBObject();
 		query.put("clientId", clientdId);
-		template.getCollection(ITINERARY).remove(query);
+		template.getCollection(ITINERARY).deleteOne(query);
 	}		
 	
 	public void saveRecurrent(RecurrentJourneyObject io) {
@@ -104,7 +96,7 @@ public class DomainStorage {
 	public void deleteRecurrent(String clientdId) {
 		BasicDBObject query = new BasicDBObject();
 		query.put("clientId", clientdId);
-		template.getCollection(RECURRENT).remove(query);		
+		template.getCollection(RECURRENT).deleteOne(query);		
 	}		
 	
 	public AlertsSent getAlertsSent() {
@@ -173,68 +165,6 @@ public class DomainStorage {
 		}
 	}
 	
-	public void deleteTrackedInstance(TrackedInstance tracked) {
-		Query query = new Query(
-				new Criteria("clientId").is(tracked.getClientId())
-				.and("day").is(tracked.getDay())
-				.and("userId").is(tracked.getUserId()));
-		TrackedInstance trackedDB = searchDomainObject(query, TrackedInstance.class);
-		template.remove(query, TrackedInstance.class, TRACKED);
-	}
-	
-	public void saveTrackedInstance(TrackedInstance tracked) {
-		Query query = new Query(
-				new Criteria("clientId").is(tracked.getClientId())
-				.and("day").is(tracked.getDay())
-				.and("userId").is(tracked.getUserId()));
-		TrackedInstance trackedDB = searchDomainObject(query, TrackedInstance.class);
-		if (trackedDB == null) {
-			template.save(tracked, TRACKED);
-		} else {
-			Update update = new Update();
-			if (tracked.getItinerary() != null) {
-				update.set("itinerary", tracked.getItinerary());
-			}
-			if (tracked.getGeolocationEvents() != null && !tracked.getGeolocationEvents().isEmpty()) {
-				update.set("geolocationEvents", tracked.getGeolocationEvents());
-			}
-
-			if (tracked.getStarted() != null) {
-				update.set("started", tracked.getStarted());
-			}
-			if (tracked.getComplete() != null) {
-				update.set("complete", tracked.getComplete());
-			}
-			if (tracked.getValidationResult() != null) {
-				update.set("validationResult", tracked.getValidationResult());
-			}	
-			if (tracked.getScore() != null) {
-				update.set("score", tracked.getScore());
-			}
-			if (tracked.getDeviceInfo() != null && !tracked.getDeviceInfo().isEmpty()) {
-				update.set("deviceInfo", tracked.getDeviceInfo());
-			}
-			update.set("changedValidity", tracked.getChangedValidity());
-			update.set("scoreStatus", tracked.getScoreStatus());
-			if (tracked.getApproved() != null) {
-				update.set("approved", tracked.getApproved());
-			}
-			if (tracked.getOverriddenDistances() != null) {
-				update.set("overriddenDistances", tracked.getOverriddenDistances());
-				
-			}
-			update.set("toCheck", tracked.getToCheck());
-			update.set("appId", tracked.getAppId());
-			update.set("multimodalId", tracked.getMultimodalId());
-			
-			template.updateFirst(query, update, TRACKED);
-		}
-	}
-	
-	public void saveSavedTrips(SavedTrip savedTrip) {
-		template.save(savedTrip, SAVED);
-	}
-	
 	public void savePolicy(CompilablePolicyData policy) {
 		Query query = new Query(new Criteria("name").is(policy.getName()));
 		CompilablePolicyData policiesDB = searchDomainObject(query, CompilablePolicyData.class);
@@ -283,7 +213,7 @@ public class DomainStorage {
 	public void deleteRouteMonitoring(String clientdId) {
 		BasicDBObject query = new BasicDBObject();
 		query.put("clientId", clientdId);
-		template.getCollection(MONITORING).remove(query);
+		template.getCollection(MONITORING).deleteOne(query);
 	}	
 	
 	public Geolocation getLastGeolocationByUserId(String userId) {

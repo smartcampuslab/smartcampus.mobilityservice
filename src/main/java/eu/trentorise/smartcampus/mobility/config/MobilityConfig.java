@@ -1,21 +1,12 @@
 package eu.trentorise.smartcampus.mobility.config;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -29,20 +20,16 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import org.thymeleaf.templateresolver.FileTemplateResolver;
 
-import com.google.common.io.Resources;
+import com.google.common.collect.Maps;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 
@@ -51,10 +38,6 @@ import eu.trentorise.smartcampus.mobility.controller.extensions.NewTrentoPlannin
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.RoveretoPlanningPolicy;
 import eu.trentorise.smartcampus.mobility.controller.extensions.TrentoPlanningPolicy;
-import eu.trentorise.smartcampus.mobility.security.AppInfo;
-import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameInfo;
-import eu.trentorise.smartcampus.mobility.security.GameSetup;
 
 @Configuration
 @EnableWebMvc
@@ -63,7 +46,7 @@ import eu.trentorise.smartcampus.mobility.security.GameSetup;
 @EnableAsync
 @EnableScheduling
 @Order(value = 0)
-public class MobilityConfig extends WebMvcConfigurerAdapter {
+public class MobilityConfig implements WebMvcConfigurer {
 
 	
 	private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
@@ -73,25 +56,6 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Value("${statlogging.dbname}")
 	private String logDB;
 	
-	@Value("${mail.host}")
-	private String host;
-	@Value("${mail.port}")
-	private String port;
-	@Value("${mail.protocol}")
-	private String protocol;
-	@Value("${mail.username}")
-	private String username;
-	@Value("${mail.password}")
-	private String password;	
-	
-//	@Value("${imagesDir}")
-//	private String imagesDir;		
-
-	@Autowired
-	private AppSetup appSetup;
-	
-	@Autowired
-	private GameSetup gameSetup;		
 	
 	public MobilityConfig() {
 		super();
@@ -100,22 +64,6 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
-	}
-	
-	@Bean
-	public JavaMailSender getJavaMailSender() throws IOException {
-		JavaMailSenderImpl sender = new JavaMailSenderImpl();
-		sender.setHost(host);
-		sender.setPort(Integer.parseInt(port));
-		sender.setProtocol(protocol);
-		sender.setUsername(username);
-		sender.setPassword(password);
-		
-		Properties props = new Properties();
-		props.load(Resources.asByteSource(Resources.getResource("javamail.properties")).openBufferedStream());
-		
-		sender.setJavaMailProperties(props);
-		return sender;
 	}
 	
 	@Bean
@@ -146,8 +94,14 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 	
 	@Bean(name = "basicPoliciesMap")
 	public Map<String, PlanningPolicy> getBasicPoliciesMap() {
-		return ArrayUtils.toMap(new Object[][] { { "default", new TrentoPlanningPolicy() }, { "Dummy", new DummyPlanningPolicy() }, { "Nessuna", new DummyPlanningPolicy() },
-				{ "Trento", new TrentoPlanningPolicy() }, { "Rovereto", new RoveretoPlanningPolicy() }, { "New Trento", new NewTrentoPlanningPolicy() }, });
+		Map<String, PlanningPolicy> result = Maps.newTreeMap();
+		result.put("default", new TrentoPlanningPolicy() );
+		result.put( "Dummy", new DummyPlanningPolicy());
+		result.put("Nessuna", new DummyPlanningPolicy() );
+		result.put("Trento", new TrentoPlanningPolicy() );
+		result.put( "Rovereto", new RoveretoPlanningPolicy());
+		result.put( "New Trento", new NewTrentoPlanningPolicy());
+		return result;
 	}
 
 	@Bean(name = "messageSource")
@@ -179,17 +133,17 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 		registry.addMapping("/**").allowedMethods("PUT", "DELETE", "GET", "POST").allowedOrigins("*");
 	} 	 
 	
-	@Bean
-	public FileTemplateResolver  svgTemplateResolver() {
-		FileTemplateResolver  svgTemplateResolver = new FileTemplateResolver ();
-		svgTemplateResolver.setPrefix("/public/images/gamification/");
-		svgTemplateResolver.setSuffix(".svg");
-		svgTemplateResolver.setTemplateMode("XML");
-		svgTemplateResolver.setCharacterEncoding("UTF-8");
-		svgTemplateResolver.setOrder(0);
-
-		return svgTemplateResolver;
-	}	
+//	@Bean
+//	public FileTemplateResolver  svgTemplateResolver() {
+//		FileTemplateResolver  svgTemplateResolver = new FileTemplateResolver ();
+//		svgTemplateResolver.setPrefix("/public/images/gamification/");
+//		svgTemplateResolver.setSuffix(".svg");
+//		svgTemplateResolver.setTemplateMode("XML");
+//		svgTemplateResolver.setCharacterEncoding("UTF-8");
+//		svgTemplateResolver.setOrder(0);
+//
+//		return svgTemplateResolver;
+//	}	
 	 
 	@Bean
 	public LocaleResolver localeResolver()
@@ -207,32 +161,33 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
         return messageSource;
     }
 	
-	@Bean
-	public OncePerRequestFilter noContentFilter() {
-		return new CheckHeaderFilter();
-	}		
-	
-	private class CheckHeaderFilter extends OncePerRequestFilter {
-
-		@Override
-		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-			String appId = request.getHeader("appId");
-			if (appId != null && !appId.isEmpty()) {
-				AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
-				if (app == null) {
-					response.sendError(HttpServletResponse.SC_FORBIDDEN);
-				} else if (app.getGameId() != null) {
-					GameInfo game = gameSetup.findGameById(app.getGameId());
-					if (game == null || game.getSend() == null || !game.getSend()) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-					}
-				}
-			}
-
-			filterChain.doFilter(request, response);
-		}
-	}
+//	@Bean
+//	public OncePerRequestFilter noContentFilter() {
+//		return new CheckHeaderFilter();
+//	}		
+//	
+//	
+//	private class CheckHeaderFilter extends OncePerRequestFilter {
+//
+//		@Override
+//		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//
+//			String appId = request.getHeader("appId");
+//			if (appId != null && !appId.isEmpty()) {
+//				AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
+//				if (app == null) {
+//					response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//				} else if (app.getGameId() != null) {
+//					GameInfo game = gameSetup.findGameById(app.getGameId());
+//					if (game == null || game.getSend() == null || !game.getSend()) {
+//						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//					}
+//				}
+//			}
+//
+//			filterChain.doFilter(request, response);
+//		}
+//	}
 	
 	
 }

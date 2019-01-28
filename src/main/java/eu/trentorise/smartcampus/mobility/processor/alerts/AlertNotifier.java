@@ -16,12 +16,12 @@
 
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
+import eu.trentorise.smartcampus.mobility.model.Announcement;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertDelay;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
-import eu.trentorise.smartcampus.mobility.model.Announcement;
 
 /**
  * @author raman

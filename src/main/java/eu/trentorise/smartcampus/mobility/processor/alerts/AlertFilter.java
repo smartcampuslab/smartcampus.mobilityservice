@@ -15,6 +15,11 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.processor.alerts;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.StopId;
@@ -27,17 +32,13 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertRoad;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertStrike;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
 
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 public class AlertFilter {
 	
 	private static final int SLOT_TRESHOLD = 3;
 	private static final int VEHICLE_TRESHOLD = 3;
 
 	private static final long THRESHOLD = 1000 * 60 * 5;
-	static Logger log = Logger.getLogger(AlertFilter.class);
+	static Logger log = LoggerFactory.getLogger(AlertFilter.class);
 
 	public static boolean filterDelay(Itinerary itinerary, AlertDelay alert) {
 		if (itinerary == null) {

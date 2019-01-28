@@ -3,7 +3,7 @@ package eu.trentorise.smartcampus.mobility.util;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

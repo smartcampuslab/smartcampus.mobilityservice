@@ -1,8 +1,8 @@
 package eu.trentorise.smartcampus.mobility.controller.extensions.compilable;
 
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 import it.sayservice.platform.smartplanner.data.message.RType;
 import it.sayservice.platform.smartplanner.data.message.TType;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
 
 public class PolicyAction {
 

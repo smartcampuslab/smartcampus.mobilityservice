@@ -14,7 +14,7 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package eu.trentorise.smartcampus.mobility.gamification.model;
+package eu.trentorise.smartcampus.mobility.model;
 
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 

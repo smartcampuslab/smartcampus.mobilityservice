@@ -15,9 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
-import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
-import it.sayservice.platform.smartplanner.data.message.otpbeans.CompressedTransitTimeTable;
-
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +38,8 @@ import com.google.common.io.ByteStreams;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
+import it.sayservice.platform.smartplanner.data.message.cache.CacheUpdateResponse;
+import it.sayservice.platform.smartplanner.data.message.otpbeans.CompressedTransitTimeTable;
 
 @Controller
 public class CacheController {

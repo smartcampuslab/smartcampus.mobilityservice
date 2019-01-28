@@ -21,8 +21,8 @@ import com.google.common.collect.Sets;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.ItinerariesAnalysis;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest;
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningResultGroup;
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningRequest.SmartplannerParameter;
 import eu.trentorise.smartcampus.mobility.controller.rest.ItinerarySorter;
 
 public class PlanningPolicyHelper {

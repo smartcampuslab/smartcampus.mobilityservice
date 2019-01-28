@@ -25,26 +25,27 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 
-import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
-import eu.trentorise.smartcampus.mobility.gamification.model.SavedTrip;
 import eu.trentorise.smartcampus.mobility.logging.StatLogger;
 import eu.trentorise.smartcampus.mobility.model.BasicItinerary;
 import eu.trentorise.smartcampus.mobility.model.BasicRecurrentJourney;
@@ -70,15 +71,13 @@ import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourneyParameters;
 import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 
-@Controller
+
+@RestController
 public class JourneyPlannerController {
 
 	@Autowired
 	private StatLogger statLogger;
-	private Logger logger = Logger.getLogger(this.getClass());
-
-	@Autowired
-	private GamificationValidator gamificationValidator;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private DomainStorage domainStorage;
@@ -94,8 +93,13 @@ public class JourneyPlannerController {
 		mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
+	@GetMapping("/searchItineraryObject")
+	public @ResponseBody ItineraryObject searchItineraryObject(@RequestBody Map<String, Object> pars) {
+		return domainStorage.searchDomainObject(pars, ItineraryObject.class);
+	}
+	
 	// no crud
-	@RequestMapping(method = RequestMethod.POST, value = "/plansinglejourney")
+	@PostMapping("/plansinglejourney")
 	public @ResponseBody List<Itinerary> planSingleJourney(HttpServletResponse response, @RequestBody(required=false) SingleJourney journeyRequest, @RequestParam(required = false, defaultValue="default") String policyId,
 			@RequestHeader(required = false, value = "UserID") String userId, @RequestHeader(required = false, value = "AppName") String appName) throws Exception {
 		try {
@@ -106,9 +110,7 @@ public class JourneyPlannerController {
 			logger.debug("-" + userId + "~AppConsume~plan");
 
 			List<Itinerary> results = smartPlannerHelper.planSingleJourney(journeyRequest, policyId);
-			for (Itinerary itinerary : results) {
-				gamificationValidator.computeEstimatedGameScore(appName, itinerary, null, false);
-			}
+			
 			return results;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,7 +120,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/itinerary")
+	@PostMapping("/itinerary")
 	public @ResponseBody BasicItinerary saveItinerary(HttpServletResponse response, @RequestBody(required=false) BasicItinerary itinerary) throws Exception {
 		try {
 			String userId = getUserId();
@@ -131,6 +133,7 @@ public class JourneyPlannerController {
 
 			String clientId = itinerary.getClientId();
 
+			String id = null;
 			if (clientId == null) {
 				clientId = new ObjectId().toString();
 			} else {
@@ -138,7 +141,10 @@ public class JourneyPlannerController {
 				pars.put("clientId", clientId);
 				ItineraryObject res = domainStorage.searchDomainObject(pars, ItineraryObject.class);
 
-				if (res != null && !userId.equals(res.getUserId())) {
+				if (res != null) {
+					id = res.getId();
+				}
+				if (!userId.equals(res.getUserId())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					return null;
 				}
@@ -146,6 +152,9 @@ public class JourneyPlannerController {
 
 			ItineraryObject io = new ItineraryObject();
 
+			if (id != null) {
+				io.setId(id);
+			}
 			io.setClientId(clientId);
 			io.setUserId(userId);
 			io.setOriginalFrom(itinerary.getOriginalFrom());
@@ -161,9 +170,6 @@ public class JourneyPlannerController {
 
 			domainStorage.saveItinerary(io);
 
-			SavedTrip st = new SavedTrip(new Date(), io, RequestMethod.POST.toString());
-			domainStorage.saveSavedTrips(st);
-
 			itinerary.setClientId(clientId);
 			return itinerary;
 		} catch (Exception e) {
@@ -173,8 +179,8 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/itinerary/{itineraryId}")
-	public @ResponseBody Boolean updateItinerary(HttpServletResponse response, @RequestBody(required=false) BasicItinerary itinerary, @PathVariable String itineraryId) throws Exception {
+	@PutMapping("/itinerary/{itineraryId}")
+	public @ResponseBody ItineraryObject updateItinerary(HttpServletResponse response, @RequestBody(required=false) BasicItinerary itinerary, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -214,10 +220,7 @@ public class JourneyPlannerController {
 
 				domainStorage.saveItinerary(res);
 
-				SavedTrip st = new SavedTrip(new Date(), res, RequestMethod.PUT.toString());
-				domainStorage.saveSavedTrips(st);
-
-				return true;
+				return res;
 			} else {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			}
@@ -228,7 +231,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/itinerary")
+	@GetMapping("/itinerary")
 	public @ResponseBody List<ItineraryObject> getItineraries(HttpServletResponse response) throws Exception {
 		try {
 			String userId = getUserId();
@@ -249,7 +252,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}")
+	@GetMapping("/itinerary/{itineraryId}")
 	public @ResponseBody BasicItinerary getItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -280,7 +283,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, value = "/itinerary/{itineraryId}")
+	@DeleteMapping("/itinerary/{itineraryId}")
 	public @ResponseBody Boolean deleteItinerary(HttpServletResponse response, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -305,9 +308,6 @@ public class JourneyPlannerController {
 
 			domainStorage.deleteItinerary(itineraryId);
 
-			SavedTrip st = new SavedTrip(new Date(), res, RequestMethod.DELETE.toString());
-			domainStorage.saveSavedTrips(st);
-
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -316,7 +316,7 @@ public class JourneyPlannerController {
 		return false;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/itinerary/{itineraryId}/monitor/{monitor}")
+	@GetMapping("/itinerary/{itineraryId}/monitor/{monitor}")
 	public @ResponseBody Boolean monitorItinerary(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws Exception {
 		try {
 			String userId = getUserId();
@@ -353,7 +353,7 @@ public class JourneyPlannerController {
 
 	// RECURRENT
 
-	@RequestMapping(method = RequestMethod.POST, value = "/planrecurrent")
+	@PostMapping("/planrecurrent")
 	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) RecurrentJourneyParameters parameters) throws Exception {
 		try {
 			return smartPlannerHelper.planRecurrent(parameters);
@@ -367,7 +367,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/recurrent")
+	@PostMapping("/recurrent")
 	public @ResponseBody BasicRecurrentJourney saveRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) BasicRecurrentJourney recurrent) throws Exception {
 		try {
 			String userId = getUserId();
@@ -415,7 +415,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/recurrent/replan/{itineraryId}")
+	@PostMapping("/recurrent/replan/{itineraryId}")
 	public @ResponseBody RecurrentJourney planRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) RecurrentJourneyParameters parameters, @PathVariable String itineraryId)
 			throws Exception {
 		try {
@@ -451,7 +451,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/recurrent/{itineraryId}")
+	@PutMapping("/recurrent/{itineraryId}")
 	public @ResponseBody Boolean updateRecurrentJourney(HttpServletResponse response, @RequestBody(required=false) BasicRecurrentJourney recurrent, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -496,7 +496,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/recurrent")
+	@GetMapping("/recurrent")
 	public @ResponseBody List<RecurrentJourneyObject> getRecurrentJourneys(HttpServletResponse response) throws Exception {
 		try {
 			String userId = getUserId();
@@ -518,7 +518,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}")
+	@GetMapping("/recurrent/{itineraryId}")
 	public @ResponseBody RecurrentJourneyObject getRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -550,7 +550,7 @@ public class JourneyPlannerController {
 		return null;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, value = "/recurrent/{itineraryId}")
+	@DeleteMapping("/recurrent/{itineraryId}")
 	public @ResponseBody Boolean deleteRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -582,7 +582,7 @@ public class JourneyPlannerController {
 		return false;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/recurrent/{itineraryId}/monitor/{monitor}")
+	@GetMapping("/recurrent/{itineraryId}/monitor/{monitor}")
 	public @ResponseBody Boolean monitorRecurrentJourney(HttpServletResponse response, @PathVariable String itineraryId, @PathVariable boolean monitor) throws Exception {
 		try {
 			String userId = getUserId();
@@ -618,7 +618,7 @@ public class JourneyPlannerController {
 	// ALERTS
 
 	// no crud
-	@RequestMapping(method = RequestMethod.POST, value = "/alert/user")
+	@PostMapping( "/alert/user")
 	public @ResponseBody void submitUserAlert(HttpServletResponse response, @RequestBody(required=false) Map<String, Object> map) throws Exception {
 		try {
 			String userId = getUserId();
@@ -645,7 +645,7 @@ public class JourneyPlannerController {
 //		}
 //	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/monitorroute")
+	@PostMapping("/monitorroute")
 	public @ResponseBody RouteMonitoring saveMonitorRoutes(HttpServletResponse response, @RequestBody(required=false) RouteMonitoring req) throws Exception {
 		try {
 			String userId = getUserId();
@@ -682,7 +682,7 @@ public class JourneyPlannerController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.PUT, value = "/monitorroute/{clientId}")
+	@PutMapping("/monitorroute/{clientId}")
 	public @ResponseBody RouteMonitoring updateMonitorRoutes(HttpServletResponse response, @RequestBody(required=false) RouteMonitoring req, @PathVariable String clientId) throws Exception {
 		try {
 			String userId = getUserId();
@@ -722,7 +722,7 @@ public class JourneyPlannerController {
 	}	
 	
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/monitorroute")
+	@GetMapping("/monitorroute")
 	public @ResponseBody List<RouteMonitoring> getMonitorRoutes(HttpServletResponse response,  @RequestParam(required = false, value = "active") Boolean active) throws Exception {
 		try {
 			String userId = getUserId();
@@ -750,7 +750,7 @@ public class JourneyPlannerController {
 		}
 	}	
 	
-	@RequestMapping(method = RequestMethod.DELETE, value = "/monitorroute/{clientId}")
+	@DeleteMapping("/monitorroute/{clientId}")
 	public @ResponseBody Boolean deletetMonitorRoutes(HttpServletResponse response, @PathVariable String clientId) throws Exception {
 		try {
 			String userId = getUserId();
