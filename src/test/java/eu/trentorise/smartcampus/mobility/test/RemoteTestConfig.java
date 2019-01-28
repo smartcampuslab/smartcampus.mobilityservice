@@ -24,16 +24,13 @@ import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.gamification.GamificationValidator;
-import eu.trentorise.smartcampus.mobility.gamification.statistics.StatisticsBuilder;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
 import eu.trentorise.smartcampus.mobility.security.AppSetup;
-import eu.trentorise.smartcampus.mobility.security.GameSetup;
 import eu.trentorise.smartcampus.mobility.service.AlertSender;
 import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import eu.trentorise.smartcampus.mobility.storage.DomainStorage;
@@ -59,7 +56,7 @@ public class RemoteTestConfig {
 
 	@Bean(name="mongoTemplate")
 	public MongoTemplate getDomainMongo() throws UnknownHostException, MongoException {
-		return new MongoTemplate(new Mongo("127.0.0.1",17017), "mobility-domain");
+		return new MongoTemplate(new MongoClient("127.0.0.1",17017), "mobility-domain");
 	}
 	
 	@Bean
@@ -72,21 +69,8 @@ public class RemoteTestConfig {
 		return new AlertSender();
 	}
 	
-	@Bean 
-	StatisticsBuilder getStatBuilder(){
-		return new StatisticsBuilder();
-	}
-	
-	@Bean
-	GamificationValidator getValidator(){
-		return new GamificationValidator();
-	}
-	
 	@Bean AppSetup getAppSetup(){
 		return new AppSetup();
-	}
-	@Bean GameSetup getGameSetup(){
-		return new GameSetup();
 	}
 	@Bean
 	TokenHelper getTokenHelper() {

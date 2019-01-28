@@ -16,6 +16,22 @@
 
 package eu.trentorise.smartcampus.mobility.test;
 
+import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.core.MongoTemplate;
+
+import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
+
+import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
+import eu.trentorise.smartcampus.mobility.model.Announcement;
+import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
+import eu.trentorise.smartcampus.mobility.service.AlertSender;
+import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
 import it.sayservice.platform.smartplanner.data.message.alerts.Alert;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertAccident;
@@ -29,23 +45,6 @@ import it.sayservice.platform.smartplanner.data.message.journey.SingleJourney;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.BikeStation;
 import it.sayservice.platform.smartplanner.data.message.otpbeans.Stop;
 
-import java.io.InputStream;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-
-import eu.trentorise.smartcampus.mobility.controller.extensions.PlanningPolicy;
-import eu.trentorise.smartcampus.mobility.model.Announcement;
-import eu.trentorise.smartcampus.mobility.processor.alerts.AlertNotifier;
-import eu.trentorise.smartcampus.mobility.service.AlertSender;
-import eu.trentorise.smartcampus.mobility.service.SmartPlannerHelper;
-
 /**
  * @author raman
  *
@@ -55,7 +54,7 @@ public class TestConfig {
 
 	@Bean(name="domainMongoTemplate")
 	public MongoTemplate getDomainMongo() throws UnknownHostException, MongoException {
-		return new MongoTemplate(new Mongo(), "test-mobility");
+		return new MongoTemplate(new MongoClient(), "test-mobility");
 	}
 	
 //	@Bean

@@ -16,8 +16,10 @@
 
 package eu.trentorise.smartcampus.mobility.test;
 
+import java.text.SimpleDateFormat;
+
+import eu.trentorise.smartcampus.network.JsonUtils;
 import it.sayservice.platform.smartplanner.data.message.Itinerary;
-import it.sayservice.platform.smartplanner.data.message.Leg;
 import it.sayservice.platform.smartplanner.data.message.Position;
 import it.sayservice.platform.smartplanner.data.message.StopId;
 import it.sayservice.platform.smartplanner.data.message.TType;
@@ -27,17 +29,6 @@ import it.sayservice.platform.smartplanner.data.message.alerts.AlertParking;
 import it.sayservice.platform.smartplanner.data.message.alerts.AlertType;
 import it.sayservice.platform.smartplanner.data.message.alerts.CreatorType;
 import it.sayservice.platform.smartplanner.data.message.journey.RecurrentJourney;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
-import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
-import eu.trentorise.smartcampus.mobility.util.GamificationHelper;
-import eu.trentorise.smartcampus.network.JsonUtils;
 
 /**
  * @author raman
@@ -227,53 +218,6 @@ public class ObjectCreator {
 		return delay;
 	}
 	
-	public static List<Geolocation> createSimpleGeolocations(ItineraryObject itinerary, double spaceError, long timeError) throws Exception {
-		List<Geolocation> result = Lists.newArrayList();
-		for (Leg leg: itinerary.getData().getLeg()) {
-			
-			
-			String activity = null;
-			TType tt = leg.getTransport().getType();
-			if (GamificationHelper.FAST_TRANSPORTS.contains(tt)) {
-				 activity = "in_vehicle";
-			} else if (tt.equals(TType.BICYCLE)) {
-				activity = "on_bicycle";
-			} else if (tt.equals(TType.WALK)) {
-				activity = "on_foot";
-			}
-//			} else {
-//				activity = "on_foot";
-//			}
-			
-			if (leg.getFrom() != null) {
-			Geolocation geolocation1 = new Geolocation();
-			geolocation1.setLatitude(spaceError + Double.parseDouble(leg.getFrom().getLat()));
-			geolocation1.setLongitude(spaceError + Double.parseDouble(leg.getFrom().getLon()));
-			geolocation1.setRecorded_at(new Date(leg.getStartime() + timeError));
-			geolocation1.setActivity_type(activity);
-			geolocation1.setActivity_confidence(100L);
-			result.add(geolocation1);
-			}
-			
-			if (leg.getTo() != null) {
-			Geolocation geolocation2 = new Geolocation();
-			geolocation2.setLatitude(spaceError + Double.parseDouble(leg.getTo().getLat()));
-			geolocation2.setLongitude(spaceError + Double.parseDouble(leg.getTo().getLon()));
-			geolocation2.setRecorded_at(new Date(leg.getStartime() + timeError));
-			geolocation2.setActivity_type(activity);
-			geolocation2.setActivity_confidence(100L);
-			result.add(geolocation2);
-			}
-		}
-		
-		for (Geolocation geolocation: result) {
-			geolocation.setRecorded_at(new Date());
-			geolocation.setUserId(itinerary.getUserId());
-			geolocation.setTravelId("Geolocations_Test");
-			Thread.sleep(10);
-		}
-		
-		return result;
-	}
+	
 
 }

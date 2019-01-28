@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
@@ -42,8 +42,8 @@ public class ConvertData {
 	
 	public ConvertData() throws UnknownHostException, MongoException {
 		super();
-		template = new MongoTemplate(new Mongo(), "smartsayback");
-		targetTemplate = new MongoTemplate(new Mongo(), "mobility-domain");
+		template = new MongoTemplate(new MongoClient(), "smartsayback");
+		targetTemplate = new MongoTemplate(new MongoClient(), "mobility-domain");
 	}
 
 
