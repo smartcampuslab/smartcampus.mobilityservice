@@ -370,8 +370,6 @@ public class ChallengeController {
 		
 		Map<String, Object> pars = Maps.newTreeMap();
 		pars.put("opponent", attendee.getName());
-		pars.put("rewardPercentage", reward.getPercentage());
-		pars.put("rewardThreshold", reward.getThreshold());
 		
 		if (invitation.getChallengeModelName().isCustomPrizes()) {
 			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
@@ -382,6 +380,9 @@ public class ChallengeController {
 			pars.put("challengerBonusScore", prizes.get(TargetPrizeChallengesCalculator.PLAYER2_PRZ));
 			pars.put("challengeTarget", prizes.get(TargetPrizeChallengesCalculator.TARGET));
 			pars.put("target", prizes.get(TargetPrizeChallengesCalculator.TARGET));
+		} else {
+			pars.put("rewardPercentage", reward.getPercentage());
+			pars.put("rewardThreshold", reward.getThreshold());
 		}
 		
 		String descr = challengeUtils.fillDescription(invitation.getChallengeModelName().toString(), invitation.getChallengePointConcept(), pars, player.getLanguage());
