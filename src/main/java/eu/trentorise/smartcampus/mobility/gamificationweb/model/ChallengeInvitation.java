@@ -155,17 +155,17 @@ public class ChallengeInvitation {
     }    
     
     public static class Reward {
-        private double percentage;
-        private double threshold;
+        private Double percentage;
+        private Double threshold;
         private Map<String, Double> bonusScore = new HashMap<>();
         private PointConceptRef calculationPointConcept;
         private PointConceptRef targetPointConcept;
 
-        public double getPercentage() {
+        public Double getPercentage() {
             return percentage;
         }
 
-        public void setPercentage(double percentage) {
+        public void setPercentage(Double percentage) {
             this.percentage = percentage;
         }
 
@@ -185,11 +185,11 @@ public class ChallengeInvitation {
             this.targetPointConcept = targetPointConcept;
         }
 
-        public double getThreshold() {
+        public Double getThreshold() {
             return threshold;
         }
 
-        public void setThreshold(double threshold) {
+        public void setThreshold(Double threshold) {
             this.threshold = threshold;
         }
 
