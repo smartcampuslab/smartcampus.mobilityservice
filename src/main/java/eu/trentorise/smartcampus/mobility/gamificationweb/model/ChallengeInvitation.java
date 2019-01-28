@@ -155,8 +155,8 @@ public class ChallengeInvitation {
     }    
     
     public static class Reward {
-        private Double percentage;
-        private Double threshold;
+        private Double percentage = null;
+        private Double threshold = null;
         private Map<String, Double> bonusScore = new HashMap<>();
         private PointConceptRef calculationPointConcept;
         private PointConceptRef targetPointConcept;
