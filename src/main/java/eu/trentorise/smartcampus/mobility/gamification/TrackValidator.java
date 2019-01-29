@@ -251,7 +251,7 @@ public class TrackValidator {
 			if (indexes.get(i) - indexes.get(i - 1) == 1 && start == -1) {
 				start = i - 1;
 			}
-			if (start != -1 && indexes.get(i) - indexes.get(i - 1) > 3) {
+			if (start != -1 && indexes.get(i) - indexes.get(i - 1) > 5) {
 				end = i - 1;
 			}
 			if (i == indexes.size() - 1 && start != -1) {
