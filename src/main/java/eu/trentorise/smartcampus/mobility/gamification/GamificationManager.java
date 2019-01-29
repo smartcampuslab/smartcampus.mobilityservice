@@ -119,6 +119,10 @@ public class GamificationManager {
 		}
 		return result;
 	}
+	
+	public boolean isTripExisting(String id) {
+		return publishQueue.contains(id);
+	}
 
 	public void removeIdFromQueue(String id) {
 		publishQueue.remove(id);

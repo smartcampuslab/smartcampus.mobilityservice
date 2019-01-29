@@ -311,7 +311,10 @@ public class GeolocationsProcessor {
 		if (res.getComplete() != null && res.getComplete()) {
 			logger.info("Skipping complete trip " + res.getId());
 			return null;
-		} else {
+		} else if (gamificationManager.isTripExisting(travelId)){
+			logger.info("Skipping already sent trip " + res.getId());
+			return null;
+		} else {			
 			if (geolocationsByItinerary.get(key) != null) {
 				logger.info("Adding " + geolocationsByItinerary.get(key).size() + " geolocations to existing " + res.getGeolocationEvents().size() + ".");
 				res.getGeolocationEvents().addAll(geolocationsByItinerary.get(key));
