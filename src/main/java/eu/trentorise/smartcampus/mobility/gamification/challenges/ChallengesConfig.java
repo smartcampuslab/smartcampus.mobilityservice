@@ -21,7 +21,7 @@ public class ChallengesConfig {
      */
 
     // Increase in the prize of the challenges
-    public static double competitiveChallengesBooster = 1;
+    public static double competitiveChallengesBooster = 1.1;
 
     public static String gLeaves = "green leaves";
 

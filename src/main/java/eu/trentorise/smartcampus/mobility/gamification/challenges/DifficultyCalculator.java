@@ -87,7 +87,7 @@ public class DifficultyCalculator {
 
     public int calculatePrize(Integer difficulty, double percent, String modeName) {
 
-        int y = 0;
+        int y;
         if (percent <= 0.1) {
             y = 0;
         } else if (percent <= 0.2) {
@@ -96,7 +96,7 @@ public class DifficultyCalculator {
             y = 2;
         } else if (percent <= 0.4) {
             y = 4;
-        } else if (percent <= 1) {
+        } else { // if (percent <= 1) {
             y = 9;
         }
 

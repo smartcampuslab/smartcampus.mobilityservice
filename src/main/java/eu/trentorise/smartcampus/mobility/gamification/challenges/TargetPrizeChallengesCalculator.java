@@ -115,6 +115,8 @@ public class TargetPrizeChallengesCalculator {
 
         tgt = checkMinTarget(counter, tgt);
 
+        tgt = ChallengesConfig.roundTarget(counter, tgt);
+        
         res.put(nm + "_tgt", tgt);
         res.put(nm + "_bas", bas);
 
@@ -317,7 +319,9 @@ public class TargetPrizeChallengesCalculator {
 
 		int prize = dc.calculatePrize(difficulty, d, counter);
 
-		return Math.ceil(prize * ChallengesConfig.competitiveChallengesBooster / 10.0) * 10;
+        double bonus =  Math.ceil(prize * ChallengesConfig.competitiveChallengesBooster / 10.0) * 10;
+
+        return Math.min(bonus, 300);
 	}
 
 	public Double getWeeklyContentMode(String status, String mode, LocalDate execDate) throws Exception {
