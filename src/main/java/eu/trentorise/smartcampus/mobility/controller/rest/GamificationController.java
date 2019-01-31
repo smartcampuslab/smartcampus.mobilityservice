@@ -824,6 +824,7 @@ public class GamificationController {
 					if (o.getValidationResult().getValidationStatus().getPolyline() == null) {
 						List<Geolocation> points = Lists.newArrayList(o.getGeolocationEvents());
 						points = TrackValidator.removeStarredClusters(points);
+//						TrackValidator.shortenByHighSpeed(points);
 						points = TrackValidator.preprocessTrack(points);
 						String polyline = GamificationHelper.encodePoly(points);
 						logger.debug("Generated polyline for " + o.getId() + " = " + polyline);
@@ -1057,7 +1058,7 @@ public class GamificationController {
 				granularity = AggregationGranularity.total;
 			}
 			
-
+			logger.info("Reading " + granularity + " statistics for player " + userId);
 			result = statisticsBuilder.computeStatistics(userId, appId, from, to, granularity);
 			
 		} catch (Exception e) {
