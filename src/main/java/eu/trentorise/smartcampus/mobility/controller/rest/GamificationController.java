@@ -1060,12 +1060,12 @@ public class GamificationController {
 			
 			logger.info("Reading " + granularity + " statistics for player " + userId);
 			result = statisticsBuilder.computeStatistics(userId, appId, from, to, granularity);
-			
 		} catch (Exception e) {
 			logger.error("Failed retrieving player statistics events: "+e.getMessage(),e);
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+		logger.info("Returning " + granularity + " statistics");
 		return result;
 		
 	}
