@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
@@ -149,6 +150,7 @@ public class TrackValidator {
 		// preprocess
 		status.computeAccuracy(points);
 		points = removeStarredClusters(points);
+		TrackValidator.shortenByHighSpeed(points);
 		points = preprocessTrack(points);
 
 		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
@@ -178,6 +180,50 @@ public class TrackValidator {
 		}
 		
 		return points;
+	}
+	
+	public static void shortenByHighSpeed(List<Geolocation> points) {
+		double prevSpeed = 0;
+		Map<Integer, Integer> ranges = Maps.newTreeMap();
+		
+		for (int i = 1; i < points.size(); i++) {
+			double d = GamificationHelper.harvesineDistance(points.get(i), points.get(i - 1));
+			long t = points.get(i).getRecorded_at().getTime() - points.get(i-1).getRecorded_at().getTime();
+			if (t > 0) {
+				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
+//				System.err.println(speed);
+				if (speed > 30 && speed > prevSpeed * 10) {
+					Integer found = findReachableBySpeed(i - 1, d, points);
+					if (found != null) {
+						ranges.put(i - 1, found);
+					}
+				}
+				prevSpeed = speed;
+			}
+		}
+		
+//		System.err.println(ranges);
+		for (Integer key: ranges.keySet()) {
+			points.removeIf(x -> points.indexOf(x) > key && points.indexOf(x) < ranges.get(key));
+		}
+		
+	}
+	
+	private static Integer findReachableBySpeed(int index, double distance, List<Geolocation> points) {
+		Integer found = null;
+		for (int i = index + 1; i < points.size(); i++) {
+			double d = GamificationHelper.harvesineDistance(points.get(index), points.get(i));
+			if (d < distance) {
+//				System.err.println(index + " -> " + i + " = " + d + " (" + distance + ")");
+				found = i;
+			}
+		}
+//		System.err.println(points.size() + " //// " + found);
+		if (found != null && found == points.size() - 1) {
+			found = null;
+		}
+		
+		return found;
 	}
 	
 	public static List<Geolocation> removeStarredClusters(List<Geolocation> origPoints) {
@@ -225,7 +271,7 @@ public class TrackValidator {
 		return newPoints;
 	}
 	
-	public static List<List<Geolocation>> computeAngles(List<Geolocation> points) {
+	private static List<List<Geolocation>> computeAngles(List<Geolocation> points) {
 		List<List<Geolocation>> groups = Lists.newArrayList();
 		List<Integer> angles1 = Lists.newArrayList();
 		List<Integer> indexes = Lists.newArrayList();

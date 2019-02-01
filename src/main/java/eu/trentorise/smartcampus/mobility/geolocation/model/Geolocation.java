@@ -47,6 +47,15 @@ public class Geolocation implements Comparable<Geolocation> {
 		this.recorded_at = recorded_at;
 		this.geocoding = new double[]{longitude,latitude};
 	}
+    
+    public Geolocation(Double latitude, Double longitude, Date recorded_at, Long accuracy) {
+		super();
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.recorded_at = recorded_at;
+		this.accuracy = accuracy;
+		this.geocoding = new double[]{longitude,latitude};
+	}    
 
 
 	public String getUserId() {
