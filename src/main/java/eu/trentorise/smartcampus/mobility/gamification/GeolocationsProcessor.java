@@ -167,7 +167,8 @@ public class GeolocationsProcessor {
 		Multimap<String, Long> freeTrackStartsByKey = ArrayListMultimap.create();
 		
 		if (geolocationsEvent.getLocation() != null) {
-			int skipped = 0;
+			int skippedOld = 0;
+			int skippedNoId = 0;
 			for (Location location : geolocationsEvent.getLocation()) {
 				String locationTravelId = null;
 				Long locationTs = null;
@@ -180,13 +181,9 @@ public class GeolocationsProcessor {
 					// locations with empty idTrip are possible only upon
 					// initialization/synchronization.
 					// we skip them here
-					logger.warn("location without idTrip, user: " + userId + ", extras = " + location.getExtras());
+					skippedNoId++;
+//					logger.warn("location without idTrip, user: " + userId + ", extras = " + location.getExtras());
 					continue;
-					// if (lastTravelId != null) {
-					// locationTravelId = lastTravelId;
-					// } else {
-					// continue;
-					// }
 				}
 
 				if (location.getTimestamp() == null) {
@@ -200,7 +197,7 @@ public class GeolocationsProcessor {
 
 				// discard event older than 2 days
 				if (now - 2 * 24 * 3600 * 1000 > location.getTimestamp().getTime()) {
-					skipped++;
+					skippedOld++;
 					continue;
 				}
 
@@ -223,8 +220,11 @@ public class GeolocationsProcessor {
 				freeTrackStarts.put(key, min);
 			}
 			
-			if (skipped > 0) {
-				logger.warn("Timestamps too old, skipped " + skipped + " locations.");
+			if (skippedOld > 0) {
+				logger.warn("Timestamps too old, skipped " + skippedOld + " locations.");
+			}
+			if (skippedNoId > 0) {
+				logger.warn("Locations without idTrip, skipped " + skippedNoId + " locations.");
 			}
 		}
 
