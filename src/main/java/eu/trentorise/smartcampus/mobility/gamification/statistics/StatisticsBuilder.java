@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
@@ -35,6 +37,8 @@ public class StatisticsBuilder {
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 	
+	private static Log logger = LogFactory.getLog(StatisticsBuilder.class);
+	
 	@Autowired
 	@Qualifier("mongoTemplate")
 	MongoTemplate template;
@@ -55,15 +59,19 @@ public class StatisticsBuilder {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
 		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000 * 60 * 60 * 0);
 		Query query = new Query(criteria);
-		
+
+		logger.info("Start getGlobalStatistics - findOne");
 		GlobalStatistics statistics = template.findOne(query, GlobalStatistics.class, GLOBAL_STATISTICS);
+		logger.info("End getGlobalStatistics - findOne");
 		if (statistics == null) {
 			statistics = new GlobalStatistics();
 			statistics.setUserId(userId);
 			statistics.setUpdateTime(System.currentTimeMillis());
 			statistics.setStats(computeGlobalStatistics(userId, appId, start, dates));
 			statistics.setAppId(appId);
+			logger.info("Start getGlobalStatistics - save");
 			template.save(statistics, GLOBAL_STATISTICS);
+			logger.info("End getGlobalStatistics - save");
 		}
 		
 		return statistics;
@@ -144,7 +152,9 @@ public class StatisticsBuilder {
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
+		logger.info("Start findAll - find");
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
+		logger.info("End findAll - find");
 		
 		result = result.stream().filter(x -> x.getDay() != null).collect(Collectors.toList());
 		
@@ -160,7 +170,9 @@ public class StatisticsBuilder {
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
+		logger.info("Start find - find");
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
+		logger.info("End find - find");
 		
 		result = result.stream().filter(x -> x.getDay() != null).collect(Collectors.toList());
 		
@@ -176,7 +188,9 @@ public class StatisticsBuilder {
 		query.with(new Sort(Sort.Direction.DESC, "day"));
 		query.fields().include("day");
 		
+		logger.info("Start outside - findOne 1");
 		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
+		logger.info("End outside - findOne 1");
 		if (before != null) {
 			result.put("before", before.getDay());
 		}
@@ -187,7 +201,9 @@ public class StatisticsBuilder {
 		query.with(new Sort(Sort.Direction.ASC, "day"));
 		query.fields().include("day");		
 		
+		logger.info("Start outside - findOne 2");
 		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances");
+		logger.info("End outside - findOne 2");
 		
 		if (after != null) {
 			result.put("after", after.getDay());
