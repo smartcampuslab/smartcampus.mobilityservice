@@ -150,7 +150,7 @@ public class TrackValidator {
 		// preprocess
 		status.computeAccuracy(points);
 		points = removeStarredClusters(points);
-		TrackValidator.shortenByHighSpeed(points);
+//		TrackValidator.shortenByHighSpeed(points);
 		points = preprocessTrack(points);
 
 		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
