@@ -139,6 +139,12 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 		template.indexOps("trackedInstances").ensureIndex(new Index("time", Direction.ASC));
 		template.indexOps("trackedInstances").ensureIndex(new Index("userId", Direction.ASC));
 		template.indexOps("trackedInstances").ensureIndex(new Index("appId", Direction.ASC));
+		
+		template.indexOps("trackedInstances").ensureIndex(new Index("changedValidity", Direction.ASC));
+		template.indexOps("trackedInstances").ensureIndex(new Index("validationResult.validationStatus.validationOutcome", Direction.ASC));
+		template.indexOps("trackedInstances").ensureIndex(new Index("validationResult.validationStatus.distance", Direction.ASC));
+		
+		
 //		template.setWriteConcern(new WriteConcern(1).withJournal(false).withWTimeout(200, TimeUnit.MILLISECONDS));
 		template.setWriteConcern(new WriteConcern(1).withWTimeout(200, TimeUnit.MILLISECONDS));
 		return template;
