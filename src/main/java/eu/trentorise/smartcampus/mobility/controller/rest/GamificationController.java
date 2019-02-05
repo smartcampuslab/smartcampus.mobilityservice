@@ -65,6 +65,7 @@ import eu.trentorise.smartcampus.mobility.gamificationweb.model.Event;
 import eu.trentorise.smartcampus.mobility.gamificationweb.model.Player;
 import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.geolocation.model.GeolocationsEvent;
+import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.security.AppDetails;
 import eu.trentorise.smartcampus.mobility.security.AppInfo;
@@ -413,7 +414,7 @@ public class GamificationController {
 		}
 	}
 	
-	/*
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/console/validate")
 	public @ResponseBody void validate(@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate, @RequestParam(required = false) Boolean excludeZeroPoints, @RequestParam(required = false) Boolean toCheck, @RequestParam(required = false) Boolean pendingOnly, @RequestParam(required = false) String filterUserId, @RequestParam(required = false) String filterTravelId, @RequestHeader(required = true, value = "appId") String appId, HttpServletResponse response) throws Exception {
 
@@ -461,16 +462,16 @@ public class GamificationController {
 					logger.info("Validating free tracking " + ti.getId());
 					
 					ValidationResult vr = gamificationValidator.validateFreeTracking(ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), appId);
-					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
-//						TODO reenabled
-						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
-						if (isGroup) {
-							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
-								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
-								logger.info("In a group");
-							}
-						}
-					}
+//					if (vr != null && TravelValidity.VALID.equals(vr.getTravelValidity())) {
+////						TODO reenabled
+//						boolean isGroup = gamificationValidator.isTripsGroup(ti.getGeolocationEvents(), ti.getUserId(), appId, ti.getFreeTrackingTransport());
+//						if (isGroup) {
+//							if ("bus".equals(ti.getFreeTrackingTransport()) || "train".equals(ti.getFreeTrackingTransport())) {
+//								vr.getValidationStatus().setValidationOutcome(TravelValidity.PENDING);
+//								logger.info("In a group");
+//							}
+//						}
+//					}
 					
 					ti.setValidationResult(vr);
 					Map<String, Object> data = gamificationValidator.computeFreeTrackingScore(appId, ti.getGeolocationEvents(), ti.getFreeTrackingTransport(), vr.getValidationStatus(), ti.getOverriddenDistances());
@@ -487,7 +488,7 @@ public class GamificationController {
 
 		}
 	}
-	*/
+	
 	
 //	@RequestMapping(method = RequestMethod.POST, value = "/console/assignScore")
 //	public @ResponseBody TrackedInstance assignScore(@PathVariable String instanceId, HttpServletResponse response) throws Exception {
