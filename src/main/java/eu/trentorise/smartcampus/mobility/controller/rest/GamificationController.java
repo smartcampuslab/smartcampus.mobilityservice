@@ -633,6 +633,7 @@ public class GamificationController {
 				}
 			}
 		} else {
+			logger.info("Not sending approved itinerary data to GE: " + instance.getId());
 			instance.setApproved(true);
 		}
 
@@ -825,7 +826,7 @@ public class GamificationController {
 					if (o.getValidationResult().getValidationStatus().getPolyline() == null) {
 						List<Geolocation> points = Lists.newArrayList(o.getGeolocationEvents());
 						points = TrackValidator.removeStarredClusters(points);
-//						TrackValidator.shortenByHighSpeed(points);
+						TrackValidator.shortenByHighSpeed(points);
 						points = TrackValidator.preprocessTrack(points);
 						String polyline = GamificationHelper.encodePoly(points);
 						logger.debug("Generated polyline for " + o.getId() + " = " + polyline);

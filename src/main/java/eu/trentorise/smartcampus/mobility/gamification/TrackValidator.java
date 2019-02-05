@@ -150,7 +150,7 @@ public class TrackValidator {
 		// preprocess
 		status.computeAccuracy(points);
 		points = removeStarredClusters(points);
-//		TrackValidator.shortenByHighSpeed(points);
+		TrackValidator.shortenByHighSpeed(points);
 		points = preprocessTrack(points);
 
 		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
@@ -191,11 +191,14 @@ public class TrackValidator {
 			long t = points.get(i).getRecorded_at().getTime() - points.get(i-1).getRecorded_at().getTime();
 			if (t > 0) {
 				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
-//				System.err.println(speed);
-				if (speed > 30 && speed > prevSpeed * 10) {
-					Integer found = findReachableBySpeed(i - 1, d, points);
-					if (found != null) {
-						ranges.put(i - 1, found);
+//				System.err.println(i + " = " + speed);
+				if (speed > 30 && speed > prevSpeed * 10 && prevSpeed != 0) {
+					Integer found = findReachableBySpeed(i, prevSpeed, points);
+//					if (found != null) {
+//						ranges.put(i - 1, found);
+//					}					
+					if (found != null) { // && found - i < 50) {
+						ranges.put(i, found);
 					}
 				}
 				prevSpeed = speed;
@@ -209,21 +212,52 @@ public class TrackValidator {
 		
 	}
 	
-	private static Integer findReachableBySpeed(int index, double distance, List<Geolocation> points) {
+	private static Integer findReachableBySpeed(int index, double prevSpeed, List<Geolocation> points) {
 		Integer found = null;
+//		System.err.println(index);
 		for (int i = index + 1; i < points.size(); i++) {
-			double d = GamificationHelper.harvesineDistance(points.get(index), points.get(i));
-			if (d < distance) {
-//				System.err.println(index + " -> " + i + " = " + d + " (" + distance + ")");
-				found = i;
+			double d = GamificationHelper.harvesineDistance(points.get(i), points.get(i - 1));
+			long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
+			if (t > 0) {
+				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
+//				System.err.println((speed < 30) + " / " + (speed < (prevSpeed * 10)));
+//				System.err.println("\t" + speed);
+//				if (speed < 30 || speed < (prevSpeed * 10)) {
+				if (speed < (prevSpeed * 10)) {
+//					System.err.println("\t" + index + " -> " + i + " = " + speed + " (" + prevSpeed + ")");
+					found = i - 1;
+					break;
+				}
 			}
 		}
-//		System.err.println(points.size() + " //// " + found);
+
+		// System.err.println(points.size() + " //// " + found);
 		if (found != null && found == points.size() - 1) {
 			found = null;
 		}
-		
+
 		return found;
+	}
+	
+//	private static Integer findReachableBySpeed(int index, double distance, List<Geolocation> points) {
+//		Integer found = null;
+//		for (int i = index + 1; i < points.size(); i++) {
+//			double d = GamificationHelper.harvesineDistance(points.get(index), points.get(i));
+//			if (d < distance) {
+//				System.err.println("\t" + index + " -> " + i + " = " + d + " (" + distance + ")");
+//				found = i;
+//			}
+//		}
+////		System.err.println(points.size() + " //// " + found);
+//		if (found != null && found == points.size() - 1) {
+//			found = null;
+//		}
+//		
+//		return found;
+//	}
+	
+	private static boolean checkSpeed(double speed, double prevSpeed) {
+		return speed > 30 && speed >= prevSpeed * 10 && prevSpeed != 0;
 	}
 	
 	public static List<Geolocation> removeStarredClusters(List<Geolocation> origPoints) {
