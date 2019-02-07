@@ -1,6 +1,5 @@
 package eu.trentorise.smartcampus.mobility.gamification.statistics;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class StatisticsBuilder {
 
 	private static final String GLOBAL_STATISTICS = "globalStatistics";
 
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+	private static FastDateFormat sdf = FastDateFormat.getInstance("yyyy/MM/dd");
 	
 	private static Log logger = LogFactory.getLog(StatisticsBuilder.class);
 	
@@ -188,7 +188,7 @@ public class StatisticsBuilder {
 		query.with(new Sort(Sort.Direction.DESC, "day"));
 		query.fields().include("day");
 		
-		logger.info("Start outside - findOne 1");
+		logger.info("Start outside - findOne 1: " + query);
 		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
 		logger.info("End outside - findOne 1");
 		if (before != null) {
