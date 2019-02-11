@@ -189,7 +189,7 @@ public class StatisticsBuilder {
 		
 		logger.info("Start outside - findOne 1b: " + query);
 		
-		List<String> before = template.find(query, TrackedInstance.class, "trackedInstances2017").stream().map(x -> x.getDay()).collect(Collectors.toList());
+		List<String> before = template.find(query, TrackedInstance.class, "trackedInstances").stream().map(x -> x.getDay()).collect(Collectors.toList());
 		Collections.sort(before);
 		Collections.reverse(before);
 		logger.info("End outside - findOne 1b");
@@ -204,7 +204,7 @@ public class StatisticsBuilder {
 		query.fields().include("day");		
 		
 		logger.info("Start outside - findOne 2b");
-		List<String> after = template.find(query, TrackedInstance.class, "trackedInstances2017").stream().map(x -> x.getDay()).collect(Collectors.toList());
+		List<String> after = template.find(query, TrackedInstance.class, "trackedInstances").stream().map(x -> x.getDay()).collect(Collectors.toList());
 		Collections.sort(after);
 		logger.info("End outside - findOne 2b");
 		
@@ -231,7 +231,7 @@ public class StatisticsBuilder {
 //		System.err.println(cursor.explain());	
 //		
 //		
-//		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances2017");
+//		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
 //		logger.info("End outside - findOne 1");
 //		if (before != null) {
 //			result.put("before", before.getDay());
@@ -244,7 +244,7 @@ public class StatisticsBuilder {
 //		query.fields().include("day");		
 //		
 //		logger.info("Start outside - findOne 2");
-//		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances2017");
+//		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances");
 //		logger.info("End outside - findOne 2");
 //		
 //		if (after != null) {
