@@ -185,14 +185,16 @@ public class StatisticsBuilder {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
 		criteria = criteria.and("day").lt(from);
 		Query query = new Query(criteria);
-		query.with(new Sort(Sort.Direction.DESC, "day"));
 		query.fields().include("day");
 		
-		logger.info("Start outside - findOne 1: " + query);
-		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
-		logger.info("End outside - findOne 1");
-		if (before != null) {
-			result.put("before", before.getDay());
+		logger.info("Start outside - findOne 1b: " + query);
+		
+		List<String> before = template.find(query, TrackedInstance.class, "trackedInstances2017").stream().map(x -> x.getDay()).collect(Collectors.toList());
+		Collections.sort(before);
+		Collections.reverse(before);
+		logger.info("End outside - findOne 1b");
+		if (!before.isEmpty()) {
+			result.put("before", before.get(0));
 		}
 		
 		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
@@ -201,16 +203,56 @@ public class StatisticsBuilder {
 		query.with(new Sort(Sort.Direction.ASC, "day"));
 		query.fields().include("day");		
 		
-		logger.info("Start outside - findOne 2");
-		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances");
-		logger.info("End outside - findOne 2");
+		logger.info("Start outside - findOne 2b");
+		List<String> after = template.find(query, TrackedInstance.class, "trackedInstances2017").stream().map(x -> x.getDay()).collect(Collectors.toList());
+		Collections.sort(after);
+		logger.info("End outside - findOne 2b");
 		
-		if (after != null) {
-			result.put("after", after.getDay());
+		if (!after.isEmpty()) {
+			result.put("after", after.get(0));
 		}		
 		
 		return result;
-	}	
+	}		
+	
+//	private Map<String, String> outside(String userId, String appId, String from, String to) {
+//		Map<String, String> result = Maps.newTreeMap();
+//		
+//		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
+//		criteria = criteria.and("day").lt(from);
+//		Query query = new Query(criteria); //.limit(1);
+//		query.with(new Sort(Sort.Direction.DESC, "day"));
+//		query.fields().include("day");
+//		
+//		logger.info("Start outside - findOne 1: " + query);
+//		
+//		DBCollection collection = template.getCollection("trackedInstances");
+//		DBCursor cursor = collection.find(query.getQueryObject());
+//		System.err.println(cursor.explain());	
+//		
+//		
+//		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances2017");
+//		logger.info("End outside - findOne 1");
+//		if (before != null) {
+//			result.put("before", before.getDay());
+//		}
+//		
+//		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
+//		criteria = criteria.and("day").gt(to);
+//		query = new Query(criteria); // .limit(1);
+//		query.with(new Sort(Sort.Direction.ASC, "day"));
+//		query.fields().include("day");		
+//		
+//		logger.info("Start outside - findOne 2");
+//		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances2017");
+//		logger.info("End outside - findOne 2");
+//		
+//		if (after != null) {
+//			result.put("after", after.getDay());
+//		}		
+//		
+//		return result;
+//	}	
 	
 	
 	private Multimap<String, TrackedInstance> groupByDay(List<TrackedInstance> instances) {
