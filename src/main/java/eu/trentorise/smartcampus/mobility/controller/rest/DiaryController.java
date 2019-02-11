@@ -1,7 +1,6 @@
 package eu.trentorise.smartcampus.mobility.controller.rest;
 
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -15,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,8 +87,8 @@ public class DiaryController {
 	@Value("${aacURL}")
 	private String aacURL;
 
-	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
-	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+	private static FastDateFormat shortSdf = FastDateFormat.getInstance("yyyy/MM/dd");
+	private static FastDateFormat fullSdf = FastDateFormat.getInstance("yyyy/MM/dd HH:mm");
 
 	@Autowired
 	private PlayerRepositoryDao playerRepositoryDao;
