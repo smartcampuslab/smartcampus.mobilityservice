@@ -369,7 +369,7 @@ public class ChallengeController {
 		Reward reward = rewards.get(invitation.getChallengeModelName().toString());
 		
 		Map<String, Object> pars = Maps.newTreeMap();
-		pars.put("opponent", attendee.getName());
+		pars.put("opponent", attendee.getNickname());
 		
 		if (invitation.getChallengeModelName().isCustomPrizes()) {
 			Map<String, Double> prizes = tpcc.targetPrizeChallengesCompute(userId, invitation.getAttendeeId(), appId, invitation.getChallengePointConcept(), invitation.getChallengeModelName().toString());
