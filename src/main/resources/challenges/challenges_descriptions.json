@@ -582,5 +582,12 @@
 			"it": "Se riuscirete a fare almeno <target> km a piedi, sommando i km fatti da te e da <opponent>, vi aggiudicherete la sfida e vincerete entrambi il premio di <reward> green leaves.",
 			"en": "You will win the challenge if the sum of walking km done by you and <opponent> is higher than <target>. In case of challenge completion, both of you will earn <reward> green leaves."
 		}
-	}
+	},
+	{
+		"modelName": "incentiveGroupChallengeReward",
+		"description": {
+			"it": "Vinci una sfida di coppia e, oltre al premio previsto, ottieni altri <bonusScore> green leaves points. Puoi scegliere il tipo di sfida multiplayer che ti piace di più, cosa stai aspettando?!",
+			"en": "Win a multiplayer challenge and, in addition to the expected prize, you will receive other <bonusScore> green leaves points. You can choose the type of multiplayer challenge that you like better, what are you waiting for?!"
+		}
+	}	
 ]

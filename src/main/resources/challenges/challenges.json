@@ -229,5 +229,13 @@
 			"it": "Unite le forze e fate almeno <target> km a piedi. Se vincete la sfida, sia tu che <opponent> otterrete un bonus di <reward> green leaves.",
 			"en": "Join forces: walk at least <target> km between you and <opponent>. If you win, you'll both get <reward> green leaves."
 		}
-	}
+	},
+	{
+		"name": "incentiveGroupChallengeReward",
+		"periodName": "daily",
+		"description": {
+			"it": "Vinci una sfida di coppia di qualsiasi tipo ed ottieni <bonusScore> punti green leaves addizionali.",
+			"en": "Win one multiplayer challenge of any kind to obtain additional <bonusScore> green leaves points."
+		}
+	}	
 ]

@@ -76,6 +76,7 @@ public class ChallengesUtils {
 	private static final String CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE = "groupCompetitivePerformance";
 	private static final String CHAL_MODEL_GROUP_COMPETITIVE_TIME = "groupCompetitiveTime";
 	private static final String CHAL_MODEL_GROUP_COOPERATIVE = "groupCooperative";
+	private static final String CHAL_MODEL_INCENTIVE_GROUP = "incentiveGroupChallengeReward";
 	
 	// week delta in milliseconds
 //	private static final Long W_DELTA = 2000L;
@@ -249,6 +250,14 @@ public class ChallengesUtils {
 		    				String link = utils.createSurveyUrl(playerId, gameId, (String)challenge.getFields().get("surveyType"), language);
 		    				challenge.getFields().put("surveylink", link);
 		    				break;
+	    				}
+	    				case CHAL_MODEL_INCENTIVE_GROUP: {
+	    					System.err.println("HERE");
+		    				if(completed) {
+	    						row_status = 1; 
+	    						status = 100;
+	    					}	    					
+	    					break;
 	    				}
 	    				case CHAL_MODEL_GROUP_COMPETITIVE_PERFORMANCE : {
 	    					row_status = (Double)challenge.getFields().get(CHAL_FIELDS_CHALLENGE_SCORE);
