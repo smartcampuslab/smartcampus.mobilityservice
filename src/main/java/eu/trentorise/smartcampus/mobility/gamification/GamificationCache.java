@@ -205,7 +205,7 @@ public class GamificationCache {
 		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = gamificationUrl + "gengine/state/" + gameId + "/" + playerId;
-		logger.info("Player state: " + url);
+		logger.debug("Player state: " + url);
 		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 		String data = res.getBody();		
@@ -225,7 +225,7 @@ public class GamificationCache {
 		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = gamificationUrl + "/notification/game/" + gameId + "/player/" + playerId + "/grouped?size=1000";
-		logger.info("Notifications: " + url);
+		logger.debug("Notifications: " + url);
 		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
 		String data = res.getBody();		
@@ -245,7 +245,7 @@ public class GamificationCache {
 		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = gamificationUrl + "data/game/" + gameId + "/statistics";
-		logger.info("Statistics: " + url);
+		logger.debug("Statistics: " + url);
 		ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(createHeaders(appId)), String.class);		
 		
 		List<GameStatistics> stats = mapper.readValue(result.getBody(),  new TypeReference<List<GameStatistics>>() {});
