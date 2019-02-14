@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -146,9 +145,14 @@ public class StatisticsBuilder {
 	
 	private List<TrackedInstance> findAll(String userId, String appId) {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);//.and("validationResult.validationStatus.validationOutcome").is(TravelValidity.VALID);
-		criteria.orOperator(
-				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID).and("changedValidity").is(null),
-				new Criteria("changedValidity").is(TravelValidity.VALID));
+		Criteria orCriteria1 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.distance").gt(0.0),
+				new Criteria("overriddenDistances").ne(null));				
+		Criteria orCriteria2 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID.toString()).and("changedValidity").is(null),
+				new Criteria("changedValidity").is(TravelValidity.VALID.toString()));
+		criteria.andOperator(orCriteria1, orCriteria2);	
+		
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
@@ -163,10 +167,14 @@ public class StatisticsBuilder {
 	
 	private List<TrackedInstance> find(String userId, String appId, String from, String to) {
 		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId);
-		criteria.orOperator(
-				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID).and("changedValidity").is(null),
-				new Criteria("changedValidity").is(TravelValidity.VALID));
-		criteria = criteria.andOperator(Criteria.where("day").gte(from).lte(to));
+		Criteria orCriteria1 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.distance").gt(0.0),
+				new Criteria("overriddenDistances").ne(null));				
+		Criteria orCriteria2 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID.toString()).and("changedValidity").is(null),
+				new Criteria("changedValidity").is(TravelValidity.VALID.toString()));
+		criteria.andOperator(orCriteria1, orCriteria2, Criteria.where("day").gte(from).lte(to));	
+		
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
@@ -182,14 +190,20 @@ public class StatisticsBuilder {
 	private Map<String, String> outside(String userId, String appId, String from, String to) {
 		Map<String, String> result = Maps.newTreeMap();
 		
-		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-		criteria = criteria.and("day").lt(from);
+		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("day").lt(from);
+		Criteria orCriteria1 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.distance").gt(0.0),
+				new Criteria("overriddenDistances").ne(null));				
+		Criteria orCriteria2 = new Criteria().orOperator(
+				new Criteria("validationResult.validationStatus.validationOutcome").ne(TravelValidity.INVALID.toString()).and("changedValidity").is(null),
+				new Criteria("changedValidity").is(TravelValidity.VALID.toString()));
+		criteria.andOperator(orCriteria1, orCriteria2);		
+		
 		Query query = new Query(criteria);
-//		query.fields().include("day");
+		query.fields().include("day");
 		
 		logger.info("Start outside - findOne 1b: " + query);
 		
-//		List<String> before = template.find(query, TrackedInstance.class, "trackedInstances").stream().map(x -> x.getDay()).collect(Collectors.toList());
 		List<String> before = template.getCollection("trackedInstances").distinct("day", query.getQueryObject());
 		Collections.sort(before);
 		Collections.reverse(before);
@@ -198,14 +212,13 @@ public class StatisticsBuilder {
 		}
 		logger.info("End outside - findOne 1b = " + result.get("before"));
 		
-		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-		criteria = criteria.and("day").gt(to);
+		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("day").gt(to);
+		criteria.andOperator(orCriteria1, orCriteria2);		
 		query = new Query(criteria);
-		query.with(new Sort(Sort.Direction.ASC, "day"));
 		query.fields().include("day");		
 		
 		logger.info("Start outside - findOne 2b");
-//		List<String> after = template.find(query, TrackedInstance.class, "trackedInstances").stream().map(x -> x.getDay()).collect(Collectors.toList());
+		
 		List<String> after = template.getCollection("trackedInstances").distinct("day", query.getQueryObject());
 		Collections.sort(after);
 		if (!after.isEmpty()) {
@@ -215,46 +228,6 @@ public class StatisticsBuilder {
 		
 		return result;
 	}		
-	
-//	private Map<String, String> outside(String userId, String appId, String from, String to) {
-//		Map<String, String> result = Maps.newTreeMap();
-//		
-//		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-//		criteria = criteria.and("day").lt(from);
-//		Query query = new Query(criteria); //.limit(1);
-//		query.with(new Sort(Sort.Direction.DESC, "day"));
-//		query.fields().include("day");
-//		
-//		logger.info("Start outside - findOne 1: " + query);
-//		
-//		DBCollection collection = template.getCollection("trackedInstances");
-//		DBCursor cursor = collection.find(query.getQueryObject());
-//		System.err.println(cursor.explain());	
-//		
-//		
-//		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
-//		logger.info("End outside - findOne 1");
-//		if (before != null) {
-//			result.put("before", before.getDay());
-//		}
-//		
-//		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-//		criteria = criteria.and("day").gt(to);
-//		query = new Query(criteria); // .limit(1);
-//		query.with(new Sort(Sort.Direction.ASC, "day"));
-//		query.fields().include("day");		
-//		
-//		logger.info("Start outside - findOne 2");
-//		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances");
-//		logger.info("End outside - findOne 2");
-//		
-//		if (after != null) {
-//			result.put("after", after.getDay());
-//		}		
-//		
-//		return result;
-//	}	
-	
 	
 	private Multimap<String, TrackedInstance> groupByDay(List<TrackedInstance> instances) {
 		Multimap<String, TrackedInstance> result = Multimaps.index(instances, TrackedInstance::getDay);
