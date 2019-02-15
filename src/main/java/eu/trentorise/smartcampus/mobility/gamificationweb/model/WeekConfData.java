@@ -1,6 +1,5 @@
 package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +7,7 @@ import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
 import java.util.Date;
 import java.util.Locale;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 public class WeekConfData {
 
@@ -19,7 +19,7 @@ public class WeekConfData {
 	private boolean prizesLast = false;
 	private String weekStart, weekEnd;
 	
-	private static final SimpleDateFormat SDF_WEEK_DATE = new SimpleDateFormat("yyyy-MM-dd");
+	private static final FastDateFormat SDF_WEEK_DATE = FastDateFormat.getInstance("yyyy-MM-dd");
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	
 	public int getWeekNum() {
