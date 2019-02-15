@@ -1,7 +1,6 @@
 package eu.trentorise.smartcampus.mobility.gamification;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
@@ -41,9 +41,9 @@ import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 @Component
 public class GeolocationsProcessor {
 
-	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
-	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
-	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+	private static FastDateFormat shortSdf = FastDateFormat.getInstance("yyyy/MM/dd");
+	private static FastDateFormat timeSdf = FastDateFormat.getInstance("HH:mm");
+	private static FastDateFormat fullSdf = FastDateFormat.getInstance("yyyy/MM/dd HH:mm");
 
 	private static final String TRAVEL_ID = "travelId";
 	public static final String START_TIME = "startTime";
