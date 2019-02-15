@@ -316,6 +316,7 @@ public class ChallengeController {
 		ResponseEntity<String> result = null;
 		
 		try {
+			logger.info("Sending invitation " + mapper.writeValueAsString(ci));
 		result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(ci, createHeaders(appId)), String.class);
 		
 		if (result.getStatusCode() == HttpStatus.OK) {
