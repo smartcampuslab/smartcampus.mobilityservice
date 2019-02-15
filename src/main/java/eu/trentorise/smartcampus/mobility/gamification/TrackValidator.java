@@ -149,8 +149,8 @@ public class TrackValidator {
 		
 		// preprocess
 		status.computeAccuracy(points);
-		points = removeStarredClusters(points);
 		TrackValidator.shortenByHighSpeed(points);
+		points = removeStarredClusters(points);
 		points = preprocessTrack(points);
 
 		Collections.sort(points, (o1, o2) -> (int)(o1.getRecorded_at().getTime() - o2.getRecorded_at().getTime()));
@@ -191,7 +191,7 @@ public class TrackValidator {
 			long t = points.get(i).getRecorded_at().getTime() - points.get(i-1).getRecorded_at().getTime();
 			if (t > 0) {
 				double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
-//				System.err.println(i + " = " + speed);
+//				System.err.println(i + " = " + speed + " / " + points.get(i));
 				if (speed > 30 && speed > prevSpeed * 10 && prevSpeed != 0) {
 					Integer found = findReachableBySpeed(i, speed, points);
 //					if (found != null) {
