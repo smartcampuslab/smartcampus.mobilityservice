@@ -59,18 +59,18 @@ public class StatisticsBuilder {
 		criteria = criteria.and("updateTime").gt(System.currentTimeMillis() - 1000 * 60 * 60 * 0);
 		Query query = new Query(criteria);
 
-		logger.info("Start getGlobalStatistics - findOne");
+		logger.debug("Start getGlobalStatistics - findOne");
 		GlobalStatistics statistics = template.findOne(query, GlobalStatistics.class, GLOBAL_STATISTICS);
-		logger.info("End getGlobalStatistics - findOne");
+		logger.debug("End getGlobalStatistics - findOne");
 		if (statistics == null) {
 			statistics = new GlobalStatistics();
 			statistics.setUserId(userId);
 			statistics.setUpdateTime(System.currentTimeMillis());
 			statistics.setStats(computeGlobalStatistics(userId, appId, start, dates));
 			statistics.setAppId(appId);
-			logger.info("Start getGlobalStatistics - save");
+			logger.debug("Start getGlobalStatistics - save");
 			template.save(statistics, GLOBAL_STATISTICS);
-			logger.info("End getGlobalStatistics - save");
+			logger.debug("End getGlobalStatistics - save");
 		}
 		
 		return statistics;
@@ -151,9 +151,9 @@ public class StatisticsBuilder {
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
-		logger.info("Start findAll - find");
+		logger.debug("Start findAll - find");
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
-		logger.info("End findAll - find");
+		logger.debug("End findAll - find");
 		
 		result = result.stream().filter(x -> x.getDay() != null).collect(Collectors.toList());
 		
@@ -169,9 +169,9 @@ public class StatisticsBuilder {
 		Query query = new Query(criteria);
 		query.fields().include("validationResult.validationStatus").include("day").include("freeTrackingTransport").include("itinerary").include("overriddenDistances");
 		
-		logger.info("Start find - find");
+		logger.debug("Start find - find");
 		List<TrackedInstance> result = template.find(query, TrackedInstance.class, "trackedInstances");
-		logger.info("End find - find");
+		logger.debug("End find - find");
 		
 		result = result.stream().filter(x -> x.getDay() != null).collect(Collectors.toList());
 		
@@ -215,46 +215,6 @@ public class StatisticsBuilder {
 		
 		return result;
 	}		
-	
-//	private Map<String, String> outside(String userId, String appId, String from, String to) {
-//		Map<String, String> result = Maps.newTreeMap();
-//		
-//		Criteria criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-//		criteria = criteria.and("day").lt(from);
-//		Query query = new Query(criteria); //.limit(1);
-//		query.with(new Sort(Sort.Direction.DESC, "day"));
-//		query.fields().include("day");
-//		
-//		logger.info("Start outside - findOne 1: " + query);
-//		
-//		DBCollection collection = template.getCollection("trackedInstances");
-//		DBCursor cursor = collection.find(query.getQueryObject());
-//		System.err.println(cursor.explain());	
-//		
-//		
-//		TrackedInstance before = template.findOne(query, TrackedInstance.class, "trackedInstances");
-//		logger.info("End outside - findOne 1");
-//		if (before != null) {
-//			result.put("before", before.getDay());
-//		}
-//		
-//		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("validationResult.validationStatus.distance").gt(0.0); // .and("validationResult.valid").is(true)
-//		criteria = criteria.and("day").gt(to);
-//		query = new Query(criteria); // .limit(1);
-//		query.with(new Sort(Sort.Direction.ASC, "day"));
-//		query.fields().include("day");		
-//		
-//		logger.info("Start outside - findOne 2");
-//		TrackedInstance after = template.findOne(query, TrackedInstance.class, "trackedInstances");
-//		logger.info("End outside - findOne 2");
-//		
-//		if (after != null) {
-//			result.put("after", after.getDay());
-//		}		
-//		
-//		return result;
-//	}	
-	
 	
 	private Multimap<String, TrackedInstance> groupByDay(List<TrackedInstance> instances) {
 		Multimap<String, TrackedInstance> result = Multimaps.index(instances, TrackedInstance::getDay);
