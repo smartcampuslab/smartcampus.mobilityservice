@@ -3,7 +3,6 @@ package eu.trentorise.smartcampus.mobility.controller.rest;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -139,9 +139,10 @@ public class GamificationController {
 	
 	private static Log logger = LogFactory.getLog(GamificationController.class);
 
-	private static SimpleDateFormat shortSdf = new SimpleDateFormat("yyyy/MM/dd");
-	private static SimpleDateFormat timeSdf = new SimpleDateFormat("HH:mm");
-	private static SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+	private static FastDateFormat shortSdf = FastDateFormat.getInstance("yyyy/MM/dd");
+	private static FastDateFormat reverseShortSdf = FastDateFormat.getInstance("dd/MM/yyyy");
+	private static FastDateFormat timeSdf = FastDateFormat.getInstance("HH:mm");
+	private static FastDateFormat fullSdf = FastDateFormat.getInstance("yyyy/MM/dd HH:mm");
 
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -665,19 +666,18 @@ public class GamificationController {
 	public @ResponseBody void generareReport(HttpServletResponse response, @RequestParam(required = true, value = "appId") String appId, @RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate) throws IOException {
 		Criteria criteria = new Criteria("appId").is(appId).and("changedValidity").ne(null).and("approved").ne(true);
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String fileName = "report";
 		
 		if (fromDate != null) {
 			String fd = shortSdf.format(new Date(fromDate));
 			criteria = criteria.and("day").gte(fd);
-			fileName += "_" + sdf.format(new Date(fromDate));
+			fileName += "_" + shortSdf.format(new Date(fromDate));
 		}
 		
 		if (toDate != null) {
 			String td = shortSdf.format(new Date(toDate));
 			criteria = criteria.andOperator(new Criteria("day").lte(td));
-			fileName += "_" + sdf.format(new Date(toDate));
+			fileName += "_" + shortSdf.format(new Date(toDate));
 		}		
 		
 		Query query = new Query(criteria).with(new Sort(Direction.DESC, "userId"));
@@ -825,8 +825,8 @@ public class GamificationController {
 					
 					if (o.getValidationResult().getValidationStatus().getPolyline() == null) {
 						List<Geolocation> points = Lists.newArrayList(o.getGeolocationEvents());
-						points = TrackValidator.removeStarredClusters(points);
 						TrackValidator.shortenByHighSpeed(points);
+						points = TrackValidator.removeStarredClusters(points);
 						points = TrackValidator.preprocessTrack(points);
 						String polyline = GamificationHelper.encodePoly(points);
 						logger.debug("Generated polyline for " + o.getId() + " = " + polyline);
@@ -1045,8 +1045,7 @@ public class GamificationController {
 			GameInfo game = gameSetup.findGameById(ai.getGameId());			
 			
 			String startDate = game.getStart();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-			start = sdf.parse(startDate).getTime();
+			start = reverseShortSdf.parse(startDate).getTime();
 			
 			if (from == null) {
 				from = start;
@@ -1093,14 +1092,12 @@ public class GamificationController {
 			GameInfo game = gameSetup.findGameById(ai.getGameId());
 			
 			String startDate = game.getStart();
-			SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
-			start = sdf1.parse(startDate).getTime();
-			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
-			startDate = sdf2.format(new Date(start));
+			start = reverseShortSdf.parse(startDate).getTime();
+			startDate = shortSdf.format(new Date(start));
 			
 
 			result = statisticsBuilder.getGlobalStatistics(userId, appId, startDate, true);
-			
+
 		} catch (Exception e) {
 			logger.error("Failed retrieving player statistics events: "+e.getMessage(),e);
 			e.printStackTrace();
