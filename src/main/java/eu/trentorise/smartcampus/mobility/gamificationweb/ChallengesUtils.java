@@ -252,7 +252,6 @@ public class ChallengesUtils {
 		    				break;
 	    				}
 	    				case CHAL_MODEL_INCENTIVE_GROUP: {
-	    					System.err.println("HERE");
 		    				if(completed) {
 	    						row_status = 1; 
 	    						status = 100;
