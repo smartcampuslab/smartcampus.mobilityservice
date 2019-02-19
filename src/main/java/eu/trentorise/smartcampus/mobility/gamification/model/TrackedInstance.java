@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.google.common.collect.Sets;
 
@@ -13,6 +14,7 @@ import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult;
 import eu.trentorise.smartcampus.mobility.geolocation.model.ValidationResult.TravelValidity;
 import eu.trentorise.smartcampus.mobility.storage.ItineraryObject;
 
+@Document(collection = "trackedInstances")
 public class TrackedInstance {
 
 	public enum ScoreStatus {
