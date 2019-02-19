@@ -112,7 +112,7 @@ public class ProfileController {
 		return profiles;
 	}
 
-	@Scheduled(cron="0 15 17 * * *")
+	@Scheduled(cron="0 30 17 * * *")
 	public void generateWaypoints() throws Exception {
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
 		for (String campaignId: campaignIds) {
