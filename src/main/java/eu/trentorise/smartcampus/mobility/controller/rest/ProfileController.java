@@ -287,33 +287,12 @@ public class ProfileController {
 		return sortedDates;
 	}	
 
-	private PlayerWaypoints convertTrackedInstance(TrackedInstance ti) {
-		PlayerWaypoints pws = new PlayerWaypoints();
-
-		pws.setUser_id(ti.getUserId());
-		pws.setActivity_id(ti.getId());
-		pws.setActivity_type(ti.getFreeTrackingTransport());
-		for (Geolocation loc : ti.getGeolocationEvents()) {
-			PlayerWaypoint pw = new PlayerWaypoint();
-
-			pw.setLatitude(loc.getLatitude());
-			pw.setLongitude(loc.getLongitude());
-			pw.setTimestamp(extendedSdf.format(loc.getRecorded_at()));
-			pw.setAccuracy(loc.getAccuracy());
-			pw.setSpeed(loc.getSpeed());
-			pw.setWaypoint_activity_confidence(loc.getActivity_confidence());
-			pw.setWaypoint_activity_type(loc.getActivity_type());
-
-			pws.getWaypoints().add(pw);
-		}
-
-		return pws;
-	}
-
 	private PlayerWaypoints convertTrackedInstance(TrackedInstance ti, SequenceWriter writer) throws IOException {
 		PlayerWaypoints pws = new PlayerWaypoints();
 
 		pws.setUser_id(ti.getUserId());
+		pws.setActivity_id(ti.getId());
+		pws.setActivity_type(ti.getFreeTrackingTransport());		
 		for (Geolocation loc : ti.getGeolocationEvents()) {
 			PlayerWaypoint pw = new PlayerWaypoint();
 
