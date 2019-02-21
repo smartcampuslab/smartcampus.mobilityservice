@@ -504,6 +504,14 @@
 		}
 	},
 	{
+		"modelName": "survey",
+		"filter": "challenge",
+		"description": {
+			"it": "Per vincere la sfida compila il questionario sulle sfide di coppia che visualizzi al seguente \\<a href='<surveylink>' target='_system'>indirizzo\\</a>.",
+			"en": "To win this challenge, complete the multiplayer challenge questionnaire that you can access \\<a href='<surveylink>' target='_system'>here\\</a>."
+		}
+	},	
+	{
 		"modelName": "leaderboardPosition",
 		"filter": null,
 		"description": {
