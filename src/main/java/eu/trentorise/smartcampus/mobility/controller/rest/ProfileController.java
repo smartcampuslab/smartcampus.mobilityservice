@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,12 @@ public class ProfileController {
 	
 	private EncryptDecrypt cryptUtils;
 
+	@PostConstruct
+	public void init() throws Exception {
+		cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
+	}
+	
+	
 	@GetMapping("/profile/{campaignId}")
 	public @ResponseBody List<PlayerProfile> profile(@PathVariable String campaignId, @RequestParam(required = false) String date_from, @RequestParam(required = false) String date_to)
 			throws Exception {
@@ -121,10 +129,7 @@ public class ProfileController {
 	}
 
 	@Scheduled(cron="0 0 14 * * *")
-//	@PostConstruct
 	public void generateWaypoints() throws Exception {
-		cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
-		
 		Runnable r= new Runnable() {
 			
 			@Override
