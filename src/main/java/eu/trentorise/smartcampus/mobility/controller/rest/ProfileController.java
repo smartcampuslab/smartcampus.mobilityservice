@@ -128,9 +128,9 @@ public class ProfileController {
 		return profiles;
 	}
 
-	@Scheduled(cron="0 30 14 * * *")
+	@Scheduled(cron="0 30 3 * * *")
 	public void generateWaypoints() throws Exception {
-		Runnable r= new Runnable() {
+		Runnable r = new Runnable() {
 			
 			@Override
 			public void run() {
