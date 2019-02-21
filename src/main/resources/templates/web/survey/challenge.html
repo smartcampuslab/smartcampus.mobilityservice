@@ -16,19 +16,19 @@
 <script src="../../../../lib/jquery.min.js"></script>
 <script src="../../../../lib/bootstrap.min.js"></script>
 </head>
-<body>
+<body onload="highlightIncomplete()">
 	<div class="container">
-		<h3 th:text="#{surveyexperience.head}" style="text-align: center;">Questionario sull'esperienza di gioco</h3>
+		<h3 th:text="#{surveychallenge.head}" style="text-align: center;">Questionario sull'esperienza di gioco</h3>
 		<form id="form" role="form" name="form" method="POST">
 
 			<div class="first-page">
 
 				<label th:text="#{survey.acc1}">acc1</label> <br />
 				<ol>
-					<p th:each="prod: ${#numbers.sequence(1, 2)}">
+					<p th:each="prod: ${#numbers.sequence(1, 15)}">
 						<!-- <p th:text="${prod}"></p> -->
 					<fieldset th:id="|fs${prod}|">
-						<li th:text="#{surveyexperience.q + ${prod}}" >?</li> <span
+						<li th:text="#{surveychallenge.q + ${prod}}" >?</li> <span
 							style="font-size: 12px" th:text="#{survey.acc2.1}"></span> <span
 							style="font-size: 12px" th:text="#{survey.acc2.2}"></span><br />
 						<span th:id="|el${prod}|" class="small_b"
@@ -41,15 +41,15 @@
 				</ol>
 
 				<div class="form-group">
-					<label for="oq16" th:text="#{surveyexperience.q16}"></label>
+					<label for="q16" th:text="#{surveychallenge.q16}"></label>
 					<br/>
-					<textarea id="oq16" name="oq16" rows="3" cols="80"></textarea>
+					<textarea id="q16" name="q16" rows="3" cols="30"></textarea>
 				</div>
 
 
 			<div class="form-group">
 				<button id="send" type="button" class="btn btn-primary"
-					th:text="#{survey.submit}" onClick="highlightIncomplete(false)">Submit</button>
+					th:text="#{survey.submit}" onClick="highlightIncomplete()">Submit</button>
 			</div>
 				
 			</div>
@@ -78,7 +78,7 @@
 	    }
   });
   
-  function highlightIncomplete(blackonly) {
+  function highlightIncomplete() {
 	  var qsn = $('fieldset').length;
 	  
 		for (i = 1; i <= qsn; i++) {
@@ -86,9 +86,7 @@
 			var inp = $("span[id=el" + i + "]");
 			if (v.val() === undefined) {
 				inp.each(function() {
-				if (!blackonly) {
-					$(this).attr("style", "color:red;");
-				}
+				$(this).attr("style", "color:red;");
 				});
 			} else {
 				inp.attr("style", "color:black;");
@@ -97,9 +95,7 @@
 	  
 		$('select:visible').each(function() {
 			if ($(this).val().length === 0) {
-				if (!blackonly) {
-					$(this).attr("style", "color:red;");
-				}
+				$(this).attr("style", "color:red;");
 			} else {
 				$(this).attr("style", "color:black;");
 			}
