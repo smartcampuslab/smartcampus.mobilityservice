@@ -128,28 +128,18 @@ public class ProfileController {
 		return profiles;
 	}
 
-	@Scheduled(cron="0 30 3 * * *")
+	@Scheduled(cron = "0 40 10 * * *")
 	public void generateWaypoints() throws Exception {
-		Runnable r = new Runnable() {
-			
-			@Override
-			public void run() {
-				logger.info("Starting waypoints generation");
-				List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
-				for (String campaignId: campaignIds) {
-					try {
-						generateWaypoints(campaignId);
-					} catch (Exception e) {
-						logger.info("Error generating waypoints");
-					}
-				}
-				logger.info("Ended waypoints generation");
+		logger.info("Starting waypoints generation");
+		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
+		for (String campaignId : campaignIds) {
+			try {
+				generateWaypoints(campaignId);
+			} catch (Exception e) {
+				logger.info("Error generating waypoints");
 			}
-		};
-		
-		Thread t = new Thread(r);
-		t.start();
-		
+		}
+		logger.info("Ended waypoints generation");
 	}
 	
 	
@@ -185,7 +175,11 @@ public class ProfileController {
 		});
 		
 		for (String month: months) {
-			created += createMissingMonth(month, currentMonth, campaignId, null);
+			try {
+				created += createMissingMonth(month, currentMonth, campaignId, null);
+			} catch (Exception e) {
+				logger.error("Error generating month " + month, e);
+			}
 		}
 		
 		sw.stop();
