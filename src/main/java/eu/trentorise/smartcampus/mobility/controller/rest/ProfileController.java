@@ -128,7 +128,7 @@ public class ProfileController {
 		return profiles;
 	}
 
-	@Scheduled(cron = "0 40 10 * * *")
+	@Scheduled(cron = "0 55 10 * * *")
 	public void generateWaypoints() throws Exception {
 		logger.info("Starting waypoints generation");
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
