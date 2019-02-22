@@ -128,7 +128,7 @@ public class ProfileController {
 		return profiles;
 	}
 
-	@Scheduled(cron = "0 55 10 * * *")
+	@Scheduled(cron = "0 30 3 * * *")
 	public void generateWaypoints() throws Exception {
 		logger.info("Starting waypoints generation");
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
@@ -164,6 +164,7 @@ public class ProfileController {
 		
 		Criteria criteria0 = new Criteria("gameId").is(gameId);
 		Query query0 = new Query(criteria0);
+		query0.fields().include("playerId");
 		List<Player> players = template.find(query0, Player.class);
 //		List<Player> players = template.findAll(Player.class);
 		Collections.sort(players, new Comparator<Player>() {
@@ -176,7 +177,7 @@ public class ProfileController {
 		
 		for (String month: months) {
 			try {
-				created += createMissingMonth(month, currentMonth, campaignId, null);
+				created += createMissingMonth(month, currentMonth, campaignId, players);
 			} catch (Exception e) {
 				logger.error("Error generating month " + month, e);
 			}
