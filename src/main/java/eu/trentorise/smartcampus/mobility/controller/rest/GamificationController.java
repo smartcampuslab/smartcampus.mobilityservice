@@ -199,7 +199,6 @@ public class GamificationController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/freetracking/{transport}/{itineraryId}")
 	public @ResponseBody void startFreeTracking(@PathVariable String transport, @PathVariable String itineraryId,
 			@RequestHeader(required = true, value = "appId") String appId, @RequestHeader(required = false, value = "device") String device, HttpServletResponse response) throws Exception {
-		logger.info("Starting free tracking for gamification, device = " + device);
 		try {
 			String userId = getUserId();
 			if (userId == null) {
@@ -215,6 +214,8 @@ public class GamificationController {
 				return;
 			}
 
+			logger.info("Starting free tracking for user " + userId + ", transport " + transport + ", itineraryId " + itineraryId + ", device = " + device);
+			
 			Map<String, Object> pars = new TreeMap<String, Object>();
 
 			pars.put("clientId", itineraryId);
