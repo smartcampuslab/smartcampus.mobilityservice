@@ -811,6 +811,9 @@ public class GamificationController {
 					Collections.sort(geo);
 					o.setGeolocationEvents(geo);
 
+					if (!scores.containsKey(o.getId())) {
+						logger.info("Missing travel score in GE: " + o.getId());
+					}
 					if (scores.containsKey(o.getId()) && !ScoreStatus.ASSIGNED.equals(o.getScoreStatus())) {
 						logger.info("Set assigned status to trip " + o.getId());
 						o.setScore(scores.get(o.getId()).longValue());
