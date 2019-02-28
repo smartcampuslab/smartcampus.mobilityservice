@@ -224,7 +224,7 @@ public class GamificationCache {
 		}
 		
 		RestTemplate restTemplate = new RestTemplate();
-		String url = gamificationUrl + "/notification/game/" + gameId + "/player/" + playerId + "/grouped?size=1000";
+		String url = gamificationUrl + "/notification/game/" + gameId + "/player/" + playerId + "/grouped?size=10000";
 		logger.debug("Notifications: " + url);
 		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(appId)),
 				String.class);
