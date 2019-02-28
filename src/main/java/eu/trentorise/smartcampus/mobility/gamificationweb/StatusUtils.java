@@ -68,8 +68,6 @@ public class StatusUtils {
 
 	public static final long MILLIS_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
-	private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
 	@Autowired
 	private ChallengesUtils challUtils;
 	
