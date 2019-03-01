@@ -127,6 +127,12 @@ public class ProfileController {
 
 		return profiles;
 	}
+	
+	@GetMapping("/waypoints/generate")
+	public @ResponseBody void generateWaypointsFiles() throws Exception {
+		generateWaypoints();
+	}
+	
 
 	@Scheduled(cron = "0 30 3 * * *")
 	public void generateWaypoints() throws Exception {
@@ -136,7 +142,7 @@ public class ProfileController {
 			try {
 				generateWaypoints(campaignId);
 			} catch (Exception e) {
-				logger.info("Error generating waypoints");
+				logger.error("Error generating waypoints");
 			}
 		}
 		logger.info("Ended waypoints generation");
@@ -144,6 +150,7 @@ public class ProfileController {
 	
 	
 	public void generateWaypoints(String campaignId) throws Exception {
+		try {
 		AppInfo app = appSetup.findAppById(campaignId);
 		String gameId = app.getGameId();
 		if (gameId == null) {
@@ -160,12 +167,14 @@ public class ProfileController {
 		String currentMonth = monthSdf.format(new Date());
 		String gameStart = shortSdfDb.format(startGame);		
 		
-		SortedSet<String> months = findMonths(campaignId, gameStart);		
+		SortedSet<String> months = findMonths(campaignId, gameStart);	
+		logger.info("Months with trips: " + months.size());
 		
 		Criteria criteria0 = new Criteria("gameId").is(gameId);
 		Query query0 = new Query(criteria0);
 		query0.fields().include("playerId");
 		List<Player> players = template.find(query0, Player.class);
+		logger.info("Found players: " + players.size());
 //		List<Player> players = template.findAll(Player.class);
 		Collections.sort(players, new Comparator<Player>() {
 
@@ -176,16 +185,15 @@ public class ProfileController {
 		});
 		
 		for (String month: months) {
-			try {
-				created += createMissingMonth(month, currentMonth, campaignId, players);
-			} catch (Exception e) {
-				logger.error("Error generating month " + month, e);
-			}
+			created += createMissingMonth(month, currentMonth, campaignId, players);
 		}
 		
 		sw.stop();
 		logger.info("Total Waypoints generated: " + created + ", time elapsed: " + sw.elapsed(TimeUnit.SECONDS));
-		
+		} catch (Exception e) {
+			logger.error("Error generating points for " + campaignId, e);
+		}
+
 	}
 
 	private PlayerProfile convertPlayer(Player p, int year) {
@@ -294,11 +302,14 @@ public class ProfileController {
 		
 		Stopwatch sw = Stopwatch.createStarted();
 		
+		logger.info("Creating zip file: " + f);
 		FileOutputStream fos0 = new FileOutputStream(f);
 		ZipOutputStream fos = new ZipOutputStream(fos0);
 		ZipEntry ze = new ZipEntry(campaignId + "_" + suffix + ".json");
+		logger.info("Adding zip entry: " + ze.getName());
 		fos.putNextEntry(ze);
 		
+		logger.info("Generating data");
 		ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
 		try (SequenceWriter sequenceWriter = writer.writeValues(fos)) {
 			sequenceWriter.init(true);
