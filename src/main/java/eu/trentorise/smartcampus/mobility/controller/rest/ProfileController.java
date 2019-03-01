@@ -27,7 +27,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -134,7 +133,7 @@ public class ProfileController {
 	}
 	
 
-	@Scheduled(cron = "0 30 3 * * *")
+//	@Scheduled(cron = "0 30 3 * * *")
 	public void generateWaypoints() throws Exception {
 		logger.info("Starting waypoints generation");
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
