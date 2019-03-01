@@ -188,7 +188,7 @@ public class StatisticsBuilder {
 		Query query = new Query(criteria);
 		query.fields().include("day");
 		
-		logger.info("Start outside - findOne 1b: " + query);
+		logger.debug("Start outside - findOne 1b: " + query);
 		
 		List<String> before = template.getCollection("trackedInstances").distinct("day", query.getQueryObject());
 		Collections.sort(before);
@@ -196,7 +196,7 @@ public class StatisticsBuilder {
 		if (!before.isEmpty()) {
 			result.put("before", before.get(0));
 		}
-		logger.info("End outside - findOne 1b = " + result.get("before"));
+		logger.debug("End outside - findOne 1b = " + result.get("before"));
 		
 		criteria = new Criteria("userId").is(userId).and("appId").is(appId).and("complete").is(true).and("day").gt(to);
 		criteria.orOperator(
@@ -205,13 +205,13 @@ public class StatisticsBuilder {
 		query = new Query(criteria);
 		query.fields().include("day");		
 		
-		logger.info("Start outside - findOne 2b");
+		logger.debug("Start outside - findOne 2b");
 		List<String> after = template.getCollection("trackedInstances").distinct("day", query.getQueryObject());
 		Collections.sort(after);
 		if (!after.isEmpty()) {
 			result.put("after", after.get(0));
 		}
-		logger.info("End outside - findOne 2b = " + result.get("after"));
+		logger.debug("End outside - findOne 2b = " + result.get("after"));
 		
 		return result;
 	}		
