@@ -83,7 +83,7 @@ public class ProfileController {
 	private String waypointsDir;
 
 	@Autowired
-	@Qualifier("prodMongoTemplate")
+	@Qualifier("mongoTemplate")
 	MongoTemplate template;
 
 	@Autowired
