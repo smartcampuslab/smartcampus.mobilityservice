@@ -31,6 +31,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -82,7 +83,7 @@ public class ProfileController {
 	private String waypointsDir;
 
 	@Autowired
-	@Qualifier("mongoTemplate")
+	@Qualifier("prodMongoTemplate")
 	MongoTemplate template;
 
 	@Autowired
@@ -138,13 +139,13 @@ public class ProfileController {
 		return profiles;
 	}
 	
-	@GetMapping("/waypoints/generate")
-	public @ResponseBody void generateWaypointsFiles() throws Exception {
-		generateWaypoints();
-	}
+//	@GetMapping("/waypoints/generate")
+//	public @ResponseBody void generateWaypointsFiles() throws Exception {
+//		generateWaypoints();
+//	}
 	
 
-//	@Scheduled(cron = "0 30 3 * * *")
+	@Scheduled(cron = "0 30 3 * * *")
 	public void generateWaypoints() throws Exception {
 		logger.info("Starting waypoints generation");
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
@@ -292,8 +293,9 @@ public class ProfileController {
 	}
 
 	private int createMissingMonth(String date, String currentDate, String campaignId, List<Player> players) throws Exception {
-		List<PlayerWaypoints> result = Lists.newArrayList();
-
+//		List<PlayerWaypoints> result = Lists.newArrayList();
+		int resultN = 0;
+		
 		String suffix = date.replace("/", "-");
 		File dir = new File(waypointsDir + "/" + campaignId + "_" + suffix);
 		File fz = new File(waypointsDir + "/" + campaignId + "_" + suffix + ".zip");
@@ -323,44 +325,62 @@ public class ProfileController {
 		calendar.setTime(monthDate);
 		int month = calendar.get(Calendar.MONTH);
 
+		String today = shortSdfApi.format(new Date());
+		
 		while (calendar.get(Calendar.MONTH) == month) {
 			String day = Strings.padStart("" + calendar.get(Calendar.DAY_OF_MONTH), 2, '0');
 
 			File wf = new File(dir, campaignId + "_" + suffix + "-" + day + ".json");
-			wf.createNewFile();
-			FileOutputStream fos = new FileOutputStream(wf);
-			logger.info("Adding file: " + wf.getName());
-
-			SequenceWriter sequenceWriter = writer.writeValues(fos);
-			sequenceWriter.init(true);
-
-			if (players != null) {
-				for (Player p : players) {
-					Criteria criteria = new Criteria("appId").is(campaignId).and("userId").is(p.getPlayerId()).and("freeTrackingTransport").ne(null).and("day").is(date + "/" + day);
-
-					Query query = new Query(criteria);
-
-					CloseableIterator<TrackedInstance> it = template.stream(query, TrackedInstance.class);
-					while (it.hasNext()) {
-						TrackedInstance ti = it.next();
-						PlayerWaypoints pws = convertTrackedInstance(ti, sequenceWriter);
-						result.add(pws);
-					}
-				}
-
-				calendar.add(Calendar.DAY_OF_MONTH, 1);
+			
+//			if (!wf.exists() || today.equals(suffix + "-" + day)) {
+//				logger.info("Skipping already generated file " + wf.getName());
+//				continue;
+//			}
+			
+			if (today.compareTo(suffix + "-" + day) < 0) {
+				logger.info("Stopping at current day");
+				break;
 			}
 			
-			sequenceWriter.flush();
-			sequenceWriter.close();
-			fos.close();
+			if (!wf.exists() || today.equals(suffix + "-" + day)) {
+				wf.createNewFile();
+				FileOutputStream fos = new FileOutputStream(wf);
+				logger.info("Adding file: " + wf.getName());
+
+				SequenceWriter sequenceWriter = writer.writeValues(fos);
+				sequenceWriter.init(true);
+
+				if (players != null) {
+					for (Player p : players) {
+						Criteria criteria = new Criteria("appId").is(campaignId).and("userId").is(p.getPlayerId()).and("freeTrackingTransport").ne(null).and("day").is(date + "/" + day);
+
+						Query query = new Query(criteria);
+
+						CloseableIterator<TrackedInstance> it = template.stream(query, TrackedInstance.class);
+						while (it.hasNext()) {
+							TrackedInstance ti = it.next();
+							PlayerWaypoints pws = convertTrackedInstance(ti, sequenceWriter);
+//							result.add(pws);
+							resultN++;
+						}
+					}
+
+				}
+
+
+				sequenceWriter.flush();
+				sequenceWriter.close();
+				fos.close();
+			}
+			
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		
 		zipMissingMonth(date, currentDate, campaignId);
 		
 		sw.stop();
-		logger.info("Waypoints generated: " + result.size() + ", time elapsed: " + sw.elapsed(TimeUnit.SECONDS));
-		return result.size();
+		logger.info("Waypoints generated: " + resultN + ", time elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+		return resultN;
 	}	
 	
 	private void zipMissingMonth(String date, String currentDate, String campaignId) throws Exception {
@@ -391,10 +411,12 @@ public class ProfileController {
 		}
 		fs.close();
 		
-		for (File jf: dir.listFiles()) {
-			jf.delete();
+		if (!suffix.equals(currentDate)) {
+			for (File jf: dir.listFiles()) {
+				jf.delete();
+			}			
+			dir.delete();
 		}
-		dir.delete();
 	}
 	
 	
