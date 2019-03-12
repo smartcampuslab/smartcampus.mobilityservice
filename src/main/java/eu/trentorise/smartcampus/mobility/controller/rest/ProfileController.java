@@ -182,8 +182,9 @@ public class ProfileController {
 		for (String campaignId : campaignIds) {
 			try {
 				generateWaypoints(campaignId);
+				logger.info("Generation for " + campaignId + " ended");
 			} catch (Exception e) {
-				logger.error("Error generating waypoints");
+				logger.error("Error generating waypoints for " + campaignId);
 			}
 		}
 		logger.info("Ended waypoints generation");
