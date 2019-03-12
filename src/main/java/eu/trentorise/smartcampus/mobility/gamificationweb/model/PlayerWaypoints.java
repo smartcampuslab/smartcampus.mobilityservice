@@ -45,4 +45,12 @@ public class PlayerWaypoints {
 		this.waypoints = waypoints;
 	}
 
+	public void flatten() {
+		for (PlayerWaypoint pw: waypoints) {
+			pw.setActivity_id(activity_id);
+			pw.setActivity_type(activity_type);
+			pw.setUser_id(user_id);
+		}
+	}
+	
 }

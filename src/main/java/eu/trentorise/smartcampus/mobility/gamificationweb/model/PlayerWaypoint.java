@@ -2,6 +2,12 @@ package eu.trentorise.smartcampus.mobility.gamificationweb.model;
 
 public class PlayerWaypoint {
 
+	private String user_id;
+	private String activity_id;
+	private String activity_type;
+
+	////
+	
 	private String timestamp;
 	private Double latitude;
 	private Double longitude;
@@ -66,5 +72,34 @@ public class PlayerWaypoint {
 	public void setWaypoint_activity_confidence(Long waypoint_activity_confidence) {
 		this.waypoint_activity_confidence = waypoint_activity_confidence;
 	}
+
+	public String getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(String user_id) {
+		this.user_id = user_id;
+	}
+
+	public String getActivity_id() {
+		return activity_id;
+	}
+
+	public void setActivity_id(String activity_id) {
+		this.activity_id = activity_id;
+	}
+
+	public String getActivity_type() {
+		return activity_type;
+	}
+
+	public void setActivity_type(String activity_type) {
+		this.activity_type = activity_type;
+	}
+	
+	////
+	
+	
+	
 
 }

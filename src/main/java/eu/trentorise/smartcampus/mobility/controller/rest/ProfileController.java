@@ -43,6 +43,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -79,11 +81,14 @@ public class ProfileController {
 
 	private ObjectMapper mapper;
 	
+	private CsvMapper csvMapper;
+	private CsvSchema schema;
+	
 	@Value("${waypointsDir}")
 	private String waypointsDir;
 
 	@Autowired
-	@Qualifier("mongoTemplate")
+	@Qualifier("prodMongoTemplate")
 	MongoTemplate template;
 
 	@Autowired
@@ -99,6 +104,31 @@ public class ProfileController {
 		JsonFactory jsonFactory = new JsonFactory();
 		jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 		mapper = new ObjectMapper(jsonFactory);
+		
+		csvMapper = new CsvMapper();
+		csvMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+		csvMapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true);
+		
+//		schema = csvMapper.schemaFor(new TypeReference<PlayerWaypoint>() {
+//		});
+		
+//		schema = csvMapper.schemaFor(PlayerWaypoint.class);
+		
+		CsvSchema.Builder builder = new CsvSchema.Builder();
+        builder.setUseHeader(true);
+        builder.setNullValue("");
+        builder.addColumn("user_id");
+        builder.addColumn("activity_id");
+        builder.addColumn("activity_type");
+        builder.addColumn("timestamp");
+        builder.addColumn("latitude");
+        builder.addColumn("longitude");
+        builder.addColumn("accuracy");
+        builder.addColumn("speed");
+        builder.addColumn("waypoint_activity_type");
+        builder.addColumn("waypoint_activity_confidence");
+        
+        schema = builder.build();
 		
 		cryptUtils = new EncryptDecrypt(secretKey1, secretKey2);
 	}
@@ -196,7 +226,7 @@ public class ProfileController {
 		});
 		
 		for (String month: months) {
-			created += createMissingMonth(month, currentMonth, campaignId, players);
+			created += createMissingMonthCsv(month, currentMonth, campaignId, players);
 		}
 		
 		sw.stop();
@@ -359,8 +389,8 @@ public class ProfileController {
 						CloseableIterator<TrackedInstance> it = template.stream(query, TrackedInstance.class);
 						while (it.hasNext()) {
 							TrackedInstance ti = it.next();
-							PlayerWaypoints pws = convertTrackedInstance(ti, sequenceWriter);
-//							result.add(pws);
+							PlayerWaypoints pws = convertTrackedInstance(ti);
+							sequenceWriter.write(pws);
 							resultN++;
 						}
 					}
@@ -370,11 +400,15 @@ public class ProfileController {
 
 				sequenceWriter.flush();
 				sequenceWriter.close();
+				
 				fos.close();
 			}
 			
+
 			calendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
+		
+
 		
 		zipMissingMonth(date, currentDate, campaignId);
 		
@@ -382,6 +416,102 @@ public class ProfileController {
 		logger.info("Waypoints generated: " + resultN + ", time elapsed: " + sw.elapsed(TimeUnit.SECONDS));
 		return resultN;
 	}	
+	
+	private int createMissingMonthCsv(String date, String currentDate, String campaignId, List<Player> players) throws Exception {
+//		List<PlayerWaypoints> result = Lists.newArrayList();
+		int resultN = 0;
+		
+		String suffix = date.replace("/", "-");
+		File dir = new File(waypointsDir + "/" + campaignId + "_" + suffix);
+		File fz = new File(waypointsDir + "/" + campaignId + "_" + suffix + "_csv.zip");
+		if (dir.exists() || fz.exists()) {
+			if (suffix.equals(currentDate)) {
+				logger.info("Overwriting current waypoints " + suffix);
+				if (!dir.exists()) {
+					dir.mkdir();
+				}
+			} else {
+				logger.info("Skipping existing waypoints " + suffix);
+				return 0;
+			}
+		} else {
+			logger.info("Writing missing waypoints " + suffix);
+			dir.mkdir();
+		}
+
+		Stopwatch sw = Stopwatch.createStarted();
+
+		logger.info("Creating files in: " + dir);
+
+		ObjectWriter csvWriter = csvMapper.writerFor(PlayerWaypoint.class).with(schema);
+
+		Date monthDate = monthSdf.parse(suffix);
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(monthDate);
+		int month = calendar.get(Calendar.MONTH);
+
+		String today = shortSdfApi.format(new Date());
+		
+		while (calendar.get(Calendar.MONTH) == month) {
+			String day = Strings.padStart("" + calendar.get(Calendar.DAY_OF_MONTH), 2, '0');
+
+			File wfCsv = new File(dir, campaignId + "_" + suffix + "-" + day + ".csv");
+			
+//			if (!wfCsv.exists() || today.equals(suffix + "-" + day)) {
+//				logger.info("Skipping already generated file " + wfCsv.getName());
+//				continue;
+//			}
+			
+			if (today.compareTo(suffix + "-" + day) < 0) {
+				logger.info("Stopping at current day");
+				break;
+			}
+			
+			if (!wfCsv.exists() || today.equals(suffix + "-" + day)) {
+				wfCsv.createNewFile();
+				FileOutputStream csvFos = new FileOutputStream(wfCsv);
+				logger.info("Adding file: " + wfCsv.getName());
+
+				SequenceWriter csvSequenceWriter = csvWriter.writeValues(csvFos);
+				csvSequenceWriter.init(true);
+
+				if (players != null) {
+					for (Player p : players) {
+						Criteria criteria = new Criteria("appId").is(campaignId).and("userId").is(p.getPlayerId()).and("freeTrackingTransport").ne(null).and("day").is(date + "/" + day);
+
+						Query query = new Query(criteria);
+
+						CloseableIterator<TrackedInstance> it = template.stream(query, TrackedInstance.class);
+						while (it.hasNext()) {
+							TrackedInstance ti = it.next();
+							PlayerWaypoints pws = convertTrackedInstance(ti);
+							pws.flatten();
+							resultN++;
+							
+							csvSequenceWriter.writeAll(pws.getWaypoints());
+						}
+					}
+
+				}
+				
+				csvSequenceWriter.flush();
+				csvSequenceWriter.close();				
+				csvFos.close();
+			}
+			
+
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		
+
+		
+		zipMissingMonth(date, currentDate, campaignId);
+		
+		sw.stop();
+		logger.info("Waypoints generated: " + resultN + ", time elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+		return resultN;
+	}		
+	
 	
 	private void zipMissingMonth(String date, String currentDate, String campaignId) throws Exception {
 		String suffix = date.replace("/", "-");
@@ -507,7 +637,7 @@ public class ProfileController {
 		return sortedDates;
 	}	
 
-	private PlayerWaypoints convertTrackedInstance(TrackedInstance ti, SequenceWriter writer) throws Exception {
+	private PlayerWaypoints convertTrackedInstance(TrackedInstance ti) throws Exception {
 		PlayerWaypoints pws = new PlayerWaypoints();
 
 		try {
@@ -530,7 +660,6 @@ public class ProfileController {
 
 			pws.getWaypoints().add(pw);
 		}
-		writer.write(pws);
 
 		return pws;
 	}
