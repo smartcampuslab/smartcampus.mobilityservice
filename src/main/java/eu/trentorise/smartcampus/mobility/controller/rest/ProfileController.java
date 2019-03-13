@@ -169,13 +169,13 @@ public class ProfileController {
 		return profiles;
 	}
 	
-//	@GetMapping("/waypoints/generate")
-//	public @ResponseBody void generateWaypointsFiles() throws Exception {
-//		generateWaypoints();
+//	@GetMapping("/waypoints/generate/{campaignId}")
+//	public @ResponseBody void generateWaypointsFiles(@PathVariable String campaignId) throws Exception {
+//		generateWaypoints(campaignId);
 //	}
 	
 
-	@Scheduled(cron = "0 0 4 * * *")
+//	@Scheduled(cron = "0 0 4 * * *")
 	public void generateWaypoints() throws Exception {
 		logger.info("Starting waypoints generation");
 		List<String> campaignIds = appSetup.getApps().stream().map(x -> x.getAppId()).collect(Collectors.toList());
@@ -424,7 +424,7 @@ public class ProfileController {
 		
 		String suffix = date.replace("/", "-");
 		File dir = new File(waypointsDir + "/" + campaignId + "_" + suffix);
-		File fz = new File(waypointsDir + "/" + campaignId + "_" + suffix + "_csv.zip");
+		File fz = new File(waypointsDir + "/" + campaignId + "_" + suffix + ".zip");
 		if (dir.exists() || fz.exists()) {
 			if (suffix.equals(currentDate)) {
 				logger.info("Overwriting current waypoints " + suffix);
