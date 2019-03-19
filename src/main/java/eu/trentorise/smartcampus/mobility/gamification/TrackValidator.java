@@ -499,7 +499,7 @@ public class TrackValidator {
 				if (coverage >= COVERAGE_THRESHOLD) {
 					status.setValidationOutcome(TravelValidity.VALID);
 				} else {
-					status.setValidationOutcome(TravelValidity.PENDING);				
+					status.setValidationOutcome(TravelValidity.INVALID);				
 				}
 			}
 			return status;
