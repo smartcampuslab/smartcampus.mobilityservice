@@ -705,7 +705,7 @@ public class TrackValidator {
 			}
 		}
 		realTime = realTime * 0.001;
-		return ( remainingDistance / (realTime)) * 3.6;
+		return ( remainingDistance / ((double) realTime)) * 3.6;
 		
 	}
 	
