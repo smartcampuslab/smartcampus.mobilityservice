@@ -188,7 +188,9 @@ public class TrackValidator {
 
 		int oldsize = 0;
 		int n = 0;
-		do {
+//		do {
+//			n++;
+//			System.err.println("N = " + n);
 			for (int i = 1; i < points.size(); i++) {
 				double d = GamificationHelper.harvesineDistance(points.get(i), points.get(i - 1));
 				long t = points.get(i).getRecorded_at().getTime() - points.get(i - 1).getRecorded_at().getTime();
@@ -213,7 +215,7 @@ public class TrackValidator {
 			for (Integer key : ranges.keySet()) {
 				points.removeIf(x -> points.indexOf(x) > key && points.indexOf(x) < ranges.get(key));
 			}
-		} while (oldsize - points.size() > 2 && n < 10);
+//		} while (oldsize - points.size() > 2 && n < 10);
 
 	}
 	
@@ -705,7 +707,7 @@ public class TrackValidator {
 			}
 		}
 		realTime = realTime * 0.001;
-		return ( remainingDistance / ((double) realTime)) * 3.6;
+		return ( remainingDistance / (realTime)) * 3.6;
 		
 	}
 	
