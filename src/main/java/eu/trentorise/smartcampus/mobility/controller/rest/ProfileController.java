@@ -169,15 +169,15 @@ public class ProfileController {
 		return profiles;
 	}
 	
-	@GetMapping("/waypoints/generate/{campaignId}")
-	public @ResponseBody void generateWaypointsFiles(@PathVariable String campaignId) throws Exception {
-		generateWaypoints(campaignId);
-	}
-	
-	@GetMapping("/waypoints/generate")
-	public @ResponseBody void generateWaypointsFiles() throws Exception {
-		generateWaypoints();
-	}	
+//	@GetMapping("/waypoints/generate/{campaignId}")
+//	public @ResponseBody void generateWaypointsFiles(@PathVariable String campaignId) throws Exception {
+//		generateWaypoints(campaignId);
+//	}
+//	
+//	@GetMapping("/waypoints/generate")
+//	public @ResponseBody void generateWaypointsFiles() throws Exception {
+//		generateWaypoints();
+//	}	
 	
 
 	@Scheduled(cron = "0 0 4 * * *")
