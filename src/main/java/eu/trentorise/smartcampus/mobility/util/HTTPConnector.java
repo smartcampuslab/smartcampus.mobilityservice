@@ -28,14 +28,23 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class HTTPConnector {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HTTPConnector.class);
 	
+	private static RestTemplate restTemplate;
+	{
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(5000);
+		factory.setReadTimeout(10000);
+		restTemplate = new RestTemplate(factory);
+	}
+	
 	public static String doGet(String address, String req, String accept, String contentType, String encoding) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 
 		logger.info("doGet " + url);
@@ -50,7 +59,7 @@ public class HTTPConnector {
 	}	
 	
 	public static InputStream doStreamGet(String address, String req, String accept, String contentType) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 		
 		logger.info("doStreamGet " + url);
@@ -68,7 +77,7 @@ public class HTTPConnector {
 	}	
 	
 	public static String doBasicAuthenticationPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 
 		logger.info("doBasicAuthenticationPost " + address);
 		
@@ -87,7 +96,7 @@ public class HTTPConnector {
 	}
 	
 	public static String doTokenAuthenticationPost(String address, String req, String accept, String contentType, String token) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 
 		logger.info("doTokenAuthenticationPost " + address);
 		
@@ -101,7 +110,7 @@ public class HTTPConnector {
 	}	
 	
 	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 
 		logger.info("doPost " + address);
 		
