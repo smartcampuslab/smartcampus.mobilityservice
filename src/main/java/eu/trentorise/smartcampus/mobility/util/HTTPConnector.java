@@ -39,7 +39,7 @@ public class HTTPConnector {
 	{
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
 		factory.setConnectTimeout(5000);
-		factory.setReadTimeout(10000);
+		factory.setReadTimeout(15000);
 		restTemplate = new RestTemplate(factory);
 	}
 	
@@ -47,7 +47,7 @@ public class HTTPConnector {
 //		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 
-		logger.info("doGet " + url);
+		// logger.info("doGet " + url);
 		
 		ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(null, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))), String.class);
 
@@ -62,7 +62,7 @@ public class HTTPConnector {
 //		RestTemplate restTemplate = new RestTemplate();
 		String url = address + ((req != null) ? ("?" + req) : "");
 		
-		logger.info("doStreamGet " + url);
+		// logger.info("doStreamGet " + url);
 		
 		ResponseEntity<Resource> res = restTemplate.exchange(url, HttpMethod.GET, 
 				new HttpEntity<Object>(null, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))),
@@ -79,7 +79,7 @@ public class HTTPConnector {
 	public static String doBasicAuthenticationPost(String address, String req, String accept, String contentType, String user, String password) throws Exception {
 //		RestTemplate restTemplate = new RestTemplate();
 
-		logger.info("doBasicAuthenticationPost " + address);
+		// logger.info("doBasicAuthenticationPost " + address);
 		
 		String s = user + ":" + password;
 		byte[] b = Base64.encodeBase64(s.getBytes());
@@ -98,7 +98,7 @@ public class HTTPConnector {
 	public static String doTokenAuthenticationPost(String address, String req, String accept, String contentType, String token) throws Exception {
 //		RestTemplate restTemplate = new RestTemplate();
 
-		logger.info("doTokenAuthenticationPost " + address);
+		// logger.info("doTokenAuthenticationPost " + address);
 		
 		ResponseEntity<String> res = restTemplate.exchange(address, HttpMethod.POST, new HttpEntity<Object>(req, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}, {"Authorization", "Bearer " + token}}))), String.class);
 
@@ -112,7 +112,7 @@ public class HTTPConnector {
 	public static String doPost(String address, String req, String accept, String contentType) throws Exception {
 //		RestTemplate restTemplate = new RestTemplate();
 
-		logger.info("doPost " + address);
+		// logger.info("doPost " + address);
 		
 		ResponseEntity<String> res = restTemplate.exchange(address, HttpMethod.POST, new HttpEntity<Object>(req, createHeaders(MapUtils.putAll(new TreeMap<String, String>(), new String[][] {{"Accept", accept}, {"Content-Type", contentType}}))),
 				String.class);
