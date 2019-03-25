@@ -34,8 +34,8 @@ public class BannedChecker {
 		banned = HashMultimap.create();
 	}
 	
-//	@PostConstruct
-//	@Scheduled(cron="0 0/15 * * * *")
+	@PostConstruct
+	@Scheduled(cron="0 0/15 * * * *")
 	private void init() {
 		logger.info("Reading banned players list");
 		String src = externalDataDir + "/banned.csv";
