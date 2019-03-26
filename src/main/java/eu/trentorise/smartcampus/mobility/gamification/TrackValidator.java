@@ -238,7 +238,7 @@ public class TrackValidator {
 //				System.err.println((speed < 30) + " / " + (speed < (prevSpeed / 10)));
 //				System.err.println("\t" + i + " / " + speed);
 //				if (speed < 30 || speed < (prevSpeed * 10)) {
-				if (speed <= (prevSpeed / 10)) {
+				if (speed <= (prevSpeed / 2)) {
 //					System.err.println("\t\t" + index + " -> " + i + " = " + speed + " (" + prevSpeed + ")");
 //					System.err.println("\t\t\t" + points.get(index) + " -> " + points.get(i) + " = " + speed + " (" + prevSpeed + ")");
 //					System.err.println("\t\t" +index + " -> " + i + " = " + speed + " / " + points.get(index) + " -> " + points.get(i));
