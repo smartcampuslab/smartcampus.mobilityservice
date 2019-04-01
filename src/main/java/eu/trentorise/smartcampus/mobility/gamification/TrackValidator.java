@@ -75,6 +75,7 @@ public class TrackValidator {
 	public static final double BIKE_DISTANCE_THRESHOLD = 100;// meters 
 	private static final double MAX_AVG_SPEED_THRESHOLD = 200; // km/h
 	
+	public static final int PENDING_COVERAGE_THRESHOLD = 60;
 	public static final int COVERAGE_THRESHOLD = 80; // %
 	public static final int CERTIFIED_COVERAGE_THRESHOLD_VALID = 70;
 	public static final int CERTIFIED_COVERAGE_THRESHOLD_PENDING = 50;	
@@ -494,6 +495,13 @@ public class TrackValidator {
 				} else {
 					status.setValidationOutcome(TravelValidity.INVALID);				
 				}
+//				status.setValidationOutcome(TravelValidity.INVALID);	
+//				if (coverage > PENDING_COVERAGE_THRESHOLD) {
+//					status.setValidationOutcome(TravelValidity.PENDING);	
+//				}
+//				if (coverage > COVERAGE_THRESHOLD) {
+//					status.setValidationOutcome(TravelValidity.VALID);	
+//				}
 			}
 			return status;
 		} else {
