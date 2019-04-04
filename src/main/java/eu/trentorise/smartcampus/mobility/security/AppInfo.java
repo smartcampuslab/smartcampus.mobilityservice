@@ -71,14 +71,6 @@ public class AppInfo implements Serializable {
 		this.agencyIds = agencyIds;
 	}
 	
-	public String getGameId() {
-		return gameId;
-	}
-
-	public void setGameId(String gameId) {
-		this.gameId = gameId;
-	}
-
 	public String getRoutesDB() {
 		return routesDB;
 	}

@@ -143,10 +143,6 @@ public class AppSetup {
 		this.appsMap = appsMap;
 	}
 	
-	public List<AppInfo> findAppsByGameId(String gameId) {
-		return apps.stream().filter(x -> gameId.equals(x.getGameId())).collect(Collectors.toList());
-	}
-
 	@Override
 	public String toString() {
 		return "AppSetup [apps=" + apps + "]";
