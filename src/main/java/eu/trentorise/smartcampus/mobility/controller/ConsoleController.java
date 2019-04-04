@@ -30,7 +30,12 @@ public class ConsoleController {
 	public String webPlanner() {
 		return "webplanner";
 	}
-
+	
+	@RequestMapping("/policiesconsole")
+	public String policiesConsole() {
+		return "policiesconsole";
+	}	
+	
 	@RequestMapping(value = "/login")
 	public String login() {
 		return "login";
