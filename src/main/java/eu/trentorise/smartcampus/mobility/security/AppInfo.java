@@ -15,9 +15,7 @@ public class AppInfo implements Serializable {
     private String gcmSenderApiKey;
     private String gcmSenderId;
     private List<String> agencyIds;
-    private String gameId;
     private String routesDB;
-
     private String servicesUser;
     private String servicesPassword;
 
