@@ -201,7 +201,7 @@ public class TrackValidator {
 				if (t > 0) {
 					double speed = (1000.0 * d / ((double) t / 1000)) * 3.6;
 //					System.err.println((i - 1) + " -> " + i + " = " + speed + " / " + points.get(i - 1) + " -> " + points.get(i));
-					if (speed > 30 && speed > prevSpeed * 2 && prevSpeed > 1) {
+					if (speed > 30 && speed > prevSpeed * 10 && prevSpeed > 1) {
 //						System.err.println("prev " + prevSpeed);
 						Integer found = findReachableBySpeed(i - 1, speed, points);
 						if (found != null) { // && found - i < 50) {
