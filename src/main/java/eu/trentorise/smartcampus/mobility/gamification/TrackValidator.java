@@ -150,9 +150,9 @@ public class TrackValidator {
 		
 		// preprocess
 		status.computeAccuracy(points);
-		TrackValidator.shortenByHighSpeed(points);
 		points = removeStarredClusters(points);
 		points = preprocessTrack(points);
+		TrackValidator.shortenByHighSpeed(points);
 		
 //		System.err.println(GamificationHelper.encodePoly(points));
 		
