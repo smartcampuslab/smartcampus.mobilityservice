@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
@@ -151,11 +152,17 @@ public class ReportEmailSender {
 	
 //	@Scheduled(cron="0 45 15 14 3 ?")
 	public void sendPDFReportMail() throws Exception {
-		logger.info("Sending PDF email");
+		logger.info("Sending PDF certificates");
 		for (AppInfo appInfo : appSetup.getApps()) {
 			logger.info("Sending PDF for app " + appInfo.getAppId());
 			try {
 				if (appInfo.getGameId() != null && !appInfo.getGameId().isEmpty()) {
+					GameInfo game = gameSetup.findGameById(appInfo.getGameId());
+					if (game.getSend() == null || !game.getSend()) {
+						logger.info("Skipping certificates for " + appInfo.getAppId() + ", " + game.getId());
+						continue;
+					}
+					logger.info("Sending certificates for " + appInfo.getAppId() + ", " + game.getId());
 					sendPDFReportMail(appInfo.getAppId());
 				}
 			} catch (Exception e) {
@@ -378,7 +385,7 @@ public class ReportEmailSender {
 				continue;
 			}
 
-			String moduleName = certificatesDir + "/Certificato_TrentoRoveretoPlayAndGo_" + p.getPlayerId() + ".pdf";
+			String moduleName = certificatesDir + "/Certificato_PlayAndGo2018_" + p.getPlayerId() + ".pdf";
 			try {
 				File finalModule = new File(moduleName);
 				// String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
