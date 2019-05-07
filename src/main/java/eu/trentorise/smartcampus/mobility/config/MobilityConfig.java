@@ -231,7 +231,8 @@ public class MobilityConfig extends WebMvcConfigurerAdapter {
 					response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				} else if (app.getGameId() != null) {
 					GameInfo game = gameSetup.findGameById(app.getGameId());
-					if (game == null || game.getSend() == null || !game.getSend()) {
+					// allow for data retrieval even if game is finished
+					if (game == null/* || game.getSend() == null || !game.getSend() */) {
 						response.sendError(HttpServletResponse.SC_FORBIDDEN);
 					}
 				}
