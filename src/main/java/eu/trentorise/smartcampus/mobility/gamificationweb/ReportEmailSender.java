@@ -150,7 +150,7 @@ public class ReportEmailSender {
 		}
 	}	
 	
-//	@Scheduled(cron="0 45 15 14 3 ?")
+	@Scheduled(cron="0 0 15 14 5 ?")
 	public void sendPDFReportMail() throws Exception {
 		logger.info("Sending PDF certificates");
 		for (AppInfo appInfo : appSetup.getApps()) {
@@ -385,7 +385,7 @@ public class ReportEmailSender {
 				continue;
 			}
 
-			String moduleName = certificatesDir + "/Certificato_PlayAndGo2018_" + p.getPlayerId() + ".pdf";
+			String moduleName = certificatesDir + "/Certificato_TrentoRoveretoPlayAndGo_" + p.getPlayerId() + ".pdf";
 			try {
 				File finalModule = new File(moduleName);
 				// String compileSurveyUrl = utils.createSurveyUrl(p.getId(), gameId, START_SURVEY, getPlayerLang(p));
