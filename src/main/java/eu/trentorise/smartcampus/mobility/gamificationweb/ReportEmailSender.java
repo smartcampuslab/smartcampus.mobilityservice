@@ -150,7 +150,7 @@ public class ReportEmailSender {
 		}
 	}	
 	
-	@Scheduled(cron="0 0 15 14 5 ?")
+	@Scheduled(cron="0 30 15 14 5 ?")
 	public void sendPDFReportMail() throws Exception {
 		logger.info("Sending PDF certificates");
 		for (AppInfo appInfo : appSetup.getApps()) {
