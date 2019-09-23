@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.mongodb.BasicDBObject;
 
 import eu.trentorise.smartcampus.mobility.controller.extensions.compilable.CompilablePolicyData;
-import eu.trentorise.smartcampus.mobility.geolocation.model.Geolocation;
 import eu.trentorise.smartcampus.mobility.model.Announcement;
 import eu.trentorise.smartcampus.mobility.model.PlanObject;
 import eu.trentorise.smartcampus.mobility.model.RouteMonitoring;
@@ -34,9 +32,6 @@ public class DomainStorage {
 	private static final String RECURRENT = "recurrent";
 	private static final String DATA = "data";
 	private static final String NEWS = "news";
-	private static final String GEOLOCATIONS = "geolocations";
-	private static final String TRACKED = "trackedInstances";
-	private static final String SAVED = "savedtrips";
 	private static final String COMPILED_POLICY = "compiledPolicies";
 	private static final String MONITORING = "routesMonitoring";
 	
@@ -60,9 +55,6 @@ public class DomainStorage {
 		}
 		if (cls == Announcement.class) {
 			return NEWS;
-		}
-		if (cls == Geolocation.class) {
-			return GEOLOCATIONS;
 		}
 		if (cls == CompilablePolicyData.class) {
 			return COMPILED_POLICY;
@@ -122,49 +114,7 @@ public class DomainStorage {
 	public void saveNews(Announcement announcment) {
 		template.save(announcment, NEWS);
 	}
-	
-	public void saveGeolocation(Geolocation geolocation) {
-		Query query = new Query(new Criteria("userId").is(geolocation.getUserId()).and("recorded_at").is(geolocation.getRecorded_at()));
-		Geolocation geolocationDB = searchDomainObject(query, Geolocation.class);
-		if (geolocationDB == null) {
-			template.save(geolocation, GEOLOCATIONS);
-		} else {
 
-			// ObjectMapper mapper = new ObjectMapper();
-			// BasicDBObject dbObject = mapper.convertValue(geolocation,
-			// BasicDBObject.class);
-			//
-			// Update update = Update.fromDBObject(dbObject);
-
-			Update update = new Update();
-			update.set("userId", geolocation.getUserId());
-			update.set("travelId", geolocation.getTravelId());
-
-			update.set("uuid", geolocation.getUuid());
-			update.set("device_id", geolocation.getDevice_id());
-			update.set("device_model", geolocation.getDevice_model());
-
-			update.set("latitude", geolocation.getLatitude());
-			update.set("longitude", geolocation.getLongitude());
-			update.set("geocoding", geolocation.getGeocoding());
-			update.set("accuracy", geolocation.getAccuracy());
-			update.set("altitude", geolocation.getAltitude());
-			update.set("speed", geolocation.getSpeed());
-			update.set("heading", geolocation.getHeading());
-			update.set("activity_type", geolocation.getActivity_type());
-			update.set("activity_confidence", geolocation.getActivity_confidence());
-			update.set("battery_level", geolocation.getBattery_level());
-			update.set("battery_is_charging", geolocation.getBattery_is_charging());
-
-			update.set("is_moving", geolocation.getIs_moving());
-			update.set("geofence", geolocation.getGeofence());
-			update.set("recorded_at", geolocation.getRecorded_at());
-			update.set("created_at", geolocation.getCreated_at());
-
-			template.updateFirst(query, update, GEOLOCATIONS);
-		}
-	}
-	
 	public void savePolicy(CompilablePolicyData policy) {
 		Query query = new Query(new Criteria("name").is(policy.getName()));
 		CompilablePolicyData policiesDB = searchDomainObject(query, CompilablePolicyData.class);
@@ -216,12 +166,7 @@ public class DomainStorage {
 		template.getCollection(MONITORING).deleteOne(query);
 	}	
 	
-	public Geolocation getLastGeolocationByUserId(String userId) {
-		Criteria criteria = new Criteria("userId").is(userId);
-		Query query = new Query(criteria).with(new Sort(Sort.Direction.DESC, "created_at"));
-		return searchDomainObject(query, Geolocation.class);
-	}
-	
+
 	public <T> List<T> searchDomainObjects(Criteria criteria, Class<T> clz) {
 		Query query = new Query(criteria);
 		logger .debug("query: {}",JsonUtils.toJSON(query.getQueryObject()));
@@ -319,7 +264,6 @@ public class DomainStorage {
 		template.dropCollection(RECURRENT);
 		template.dropCollection(DATA);
 		template.dropCollection(NEWS);
-		template.dropCollection(GEOLOCATIONS);
 	}
 
 	/**

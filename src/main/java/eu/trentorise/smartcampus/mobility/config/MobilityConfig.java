@@ -81,13 +81,7 @@ public class MobilityConfig implements WebMvcConfigurer {
 	@Bean(name = "mongoTemplate")
 	@Primary
 	public MongoTemplate getDomainMongoTemplate() throws UnknownHostException {
-//		MongoTemplate template = new MongoTemplate(new Mongo("localhost", 17017), "mobility-domain");
 		MongoTemplate template = new MongoTemplate(getMongoClient(), "mobility-domain");
-		template.indexOps("trackedInstances").ensureIndex(new Index("day", Direction.ASC));
-		template.indexOps("trackedInstances").ensureIndex(new Index("time", Direction.ASC));
-		template.indexOps("trackedInstances").ensureIndex(new Index("userId", Direction.ASC));
-		template.indexOps("trackedInstances").ensureIndex(new Index("appId", Direction.ASC));
-//		template.setWriteConcern(new WriteConcern(1).withJournal(false).withWTimeout(200, TimeUnit.MILLISECONDS));
 		template.setWriteConcern(new WriteConcern(1).withWTimeout(200, TimeUnit.MILLISECONDS));
 		return template;
 	}
@@ -120,31 +114,13 @@ public class MobilityConfig implements WebMvcConfigurer {
 	 @Override
 	 public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		 registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);	
-//		 registry
-//		      .addResourceHandler("/avatar/**")
-//		      .addResourceLocations("file:///" + imagesDir)
-//		      .setCachePeriod(3600);
-////		      .resourceChain(true);
-////		      .addResolver(new PathResourceResolver());
 	 }
 	 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/**").allowedMethods("PUT", "DELETE", "GET", "POST").allowedOrigins("*");
 	} 	 
-	
-//	@Bean
-//	public FileTemplateResolver  svgTemplateResolver() {
-//		FileTemplateResolver  svgTemplateResolver = new FileTemplateResolver ();
-//		svgTemplateResolver.setPrefix("/public/images/gamification/");
-//		svgTemplateResolver.setSuffix(".svg");
-//		svgTemplateResolver.setTemplateMode("XML");
-//		svgTemplateResolver.setCharacterEncoding("UTF-8");
-//		svgTemplateResolver.setOrder(0);
-//
-//		return svgTemplateResolver;
-//	}	
-	 
+
 	@Bean
 	public LocaleResolver localeResolver()
 	{
@@ -161,33 +137,6 @@ public class MobilityConfig implements WebMvcConfigurer {
         return messageSource;
     }
 	
-//	@Bean
-//	public OncePerRequestFilter noContentFilter() {
-//		return new CheckHeaderFilter();
-//	}		
-//	
-//	
-//	private class CheckHeaderFilter extends OncePerRequestFilter {
-//
-//		@Override
-//		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//
-//			String appId = request.getHeader("appId");
-//			if (appId != null && !appId.isEmpty()) {
-//				AppInfo app = MobilityConfig.this.appSetup.findAppById(appId);
-//				if (app == null) {
-//					response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//				} else if (app.getGameId() != null) {
-//					GameInfo game = gameSetup.findGameById(app.getGameId());
-//					if (game == null || game.getSend() == null || !game.getSend()) {
-//						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//					}
-//				}
-//			}
-//
-//			filterChain.doFilter(request, response);
-//		}
-//	}
-	
+
 	
 }

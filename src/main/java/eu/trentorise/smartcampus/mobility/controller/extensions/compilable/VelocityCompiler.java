@@ -162,7 +162,6 @@ public class VelocityCompiler {
 	public static void main(String[] args) throws Exception {
 		List<PolicyElement> pecs = Lists.newArrayList();
 		List<PolicyElement> pems = Lists.newArrayList();
-		List<PolicyElement> pefs = Lists.newArrayList();
 		List<PlanningResultGroup> prgs = Lists.newArrayList();
 		PlanningResultGroup prg = new PlanningResultGroup("G1", 1, RType.fastest);
 		prgs.add(prg);

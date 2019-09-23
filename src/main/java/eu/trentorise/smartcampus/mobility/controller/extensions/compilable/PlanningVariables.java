@@ -22,7 +22,6 @@ public class PlanningVariables {
 	
 	private int resultNumber;
 	
-	private String groupName;
 	
 	public PlanningVariables() {
 	}
@@ -32,9 +31,6 @@ public class PlanningVariables {
 		rtype = pr.getRouteType();
 		promoted = pr.isPromoted();
 		iteration = pr.getIteration();
-		if (pr.getGroup() != null) {
-			groupName = pr.getGroup().getName();
-		}
 		if (pr.getItinerary() != null) {
 			resultNumber = pr.getItinerary().size();
 			

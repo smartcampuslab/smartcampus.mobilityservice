@@ -185,14 +185,15 @@ public class CacheController {
 		}
 	}  	
   	
-  	@RequestMapping(method = RequestMethod.GET, value = "/versions")
+  	@SuppressWarnings("unchecked")
+	@RequestMapping(method = RequestMethod.GET, value = "/versions")
   	public @ResponseBody
-  	Map getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+  	Map<Object, Object> getRoutesDB(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
   		try {
 			String versions = smartPlannerHelper.getVersions();
 			
 			ObjectMapper mapper = new ObjectMapper();
-			Map result = mapper.readValue(versions, Map.class);
+			Map<Object, Object> result = mapper.readValue(versions, Map.class);
 
 			return result;
 		} catch (Exception e) {

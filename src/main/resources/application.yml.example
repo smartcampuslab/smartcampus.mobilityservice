@@ -5,14 +5,12 @@ communicatorURL: http://localhost:8080/core.communicator
 
 aacURL: http://localhost:8080/aac/
 
-mobilityURL: http://localhost:8080/core.mobility
-
 smartplannerURL: https://dev.smartcommunitylab.it/smart-planner2/
 
-smartcampus:
+mobility:
   clientId: 
-  clientSecret: 
-
+  clientSecret:
+   
 statlogging:
   dbname: mobility-logging
   enabled: true
@@ -21,40 +19,6 @@ statlogging:
 
 smartplanner:
   router: trentino
-
-geolocations:
-  db:
-    name: background-geolocation.db
-    dir: db
-    
-gamification:
-  url: http://localhost:8080/gamification/
-  secretKey1: 
-  secretKey2: 
-  surveyUrl: 
-
-mail:
-  username: 
-  password: 
-  host: smtp.gmail.com
-  port: 465
-  protocol: smtps   
-  from: 
-  to: 
-  send: false
-  subject: Gamification Notification  
-  redirectUrl: http://localhost:8010/core.mobility/gamificationweb
-  
-validation:
-  shapefolder:
-  
-weeklyDataDir:
-
-externalDataDir:
-
-certificatesDir: 
-
-imagesDir:
 
 management:
   port: 7011  

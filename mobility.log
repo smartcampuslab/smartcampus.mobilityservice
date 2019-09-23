@@ -1,0 +1,47 @@
+2019-09-23 15:59:46 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 17740 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 15:59:46 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:03:57 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 17919 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:03:57 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:04:44 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 17958 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:04:44 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:05:58 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 18008 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:05:58 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:06:36 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 18038 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:06:36 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:06:43 [main] INFO  e.t.s.mobility.MobilityService - Started MobilityService in 7.165 seconds (JVM running for 7.704)
+2019-09-23 16:07:10 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:08:28 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 18126 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:08:28 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:08:37 [main] INFO  e.t.s.mobility.MobilityService - Started MobilityService in 9.987 seconds (JVM running for 10.908)
+2019-09-23 16:09:04 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:09:14 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:09:24 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:09:34 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:09:44 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:09:54 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:04 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:14 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:24 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:34 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:44 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:10:54 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:04 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:14 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:24 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:34 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:44 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:11:54 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:12:08 [main] INFO  e.t.s.mobility.MobilityService - Starting MobilityService on smarts-mbp.fbkeduroam.it with PID 18298 (/Users/raman/workspace/tmp/sco.mobilityservice/target/classes started by raman in /Users/raman/workspace/tmp/sco.mobilityservice)
+2019-09-23 16:12:08 [main] INFO  e.t.s.mobility.MobilityService - No active profile set, falling back to default profiles: default
+2019-09-23 16:12:15 [main] INFO  e.t.s.mobility.MobilityService - Started MobilityService in 6.932 seconds (JVM running for 7.438)
+2019-09-23 16:12:42 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:12:52 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:02 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:12 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:22 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:32 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:42 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:13:53 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:14:03 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:14:13 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
+2019-09-23 16:14:23 [Timer-0] WARN  e.t.s.mobility.security.AppSetup - Failed to register appmobility.rovereto
